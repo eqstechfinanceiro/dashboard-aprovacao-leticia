@@ -1,5 +1,5 @@
 import "server-only";
-import { getReports, getTeamMembers } from "./vexpenses";
+import { getAllReportsPaginated, getTeamMembers } from "./vexpenses";
 import type { Advance, Report, TeamMember } from "@/types/vexpenses";
 import { db, schema } from "@/db";
 import { desc, eq } from "drizzle-orm";
@@ -181,7 +181,7 @@ function toNumber(v: number | string | null | undefined): number {
 export async function computeBalancesLive(): Promise<UserBalance[]> {
   const [members, reports] = await Promise.all([
     getTeamMembers({ revalidate: 300 }),
-    getReports(
+    getAllReportsPaginated(
       {
         include: [
           "teamMember",
@@ -190,7 +190,7 @@ export async function computeBalancesLive(): Promise<UserBalance[]> {
           "advance",
         ],
       },
-      { revalidate: 60 },
+      { revalidate: 60, perPage: 200 },
     ),
   ]);
 

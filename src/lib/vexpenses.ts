@@ -270,6 +270,31 @@ export async function getReports(
   });
 }
 
+/**
+ * Paginates /v2/reports sequentially with a small perPage so each individual
+ * upstream response is small enough to avoid the nginx 502 timeouts we see
+ * when asking for all 5k+ reports with deep includes in one shot. Retries
+ * per-page via `vexRequest`'s built-in 5xx/429 retry loop.
+ */
+export async function getAllReportsPaginated(
+  filters?: Omit<ReportFilters, "page" | "perPage">,
+  options?: RequestOptions & { perPage?: number; maxPages?: number },
+): Promise<Report[]> {
+  const perPage = options?.perPage ?? 300;
+  const maxPages = options?.maxPages ?? 40;
+  const all: Report[] = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const chunk = await getReports(
+      { ...filters, page, perPage },
+      { tags: options?.tags, revalidate: options?.revalidate, signal: options?.signal },
+    );
+    if (!chunk || chunk.length === 0) break;
+    all.push(...chunk);
+    if (chunk.length < perPage) break;
+  }
+  return all;
+}
+
 export async function getReport(
   id: number,
   include?: ReportInclude[],
