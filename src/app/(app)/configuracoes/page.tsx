@@ -17,10 +17,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CheckCircle2, KeyRound, ShieldAlert, Database } from "lucide-react";
+import {
+  CheckCircle2,
+  KeyRound,
+  ShieldAlert,
+  Database,
+  Download,
+  User,
+} from "lucide-react";
 import { db, schema } from "@/db";
 import { desc } from "drizzle-orm";
 import { fmtDateTime } from "@/lib/format";
+import { cookies } from "next/headers";
+import { Button } from "@/components/ui/button";
+import { SESSION_COOKIE, authConfig, verifySession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -29,6 +39,10 @@ async function SettingsView() {
   const hasToken = Boolean(process.env.VEXPENSES_TOKEN);
   const hasDb = Boolean(process.env.DATABASE_URL);
   const writesEnabled = process.env.ENABLE_WRITES === "true";
+
+  const cfg = authConfig();
+  const token = cookies().get(SESSION_COOKIE)?.value;
+  const session = await verifySession(token);
 
   let recentAudit: (typeof schema.auditLog.$inferSelect)[] = [];
   let dbOk = false;
@@ -115,10 +129,45 @@ async function SettingsView() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Auditoria recente</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <User className="h-4 w-4" /> Acesso
+          </CardTitle>
           <CardDescription>
-            Últimas 20 ações executadas pelo dashboard.
+            Dashboard single-user protegido por login. Mude{" "}
+            <code>APP_USER</code> / <code>APP_PASSWORD</code> /{" "}
+            <code>APP_SESSION_SECRET</code> no <code>.env.local</code> e
+            reinicie o servidor para trocar credenciais.
           </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2 text-sm">
+          <Row
+            label="Sessão atual"
+            value={session ? session.u : "sem sessão"}
+            ok={Boolean(session)}
+          />
+          <Row
+            label="Credenciais em uso"
+            value={cfg.usingDefaults ? "DEFAULT (admin/admin)" : "env vars"}
+            ok={!cfg.usingDefaults}
+            danger={cfg.usingDefaults}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Auditoria recente</CardTitle>
+            <CardDescription>
+              Últimas 20 ações executadas pelo dashboard.
+            </CardDescription>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <a href="/api/export/audit">
+              <Download className="mr-1 h-3.5 w-3.5" />
+              Exportar CSV
+            </a>
+          </Button>
         </CardHeader>
         <CardContent className="p-0">
           <Table>

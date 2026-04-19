@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { db, schema } from "@/db";
 import { AIRulesManager } from "@/components/ai/rules-manager";
 import { AIAdviceChat } from "@/components/ai/advice-chat";
+import { AdviceCards } from "@/components/ai/advice-cards";
 import { Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -43,13 +44,21 @@ async function AIView() {
   }
 
   return (
-    <Tabs defaultValue="rules" className="space-y-4">
+    <Tabs defaultValue="advice" className="space-y-4">
       <TabsList>
+        <TabsTrigger value="advice">Recomendações</TabsTrigger>
         <TabsTrigger value="rules">
           Regras programadas ({rules.length})
         </TabsTrigger>
         <TabsTrigger value="chat">Chat contextual</TabsTrigger>
       </TabsList>
+      <TabsContent value="advice">
+        <Suspense
+          fallback={<Skeleton className="h-[400px] w-full rounded-md" />}
+        >
+          <AdviceCards />
+        </Suspense>
+      </TabsContent>
       <TabsContent value="rules">
         <AIRulesManager initial={rules} />
       </TabsContent>
@@ -65,7 +74,7 @@ export default function AIPage() {
     <div className="space-y-6">
       <PageHeader
         title="IA Consultora"
-        description="Regras no-code para sugestões e ações + chat contextual para análise ad-hoc."
+        description="Recomendações programadas (sem LLM), regras no-code e chat contextual sobre os dados reais."
         actions={
           <Badge variant="secondary" className="gap-1">
             <Sparkles className="h-3 w-3" /> MVP
