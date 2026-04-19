@@ -66,6 +66,13 @@ export interface RequestOptions {
   signal?: AbortSignal;
 }
 
+const MAX_RETRIES = 3;
+const RETRY_BACKOFF_MS = [400, 1200, 2500];
+
+async function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 export async function vexRequest<T>(
   path: string,
   params?: Params,
@@ -79,29 +86,55 @@ export async function vexRequest<T>(
   else next.revalidate = options.revalidate ?? DEFAULT_REVALIDATE;
   if (options.tags) next.tags = options.tags;
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: token,
-      Accept: "application/json",
-    },
-    next,
-    signal: options.signal,
-  });
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          Authorization: token,
+          Accept: "application/json",
+        },
+        next,
+        signal: options.signal,
+      });
 
-  if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new VExpensesError(
-      response.status,
-      `VExpenses ${response.status} ${response.statusText} ${path}: ${text}`,
-    );
-  }
+      if (!response.ok) {
+        const text = await response.text().catch(() => "");
+        const retriable =
+          response.status === 429 ||
+          (response.status >= 500 && response.status < 600);
+        if (retriable && attempt < MAX_RETRIES) {
+          lastError = new VExpensesError(
+            response.status,
+            `VExpenses ${response.status} ${response.statusText} ${path}: ${text}`,
+          );
+          await sleep(RETRY_BACKOFF_MS[attempt] ?? 2500);
+          continue;
+        }
+        throw new VExpensesError(
+          response.status,
+          `VExpenses ${response.status} ${response.statusText} ${path}: ${text}`,
+        );
+      }
 
-  const json = (await response.json()) as Envelope<T> | T;
-  if (json && typeof json === "object" && "data" in (json as object)) {
-    return (json as Envelope<T>).data;
+      const json = (await response.json()) as Envelope<T> | T;
+      if (json && typeof json === "object" && "data" in (json as object)) {
+        return (json as Envelope<T>).data;
+      }
+      return json as T;
+    } catch (e) {
+      const isNetworkError =
+        e instanceof TypeError || (e as { code?: string })?.code === "UND_ERR_SOCKET";
+      if (isNetworkError && attempt < MAX_RETRIES) {
+        lastError = e;
+        await sleep(RETRY_BACKOFF_MS[attempt] ?? 2500);
+        continue;
+      }
+      throw e;
+    }
   }
-  return json as T;
+  throw lastError ?? new Error(`VExpenses request failed: ${path}`);
 }
 
 export class VExpensesError extends Error {
