@@ -308,30 +308,78 @@ const SEVERITY_ORDER: Record<AdviceSeverity, number> = {
   success: 3,
 };
 
+/**
+ * Race a promise against a timeout, returning `fallback` if it takes too long.
+ * Used to keep the advice page responsive when VExpenses is slow: rules that
+ * depend on balances simply don't fire rather than blocking the whole tab.
+ */
+async function withTimeout<T>(
+  p: Promise<T>,
+  ms: number,
+  fallback: T,
+): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(fallback), ms);
+  });
+  try {
+    return await Promise.race([p, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function computeAdvice(): Promise<{
   advice: Advice[];
   generatedAt: string;
-  source: { reports: number; balances: number };
+  source: { reports: number; balances: number; pending: number };
 }> {
-  const [reports, balances] = await Promise.all([
-    getReports(
-      {
-        include: [
-          "teamMember",
-          "costsCenter",
-          "expenses",
-          "expenses.expenseType",
-          "expenses.paymentMethod",
-        ],
-        perPage: 300,
-      },
-      { revalidate: 120 },
-    ),
+  // 1) Main report batch: lightweight includes only. Used by 8 of 9 rules.
+  //    Keeping includes minimal is what makes this call fit inside the 2 MB
+  //    Next.js fetch cache (a full `expenses.*` include blows past 5 MB).
+  // 2) Pending-only batch with `expenses` include for the missing-receipt
+  //    rule — filtered to ENVIADO/REABERTO, a tiny subset of the 5.9k reports.
+  // 3) Live balances with a timeout: if VExpenses is slow, balance-dependent
+  //    rules silently skip instead of hanging the whole tab.
+  const mainReportsP = getReports(
+    {
+      include: ["teamMember", "costsCenter"],
+      perPage: 500,
+    },
+    { revalidate: 120 },
+  ).catch(() => [] as Report[]);
+
+  const pendingReportsP = getReports(
+    {
+      status: ["ENVIADO", "REABERTO"],
+      include: ["teamMember", "expenses", "expenses.paymentMethod"],
+      perPage: 500,
+    },
+    { revalidate: 120 },
+  ).catch(() => [] as Report[]);
+
+  const balancesP = withTimeout(
     computeBalancesLive().catch(() => [] as UserBalance[]),
+    45_000,
+    [] as UserBalance[],
+  );
+
+  const [reports, pendingWithExpenses, balances] = await Promise.all([
+    mainReportsP,
+    pendingReportsP,
+    balancesP,
   ]);
 
+  // Merge pending-with-expenses into the main list so `ruleSemComprovante`
+  // can iterate `r.expenses`. The main list doesn't have expenses populated,
+  // so we overwrite by id for the pending subset.
+  const byId = new Map<number, Report>();
+  for (const r of reports) byId.set(r.id, r);
+  for (const r of pendingWithExpenses) byId.set(r.id, r);
+  const merged = Array.from(byId.values());
+
   const ctx: AdviceContext = {
-    reports,
+    reports: merged,
     balances,
     generatedAt: new Date().toISOString(),
   };
@@ -351,6 +399,10 @@ export async function computeAdvice(): Promise<{
   return {
     advice,
     generatedAt: ctx.generatedAt,
-    source: { reports: reports.length, balances: balances.length },
+    source: {
+      reports: reports.length,
+      balances: balances.length,
+      pending: pendingWithExpenses.length,
+    },
   };
 }
