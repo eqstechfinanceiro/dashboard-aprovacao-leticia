@@ -42,18 +42,35 @@ import {
 } from "@/lib/analytics";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 async function OverviewContent() {
-  const reports = await getReports(
-    {
-      include: ["teamMember", "costsCenter"],
-      perPage: 500,
-    },
-    { revalidate: 120 },
-  );
+  let reports;
+  try {
+    reports = await getReports(
+      {
+        include: ["teamMember", "costsCenter"],
+        perPage: 500,
+      },
+      { revalidate: 120 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return (
+        <UpstreamErrorCard
+          error={e}
+          area="o painel (KPIs, gráficos e atividade recente)"
+        />
+      );
+    }
+    throw e;
+  }
 
   const total = reports.length;
   const totalValue = reports.reduce((s, r) => s + Number(r.total ?? 0), 0);

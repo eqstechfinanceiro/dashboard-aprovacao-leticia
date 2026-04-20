@@ -22,18 +22,30 @@ import { fmtBRL, fmtDate } from "@/lib/format";
 import { getReports } from "@/lib/vexpenses";
 import { ExternalLink, ReceiptText } from "lucide-react";
 import { KpiCard } from "@/components/shared/kpi-card";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 120;
 
 async function ExpensesView() {
-  const reports = await getReports(
-    {
-      include: ["teamMember", "expenses", "expenses.expenseType", "expenses.paymentMethod"],
-      perPage: 200,
-    },
-    { revalidate: 120 },
-  );
+  let reports;
+  try {
+    reports = await getReports(
+      {
+        include: ["teamMember", "expenses", "expenses.expenseType", "expenses.paymentMethod"],
+        perPage: 200,
+      },
+      { revalidate: 120 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return <UpstreamErrorCard error={e} area="a lista de despesas" />;
+    }
+    throw e;
+  }
 
   type ExpenseRow = {
     id: number;

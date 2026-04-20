@@ -24,6 +24,10 @@ import { ReportFilters } from "@/components/reports/report-filters";
 import type { ReportStatus } from "@/types/vexpenses";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -42,16 +46,24 @@ async function ReportsList({ searchParams }: PageProps) {
   const page = Number(searchParams.page ?? 1);
   const perPage = 50;
 
-  const reports = await getReports(
-    {
-      status,
-      search,
-      page,
-      perPage,
-      include: ["teamMember", "costsCenter", "project"],
-    },
-    { revalidate: 60 },
-  );
+  let reports;
+  try {
+    reports = await getReports(
+      {
+        status,
+        search,
+        page,
+        perPage,
+        include: ["teamMember", "costsCenter", "project"],
+      },
+      { revalidate: 60 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return <UpstreamErrorCard error={e} area="a lista de relatórios" />;
+    }
+    throw e;
+  }
 
   return (
     <Card>

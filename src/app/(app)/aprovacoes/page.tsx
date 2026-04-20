@@ -26,19 +26,36 @@ import { getReports } from "@/lib/vexpenses";
 import type { Report } from "@/types/vexpenses";
 import { AlertTriangle, CheckCircle2, Clock, Timer } from "lucide-react";
 import { WriteFlagBanner } from "@/components/shared/write-flag-banner";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 async function ApprovalsContent() {
-  const reports = await getReports(
-    {
-      status: ["ENVIADO", "REABERTO", "ABERTO"],
-      include: ["teamMember", "costsCenter", "approvalFlow"],
-      perPage: 300,
-    },
-    { revalidate: 60 },
-  );
+  let reports;
+  try {
+    reports = await getReports(
+      {
+        status: ["ENVIADO", "REABERTO", "ABERTO"],
+        include: ["teamMember", "costsCenter", "approvalFlow"],
+        perPage: 300,
+      },
+      { revalidate: 60 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return (
+        <>
+          <WriteFlagBanner />
+          <UpstreamErrorCard error={e} area="a fila de aprovações" />
+        </>
+      );
+    }
+    throw e;
+  }
 
   const pending = reports.filter((r) => r.status === "ENVIADO");
   const reopened = reports.filter((r) => r.status === "REABERTO");

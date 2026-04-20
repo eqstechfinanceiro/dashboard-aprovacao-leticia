@@ -18,15 +18,28 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { fmtBRL } from "@/lib/format";
 import { getProjects, getReports } from "@/lib/vexpenses";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 async function ProjectsView() {
-  const [projects, reports] = await Promise.all([
-    getProjects({ revalidate: 600 }),
-    getReports({ include: ["project"], perPage: 500 }, { revalidate: 300 }),
-  ]);
+  let projects: Awaited<ReturnType<typeof getProjects>>;
+  let reports: Awaited<ReturnType<typeof getReports>>;
+  try {
+    [projects, reports] = await Promise.all([
+      getProjects({ revalidate: 600 }),
+      getReports({ include: ["project"], perPage: 500 }, { revalidate: 300 }),
+    ]);
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return <UpstreamErrorCard error={e} area="os totais por projeto" />;
+    }
+    throw e;
+  }
 
   const totals = new Map<number, { value: number; count: number }>();
   for (const r of reports) {

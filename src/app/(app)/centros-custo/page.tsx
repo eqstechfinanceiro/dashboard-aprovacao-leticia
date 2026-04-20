@@ -18,15 +18,33 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { fmtBRL } from "@/lib/format";
 import { getCostsCenters, getReports } from "@/lib/vexpenses";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
 
 async function CostsCentersView() {
-  const [ccs, reports] = await Promise.all([
-    getCostsCenters({ revalidate: 600 }),
-    getReports({ include: ["costsCenter"], perPage: 500 }, { revalidate: 300 }),
-  ]);
+  let ccs: Awaited<ReturnType<typeof getCostsCenters>>;
+  let reports: Awaited<ReturnType<typeof getReports>>;
+  try {
+    [ccs, reports] = await Promise.all([
+      getCostsCenters({ revalidate: 600 }),
+      getReports(
+        { include: ["costsCenter"], perPage: 500 },
+        { revalidate: 300 },
+      ),
+    ]);
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return (
+        <UpstreamErrorCard error={e} area="os totais por centro de custo" />
+      );
+    }
+    throw e;
+  }
 
   const totals = new Map<number, { value: number; count: number }>();
   for (const r of reports) {

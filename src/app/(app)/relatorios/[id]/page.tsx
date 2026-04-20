@@ -25,6 +25,10 @@ import { fmtBRL, fmtDate, fmtDateTime } from "@/lib/format";
 import { getReport, VExpensesError } from "@/lib/vexpenses";
 import { ApprovalActions } from "@/components/reports/approval-actions";
 import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 30;
@@ -61,6 +65,25 @@ export default async function ReportDetailPage({
     );
   } catch (err) {
     if (err instanceof VExpensesError && err.status === 404) notFound();
+    if (isUpstreamError(err)) {
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title={`Relatório #${id}`}
+            description="VExpenses indisponível — não foi possível carregar o relatório."
+            actions={
+              <Button asChild variant="outline" size="sm">
+                <Link href="/relatorios">
+                  <ArrowLeft className="mr-1 h-3.5 w-3.5" />
+                  Voltar
+                </Link>
+              </Button>
+            }
+          />
+          <UpstreamErrorCard error={err} area={`o relatório #${id}`} />
+        </div>
+      );
+    }
     throw err;
   }
 

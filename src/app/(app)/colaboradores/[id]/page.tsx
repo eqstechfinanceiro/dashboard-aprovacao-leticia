@@ -27,6 +27,10 @@ import {
 import { buildBalances } from "@/lib/cash-balance";
 import { fmtBRL, fmtDate } from "@/lib/format";
 import { AdvanceButton } from "@/components/cash/advance-button";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 120;
@@ -47,20 +51,30 @@ export default async function MemberDetailPage({
     throw e;
   }
 
-  const reports = await getReports(
-    {
-      teamMemberId: id,
-      include: [
-        "teamMember",
-        "expenses",
-        "expenses.paymentMethod",
-        "costsCenter",
-        "advance",
-      ],
-      perPage: 300,
-    },
-    { revalidate: 60 },
-  );
+  let reports: Awaited<ReturnType<typeof getReports>> = [];
+  let reportsError: unknown = null;
+  try {
+    reports = await getReports(
+      {
+        teamMemberId: id,
+        include: [
+          "teamMember",
+          "expenses",
+          "expenses.paymentMethod",
+          "costsCenter",
+          "advance",
+        ],
+        perPage: 300,
+      },
+      { revalidate: 60 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      reportsError = e;
+    } else {
+      throw e;
+    }
+  }
 
   const [balance] = buildBalances([member], reports, []);
 
@@ -91,6 +105,13 @@ export default async function MemberDetailPage({
           </>
         }
       />
+
+      {reportsError ? (
+        <UpstreamErrorCard
+          error={reportsError}
+          area="os relatórios deste colaborador"
+        />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard

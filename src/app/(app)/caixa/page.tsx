@@ -25,12 +25,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { fmtBRL, fmtRelative } from "@/lib/format";
 import { computeBalancesLive } from "@/lib/cash-balance";
 import { AdvanceButton } from "@/components/cash/advance-button";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 120;
 
 async function CashView() {
-  const balances = await computeBalancesLive();
+  let balances;
+  try {
+    balances = await computeBalancesLive();
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return (
+        <>
+          <WriteFlagBanner />
+          <UpstreamErrorCard error={e} area="o cálculo de saldo" />
+        </>
+      );
+    }
+    throw e;
+  }
 
   const devedores = balances.filter((b) => b.status === "DEVEDOR");
   const credores = balances.filter((b) => b.status === "CREDOR");

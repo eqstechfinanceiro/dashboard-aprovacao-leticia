@@ -32,15 +32,27 @@ import {
   computeTopCostsCenters,
   computeTopMembers,
 } from "@/lib/analytics";
+import {
+  UpstreamErrorCard,
+  isUpstreamError,
+} from "@/components/shared/upstream-error-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 180;
 
 async function AnalysisView() {
-  const reports = await getReports(
-    { include: ["teamMember", "costsCenter"], perPage: 1000 },
-    { revalidate: 180 },
-  );
+  let reports;
+  try {
+    reports = await getReports(
+      { include: ["teamMember", "costsCenter"], perPage: 1000 },
+      { revalidate: 180 },
+    );
+  } catch (e) {
+    if (isUpstreamError(e)) {
+      return <UpstreamErrorCard error={e} area="as análises" />;
+    }
+    throw e;
+  }
 
   const approvalStats = computeApprovalTimeStats(reports);
   const statusBuckets = computeStatusBuckets(reports);
