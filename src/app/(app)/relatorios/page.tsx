@@ -22,6 +22,8 @@ import { fmtBRL, fmtDate } from "@/lib/format";
 import { getReports } from "@/lib/vexpenses";
 import { ReportFilters } from "@/components/reports/report-filters";
 import type { ReportStatus } from "@/types/vexpenses";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -118,11 +120,24 @@ async function ReportsList({ searchParams }: PageProps) {
 }
 
 export default function ReportsPage(props: PageProps) {
+  const qs = new URLSearchParams();
+  if (props.searchParams.status) qs.set("status", props.searchParams.status);
+  if (props.searchParams.search) qs.set("search", props.searchParams.search);
+  const exportHref = `/api/export/reports${qs.toString() ? `?${qs.toString()}` : ""}`;
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Relatórios"
         description="Todos os relatórios de despesa sincronizados da VExpenses."
+        actions={
+          <Button asChild variant="outline" size="sm">
+            <a href={exportHref}>
+              <Download className="mr-1 h-3.5 w-3.5" />
+              Exportar CSV
+            </a>
+          </Button>
+        }
       />
       <ReportFilters />
       <Suspense

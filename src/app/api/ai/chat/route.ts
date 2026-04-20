@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getReports } from "@/lib/vexpenses";
 import { computeApprovalTimeStats, computeTopMembers } from "@/lib/analytics";
 import { computeBalancesLive } from "@/lib/cash-balance";
+import { computeAdvice } from "@/lib/ai-advice";
 import { fmtBRL, fmtDuration } from "@/lib/format";
 import { handleApiError } from "@/lib/api-errors";
 
@@ -16,6 +17,31 @@ export async function POST(req: Request) {
     const lower = prompt.toLowerCase();
 
     // Regras determinísticas: identifica intenção e responde com base em dados reais.
+    if (
+      lower.includes("recomend") ||
+      lower.includes("conselho") ||
+      lower.includes("alerta")
+    ) {
+      const { advice } = await computeAdvice();
+      if (advice.length === 0) {
+        return NextResponse.json({
+          answer:
+            "Nenhuma recomendação disparada pelas regras no momento — está tudo em ordem.",
+        });
+      }
+      return NextResponse.json({
+        answer: [
+          `Top recomendações agora (${advice.length} regra(s) disparada(s)):`,
+          ...advice
+            .slice(0, 6)
+            .map(
+              (a, i) =>
+                `${i + 1}. [${a.severity.toUpperCase()}] ${a.title}${a.metric ? ` — ${a.metric}` : ""}`,
+            ),
+        ].join("\n"),
+      });
+    }
+
     if (
       lower.includes("reembolso") &&
       (lower.includes("pendent") || lower.includes("deve"))

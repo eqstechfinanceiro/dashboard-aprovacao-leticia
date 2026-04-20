@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
-import { Bell, Moon, Sparkles, Sun, Search as SearchIcon, Menu } from "lucide-react";
+import { Bell, LogOut, Moon, Sparkles, Sun, Search as SearchIcon, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -167,6 +167,18 @@ export function Topbar() {
               >
                 Doc VExpenses ↗
               </a>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={async (e) => {
+                e.preventDefault();
+                await fetch("/api/auth/logout", { method: "POST" });
+                router.replace("/login");
+                router.refresh();
+              }}
+            >
+              <LogOut className="mr-2 h-3.5 w-3.5" />
+              Sair
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

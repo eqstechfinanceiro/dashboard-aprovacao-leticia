@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 type Message = { role: "user" | "assistant"; content: string };
 
 const SUGGESTIONS = [
+  "Quais são as recomendações principais agora?",
   "Quem são os 5 colaboradores com mais reembolso pendente?",
   "Existe algum setor com tempo médio de aprovação acima de 7 dias?",
   "Liste relatórios acima de R$ 5.000 aguardando aprovação.",
