@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Painel de Administração - Central de Automação">
+    <title>Admin | Central de Automação</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <style>
+        .admin-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 24px;
+            padding: 24px;
+        }
+
+        .admin-sidebar {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .admin-sidebar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #94a3b8;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        .admin-nav-item:hover,
+        .admin-nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #6366f1;
+        }
+
+        .admin-nav-item.active {
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        .admin-content {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .admin-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .admin-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .admin-btn-add {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .admin-table th {
+            text-align: left;
+            padding: 12px;
+            color: #94a3b8;
+            font-weight: 500;
+            font-size: 12px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .admin-table td {
+            padding: 12px;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+
+        .admin-table tr:hover {
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .admin-btn-action {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: #6366f1;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .admin-btn-action:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .admin-btn-action.delete {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+
+        .admin-btn-action.delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .admin-form {
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .admin-form-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+        }
+
+        .admin-form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .admin-form-group {
+            margin-bottom: 16px;
+        }
+
+        .admin-form-label {
+            display: block;
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .admin-form-input,
+        .admin-form-select,
+        .admin-form-textarea {
+            width: 100%;
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 10px 12px;
+            color: #e2e8f0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-form-input:focus,
+        .admin-form-select:focus,
+        .admin-form-textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .admin-form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .admin-form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .admin-btn-cancel {
+            background: rgba(148, 163, 184, 0.1);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            color: #94a3b8;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn-cancel:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .admin-btn-save {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-badge.inactive {
+            background: rgba(148, 163, 184, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .status-badge.paused {
+            background: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Topbar Styles */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 24px;
+            background: rgba(17, 24, 39, 0.5);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .menu-toggle {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            color: #6366f1;
+            cursor: pointer;
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .topbar-search {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            padding: 8px 16px;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .topbar-search .material-icons-round {
+            color: #94a3b8;
+            font-size: 20px;
+        }
+
+        .topbar-search input {
+            background: transparent;
+            border: none;
+            color: #e2e8f0;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+        }
+
+        .topbar-search input::placeholder {
+            color: #64748b;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .topbar-btn {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            color: #6366f1;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .topbar-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .topbar-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .topbar-user:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .user-avatar .material-icons-round {
+            font-size: 18px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f1f5f9;
+        }
+
+        .user-role {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        @media (max-width: 1024px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+
+            .admin-sidebar {
+                display: flex;
+                overflow-x: auto;
+                padding: 12px;
+            }
+
+            .admin-nav-item {
+                white-space: nowrap;
+                margin-bottom: 0;
+                margin-right: 8px;
+            }
+
+            .menu-toggle {
+                display: flex;
+            }
+
+            .topbar-search {
+                max-width: 200px;
+            }
+
+            .user-info {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <span class="material-icons-round">bolt</span>
+                </div>
+                <div class="logo-text">
+                    <h1>Central</h1>
+                    <span>Automação</span>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li>
+                    <a href="../index.html" class="nav-link" data-page="dashboard">
+                        <span class="material-icons-round">dashboard</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="automacoes.html" class="nav-link" data-page="automacoes">
+                        <span class="material-icons-round">smart_toy</span>
+                        <span class="nav-text">Automações</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="progresso.html" class="nav-link" data-page="progresso">
+                        <span class="material-icons-round">timeline</span>
+                        <span class="nav-text">Progresso</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="admin.html" class="nav-link active" data-page="admin">
+                        <span class="material-icons-round">admin_panel_settings</span>
+                        <span class="nav-text">Admin</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <div class="status-dot pulse"></div>
+                <span>Sistema Operacional</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="topbar">
+            <button id="menu-toggle" class="menu-toggle">
+                <span class="material-icons-round">menu</span>
+            </button>
+            <div class="topbar-search">
+                <span class="material-icons-round">search</span>
+                <input type="text" placeholder="Buscar..." id="search-input">
+            </div>
+            <div class="topbar-actions">
+                <button class="topbar-btn" id="notification-btn">
+                    <span class="material-icons-round">notifications</span>
+                    <span class="notification-badge">3</span>
+                </button>
+                <div class="topbar-user">
+                    <div class="user-avatar">
+                        <span class="material-icons-round">person</span>
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Admin</span>
+                        <span class="user-role">Administrador</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <div class="page-content">
+            <div class="page-header">
+                <h1 class="page-title">Painel de Administração</h1>
+                <p class="page-subtitle">Gerencie todos os dados da aplicação</p>
+            </div>
+
+            <!-- Admin Container -->
+            <div class="admin-container">
+                <!-- Admin Sidebar -->
+                <div class="admin-sidebar">
+                    <h3 class="admin-sidebar-title">Gerenciar</h3>
+                    <div class="admin-nav-item active" data-section="sectors">
+                        <span class="material-icons-round">business</span>
+                        <span>Setores</span>
+                    </div>
+                    <div class="admin-nav-item" data-section="automations">
+                        <span class="material-icons-round">smart_toy</span>
+                        <span>Automações</span>
+                    </div>
+                    <div class="admin-nav-item" data-section="timeline">
+                        <span class="material-icons-round">timeline</span>
+                        <span>Timeline</span>
+                    </div>
+                    <div class="admin-nav-item" data-section="kpis">
+                        <span class="material-icons-round">analytics</span>
+                        <span>KPIs</span>
+                    </div>
+                    <div class="admin-nav-item" data-section="chart-data">
+                        <span class="material-icons-round">show_chart</span>
+                        <span>Dados de Gráficos</span>
+                    </div>
+                    <div class="admin-nav-item" data-section="notes">
+                        <span class="material-icons-round">receipt_long</span>
+                        <span>Notas</span>
+                    </div>
+                </div>
+
+                <!-- Admin Content -->
+                <div class="admin-content">
+                    <!-- Setores Section -->
+                    <div class="admin-section active" id="sectors-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar Setores</h2>
+                            <button class="admin-btn-add" onclick="showSectorForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar Setor
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="sector-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/Setor</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Chave (key)</label>
+                                    <input type="text" class="admin-form-input" id="sector-key" placeholder="Ex: entrada-notas">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Nome</label>
+                                    <input type="text" class="admin-form-input" id="sector-name" placeholder="Ex: Entrada de Notas">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Cor</label>
+                                    <input type="color" class="admin-form-input" id="sector-color" value="#6366f1">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Ícone</label>
+                                    <select class="admin-form-select" id="sector-icon">
+                                        <option value="receipt_long">receipt_long</option>
+                                        <option value="account_balance">account_balance</option>
+                                        <option value="payments">payments</option>
+                                        <option value="request_quote">request_quote</option>
+                                        <option value="gavel">gavel</option>
+                                        <option value="account_balance_wallet">account_balance_wallet</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideSectorForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveSector()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Chave</th>
+                                    <th>Nome</th>
+                                    <th>Cor</th>
+                                    <th>Ícone</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectors-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Automações Section -->
+                    <div class="admin-section" id="automations-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar Automações</h2>
+                            <button class="admin-btn-add" onclick="showAutomationForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar Automação
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="automation-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/Automação</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Nome</label>
+                                    <input type="text" class="admin-form-input" id="automation-name" placeholder="Ex: Processamento de Notas">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Descrição</label>
+                                    <textarea class="admin-form-textarea" id="automation-description" placeholder="Descrição da automação"></textarea>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Setor</label>
+                                    <select class="admin-form-select" id="automation-sector">
+                                        <option value="">Selecione um setor</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Status</label>
+                                    <select class="admin-form-select" id="automation-status">
+                                        <option value="active">Ativo</option>
+                                        <option value="inactive">Inativo</option>
+                                        <option value="paused">Pausado</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Runtime</label>
+                                    <input type="text" class="admin-form-input" id="automation-runtime" placeholder="Ex: 2h 30m">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Rodando (running)</label>
+                                    <select class="admin-form-select" id="automation-running">
+                                        <option value="true">Sim</option>
+                                        <option value="false">Não</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideAutomationForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveAutomation()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Setor</th>
+                                    <th>Status</th>
+                                    <th>Runtime</th>
+                                    <th>Rodando</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="automations-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Timeline Section -->
+                    <div class="admin-section" id="timeline-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar Timeline</h2>
+                            <button class="admin-btn-add" onclick="showTimelineForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar Evento
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="timeline-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/Evento</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Título</label>
+                                    <input type="text" class="admin-form-input" id="timeline-title" placeholder="Ex: Nova automação implementada">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Descrição</label>
+                                    <textarea class="admin-form-textarea" id="timeline-description" placeholder="Descrição do evento"></textarea>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Tipo</label>
+                                    <select class="admin-form-select" id="timeline-type">
+                                        <option value="deployment">Deploy</option>
+                                        <option value="fix">Correção</option>
+                                        <option value="improvement">Melhoria</option>
+                                        <option value="feature">Funcionalidade</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Data</label>
+                                    <input type="date" class="admin-form-input" id="timeline-date">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Setor</label>
+                                    <select class="admin-form-select" id="timeline-sector">
+                                        <option value="">Selecione um setor</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideTimelineForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveTimeline()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Tipo</th>
+                                    <th>Data</th>
+                                    <th>Setor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timeline-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- KPIs Section -->
+                    <div class="admin-section" id="kpis-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar KPIs</h2>
+                            <button class="admin-btn-add" onclick="showKPIForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar KPI
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="kpi-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/KPI</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Chave (key)</label>
+                                    <input type="text" class="admin-form-input" id="kpi-key" placeholder="Ex: time-saved">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Valor</label>
+                                    <input type="number" class="admin-form-input" id="kpi-value" placeholder="Ex: 847">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Unidade</label>
+                                    <input type="text" class="admin-form-input" id="kpi-unit" placeholder="Ex: horas">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Mudança %</label>
+                                    <input type="text" class="admin-form-input" id="kpi-change-percent" placeholder="Ex: 12.50">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Período</label>
+                                    <input type="text" class="admin-form-input" id="kpi-change-period" placeholder="Ex: este mês">
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideKPIForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveKPI()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Chave</th>
+                                    <th>Valor</th>
+                                    <th>Unidade</th>
+                                    <th>Mudança %</th>
+                                    <th>Período</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="kpis-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Chart Data Section -->
+                    <div class="admin-section" id="chart-data-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar Dados de Gráficos</h2>
+                            <button class="admin-btn-add" onclick="showChartDataForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar Dados
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="chart-data-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/Dados de Gráfico</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Período</label>
+                                    <select class="admin-form-select" id="chart-data-period">
+                                        <option value="hora">Hora</option>
+                                        <option value="dia">Dia</option>
+                                        <option value="semana">Semana</option>
+                                        <option value="mes">Mês</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Labels (separados por vírgula)</label>
+                                    <input type="text" class="admin-form-input" id="chart-data-labels" placeholder="Ex: 08h, 09h, 10h">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Dados (separados por vírgula)</label>
+                                    <input type="text" class="admin-form-input" id="chart-data-values" placeholder="Ex: 8, 15, 22, 18">
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideChartDataForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveChartData()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Período</th>
+                                    <th>Labels</th>
+                                    <th>Dados</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chart-data-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notes Section -->
+                    <div class="admin-section" id="notes-section">
+                        <div class="admin-section-header">
+                            <h2 class="admin-section-title">Gerenciar Notas</h2>
+                            <button class="admin-btn-add" onclick="showNoteForm()">
+                                <span class="material-icons-round">add</span>
+                                Adicionar Nota
+                            </button>
+                        </div>
+
+                        <!-- Form -->
+                        <div class="admin-form" id="note-form" style="display: none;">
+                            <h3 class="admin-form-title">Adicionar/Nota</h3>
+                            <form class="admin-form-grid">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Número da Nota</label>
+                                    <input type="text" class="admin-form-input" id="note-number" placeholder="Ex: NF-12345">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Valor</label>
+                                    <input type="number" class="admin-form-input" id="note-value" placeholder="Ex: 1500.00">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Data de Emissão</label>
+                                    <input type="date" class="admin-form-input" id="note-date">
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Setor</label>
+                                    <select class="admin-form-select" id="note-sector">
+                                        <option value="">Selecione um setor</option>
+                                    </select>
+                                </div>
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Status</label>
+                                    <select class="admin-form-select" id="note-status">
+                                        <option value="pending">Pendente</option>
+                                        <option value="processing">Processando</option>
+                                        <option value="completed">Concluída</option>
+                                        <option value="error">Erro</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div class="admin-form-actions">
+                                <button class="admin-btn-cancel" onclick="hideNoteForm()">Cancelar</button>
+                                <button class="admin-btn-save" onclick="saveNote()">Salvar</button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Valor</th>
+                                    <th>Data</th>
+                                    <th>Setor</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notes-table-body">
+                                <!-- Populated by admin.js -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notification-panel">
+        <div class="notification-header">
+            <h3>Notificações</h3>
+            <button class="notification-close" id="notification-close">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+        <div class="notification-list">
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <span class="material-icons-round">info</span>
+                </div>
+                <div class="notification-content">
+                    <p><strong>Sistema</strong> — Atualização v2.4.1 disponível</p>
+                    <span class="notification-time">Há 1 hora</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="overlay" id="overlay"></div>
+
+    <script type="module" src="../static/js/shared/navigation.js"></script>
+    <script type="module" src="../static/js/admin.js"></script>
+    <script>
+        // Admin Navigation
+        document.querySelectorAll('.admin-nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.admin-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+
+                const section = item.dataset.section;
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(`${section}-section`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+
+</html>
