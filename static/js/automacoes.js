@@ -1,5 +1,4 @@
 // ===== AUTOMAÇÕES MODULE =====
-import { ApiClient, AppData, loadAppData } from './shared/api-client.js';
 
 // ===== KANBAN BOARD =====
 class KanbanBoard {
@@ -9,12 +8,13 @@ class KanbanBoard {
             this.currentFilter = 'all';
             this.render();
             this.bindFilters();
+            this.bindActions();
         }
     }
 
     render() {
-        const html = AppData.sectors.map(sector => {
-            const automations = AppData.automations.filter(a => a.sectorKey === sector.key);
+        const html = window.AppData.sectors.map(sector => {
+            const automations = window.AppData.automations.filter(a => a.sectorKey === sector.key);
             const filtered = this.currentFilter === 'all'
                 ? automations
                 : automations.filter(a => a.status === this.currentFilter);
@@ -72,11 +72,54 @@ class KanbanBoard {
             });
         });
     }
+
+    bindActions() {
+        const actionButtons = this.container.querySelectorAll('.kanban-card-action');
+        actionButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = btn.dataset.action;
+                const card = btn.closest('.kanban-card');
+                const id = parseInt(card.dataset.id);
+
+                if (action === 'edit') {
+                    this.editAutomation(id);
+                } else if (action === 'delete') {
+                    this.deleteAutomation(id);
+                }
+            });
+        });
+    }
+
+    async editAutomation(id) {
+        const automation = window.AppData.automations.find(a => a.id === id);
+        if (!automation) return;
+
+        // Redirect to admin page with edit mode
+        window.location.href = `/pages/admin.html?edit=automation&id=${id}`;
+    }
+
+    async deleteAutomation(id) {
+        if (!confirm('Tem certeza que deseja excluir esta automação?')) return;
+
+        try {
+            const result = await window.ApiClient.deleteAutomation(id);
+            if (result) {
+                await window.loadAppData();
+                this.render();
+                alert('Automação excluída com sucesso!');
+            } else {
+                alert('Erro ao excluir automação');
+            }
+        } catch (error) {
+            console.error('Error deleting automation:', error);
+            alert('Erro ao excluir automação');
+        }
+    }
 }
 
 // ===== INITIALIZE AUTOMAÇÕES =====
 async function initAutomacoes() {
-    await loadAppData();
+    await window.loadAppData();
     new KanbanBoard();
 }
 

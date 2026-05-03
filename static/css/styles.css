@@ -1151,6 +1151,42 @@ body::before {
     justify-content: space-between;
 }
 
+.kanban-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.kanban-card-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.kanban-card-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 8px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.kanban-card-action:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.25);
+    color: var(--accent-primary);
+}
+
+.kanban-card-action .material-icons-round {
+    font-size: 18px;
+}
+
 .kanban-card-status {
     display: inline-flex;
     align-items: center;

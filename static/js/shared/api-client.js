@@ -1,7 +1,7 @@
 // ===== API CLIENT =====
 // API_BASE usa '/api' para deploy no Vercel
 // Para testes locais, use 'http://localhost:5000/api'
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:5000/api';
 
 const ApiClient = {
     async fetch(endpoint, options = {}) {
@@ -201,3 +201,9 @@ async function loadAppData() {
         return false;
     }
 }
+
+// ===== EXPORT TO GLOBAL SCOPE =====
+// Expose ApiClient and AppData to global scope
+window.ApiClient = ApiClient;
+window.AppData = AppData;
+window.loadAppData = loadAppData;

@@ -1,5 +1,4 @@
 // ===== PROGRESSO MODULE =====
-import { ApiClient, AppData, loadAppData } from './shared/api-client.js';
 
 // ===== TIMELINE =====
 class Timeline {
@@ -14,7 +13,7 @@ class Timeline {
     }
 
     render() {
-        let items = [...AppData.timeline];
+        let items = [...window.AppData.timeline];
 
         // Filter by type
         if (this.currentFilter !== 'all') {
@@ -99,7 +98,7 @@ class Timeline {
 
 // ===== INITIALIZE PROGRESSO =====
 async function initProgresso() {
-    await loadAppData();
+    await window.loadAppData();
     new Timeline();
 }
 

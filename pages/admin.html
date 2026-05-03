@@ -293,6 +293,52 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* Icon Selector Styles */
+        .icon-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
+        }
+
+        .icon-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .icon-option:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .icon-option.selected {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        .icon-option .material-icons-round {
+            font-size: 28px;
+            color: #94a3b8;
+        }
+
+        .icon-option.selected .material-icons-round {
+            color: #6366f1;
+        }
+
+        .icon-name {
+            font-size: 10px;
+            color: #64748b;
+            text-align: center;
+        }
+
         /* Topbar Styles */
         .topbar {
             display: flex;
@@ -613,14 +659,33 @@
                                 </div>
                                 <div class="admin-form-group">
                                     <label class="admin-form-label">Ícone</label>
-                                    <select class="admin-form-select" id="sector-icon">
-                                        <option value="receipt_long">receipt_long</option>
-                                        <option value="account_balance">account_balance</option>
-                                        <option value="payments">payments</option>
-                                        <option value="request_quote">request_quote</option>
-                                        <option value="gavel">gavel</option>
-                                        <option value="account_balance_wallet">account_balance_wallet</option>
-                                    </select>
+                                    <div class="icon-selector" id="icon-selector">
+                                        <div class="icon-option selected" data-icon="receipt_long">
+                                            <span class="material-icons-round">receipt_long</span>
+                                            <span class="icon-name">receipt_long</span>
+                                        </div>
+                                        <div class="icon-option" data-icon="account_balance">
+                                            <span class="material-icons-round">account_balance</span>
+                                            <span class="icon-name">account_balance</span>
+                                        </div>
+                                        <div class="icon-option" data-icon="payments">
+                                            <span class="material-icons-round">payments</span>
+                                            <span class="icon-name">payments</span>
+                                        </div>
+                                        <div class="icon-option" data-icon="request_quote">
+                                            <span class="material-icons-round">request_quote</span>
+                                            <span class="icon-name">request_quote</span>
+                                        </div>
+                                        <div class="icon-option" data-icon="gavel">
+                                            <span class="material-icons-round">gavel</span>
+                                            <span class="icon-name">gavel</span>
+                                        </div>
+                                        <div class="icon-option" data-icon="account_balance_wallet">
+                                            <span class="material-icons-round">account_balance_wallet</span>
+                                            <span class="icon-name">account_balance_wallet</span>
+                                        </div>
+                                        <input type="hidden" id="sector-icon" value="receipt_long">
+                                    </div>
                                 </div>
                             </form>
                             <div class="admin-form-actions">
@@ -989,7 +1054,9 @@
     <div class="overlay" id="overlay"></div>
 
     <script type="module" src="../static/js/shared/navigation.js"></script>
-    <script type="module" src="../static/js/admin.js"></script>
+    <script src="../static/js/shared/auth.js"></script>
+    <script src="../static/js/shared/api-client.js"></script>
+    <script src="../static/js/admin.js"></script>
     <script>
         // Admin Navigation
         document.querySelectorAll('.admin-nav-item').forEach(item => {

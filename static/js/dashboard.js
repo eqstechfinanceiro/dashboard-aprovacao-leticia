@@ -1,6 +1,4 @@
 // ===== DASHBOARD MODULE =====
-import { ApiClient, AppData, loadAppData } from './shared/api-client.js';
-import { CounterAnimator, updateKPIs } from './shared/utils.js';
 
 // ===== AUTOMATION LIST =====
 class AutomationList {
@@ -12,7 +10,7 @@ class AutomationList {
     }
 
     render() {
-        const html = AppData.automations
+        const html = window.AppData.automations
             .filter(a => a.status === 'active')
             .map(automation => `
                 <div class="automation-item" data-id="${automation.id}">
@@ -41,7 +39,7 @@ class AutomationList {
         this.container.querySelectorAll('.toggle-switch input').forEach(toggle => {
             toggle.addEventListener('change', async (e) => {
                 const id = parseInt(e.target.dataset.automationId);
-                const automation = AppData.automations.find(a => a.id === id);
+                const automation = window.AppData.automations.find(a => a.id === id);
                 if (automation) {
                     const newRunningState = e.target.checked;
                     
@@ -95,7 +93,7 @@ class ChartManager {
 
         if (this.notasChart) this.notasChart.destroy();
 
-        const data = AppData.chartData[period];
+        const data = window.AppData.chartData[period];
         if (!data) return;
 
         this.notasChart = new Chart(ctx, {
@@ -168,7 +166,7 @@ class ChartManager {
         if (!ctx) return;
 
         // Use sector data from API
-        const sectorData = AppData.sectors.map(sector => ({
+        const sectorData = window.AppData.sectors.map(sector => ({
             name: sector.name,
             hours: Math.floor(Math.random() * 300) + 50, // Placeholder - should come from API
             color: sector.color
@@ -228,8 +226,8 @@ class ChartManager {
         const ctx = document.getElementById('evolutionChart');
         if (!ctx) return;
 
-        const weekData = AppData.chartData['semana']?.data || [680, 720, 750, 810];
-        const weekLabels = AppData.chartData['semana']?.labels || ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
+        const weekData = window.AppData.chartData['semana']?.data || [680, 720, 750, 810];
+        const weekLabels = window.AppData.chartData['semana']?.labels || ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'];
 
         this.evolutionChart = new Chart(ctx, {
             type: 'line',
@@ -301,7 +299,7 @@ class ChartManager {
         if (!container) return;
 
         // Use chart data from API (semana period)
-        const weekData = AppData.chartData['semana']?.data || [120, 135, 148, 142, 155, 160, 145, 158, 165, 170, 162, 175];
+        const weekData = window.AppData.chartData['semana']?.data || [120, 135, 148, 142, 155, 160, 145, 158, 165, 170, 162, 175];
         const data = weekData;
         const width = 280;
         const height = 50;
@@ -348,14 +346,14 @@ class ChartManager {
 
 // ===== INITIALIZE DASHBOARD =====
 async function initDashboard() {
-    await loadAppData();
+    await window.loadAppData();
     
     new ChartManager();
     new AutomationList();
-    new CounterAnimator();
+    new window.CounterAnimator();
     
-    if (AppData.kpis) {
-        updateKPIs(AppData.kpis);
+    if (window.AppData.kpis) {
+        window.updateKPIs(window.AppData.kpis);
     }
 }
 

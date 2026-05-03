@@ -78,3 +78,7 @@ if (document.readyState === 'loading') {
 } else {
     new CounterAnimator();
 }
+
+// ===== EXPORT TO GLOBAL SCOPE =====
+window.CounterAnimator = CounterAnimator;
+window.updateKPIs = updateKPIs;

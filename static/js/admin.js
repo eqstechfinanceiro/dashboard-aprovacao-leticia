@@ -1,5 +1,6 @@
 // ===== ADMIN MODULE =====
-import { ApiClient, AppData, loadAppData } from './shared/api-client.js';
+// Load ApiClient from shared module (must be loaded before this script)
+// ApiClient is available globally from api-client.js
 
 // ===== ADMIN DATA STORE =====
 const AdminData = {
@@ -16,19 +17,19 @@ const AdminData = {
 async function loadAdminData() {
     try {
         const [sectors, automations, timeline, kpis, chartData, notes] = await Promise.all([
-            ApiClient.getSectors(),
-            ApiClient.getAutomations(),
-            ApiClient.getTimeline(),
-            ApiClient.getKPIs(),
-            ApiClient.getChartData(),
-            ApiClient.getNotes()
+            window.ApiClient.getSectors(),
+            window.ApiClient.getAutomations(),
+            window.ApiClient.getTimeline(),
+            window.ApiClient.getKPIs(),
+            window.ApiClient.getChartData(),
+            window.ApiClient.getNotes()
         ]);
 
         if (sectors) AdminData.sectors = sectors;
         if (automations) AdminData.automations = automations;
         if (timeline) AdminData.timeline = timeline;
-        if (kpis) AdminData.kpis = Object.entries(kpis).map(([key, value]) => ({ ...value, key }));
-        if (chartData) AdminData.chartData = Object.entries(chartData).map(([period, data]) => ({ ...data, period }));
+        if (kpis) AdminData.kpis = kpis;
+        if (chartData) AdminData.chartData = chartData;
         if (notes) AdminData.notes = notes;
 
         return true;
@@ -91,9 +92,9 @@ async function saveSector() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'sector') {
-        result = await ApiClient.updateSector(AdminData.editingItem.key, data);
+        result = await window.ApiClient.updateSector(AdminData.editingItem.key, data);
     } else {
-        result = await ApiClient.createSector(data);
+        result = await window.ApiClient.createSector(data);
     }
 
     if (result) {
@@ -113,13 +114,25 @@ async function editSector(key) {
     if (!sector) return;
 
     AdminData.editingItem = { type: 'sector', key };
-    
+
     document.getElementById('sector-key').value = sector.key;
     document.getElementById('sector-key').disabled = true;
     document.getElementById('sector-name').value = sector.name;
     document.getElementById('sector-color').value = sector.color;
     document.getElementById('sector-icon').value = sector.icon;
-    
+
+    // Update icon selector visual selection
+    const iconSelector = document.getElementById('icon-selector');
+    if (iconSelector) {
+        const iconOptions = iconSelector.querySelectorAll('.icon-option');
+        iconOptions.forEach(opt => {
+            opt.classList.remove('selected');
+            if (opt.dataset.icon === sector.icon) {
+                opt.classList.add('selected');
+            }
+        });
+    }
+
     document.querySelector('#sector-form .admin-form-title').textContent = 'Editar Setor';
     showSectorForm();
 }
@@ -127,7 +140,7 @@ async function editSector(key) {
 async function deleteSector(key) {
     if (!confirm('Tem certeza que deseja excluir este setor?')) return;
 
-    const result = await ApiClient.deleteSector(key);
+    const result = await window.ApiClient.deleteSector(key);
     if (result) {
         await loadAdminData();
         renderSectorsTable();
@@ -190,9 +203,9 @@ async function saveAutomation() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'automation') {
-        result = await ApiClient.updateAutomation(AdminData.editingItem.id, data);
+        result = await window.ApiClient.updateAutomation(AdminData.editingItem.id, data);
     } else {
-        result = await ApiClient.createAutomation(data);
+        result = await window.ApiClient.createAutomation(data);
     }
 
     if (result) {
@@ -226,7 +239,7 @@ async function editAutomation(id) {
 async function deleteAutomation(id) {
     if (!confirm('Tem certeza que deseja excluir esta automação?')) return;
 
-    const result = await ApiClient.deleteAutomation(id);
+    const result = await window.ApiClient.deleteAutomation(id);
     if (result) {
         await loadAdminData();
         renderAutomationsTable();
@@ -287,9 +300,9 @@ async function saveTimeline() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'timeline') {
-        result = await ApiClient.updateTimeline(AdminData.editingItem.id, data);
+        result = await window.ApiClient.updateTimeline(AdminData.editingItem.id, data);
     } else {
-        result = await ApiClient.createTimeline(data);
+        result = await window.ApiClient.createTimeline(data);
     }
 
     if (result) {
@@ -322,7 +335,7 @@ async function editTimeline(id) {
 async function deleteTimeline(id) {
     if (!confirm('Tem certeza que deseja excluir este evento?')) return;
 
-    const result = await ApiClient.deleteTimeline(id);
+    const result = await window.ApiClient.deleteTimeline(id);
     if (result) {
         await loadAdminData();
         renderTimelineTable();
@@ -382,9 +395,9 @@ async function saveKPI() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'kpi') {
-        result = await ApiClient.updateKPI(AdminData.editingItem.id, data);
+        result = await window.ApiClient.updateKPI(AdminData.editingItem.id, data);
     } else {
-        result = await ApiClient.createKPI(data);
+        result = await window.ApiClient.createKPI(data);
     }
 
     if (result) {
@@ -418,7 +431,7 @@ async function editKPI(id) {
 async function deleteKPI(id) {
     if (!confirm('Tem certeza que deseja excluir este KPI?')) return;
 
-    const result = await ApiClient.deleteKPI(id);
+    const result = await window.ApiClient.deleteKPI(id);
     if (result) {
         await loadAdminData();
         renderKPITable();
@@ -471,9 +484,9 @@ async function saveChartData() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'chartData') {
-        result = await ApiClient.updateChartData(AdminData.editingItem.id, chartData);
+        result = await window.ApiClient.updateChartData(AdminData.editingItem.id, chartData);
     } else {
-        result = await ApiClient.createChartData(chartData);
+        result = await window.ApiClient.createChartData(chartData);
     }
 
     if (result) {
@@ -505,7 +518,7 @@ async function editChartData(id) {
 async function deleteChartData(id) {
     if (!confirm('Tem certeza que deseja excluir estes dados?')) return;
 
-    const result = await ApiClient.deleteChartData(id);
+    const result = await window.ApiClient.deleteChartData(id);
     if (result) {
         await loadAdminData();
         renderChartDataTable();
@@ -573,9 +586,9 @@ async function saveNote() {
     let result;
 
     if (AdminData.editingItem && AdminData.editingItem.type === 'note') {
-        result = await ApiClient.updateNote(AdminData.editingItem.id, data);
+        result = await window.ApiClient.updateNote(AdminData.editingItem.id, data);
     } else {
-        result = await ApiClient.createNote(data);
+        result = await window.ApiClient.createNote(data);
     }
 
     if (result) {
@@ -609,7 +622,7 @@ async function editNote(id) {
 async function deleteNote(id) {
     if (!confirm('Tem certeza que deseja excluir esta nota?')) return;
 
-    const result = await ApiClient.deleteNote(id);
+    const result = await window.ApiClient.deleteNote(id);
     if (result) {
         await loadAdminData();
         renderNotesTable();
@@ -766,10 +779,36 @@ function showNotification(message, type = 'info') {
     }, 3000);
 }
 
+// ===== ICON SELECTOR =====
+function initIconSelector() {
+    const iconSelector = document.getElementById('icon-selector');
+    if (!iconSelector) return;
+
+    const iconOptions = iconSelector.querySelectorAll('.icon-option');
+    const hiddenInput = document.getElementById('sector-icon');
+
+    iconOptions.forEach(option => {
+        option.addEventListener('click', () => {
+            // Remove selected class from all options
+            iconOptions.forEach(opt => opt.classList.remove('selected'));
+            // Add selected class to clicked option
+            option.classList.add('selected');
+            // Update hidden input value
+            hiddenInput.value = option.dataset.icon;
+        });
+    });
+}
+
 // ===== INITIALIZE ADMIN =====
 async function initAdmin() {
+    // Wait for ApiClient to be available
+    if (!window.ApiClient) {
+        setTimeout(initAdmin, 100);
+        return;
+    }
+
     await loadAdminData();
-    
+
     renderSectorsTable();
     renderAutomationsTable();
     renderTimelineTable();
@@ -777,6 +816,7 @@ async function initAdmin() {
     renderChartDataTable();
     renderNotesTable();
     populateSectorSelect();
+    initIconSelector();
 }
 
 // Initialize when DOM is ready
