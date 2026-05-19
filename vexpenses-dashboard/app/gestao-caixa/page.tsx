@@ -158,7 +158,7 @@ export default function GestaoCaixa() {
   const kpis = useMemo(() => {
     const totalPaidValue = filteredReports.reduce((sum, r) => {
       // Buscar valor total das despesas do relatório
-      const reportExpenses = cashFlowData.filter(e => e.report_id === r.id);
+      const reportExpenses = cashFlowData.filter(e => e.report_id === r.id || e.report?.data?.id === r.id);
       const reportValue = reportExpenses.reduce((expSum, exp) => expSum + (exp.value || 0), 0);
       return sum + reportValue;
     }, 0);
@@ -476,7 +476,7 @@ export default function GestaoCaixa() {
               </thead>
               <tbody>
                 {paginatedReports.map((report) => {
-                  const reportExpenses = cashFlowData.filter(e => e.report_id === report.id);
+                  const reportExpenses = cashFlowData.filter(e => e.report_id === report.id || e.report?.data?.id === report.id);
                   const reportValue = reportExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
                   
                   return (

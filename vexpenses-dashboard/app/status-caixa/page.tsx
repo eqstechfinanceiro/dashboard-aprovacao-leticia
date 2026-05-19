@@ -149,7 +149,8 @@ export default function StatusCaixa() {
     // Calcular valor total por status usando os dados de expenses
     // Criar um mapa de report_id -> valor total
     const reportValueMap = expenses.reduce((acc, exp) => {
-      const reportId = exp.report_id;
+      // Tenta report_id primeiro, depois report?.data?.id como fallback
+      const reportId = exp.report_id || exp.report?.data?.id;
       if (reportId) {
         acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
       }
