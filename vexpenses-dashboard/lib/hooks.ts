@@ -160,3 +160,45 @@ export function useRefreshData() {
     refreshAll: () => queryClient.invalidateQueries(),
   };
 }
+
+// Hook para buscar dados de status-caixa (relatórios agrupados por status)
+export function useStatusCaixa(params?: {
+  startDate?: string;
+  endDate?: string;
+  costCenterId?: string;
+}) {
+  const searchParams = new URLSearchParams();
+  searchParams.append('include', 'user,expense');
+  
+  if (params?.startDate && params?.endDate) {
+    searchParams.append('search', `created_at:${params.startDate},${params.endDate}`);
+    searchParams.append('searchFields', 'created_at:between');
+  }
+  
+  return useQuery({
+    queryKey: ['status-caixa', params],
+    queryFn: async () => {
+      const response = await fetch(`/api/vexpenses/reports?${searchParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch reports for status caixa');
+      const data = await response.json();
+      return data.data as Report[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 30 * 60 * 1000, // 30 minutos
+  });
+}
+
+// Hook para buscar equipe (team-members) para filtros
+export function useTeamMembers() {
+  return useQuery({
+    queryKey: ['team-members'],
+    queryFn: async () => {
+      const response = await fetch('/api/vexpenses/team-members?include=costs_center');
+      if (!response.ok) throw new Error('Failed to fetch team members');
+      const data = await response.json();
+      return data.data as any[];
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutos
+    gcTime: 6 * 60 * 60 * 1000, // 6 horas
+  });
+}
