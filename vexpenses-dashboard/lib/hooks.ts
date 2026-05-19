@@ -202,3 +202,57 @@ export function useTeamMembers() {
     gcTime: 6 * 60 * 60 * 1000, // 6 horas
   });
 }
+
+// Hook para buscar relatórios pagos (status PAGO)
+export function usePaidReports(params?: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const searchParams = new URLSearchParams();
+  searchParams.append('include', 'user');
+  
+  if (params?.startDate && params?.endDate) {
+    searchParams.append('search', `created_at:${params.startDate},${params.endDate}`);
+    searchParams.append('searchFields', 'created_at:between');
+  }
+  
+  return useQuery({
+    queryKey: ['paid-reports', params],
+    queryFn: async () => {
+      const response = await fetch(`/api/vexpenses/reports?${searchParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch paid reports');
+      const data = await response.json();
+      // Filtrar apenas relatórios pagos
+      const paidReports = (data.data as Report[]).filter(r => r.status === 'PAGO');
+      return paidReports;
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutos
+    gcTime: 2 * 60 * 60 * 1000, // 2 horas
+  });
+}
+
+// Hook para buscar fluxo de caixa (despesas agrupadas por período)
+export function useCashFlow(params?: {
+  startDate?: string;
+  endDate?: string;
+}) {
+  const searchParams = new URLSearchParams();
+  searchParams.append('include', 'expense_type,costs_center');
+  
+  if (params?.startDate && params?.endDate) {
+    searchParams.append('search', `date:${params.startDate},${params.endDate}`);
+    searchParams.append('searchFields', 'date:between');
+  }
+  
+  return useQuery({
+    queryKey: ['cash-flow', params],
+    queryFn: async () => {
+      const response = await fetch(`/api/vexpenses/expenses?${searchParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch cash flow data');
+      const data = await response.json();
+      return data.data as Expense[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 1 * 60 * 60 * 1000, // 1 hora
+  });
+}
