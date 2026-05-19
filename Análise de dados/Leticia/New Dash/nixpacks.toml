@@ -6,6 +6,3 @@ cmds = ["cd vexpenses-dashboard && npm install && npm run build"]
 
 [start]
 cmd = "cd vexpenses-dashboard && npm run start"
-
-[static]
-nginx = true
