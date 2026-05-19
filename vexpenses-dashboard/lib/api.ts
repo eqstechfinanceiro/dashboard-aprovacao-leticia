@@ -219,6 +219,7 @@ export interface Apportionment {
 export interface Expense {
   id: number;
   user_id: number;
+  expense_id: number;
   report_id: number;
   device_id: number;
   integration_id: number;
