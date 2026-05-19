@@ -171,6 +171,36 @@ export default function StatusCaixa() {
     };
   }, [filteredReports]);
 
+  // Dados para gráfico de evolução temporal (movido para o nível superior do componente)
+  const monthlyData = useMemo(() => {
+    // Agrupar relatórios por mês e status
+    const dataMap = new Map();
+    
+    filteredReports.forEach(report => {
+      const date = new Date(report.created_at);
+      const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      
+      if (!dataMap.has(monthKey)) {
+        dataMap.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Pago: 0, Reaberto: 0 });
+      }
+      
+      const data = dataMap.get(monthKey);
+      const statusKey = report.status === 'ABERTO' ? 'Aberto' :
+                      report.status === 'ENVIADO' ? 'Enviado' :
+                      report.status === 'APROVADO' ? 'Aprovado' :
+                      report.status === 'REPROVADO' ? 'Reprovado' :
+                      report.status === 'PAGO' ? 'Pago' : 'Reaberto';
+      
+      if (data && statusKey in data) {
+        data[statusKey as keyof typeof data]++;
+      }
+    });
+    
+    return Array.from(dataMap.values()).sort((a, b) => 
+      new Date(a.month).getTime() - new Date(b.month).getTime()
+    );
+  }, [filteredReports]);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -519,34 +549,7 @@ export default function StatusCaixa() {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={useMemo(() => {
-              // Agrupar relatórios por mês e status
-              const monthlyData = new Map();
-              
-              filteredReports.forEach(report => {
-                const date = new Date(report.created_at);
-                const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-                
-                if (!monthlyData.has(monthKey)) {
-                  monthlyData.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Pago: 0, Reaberto: 0 });
-                }
-                
-                const data = monthlyData.get(monthKey);
-                const statusKey = report.status === 'ABERTO' ? 'Aberto' :
-                                report.status === 'ENVIADO' ? 'Enviado' :
-                                report.status === 'APROVADO' ? 'Aprovado' :
-                                report.status === 'REPROVADO' ? 'Reprovado' :
-                                report.status === 'PAGO' ? 'Pago' : 'Reaberto';
-                
-                if (data && statusKey in data) {
-                  data[statusKey as keyof typeof data]++;
-                }
-              });
-              
-              return Array.from(monthlyData.values()).sort((a, b) => 
-                new Date(a.month).getTime() - new Date(b.month).getTime()
-              );
-            }, [filteredReports])}>
+            <LineChart data={monthlyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
