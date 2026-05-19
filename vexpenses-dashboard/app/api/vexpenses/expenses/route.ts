@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
+// Log para debug (remover em produção)
+console.log('[Expenses API] API_KEY exists:', !!API_KEY);
+console.log('[Expenses API] API_KEY length:', API_KEY?.length);
+console.log('[Expenses API] API_KEY prefix:', API_KEY?.substring(0, 10));
+
 // POST endpoint para salvar direto no cache (usado pelo background preloader)
 export async function POST(request: NextRequest) {
   try {
@@ -79,7 +84,7 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos de timeout
@@ -148,7 +153,7 @@ async function refreshCacheInBackground(
     
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos

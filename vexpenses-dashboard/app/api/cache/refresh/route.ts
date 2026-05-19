@@ -24,6 +24,11 @@ export async function POST(request: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
     const apiKey = process.env.VEXPENSES_API_KEY || '';
 
+    // Log para debug (remover em produção)
+    console.log('[Cache Refresh] API_KEY exists:', !!apiKey);
+    console.log('[Cache Refresh] API_KEY length:', apiKey?.length);
+    console.log('[Cache Refresh] API_KEY prefix:', apiKey?.substring(0, 10));
+
     let cacheKey: string;
     let url: string;
     let ttl: number;
@@ -76,7 +81,7 @@ export async function POST(request: Request) {
     // Buscar dados da API
     const response = await fetch(url, {
       headers: {
-        'Authorization': apiKey,
+        'Authorization': apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos de timeout
@@ -119,6 +124,11 @@ export async function GET() {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
     const apiKey = process.env.VEXPENSES_API_KEY || '';
 
+    // Log para debug (remover em produção)
+    console.log('[Cache Refresh GET] API_KEY exists:', !!apiKey);
+    console.log('[Cache Refresh GET] API_KEY length:', apiKey?.length);
+    console.log('[Cache Refresh GET] API_KEY prefix:', apiKey?.substring(0, 10));
+
     const results: any[] = [];
 
     // Atualizar cada endpoint
@@ -134,7 +144,7 @@ export async function GET() {
         
         const response = await fetch(endpoint.url, {
           headers: {
-            'Authorization': apiKey,
+            'Authorization': apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
             'Accept': 'application/json',
           },
           signal: AbortSignal.timeout(120000),

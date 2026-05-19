@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
+// Log para debug (remover em produção)
+console.log('[Cache Refresh Background] API_KEY exists:', !!API_KEY);
+console.log('[Cache Refresh Background] API_KEY length:', API_KEY?.length);
+console.log('[Cache Refresh Background] API_KEY prefix:', API_KEY?.substring(0, 10));
+
 // Endpoint para atualizar cache em background
 // Este endpoint não espera pela resposta da API vExpenses
 // Ele inicia o refresh e retorna imediatamente
@@ -49,7 +54,7 @@ async function refreshCacheInBackground(keys: string[]) {
       let fetchUrl: string;
       let fetchOptions: RequestInit = {
         headers: {
-          'Authorization': API_KEY,
+          'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
           'Accept': 'application/json',
         },
         signal: AbortSignal.timeout(300000), // 5 minutos

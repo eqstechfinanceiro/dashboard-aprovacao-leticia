@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
+// Log para debug (remover em produção)
+console.log('[Costs Centers API] API_KEY exists:', !!API_KEY);
+console.log('[Costs Centers API] API_KEY length:', API_KEY?.length);
+console.log('[Costs Centers API] API_KEY prefix:', API_KEY?.substring(0, 10));
+
 export async function GET(request: NextRequest) {
   try {
     // Criar chave de cache
@@ -30,7 +35,7 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/costs-centers`, {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(120000), // 2 minutos de timeout
@@ -63,7 +68,7 @@ async function refreshCacheInBackground(cacheKey: string) {
     
     const response = await fetch(`${API_URL}/v2/costs-centers`, {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(120000), // 2 minutos

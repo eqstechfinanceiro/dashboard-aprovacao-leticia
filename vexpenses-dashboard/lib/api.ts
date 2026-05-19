@@ -3,10 +3,15 @@ import axios from 'axios';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
+// Log para debug (remover em produção)
+console.log('[API Client] API_KEY exists:', !!API_KEY);
+console.log('[API Client] API_KEY length:', API_KEY?.length);
+console.log('[API Client] API_KEY prefix:', API_KEY?.substring(0, 10));
+
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Authorization': API_KEY,
+    'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
     'Accept': 'application/json',
   },
 });

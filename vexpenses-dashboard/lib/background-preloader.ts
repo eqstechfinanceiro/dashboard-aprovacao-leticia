@@ -58,6 +58,11 @@ async function fetchMonthData(
   const API_KEY = process.env.VEXPENSES_API_KEY || '';
   const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL || 'http://localhost:3000';
 
+  // Log para debug (remover em produção)
+  console.log('[Background Preloader] API_KEY exists:', !!API_KEY);
+  console.log('[Background Preloader] API_KEY length:', API_KEY?.length);
+  console.log('[Background Preloader] API_KEY prefix:', API_KEY?.substring(0, 10));
+
   const startTime = Date.now();
   const cacheKey = `expenses:${include}:date:${startDate},${endDate}:1:100`;
 
@@ -72,7 +77,7 @@ async function fetchMonthData(
 
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY,
+        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(60000), // 1 minuto por mês
