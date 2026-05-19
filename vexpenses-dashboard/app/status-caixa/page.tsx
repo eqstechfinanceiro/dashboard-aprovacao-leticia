@@ -23,7 +23,7 @@ import {
   Eye,
   BarChart3
 } from 'lucide-react';
-import { useStatusCaixa, useCostCenters, useTeamMembers } from '@/lib/hooks';
+import { useStatusCaixa, useCostCenters, useTeamMembers, useExpenses } from '@/lib/hooks';
 import { Report } from '@/lib/api';
 import {
   BarChart,
@@ -65,6 +65,12 @@ export default function StatusCaixa() {
 
   const { data: costCenters = [] } = useCostCenters();
   const { data: teamMembers = [] } = useTeamMembers();
+  
+  // Buscar expenses para calcular valores
+  const { data: expenses = [] } = useExpenses({
+    startDate: defaultStartDate,
+    endDate: defaultEndDate,
+  });
 
   // Filtrar relatórios
   const filteredReports = useMemo(() => {
@@ -140,10 +146,19 @@ export default function StatusCaixa() {
       return acc;
     }, {} as Record<string, number>);
 
-    // Calcular valor total por status (precisamos buscar as despesas de cada relatório)
+    // Calcular valor total por status usando os dados de expenses
+    // Criar um mapa de report_id -> valor total
+    const reportValueMap = expenses.reduce((acc, exp) => {
+      const reportId = exp.expense_id || exp.report_id;
+      if (reportId) {
+        acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
+      }
+      return acc;
+    }, {} as Record<number, number>);
+
     const valueByStatus = filteredReports.reduce((acc, r) => {
-      const totalValue = r.expenses?.data?.reduce((sum, exp) => sum + (exp.value || 0), 0) || 0;
-      acc[r.status] = (acc[r.status] || 0) + totalValue;
+      const reportValue = reportValueMap[r.id] || 0;
+      acc[r.status] = (acc[r.status] || 0) + reportValue;
       return acc;
     }, {} as Record<string, number>);
 
@@ -169,7 +184,7 @@ export default function StatusCaixa() {
       conversionRate: Math.round(conversionRate),
       total: filteredReports.length,
     };
-  }, [filteredReports]);
+  }, [filteredReports, expenses]);
 
   // Dados para gráfico de evolução temporal (movido para o nível superior do componente)
   const monthlyData = useMemo(() => {
