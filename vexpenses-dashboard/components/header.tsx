@@ -27,8 +27,8 @@ export function Header() {
             <User className="h-5 w-5 text-white" />
           </div>
           <div className="text-sm">
-            <p className="font-medium text-gray-900">Admin</p>
-            <p className="text-xs text-gray-500">Administrador</p>
+            <p className="font-medium text-gray-900">Letícia</p>
+            <p className="text-xs text-gray-500">Administradora</p>
           </div>
         </div>
       </div>

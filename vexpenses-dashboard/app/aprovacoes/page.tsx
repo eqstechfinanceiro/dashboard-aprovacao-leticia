@@ -20,7 +20,7 @@ import {
   Calendar,
   Building2
 } from 'lucide-react';
-import { usePendingReports, useReportDetails, useApproveReport } from '@/lib/hooks';
+import { useReports, useReportDetails, useApproveReport } from '@/lib/hooks';
 import { Report } from '@/lib/api';
 
 export default function AprovacoesPage() {
@@ -34,7 +34,7 @@ export default function AprovacoesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   
-  const { data: reports = [], isLoading, refetch } = usePendingReports();
+  const { data: reports = [], isLoading, refetch } = useReports();
   const { data: reportDetails } = useReportDetails(selectedReport?.id || 0);
   const { approveReport, rejectReport } = useApproveReport();
   
