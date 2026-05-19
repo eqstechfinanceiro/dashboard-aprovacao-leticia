@@ -45,7 +45,7 @@ export const dynamic = 'force-dynamic';
 
 export default function StatusCaixa() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'ENVIADO' | 'APROVADO' | 'REPROVADO' | 'PAGO' | 'REABERTO'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'ENVIADO' | 'APROVADO' | 'REPROVADO' | 'REABERTO'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('month');
   const [costCenterFilter, setCostCenterFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('all');
@@ -196,15 +196,14 @@ export default function StatusCaixa() {
       const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
       
       if (!dataMap.has(monthKey)) {
-        dataMap.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Pago: 0, Reaberto: 0 });
+        dataMap.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Reaberto: 0 });
       }
-      
+
       const data = dataMap.get(monthKey);
       const statusKey = report.status === 'ABERTO' ? 'Aberto' :
                       report.status === 'ENVIADO' ? 'Enviado' :
                       report.status === 'APROVADO' ? 'Aprovado' :
-                      report.status === 'REPROVADO' ? 'Reprovado' :
-                      report.status === 'PAGO' ? 'Pago' : 'Reaberto';
+                      report.status === 'REPROVADO' ? 'Reprovado' : 'Reaberto';
       
       if (data && statusKey in data) {
         data[statusKey as keyof typeof data]++;
@@ -260,13 +259,6 @@ export default function StatusCaixa() {
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200">
             <AlertCircle className="h-3 w-3 mr-1" />
             Enviado
-          </Badge>
-        );
-      case 'PAGO':
-        return (
-          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200">
-            <DollarSign className="h-3 w-3 mr-1" />
-            Pago
           </Badge>
         );
       case 'REABERTO':
@@ -358,7 +350,6 @@ export default function StatusCaixa() {
                   <option value="ENVIADO">Enviado</option>
                   <option value="APROVADO">Aprovado</option>
                   <option value="REPROVADO">Reprovado</option>
-                  <option value="PAGO">Pago</option>
                   <option value="REABERTO">Reaberto</option>
                 </select>
               </div>
@@ -412,7 +403,7 @@ export default function StatusCaixa() {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-4">Total</p>
@@ -435,12 +426,6 @@ export default function StatusCaixa() {
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-4">Aprovados</p>
             <p className="text-4xl font-bold">{kpis.byStatus['APROVADO'] || 0}</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
-          <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
-            <p className="text-sm font-medium text-purple-100 uppercase tracking-wide mb-4">Pagos</p>
-            <p className="text-4xl font-bold">{kpis.byStatus['PAGO'] || 0}</p>
           </CardContent>
         </Card>
       </div>
@@ -510,7 +495,6 @@ export default function StatusCaixa() {
                           .replace('ENVIADO', 'Enviado')
                           .replace('APROVADO', 'Aprovado')
                           .replace('REPROVADO', 'Reprovado')
-                          .replace('PAGO', 'Pago')
                           .replace('REABERTO', 'Reaberto'),
                 count
               }))}>
@@ -539,7 +523,6 @@ export default function StatusCaixa() {
                           .replace('ENVIADO', 'Enviado')
                           .replace('APROVADO', 'Aprovado')
                           .replace('REPROVADO', 'Reprovado')
-                          .replace('PAGO', 'Pago')
                           .replace('REABERTO', 'Reaberto'),
                 valor: value
               }))}>
