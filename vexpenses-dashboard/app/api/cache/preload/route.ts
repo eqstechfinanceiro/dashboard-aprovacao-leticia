@@ -75,7 +75,7 @@ async function preloadData(keys: string[]) {
       let fetchUrl: string;
       let fetchOptions: RequestInit = {
         headers: {
-          'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+          'Authorization': API_KEY,
           'Accept': 'application/json',
         },
         signal: AbortSignal.timeout(300000), // 5 minutos

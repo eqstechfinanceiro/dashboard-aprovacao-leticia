@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/team-members?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+        'Authorization': API_KEY,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(120000), // 2 minutos de timeout

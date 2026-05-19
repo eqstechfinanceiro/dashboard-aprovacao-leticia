@@ -77,7 +77,7 @@ async function fetchMonthData(
 
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+        'Authorization': API_KEY,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(60000), // 1 minuto por mês

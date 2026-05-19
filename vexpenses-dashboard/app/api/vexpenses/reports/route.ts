@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/reports?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+        'Authorization': API_KEY,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos de timeout (reports é muito lento)
@@ -114,7 +114,7 @@ async function refreshCacheInBackground(cacheKey: string, include: string | null
     
     const response = await fetch(`${API_URL}/v2/reports?${params.toString()}`, {
       headers: {
-        'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+        'Authorization': API_KEY,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos

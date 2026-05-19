@@ -11,7 +11,7 @@ console.log('[API Client] API_KEY prefix:', API_KEY?.substring(0, 10));
 const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Authorization': API_KEY.startsWith('Bearer ') ? API_KEY : `Bearer ${API_KEY}`,
+    'Authorization': API_KEY,
     'Accept': 'application/json',
   },
 });

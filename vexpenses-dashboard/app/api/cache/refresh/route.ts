@@ -81,7 +81,7 @@ export async function POST(request: Request) {
     // Buscar dados da API
     const response = await fetch(url, {
       headers: {
-        'Authorization': apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
+        'Authorization': apiKey,
         'Accept': 'application/json',
       },
       signal: AbortSignal.timeout(300000), // 5 minutos de timeout
@@ -144,7 +144,7 @@ export async function GET() {
         
         const response = await fetch(endpoint.url, {
           headers: {
-            'Authorization': apiKey.startsWith('Bearer ') ? apiKey : `Bearer ${apiKey}`,
+            'Authorization': apiKey,
             'Accept': 'application/json',
           },
           signal: AbortSignal.timeout(120000),
