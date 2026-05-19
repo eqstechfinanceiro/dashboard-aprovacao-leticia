@@ -193,7 +193,7 @@ export function useTeamMembers() {
   return useQuery({
     queryKey: ['team-members'],
     queryFn: async () => {
-      const response = await fetch('/api/vexpenses/team-members?include=costs_center');
+      const response = await fetch('/api/vexpenses/team-members');
       if (!response.ok) throw new Error('Failed to fetch team members');
       const data = await response.json();
       return data.data as any[];
