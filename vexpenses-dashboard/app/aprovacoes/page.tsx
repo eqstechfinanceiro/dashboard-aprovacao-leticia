@@ -5,15 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  CheckCircle, 
-  XCircle, 
-  FileText, 
-  Clock, 
-  User, 
-  AlertCircle, 
-  Download, 
-  Eye, 
+import {
+  CheckCircle,
+  XCircle,
+  FileText,
+  Clock,
+  User,
+  AlertCircle,
+  Download,
+  Eye,
   Search,
   Filter,
   ChevronDown,
@@ -21,25 +21,7 @@ import {
   Building2
 } from 'lucide-react';
 import { usePendingReports, useReportDetails, useApproveReport } from '@/lib/hooks';
-
-interface Report {
-  id: number;
-  description: string;
-  status: string;
-  user: {
-    data: {
-      name: string;
-      email: string;
-    };
-  };
-  pdf_link: string;
-  excel_link: string;
-  created_at: string;
-  approval_date: string | null;
-  approval_stage_id: number | null;
-  observation: string | null;
-  justification: string | null;
-}
+import { Report } from '@/lib/api';
 
 export default function AprovacoesPage() {
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);

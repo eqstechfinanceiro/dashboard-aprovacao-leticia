@@ -138,7 +138,7 @@ export async function startFractionalPreload(
       task.progress = Math.round((i / months.length) * 100);
       activeTasks.set(taskIdFinal, { ...task });
 
-      console.log(`[Background Preloader] ${taskIdFinal}: ${month.currentStep}`);
+      console.log(`[Background Preloader] ${taskIdFinal}: ${task.currentStep}`);
 
       try {
         const result = await fetchMonthData(month.start, month.end);

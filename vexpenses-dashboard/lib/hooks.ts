@@ -1,39 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-// Types
-interface CostCenter {
-  id: number;
-  name: string;
-  company_group_id: number;
-}
-
-interface Expense {
-  id: number;
-  value: number;
-  date: string;
-  expense_type: {
-    data: {
-      description: string;
-    };
-  };
-  costs_center: {
-    data: {
-      name: string;
-    };
-  };
-}
-
-interface Report {
-  id: number;
-  status: string;
-  description: string;
-  user: {
-    data: {
-      name: string;
-    };
-  };
-  created_at: string;
-}
+import { Report, CostCenter, Expense } from './api';
 
 // Hook para buscar centros de custo
 export function useCostCenters() {
