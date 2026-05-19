@@ -20,7 +20,7 @@ import {
   Eye,
   BarChart3
 } from 'lucide-react';
-import { usePaidReports, useCashFlow, useTeamMembers, useCostCenters } from '@/lib/hooks';
+import { useApprovedReports, useCashFlow, useTeamMembers, useCostCenters } from '@/lib/hooks';
 import { Report } from '@/lib/api';
 import {
   BarChart,
@@ -51,7 +51,7 @@ export default function GestaoCaixa() {
   const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const { data: paidReports = [], isLoading: loadingPaid } = usePaidReports({
+  const { data: approvedReports = [], isLoading: loadingApproved } = useApprovedReports({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
@@ -64,9 +64,9 @@ export default function GestaoCaixa() {
   const { data: teamMembers = [] } = useTeamMembers();
   const { data: costCenters = [] } = useCostCenters();
 
-  // Filtrar relatórios pagos
+  // Filtrar relatórios aprovados
   const filteredReports = useMemo(() => {
-    let filtered = [...paidReports];
+    let filtered = [...approvedReports];
 
     // Filtro de busca
     if (searchTerm) {
@@ -108,7 +108,7 @@ export default function GestaoCaixa() {
     }
 
     return filtered;
-  }, [paidReports, searchTerm, userFilter, dateFilter]);
+  }, [approvedReports, searchTerm, userFilter, dateFilter]);
 
   // Filtrar dados de fluxo de caixa
   const filteredCashFlow = useMemo(() => {
@@ -222,7 +222,7 @@ export default function GestaoCaixa() {
     setCurrentPage(1);
   };
 
-  const loading = loadingPaid || loadingCashFlow;
+  const loading = loadingApproved || loadingCashFlow;
 
   if (loading) {
     return (
@@ -329,14 +329,14 @@ export default function GestaoCaixa() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
-            <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-4">Valor Total Pago</p>
+            <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-4">Valor Total Aprovado</p>
             <p className="text-4xl font-bold">{formatCurrency(kpis.totalPaidValue)}</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
-            <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-4">Relatórios Pagos</p>
+            <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-4">Relatórios Aprovados</p>
             <p className="text-4xl font-bold">{kpis.totalPaidReports}</p>
           </CardContent>
         </Card>
@@ -455,10 +455,10 @@ export default function GestaoCaixa() {
         </CardContent>
       </Card>
 
-      {/* Tabela de Relatórios Pagos */}
+      {/* Tabela de Relatórios Aprovados */}
       <Card>
         <CardHeader>
-          <CardTitle>Relatórios Pagos</CardTitle>
+          <CardTitle>Relatórios Aprovados</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -498,7 +498,7 @@ export default function GestaoCaixa() {
                 {paginatedReports.length === 0 && (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-gray-500">
-                      Nenhum relatório pago encontrado com os filtros atuais
+                      Nenhum relatório aprovado encontrado com os filtros atuais
                     </td>
                   </tr>
                 )}

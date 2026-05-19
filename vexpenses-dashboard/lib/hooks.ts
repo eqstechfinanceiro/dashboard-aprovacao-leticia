@@ -203,8 +203,8 @@ export function useTeamMembers() {
   });
 }
 
-// Hook para buscar relatórios pagos (status PAGO)
-export function usePaidReports(params?: {
+// Hook para buscar relatórios aprovados (status APROVADO) - prontos para pagamento
+export function useApprovedReports(params?: {
   startDate?: string;
   endDate?: string;
 }) {
@@ -217,14 +217,14 @@ export function usePaidReports(params?: {
   }
   
   return useQuery({
-    queryKey: ['paid-reports', params],
+    queryKey: ['approved-reports', params],
     queryFn: async () => {
       const response = await fetch(`/api/vexpenses/reports?${searchParams.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch paid reports');
+      if (!response.ok) throw new Error('Failed to fetch approved reports');
       const data = await response.json();
-      // Filtrar apenas relatórios pagos
-      const paidReports = (data.data as Report[]).filter(r => r.status === 'PAGO');
-      return paidReports;
+      // Filtrar apenas relatórios aprovados (prontos para pagamento)
+      const approvedReports = (data.data as Report[]).filter(r => r.status === 'APROVADO');
+      return approvedReports;
     },
     staleTime: 10 * 60 * 1000, // 10 minutos
     gcTime: 2 * 60 * 60 * 1000, // 2 horas
