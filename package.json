@@ -1,8 +1,0 @@
-{
-  "name": "dashboard-aprovacao-leticia",
-  "version": "1.0.0",
-  "description": "Dashboard de Automações com Backend Python",
-  "scripts": {
-    "dev": "python api/local_server.py"
-  }
-}
