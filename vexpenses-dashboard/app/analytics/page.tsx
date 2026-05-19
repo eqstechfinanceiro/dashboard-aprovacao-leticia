@@ -128,7 +128,7 @@ export default function Analytics() {
 
     // Calcular valor total por status usando os dados de expenses
     const reportValueMap = expenses.reduce((acc, exp) => {
-      const reportId = exp.expense_id || exp.report_id;
+      const reportId = exp.report_id;
       if (reportId) {
         acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
       }
