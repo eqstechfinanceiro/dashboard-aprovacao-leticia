@@ -1,2 +1,2 @@
-# This file is intentionally empty to prevent Railway Railpack from detecting Python
-# The project is a Next.js application, not a Python application
+flask
+gunicorn

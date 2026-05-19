@@ -6,7 +6,7 @@
     "watchPatterns": ["vexpenses-dashboard/**"]
   },
   "deploy": {
-    "startCommand": "cd vexpenses-dashboard && npm run start",
+    "startCommand": "gunicorn api.local_server:app",
     "healthcheckPath": "/",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
