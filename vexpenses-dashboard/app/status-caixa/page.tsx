@@ -20,10 +20,26 @@ import {
   XCircle,
   AlertCircle,
   DollarSign,
-  Eye
+  Eye,
+  BarChart3
 } from 'lucide-react';
 import { useStatusCaixa, useCostCenters, useTeamMembers } from '@/lib/hooks';
 import { Report } from '@/lib/api';
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
+} from 'recharts';
 
 export const dynamic = 'force-dynamic';
 
@@ -431,6 +447,120 @@ export default function StatusCaixa() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Distribuição por Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Distribuição por Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={Object.entries(kpis.byStatus).map(([status, count]) => ({
+                status: status.replace('ABERTO', 'Aberto')
+                          .replace('ENVIADO', 'Enviado')
+                          .replace('APROVADO', 'Aprovado')
+                          .replace('REPROVADO', 'Reprovado')
+                          .replace('PAGO', 'Pago')
+                          .replace('REABERTO', 'Reaberto'),
+                count
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#3b82f6" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* Gráfico de Valor por Status */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Valor por Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={Object.entries(kpis.valueByStatus).map(([status, value]) => ({
+                status: status.replace('ABERTO', 'Aberto')
+                          .replace('ENVIADO', 'Enviado')
+                          .replace('APROVADO', 'Aprovado')
+                          .replace('REPROVADO', 'Reprovado')
+                          .replace('PAGO', 'Pago')
+                          .replace('REABERTO', 'Reaberto'),
+                valor: value
+              }))}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="status" />
+                <YAxis />
+                <Tooltip formatter={(value) => formatCurrency(value as number)} />
+                <Bar dataKey="valor" fill="#10b981" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Gráfico de Evolução Temporal */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Evolução Temporal por Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={useMemo(() => {
+              // Agrupar relatórios por mês e status
+              const monthlyData = new Map();
+              
+              filteredReports.forEach(report => {
+                const date = new Date(report.created_at);
+                const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+                
+                if (!monthlyData.has(monthKey)) {
+                  monthlyData.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Pago: 0, Reaberto: 0 });
+                }
+                
+                const data = monthlyData.get(monthKey);
+                const statusKey = report.status === 'ABERTO' ? 'Aberto' :
+                                report.status === 'ENVIADO' ? 'Enviado' :
+                                report.status === 'APROVADO' ? 'Aprovado' :
+                                report.status === 'REPROVADO' ? 'Reprovado' :
+                                report.status === 'PAGO' ? 'Pago' : 'Reaberto';
+                
+                if (data && statusKey in data) {
+                  data[statusKey as keyof typeof data]++;
+                }
+              });
+              
+              return Array.from(monthlyData.values()).sort((a, b) => 
+                new Date(a.month).getTime() - new Date(b.month).getTime()
+              );
+            }, [filteredReports])}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="Aberto" stroke="#eab308" strokeWidth={2} />
+              <Line type="monotone" dataKey="Enviado" stroke="#3b82f6" strokeWidth={2} />
+              <Line type="monotone" dataKey="Aprovado" stroke="#10b981" strokeWidth={2} />
+              <Line type="monotone" dataKey="Reprovado" stroke="#ef4444" strokeWidth={2} />
+              <Line type="monotone" dataKey="Pago" stroke="#8b5cf6" strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       {/* Tabela Detalhada */}
       <Card>
