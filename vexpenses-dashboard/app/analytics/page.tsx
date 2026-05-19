@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 export default function Analytics() {
   const [loading, setLoading] = useState(true);
 
