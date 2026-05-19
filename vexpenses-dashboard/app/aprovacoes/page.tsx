@@ -71,7 +71,6 @@ export default function AprovacoesPage() {
       filtered = filtered.filter(r => 
         r.description?.toLowerCase().includes(term) ||
         r.user?.data?.name?.toLowerCase().includes(term) ||
-        r.observation?.toLowerCase().includes(term) ||
         r.justification?.toLowerCase().includes(term)
       );
     }
