@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
 
+// Force dynamic to prevent static generation during build
+export const dynamic = 'force-dynamic';
+
 // Endpoint para verificar o status do cache
 export async function GET() {
   try {

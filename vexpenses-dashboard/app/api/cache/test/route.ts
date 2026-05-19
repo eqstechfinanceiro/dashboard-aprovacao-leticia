@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { sql, createCacheTable } from '@/lib/neon';
 
+// Force dynamic to prevent static generation during build
+export const dynamic = 'force-dynamic';
+
 // Endpoint para testar a conexão com o Neon
 export async function GET() {
   try {

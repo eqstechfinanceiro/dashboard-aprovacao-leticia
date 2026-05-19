@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["nodejs", "python3"]
+nixPkgs = ["nodejs"]
 
 [phases.build]
 cmds = ["cd vexpenses-dashboard && npm install && npm run build"]

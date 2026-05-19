@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { preloadPeriodData, preloadStaticData } from '@/lib/cache-preloader';
 
+// Force dynamic to prevent static generation during build
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();

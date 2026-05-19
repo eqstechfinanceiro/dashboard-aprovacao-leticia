@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { startFractionalPreload, getTaskStatus, getAllActiveTasks } from '@/lib/background-preloader';
 
+// Force dynamic to prevent static generation during build
+export const dynamic = 'force-dynamic';
+
 // GET - Obter status de tasks ou status específico
 export async function GET(request: NextRequest) {
   try {
