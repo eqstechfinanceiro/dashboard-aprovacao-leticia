@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql, isDatabaseAvailable } from '@/lib/neon';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Se o banco não estiver disponível, retornar erro informativo
+  if (!isDatabaseAvailable || !sql) {
+    return NextResponse.json(
+      { 
+        error: 'Database not available',
+        message: 'Cache debug is not available during build time or when database is not configured',
+        isDatabaseAvailable: isDatabaseAvailable
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const key = searchParams.get('key');

@@ -1,5 +1,5 @@
 // Sistema de pré-carregamento em background com progresso visível
-import { sql } from './neon';
+import { sql, isDatabaseAvailable } from './neon';
 
 interface PreloadTask {
   id: string;
@@ -221,6 +221,12 @@ async function savePreloadStats(task: PreloadTask): Promise<void> {
     const totalRecords = successful.reduce((sum, r) => sum + r.recordCount, 0);
     const totalDuration = successful.reduce((sum, r) => sum + r.duration, 0);
     const avgDuration = successful.length > 0 ? totalDuration / successful.length : 0;
+
+    // Se o banco não estiver disponível, não salvar estatísticas
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Background Preloader] Banco não disponível, ignorando salvamento de estatísticas');
+      return;
+    }
 
     await sql`
       INSERT INTO preload_stats (

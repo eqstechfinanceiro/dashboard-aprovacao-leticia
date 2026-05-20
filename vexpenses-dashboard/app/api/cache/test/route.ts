@@ -1,11 +1,24 @@
 import { NextResponse } from 'next/server';
-import { sql, createCacheTable } from '@/lib/neon';
+import { sql, createCacheTable, isDatabaseAvailable } from '@/lib/neon';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
 // Endpoint para testar a conexão com o Neon
 export async function GET() {
+  // Se o banco não estiver disponível, retornar erro informativo
+  if (!isDatabaseAvailable || !sql) {
+    return NextResponse.json(
+      { 
+        success: false,
+        error: 'Database not available',
+        message: 'Neon connection is not available during build time or when database is not configured',
+        isDatabaseAvailable: isDatabaseAvailable
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     console.log('[Neon Test] Iniciando teste de conexão...');
 
