@@ -443,30 +443,30 @@ export default function Analytics() {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
         <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
-          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center pt-10">
             <Clock className="h-8 w-8 mb-3 text-blue-100" />
             <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-2">Tempo Médio de Aprovação</p>
             <p className="text-3xl font-bold">{kpis.avgApprovalTime} dias</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
-          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center pt-10">
             <CheckCircle className="h-8 w-8 mb-3 text-green-100" />
             <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-2">Taxa de Aprovação</p>
             <p className="text-3xl font-bold">{kpis.approvalRate}%</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
-          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center pt-10">
             <DollarSign className="h-8 w-8 mb-3 text-purple-100" />
             <p className="text-sm font-medium text-purple-100 uppercase tracking-wide mb-2">Valor Total Aprovado</p>
             <p className="text-2xl font-bold">{formatCurrency(kpis.totalApprovedValue)}</p>
           </CardContent>
         </Card>
         <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
-          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center pt-10">
             <XCircle className="h-8 w-8 mb-3 text-red-100" />
             <p className="text-sm font-medium text-red-100 uppercase tracking-wide mb-2">Taxa de Reprovação</p>
             <p className="text-3xl font-bold">{kpis.rejectionRate}%</p>
@@ -481,7 +481,7 @@ export default function Analytics() {
             <CardTitle className="text-sm font-medium text-gray-600">Total de Relatórios</CardTitle>
             <div className="p-2 bg-blue-100 rounded-lg"><BarChart3 className="h-4 w-4 text-blue-600" /></div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex items-center justify-center">
             <div className="text-2xl font-bold text-gray-900">{kpis.totalReports}</div>
           </CardContent>
         </Card>
@@ -490,7 +490,7 @@ export default function Analytics() {
             <CardTitle className="text-sm font-medium text-gray-600">Relatórios Aprovados</CardTitle>
             <div className="p-2 bg-green-100 rounded-lg"><CheckCircle className="h-4 w-4 text-green-600" /></div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex items-center justify-center">
             <div className="text-2xl font-bold text-gray-900">{kpis.approvedCount}</div>
           </CardContent>
         </Card>
@@ -499,7 +499,7 @@ export default function Analytics() {
             <CardTitle className="text-sm font-medium text-gray-600">Relatórios Reprovados</CardTitle>
             <div className="p-2 bg-red-100 rounded-lg"><XCircle className="h-4 w-4 text-red-600" /></div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex items-center justify-center">
             <div className="text-2xl font-bold text-gray-900">{kpis.rejectedCount}</div>
           </CardContent>
         </Card>
