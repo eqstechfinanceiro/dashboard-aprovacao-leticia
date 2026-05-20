@@ -4,6 +4,9 @@ import { apiCache } from '@/lib/neon-cache';
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
+// Verificar se estamos em ambiente de build
+const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
@@ -14,6 +17,11 @@ console.log('[Expenses API] API_KEY prefix:', API_KEY?.substring(0, 10));
 
 // POST endpoint para salvar direto no cache (usado pelo background preloader)
 export async function POST(request: NextRequest) {
+  // Se estivermos em build time, não fazer nada
+  if (isBuildTime) {
+    return NextResponse.json({ success: true, buildTime: true, message: 'Build time - skipping cache operations' });
+  }
+
   try {
     const body = await request.json();
     const { cacheKey, data, skipFetch } = body;

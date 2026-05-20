@@ -1,7 +1,7 @@
 // Sistema de cache persistente usando banco de dados Neon
 // Mantém a mesma interface do SimpleCache para fácil substituição
 
-import { sql, ensureCacheTable } from './neon';
+import { sql, ensureCacheTable, isDatabaseAvailable } from './neon';
 
 interface CacheEntry<T> {
   data: T;
@@ -85,6 +85,12 @@ class NeonCache {
   }
 
   async set<T>(key: string, data: T, ttl?: number, dataType?: string): Promise<void> {
+    // Se o banco não estiver disponível (build time), não fazer nada
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, ignorando set operation');
+      return;
+    }
+
     try {
       // Determinar tipo de dado automaticamente se não fornecido
       const type = dataType || this.getDataType(key);
@@ -133,6 +139,12 @@ class NeonCache {
   }
 
   async get<T>(key: string): Promise<T | null> {
+    // Se o banco não estiver disponível (build time), retornar null
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando null para get');
+      return null;
+    }
+
     try {
       // Primeiro atualizar last_accessed_at
       await sql`
@@ -229,6 +241,12 @@ class NeonCache {
   }
 
   async has(key: string): Promise<boolean> {
+    // Se o banco não estiver disponível (build time), retornar false
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando false para has');
+      return false;
+    }
+
     try {
       const result = await sql`
         SELECT 1 
@@ -243,6 +261,12 @@ class NeonCache {
   }
 
   async clear(): Promise<void> {
+    // Se o banco não estiver disponível (build time), não fazer nada
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, ignorando clear');
+      return;
+    }
+
     try {
       await sql`DELETE FROM api_cache`;
       console.log('[Neon Cache] Cache limpo');
@@ -253,6 +277,12 @@ class NeonCache {
   }
 
   async delete(key: string): Promise<boolean> {
+    // Se o banco não estiver disponível (build time), retornar false
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando false para delete');
+      return false;
+    }
+
     try {
       const result = await sql`
         DELETE FROM api_cache 
@@ -268,6 +298,12 @@ class NeonCache {
 
   // Limpar entradas expiradas
   async cleanup(): Promise<void> {
+    // Se o banco não estiver disponível (build time), não fazer nada
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, ignorando cleanup');
+      return;
+    }
+
     try {
       const result = await sql`
         DELETE FROM api_cache 
@@ -283,6 +319,12 @@ class NeonCache {
 
   // Obter estatísticas do cache
   async getStats(): Promise<{ total: number; expired: number; byType: Record<string, number> }> {
+    // Se o banco não estiver disponível (build time), retornar estatísticas vazias
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando estatísticas vazias');
+      return { total: 0, expired: 0, byType: {} };
+    }
+
     try {
       const result = await sql`
         SELECT 

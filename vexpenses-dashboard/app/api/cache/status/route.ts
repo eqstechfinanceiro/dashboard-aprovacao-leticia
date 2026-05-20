@@ -4,8 +4,22 @@ import { apiCache } from '@/lib/neon-cache';
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
+// Verificar se estamos em ambiente de build
+const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
+
 // Endpoint para verificar o status do cache
 export async function GET() {
+  // Se estivermos em build time, retornar status simplificado
+  if (isBuildTime) {
+    return NextResponse.json({
+      success: true,
+      stats: { total: 0, expired: 0, byType: {} },
+      timestamp: new Date().toISOString(),
+      buildTime: true,
+      message: 'Cache não disponível durante build'
+    });
+  }
+
   try {
     const stats = await apiCache.getStats();
 

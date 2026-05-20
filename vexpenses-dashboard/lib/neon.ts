@@ -3,11 +3,13 @@ import { neon } from '@neondatabase/serverless';
 // Configuração do banco de dados Neon
 const NEON_DATABASE_URL = process.env.NEON_DATABASE_URL;
 
-if (!NEON_DATABASE_URL) {
-  throw new Error('NEON_DATABASE_URL não está definida nas variáveis de ambiente');
-}
+// Verificar se estamos em ambiente de build (Next.js build time)
+const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
 
-export const sql = neon(NEON_DATABASE_URL);
+export const sql = NEON_DATABASE_URL ? neon(NEON_DATABASE_URL) : null;
+
+// Flag para indicar se o banco está disponível
+export const isDatabaseAvailable = !!NEON_DATABASE_URL && !isBuildTime;
 
 // Flag para evitar múltiplas tentativas de criação da tabela
 let tableCreationAttempted = false;

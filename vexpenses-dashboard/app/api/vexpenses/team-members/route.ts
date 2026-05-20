@@ -4,6 +4,9 @@ import { apiCache } from '@/lib/neon-cache';
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
+// Verificar se estamos em ambiente de build
+const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
@@ -13,6 +16,19 @@ console.log('[Team Members API] API_KEY length:', API_KEY?.length);
 console.log('[Team Members API] API_KEY prefix:', API_KEY?.substring(0, 10));
 
 export async function GET(request: NextRequest) {
+  // Se estivermos em build time, retornar dados vazios para não falhar
+  if (isBuildTime) {
+    return NextResponse.json({
+      success: true,
+      data: [],
+      request: '',
+      method: 'GET',
+      code: 200,
+      message: 'Build time - no data available',
+      buildTime: true
+    });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const include = searchParams.get('include');
