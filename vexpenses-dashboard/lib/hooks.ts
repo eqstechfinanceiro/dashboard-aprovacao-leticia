@@ -25,7 +25,7 @@ export function useExpenses(params: {
   endMonth?: string;
 }) {
   const searchParams = new URLSearchParams();
-  searchParams.append('include', 'expense_type,costs_center');
+  searchParams.append('include', 'expense_type,costs_center,payment_method');
   searchParams.append('search', `date:${params.startDate},${params.endDate}`);
   searchParams.append('searchFields', 'date:between');
   
@@ -237,7 +237,7 @@ export function useCashFlow(params?: {
   endDate?: string;
 }) {
   const searchParams = new URLSearchParams();
-  searchParams.append('include', 'expense_type,costs_center');
+  searchParams.append('include', 'expense_type,costs_center,payment_method');
   
   if (params?.startDate && params?.endDate) {
     searchParams.append('search', `date:${params.startDate},${params.endDate}`);

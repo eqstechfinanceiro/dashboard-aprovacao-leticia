@@ -17,7 +17,7 @@ import {
   DollarSign,
   AlertCircle
 } from 'lucide-react';
-import { useExpenses, useCostCenters } from '@/lib/hooks';
+import { useExpenses, useCostCenters, useTeamMembers } from '@/lib/hooks';
 
 export default function DespesasPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,19 +26,58 @@ export default function DespesasPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25;
+  const [cardFilter, setCardFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [regionalFilter, setRegionalFilter] = useState('all');
   
   // Data padrão: último mês
   const today = new Date();
   const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
   const defaultEndDate = today.toISOString().split('T')[0];
   
-  const { data: expenses = [], isLoading } = useExpenses({
+  const { data: expenses = [], isLoading, error: expensesError } = useExpenses({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
-  
+
   const { data: costCenters = [] } = useCostCenters();
-  
+  const { data: teamMembers = [] } = useTeamMembers();
+
+  const hasError = !!expensesError; // Only expenses is critical
+  const combinedError = expensesError;
+
+  // Extrair filtros disponíveis
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    expenses.forEach(exp => {
+      if (exp.payment_method?.data?.description) {
+        cards.add(exp.payment_method.data.description);
+      }
+    });
+    return Array.from(cards).sort();
+  }, [expenses]);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    expenses.forEach(exp => {
+      const year = new Date(exp.date).getFullYear();
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [expenses]);
+
+  const availableRegionals = useMemo(() => {
+    const regionals = new Set<string>();
+    costCenters.forEach(cc => {
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = cc.name.match(/\b([A-Z]{2})\b$/);
+      if (match) {
+        regionals.add(match[1]);
+      }
+    });
+    return Array.from(regionals).sort();
+  }, [costCenters]);
+
   // Filtrar despesas
   const filteredExpenses = useMemo(() => {
     let filtered = [...expenses];
@@ -57,7 +96,30 @@ export default function DespesasPage() {
     if (costCenterFilter !== 'all') {
       filtered = filtered.filter(e => e.costs_center?.data?.name === costCenterFilter);
     }
-    
+
+    // Filtro de cartão
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(e => e.payment_method?.data?.description === cardFilter);
+    }
+
+    // Filtro de ano
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(e => {
+        const year = new Date(e.date).getFullYear();
+        return year === parseInt(yearFilter);
+      });
+    }
+
+    // Filtro de regional (baseado no centro de custo da despesa)
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(e => {
+        const costCenterName = e.costs_center?.data?.name;
+        if (!costCenterName) return false;
+        // Verificar se o nome do centro de custo contém a sigla da regional
+        return costCenterName.includes(regionalFilter);
+      });
+    }
+
     // Filtro de data
     if (dateFilter !== 'all') {
       const now = new Date();
@@ -84,7 +146,7 @@ export default function DespesasPage() {
     }
     
     return filtered;
-  }, [expenses, searchTerm, costCenterFilter, dateFilter]);
+  }, [expenses, searchTerm, costCenterFilter, dateFilter, cardFilter, yearFilter, regionalFilter]);
   
   // Paginação
   const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
@@ -141,6 +203,9 @@ export default function DespesasPage() {
     setSearchTerm('');
     setCostCenterFilter('all');
     setDateFilter('month');
+    setCardFilter('all');
+    setYearFilter('all');
+    setRegionalFilter('all');
     setCurrentPage(1);
   };
 
@@ -279,7 +344,7 @@ export default function DespesasPage() {
                   className="w-full"
                 />
               </div>
-              
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
@@ -296,7 +361,7 @@ export default function DespesasPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -313,7 +378,60 @@ export default function DespesasPage() {
                   <option value="month">Último mês</option>
                 </select>
               </div>
-              
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Cartão
+                </label>
+                <select
+                  value={cardFilter}
+                  onChange={(e) => setCardFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <option value="all">Todos</option>
+                  {availableCards.length > 0 ? availableCards.map(card => (
+                    <option key={card} value={card}>{card}</option>
+                  )) : (
+                    <option value="" disabled>Nenhum cartão disponível</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Ano
+                </label>
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todos</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Regional
+                </label>
+                <select
+                  value={regionalFilter}
+                  onChange={(e) => setRegionalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todas</option>
+                  {availableRegionals.map(regional => (
+                    <option key={regional} value={regional}>{regional}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700">Ações</label>
                 <Button
@@ -346,6 +464,13 @@ export default function DespesasPage() {
             <div className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p className="mt-4 text-gray-600 font-medium">Carregando despesas...</p>
+            </div>
+          ) : hasError ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Erro ao carregar dados</h2>
+              <p className="text-gray-600 mb-4">{combinedError instanceof Error ? combinedError.message : 'Tente novamente mais tarde'}</p>
+              <Button onClick={() => window.location.reload()}>Recarregar página</Button>
             </div>
           ) : filteredExpenses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">

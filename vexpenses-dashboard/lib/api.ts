@@ -425,7 +425,10 @@ export interface ReportApproval {
 // Payment Methods
 export interface PaymentMethod {
   id: number;
-  name: string;
+  name?: string;
+  description?: string;
+  reimbursable?: boolean;
+  affects_advance?: boolean;
 }
 
 // Funções da API

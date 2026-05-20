@@ -21,7 +21,8 @@ import {
   AlertCircle,
   DollarSign,
   Eye,
-  BarChart3
+  BarChart3,
+  Users
 } from 'lucide-react';
 import { useStatusCaixa, useCostCenters, useTeamMembers, useExpenses } from '@/lib/hooks';
 import { Report } from '@/lib/api';
@@ -45,20 +46,23 @@ export const dynamic = 'force-dynamic';
 
 export default function StatusCaixa() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'ENVIADO' | 'APROVADO' | 'REPROVADO' | 'REABERTO'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'ENVIADO' | 'APROVADO' | 'REPROVADO' | 'REABERTO' | 'CONFERIDO'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('month');
   const [costCenterFilter, setCostCenterFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [cardFilter, setCardFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [regionalFilter, setRegionalFilter] = useState('all');
 
   // Data padrão: último mês
   const today = new Date();
   const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const { data: reports = [], isLoading } = useStatusCaixa({
+  const { data: reports = [], isLoading, error: reportsError } = useStatusCaixa({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
@@ -71,6 +75,41 @@ export default function StatusCaixa() {
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
+
+  const hasError = !!reportsError; // Only block on critical data error
+  const combinedError = reportsError;
+
+  // Extrair filtros disponíveis
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    expenses.forEach(exp => {
+      if (exp.payment_method?.data?.description) {
+        cards.add(exp.payment_method.data.description);
+      }
+    });
+    return Array.from(cards).sort();
+  }, [expenses]);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    reports.forEach(report => {
+      const year = new Date(report.created_at).getFullYear();
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [reports]);
+
+  const availableRegionals = useMemo(() => {
+    const regionals = new Set<string>();
+    costCenters.forEach(cc => {
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = cc.name.match(/\b([A-Z]{2})\b$/);
+      if (match) {
+        regionals.add(match[1]);
+      }
+    });
+    return Array.from(regionals).sort();
+  }, [costCenters]);
 
   // Filtrar relatórios
   const filteredReports = useMemo(() => {
@@ -104,6 +143,32 @@ export default function StatusCaixa() {
       filtered = filtered.filter(r => r.user_id === parseInt(userFilter));
     }
 
+    // Filtro de cartão (baseado nas despesas do relatório)
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const reportExpenses = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+        return reportExpenses.some(e => e.payment_method?.data?.description === cardFilter);
+      });
+    }
+
+    // Filtro de ano
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const year = new Date(r.created_at).getFullYear();
+        return year === parseInt(yearFilter);
+      });
+    }
+
+    // Filtro de regional (baseado no centro de custo do usuário)
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+        if (!userCostCenter) return false;
+        // Verificar se o nome do centro de custo contém a sigla da regional
+        return userCostCenter.includes(regionalFilter);
+      });
+    }
+
     // Filtro de data
     if (dateFilter !== 'all') {
       const now = new Date();
@@ -130,7 +195,7 @@ export default function StatusCaixa() {
     }
 
     return filtered;
-  }, [reports, statusFilter, searchTerm, costCenterFilter, userFilter, dateFilter, teamMembers]);
+  }, [reports, statusFilter, searchTerm, costCenterFilter, userFilter, dateFilter, teamMembers, expenses, cardFilter, yearFilter, regionalFilter]);
 
   // Paginação
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
@@ -197,24 +262,82 @@ export default function StatusCaixa() {
       const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
       
       if (!dataMap.has(monthKey)) {
-        dataMap.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Reaberto: 0 });
+        dataMap.set(monthKey, { month: monthKey, Aberto: 0, Enviado: 0, Aprovado: 0, Reprovado: 0, Reaberto: 0, Conferido: 0 });
       }
 
       const data = dataMap.get(monthKey);
       const statusKey = report.status === 'ABERTO' ? 'Aberto' :
                       report.status === 'ENVIADO' ? 'Enviado' :
                       report.status === 'APROVADO' ? 'Aprovado' :
-                      report.status === 'REPROVADO' ? 'Reprovado' : 'Reaberto';
+                      report.status === 'REPROVADO' ? 'Reprovado' :
+                      report.status === 'REABERTO' ? 'Reaberto' : 'Conferido';
       
       if (data && statusKey in data) {
         data[statusKey as keyof typeof data]++;
       }
     });
     
-    return Array.from(dataMap.values()).sort((a, b) => 
+    return Array.from(dataMap.values()).sort((a, b) =>
       new Date(a.month).getTime() - new Date(b.month).getTime()
     );
   }, [filteredReports]);
+
+  // Rankings por regional
+  const regionalRankings = useMemo(() => {
+    const regionalStats = filteredReports.reduce((acc, r) => {
+      const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+      if (!userCostCenter) return acc;
+
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = userCostCenter.match(/\b([A-Z]{2})\b$/);
+      const regional = match ? match[1] : 'Outros';
+
+      if (!acc[regional]) {
+        acc[regional] = { name: regional, count: 0, value: 0 };
+      }
+
+      acc[regional].count++;
+
+      // Calcular valor do relatório
+      const reportExpenses = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+      const reportValue = reportExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
+      acc[regional].value += reportValue;
+
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number }>);
+
+    return Object.values(regionalStats)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  }, [filteredReports, expenses, teamMembers]);
+
+  // Tabela detalhada de colaboradores
+  const collaboratorTable = useMemo(() => {
+    const collaboratorStats = filteredReports.reduce((acc, r) => {
+      const userName = r.user?.data?.name || 'Desconhecido';
+      const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = userCostCenter?.match(/\b([A-Z]{2})\b$/);
+      const regional = match ? match[1] : 'Outros';
+
+      if (!acc[userName]) {
+        acc[userName] = { name: userName, count: 0, value: 0, regional };
+      }
+
+      acc[userName].count++;
+
+      // Calcular valor do relatório
+      const reportExpenses = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+      const reportValue = reportExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
+      acc[userName].value += reportValue;
+
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number; regional: string }>);
+
+    return Object.values(collaboratorStats)
+      .sort((a, b) => b.value - a.value);
+  }, [filteredReports, expenses, teamMembers]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -269,6 +392,13 @@ export default function StatusCaixa() {
             Reaberto
           </Badge>
         );
+      case 'CONFERIDO':
+        return (
+          <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200 border-purple-200">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Conferido
+          </Badge>
+        );
       default:
         return (
           <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-200 border-gray-200">
@@ -284,6 +414,9 @@ export default function StatusCaixa() {
     setDateFilter('month');
     setCostCenterFilter('all');
     setUserFilter('all');
+    setCardFilter('all');
+    setYearFilter('all');
+    setRegionalFilter('all');
     setCurrentPage(1);
   };
 
@@ -293,6 +426,19 @@ export default function StatusCaixa() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando status de caixa...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Erro ao carregar dados</h2>
+          <p className="text-gray-600 mb-4">{combinedError instanceof Error ? combinedError.message : 'Tente novamente mais tarde'}</p>
+          <Button onClick={() => window.location.reload()}>Recarregar página</Button>
         </div>
       </div>
     );
@@ -352,6 +498,7 @@ export default function StatusCaixa() {
                   <option value="APROVADO">Aprovado</option>
                   <option value="REPROVADO">Reprovado</option>
                   <option value="REABERTO">Reaberto</option>
+                  <option value="CONFERIDO">Conferido</option>
                 </select>
               </div>
               <div>
@@ -390,6 +537,47 @@ export default function StatusCaixa() {
                   <option value="all">Todos</option>
                   {teamMembers.map(member => (
                     <option key={member.id} value={member.id}>{member.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Cartão</label>
+                <select
+                  value={cardFilter}
+                  onChange={(e) => setCardFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <option value="all">Todos</option>
+                  {availableCards.length > 0 ? availableCards.map(card => (
+                    <option key={card} value={card}>{card}</option>
+                  )) : (
+                    <option value="" disabled>Nenhum cartão disponível</option>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Ano</label>
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todos</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Regional</label>
+                <select
+                  value={regionalFilter}
+                  onChange={(e) => setRegionalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todas</option>
+                  {availableRegionals.map(regional => (
+                    <option key={regional} value={regional}>{regional}</option>
                   ))}
                 </select>
               </div>
@@ -558,9 +746,80 @@ export default function StatusCaixa() {
               <Line type="monotone" dataKey="Enviado" stroke="#3b82f6" strokeWidth={2} />
               <Line type="monotone" dataKey="Aprovado" stroke="#10b981" strokeWidth={2} />
               <Line type="monotone" dataKey="Reprovado" stroke="#ef4444" strokeWidth={2} />
-              <Line type="monotone" dataKey="Pago" stroke="#8b5cf6" strokeWidth={2} />
+              <Line type="monotone" dataKey="Reaberto" stroke="#f97316" strokeWidth={2} />
+              <Line type="monotone" dataKey="Conferido" stroke="#8b5cf6" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Rankings por Regional */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Rankings por Regional (Top 10 por Valor)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {regionalRankings.length > 0 ? regionalRankings.map((regional, index) => (
+              <div key={regional.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                    {index + 1}
+                  </Badge>
+                  <span className="font-medium">{regional.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(regional.value)}</p>
+                  <p className="text-xs text-gray-500">{regional.count} relatórios</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhum dado disponível</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela Detalhada de Colaboradores */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Tabela Detalhada de Colaboradores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Colaborador</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Valor</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">QTD</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Regional</th>
+                </tr>
+              </thead>
+              <tbody>
+                {collaboratorTable.length > 0 ? collaboratorTable.map((collab) => (
+                  <tr key={collab.name} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm text-gray-900 font-medium">{collab.name}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900 font-bold">{formatCurrency(collab.value)}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{collab.count}</td>
+                    <td className="py-3 px-4 text-sm">
+                      <Badge variant="outline">{collab.regional}</Badge>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-gray-500 text-sm">Nenhum dado disponível</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 

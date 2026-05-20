@@ -18,7 +18,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Eye,
-  BarChart3
+  BarChart3,
+  Building2
 } from 'lucide-react';
 import { useApprovedReports, useCashFlow, useTeamMembers, useCostCenters } from '@/lib/hooks';
 import { Report } from '@/lib/api';
@@ -45,24 +46,62 @@ export default function GestaoCaixa() {
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [cardFilter, setCardFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [regionalFilter, setRegionalFilter] = useState('all');
 
   // Data padrão: último mês
   const today = new Date();
   const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const { data: approvedReports = [], isLoading: loadingApproved } = useApprovedReports({
+  const { data: approvedReports = [], isLoading: loadingApproved, error: reportsError } = useApprovedReports({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
 
-  const { data: cashFlowData = [], isLoading: loadingCashFlow } = useCashFlow({
+  const { data: cashFlowData = [], isLoading: loadingCashFlow, error: expensesError } = useCashFlow({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
 
   const { data: teamMembers = [] } = useTeamMembers();
   const { data: costCenters = [] } = useCostCenters();
+
+  const hasError = !!(reportsError || expensesError); // Block on main data errors
+  const combinedError = reportsError || expensesError;
+
+  // Extrair filtros disponíveis
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    cashFlowData.forEach(exp => {
+      if (exp.payment_method?.data?.description) {
+        cards.add(exp.payment_method.data.description);
+      }
+    });
+    return Array.from(cards).sort();
+  }, [cashFlowData]);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    approvedReports.forEach(report => {
+      const year = new Date(report.created_at).getFullYear();
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [approvedReports]);
+
+  const availableRegionals = useMemo(() => {
+    const regionals = new Set<string>();
+    costCenters.forEach(cc => {
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = cc.name.match(/\b([A-Z]{2})\b$/);
+      if (match) {
+        regionals.add(match[1]);
+      }
+    });
+    return Array.from(regionals).sort();
+  }, [costCenters]);
 
   // Filtrar relatórios aprovados
   const filteredReports = useMemo(() => {
@@ -80,6 +119,32 @@ export default function GestaoCaixa() {
     // Filtro de usuário
     if (userFilter !== 'all') {
       filtered = filtered.filter(r => r.user_id === parseInt(userFilter));
+    }
+
+    // Filtro de cartão (baseado nas despesas do relatório)
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const reportExpenses = cashFlowData.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+        return reportExpenses.some(e => e.payment_method?.data?.description === cardFilter);
+      });
+    }
+
+    // Filtro de ano
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const year = new Date(r.created_at).getFullYear();
+        return year === parseInt(yearFilter);
+      });
+    }
+
+    // Filtro de regional (baseado no centro de custo do usuário)
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+        if (!userCostCenter) return false;
+        // Verificar se o nome do centro de custo contém a sigla da regional
+        return userCostCenter.includes(regionalFilter);
+      });
     }
 
     // Filtro de data
@@ -108,7 +173,7 @@ export default function GestaoCaixa() {
     }
 
     return filtered;
-  }, [approvedReports, searchTerm, userFilter, dateFilter]);
+  }, [approvedReports, searchTerm, userFilter, dateFilter, cashFlowData, cardFilter, yearFilter, regionalFilter, teamMembers]);
 
   // Filtrar dados de fluxo de caixa
   const filteredCashFlow = useMemo(() => {
@@ -117,6 +182,29 @@ export default function GestaoCaixa() {
     // Filtro de centro de custo
     if (costCenterFilter !== 'all') {
       filtered = filtered.filter(e => e.costs_center?.data?.name === costCenterFilter);
+    }
+
+    // Filtro de cartão
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(e => e.payment_method?.data?.description === cardFilter);
+    }
+
+    // Filtro de ano
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(e => {
+        const year = new Date(e.date).getFullYear();
+        return year === parseInt(yearFilter);
+      });
+    }
+
+    // Filtro de regional (baseado no centro de custo da despesa)
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(e => {
+        const costCenterName = e.costs_center?.data?.name;
+        if (!costCenterName) return false;
+        // Verificar se o nome do centro de custo contém a sigla da regional
+        return costCenterName.includes(regionalFilter);
+      });
     }
 
     // Filtro de data (aplicado nos expenses)
@@ -145,7 +233,7 @@ export default function GestaoCaixa() {
     }
 
     return filtered;
-  }, [cashFlowData, costCenterFilter, dateFilter]);
+  }, [cashFlowData, costCenterFilter, dateFilter, cardFilter, yearFilter, regionalFilter]);
 
   // Paginação
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
@@ -198,6 +286,59 @@ export default function GestaoCaixa() {
     };
   }, [filteredReports, filteredCashFlow, cashFlowData]);
 
+  // Rankings por regional
+  const regionalRankings = useMemo(() => {
+    const regionalStats = filteredCashFlow.reduce((acc, exp) => {
+      const costCenterName = exp.costs_center?.data?.name;
+      if (!costCenterName) return acc;
+
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = costCenterName.match(/\b([A-Z]{2})\b$/);
+      const regional = match ? match[1] : 'Outros';
+
+      if (!acc[regional]) {
+        acc[regional] = { name: regional, count: 0, value: 0 };
+      }
+
+      acc[regional].count++;
+      acc[regional].value += exp.value || 0;
+
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number }>);
+
+    return Object.values(regionalStats)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 10);
+  }, [filteredCashFlow]);
+
+  // Tabela detalhada de colaboradores
+  const collaboratorTable = useMemo(() => {
+    const collaboratorStats = filteredReports.reduce((acc, r) => {
+      const userName = r.user?.data?.name || 'Desconhecido';
+      const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = userCostCenter?.match(/\b([A-Z]{2})\b$/);
+      const regional = match ? match[1] : 'Outros';
+
+      if (!acc[userName]) {
+        acc[userName] = { name: userName, count: 0, value: 0, regional };
+      }
+
+      acc[userName].count++;
+
+      // Calcular valor do relatório
+      const reportExpenses = cashFlowData.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+      const reportValue = reportExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
+      acc[userName].value += reportValue;
+
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number; regional: string }>);
+
+    return Object.values(collaboratorStats)
+      .sort((a, b) => b.value - a.value);
+  }, [filteredReports, cashFlowData, teamMembers]);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -219,6 +360,9 @@ export default function GestaoCaixa() {
     setDateFilter('month');
     setUserFilter('all');
     setCostCenterFilter('all');
+    setCardFilter('all');
+    setYearFilter('all');
+    setRegionalFilter('all');
     setCurrentPage(1);
   };
 
@@ -230,6 +374,19 @@ export default function GestaoCaixa() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando gestão de caixa...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Erro ao carregar dados</h2>
+          <p className="text-gray-600 mb-4">{combinedError instanceof Error ? combinedError.message : 'Tente novamente mais tarde'}</p>
+          <Button onClick={() => window.location.reload()}>Recarregar página</Button>
         </div>
       </div>
     );
@@ -315,7 +472,48 @@ export default function GestaoCaixa() {
                   ))}
                 </select>
               </div>
-              <div className="flex items-end md:col-span-2 lg:col-span-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Cartão</label>
+                <select
+                  value={cardFilter}
+                  onChange={(e) => setCardFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <option value="all">Todos</option>
+                  {availableCards.length > 0 ? availableCards.map(card => (
+                    <option key={card} value={card}>{card}</option>
+                  )) : (
+                    <option value="" disabled>Nenhum cartão disponível</option>
+                  )}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Ano</label>
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todos</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Regional</label>
+                <select
+                  value={regionalFilter}
+                  onChange={(e) => setRegionalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todas</option>
+                  {availableRegionals.map(regional => (
+                    <option key={regional} value={regional}>{regional}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-end">
                 <Button onClick={resetFilters} variant="outline" className="w-full">
                   Limpar Filtros
                 </Button>
@@ -452,6 +650,76 @@ export default function GestaoCaixa() {
               <Line type="monotone" dataKey="valor" stroke="#8b5cf6" strokeWidth={2} />
             </LineChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Rankings por Regional */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Rankings por Regional (Top 10 por Valor)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {regionalRankings.length > 0 ? regionalRankings.map((regional, index) => (
+              <div key={regional.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                    {index + 1}
+                  </Badge>
+                  <span className="font-medium">{regional.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(regional.value)}</p>
+                  <p className="text-xs text-gray-500">{regional.count} despesas</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhum dado disponível</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela Detalhada de Colaboradores */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <User className="h-5 w-5" />
+            Tabela Detalhada de Colaboradores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Colaborador</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Valor</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">QTD</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Regional</th>
+                </tr>
+              </thead>
+              <tbody>
+                {collaboratorTable.length > 0 ? collaboratorTable.map((collab) => (
+                  <tr key={collab.name} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm text-gray-900 font-medium">{collab.name}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900 font-bold">{formatCurrency(collab.value)}</td>
+                    <td className="py-3 px-4 text-sm text-gray-900">{collab.count}</td>
+                    <td className="py-3 px-4 text-sm">
+                      <Badge variant="outline">{collab.regional}</Badge>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={4} className="py-4 text-center text-gray-500 text-sm">Nenhum dado disponível</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </CardContent>
       </Card>
 

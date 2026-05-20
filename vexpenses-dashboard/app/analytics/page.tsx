@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import {
   BarChart3,
   Search,
@@ -12,15 +13,14 @@ import {
   ChevronDown,
   Calendar,
   TrendingUp,
-  TrendingDown,
   Clock,
   DollarSign,
   CheckCircle,
   XCircle,
-  Users
+  Users,
+  Building2
 } from 'lucide-react';
 import { useStatusCaixa, useCostCenters, useTeamMembers, useExpenses } from '@/lib/hooks';
-import { Report } from '@/lib/api';
 import {
   BarChart,
   Bar,
@@ -45,31 +45,68 @@ export default function Analytics() {
   const [costCenterFilter, setCostCenterFilter] = useState('all');
   const [userFilter, setUserFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [cardFilter, setCardFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [regionalFilter, setRegionalFilter] = useState('all');
+  const [approverFilter, setApproverFilter] = useState('all');
+  const [reportFilter, setReportFilter] = useState('all');
 
-  // Data padrão: último mês
   const today = new Date();
   const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
   const defaultEndDate = today.toISOString().split('T')[0];
 
-  const { data: reports = [], isLoading } = useStatusCaixa({
+  const { data: reports = [], isLoading, error: reportsError } = useStatusCaixa({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
 
   const { data: costCenters = [] } = useCostCenters();
   const { data: teamMembers = [] } = useTeamMembers();
-
-  // Buscar expenses para calcular valores
   const { data: expenses = [] } = useExpenses({
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   });
 
+  // Filtros disponíveis
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    expenses.forEach(exp => {
+      if (exp.payment_method?.data?.description) cards.add(exp.payment_method.data.description);
+    });
+    return Array.from(cards).sort();
+  }, [expenses]);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    reports.forEach(r => years.add(new Date(r.created_at).getFullYear()));
+    return Array.from(years).sort((a, b) => b - a);
+  }, [reports]);
+
+  const availableRegionals = useMemo(() => {
+    const set = new Set<string>();
+    costCenters.forEach(cc => {
+      const m = cc.name.match(/\b([A-Z]{2})\b$/);
+      if (m) set.add(m[1]);
+    });
+    return Array.from(set).sort();
+  }, [costCenters]);
+
+  const availableApprovers = useMemo(() => {
+    const set = new Set<number>();
+    reports.forEach(r => { if (r.approval_user_id) set.add(r.approval_user_id); });
+    return Array.from(set).sort();
+  }, [reports]);
+
+  const availableReports = useMemo(() => {
+    const set = new Set<string>();
+    reports.forEach(r => { if (r.description) set.add(r.description); });
+    return Array.from(set).sort();
+  }, [reports]);
+
   // Filtrar relatórios
   const filteredReports = useMemo(() => {
     let filtered = [...reports];
 
-    // Filtro de busca
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
@@ -78,167 +115,191 @@ export default function Analytics() {
       );
     }
 
-    // Filtro de centro de custo
     if (costCenterFilter !== 'all') {
       filtered = filtered.filter(r => {
-        const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
-        return userCostCenter === costCenterFilter;
+        const cc = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+        return cc === costCenterFilter;
       });
     }
 
-    // Filtro de usuário
     if (userFilter !== 'all') {
       filtered = filtered.filter(r => r.user_id === parseInt(userFilter));
     }
 
-    // Filtro de data
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const exps = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+        return exps.some(e => e.payment_method?.data?.description === cardFilter);
+      });
+    }
+
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(r => new Date(r.created_at).getFullYear() === parseInt(yearFilter));
+    }
+
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const cc = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+        return cc?.includes(regionalFilter) || false;
+      });
+    }
+
+    if (approverFilter !== 'all') {
+      filtered = filtered.filter(r => r.approval_user_id === parseInt(approverFilter));
+    }
+
+    if (reportFilter !== 'all') {
+      filtered = filtered.filter(r => r.description === reportFilter);
+    }
+
     if (dateFilter !== 'all') {
       const now = new Date();
       const todayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
       filtered = filtered.filter(r => {
         const reportDate = new Date(r.created_at);
-
         switch (dateFilter) {
-          case 'today':
-            return reportDate >= todayDate;
-          case 'week':
+          case 'today': return reportDate >= todayDate;
+          case 'week': {
             const weekAgo = new Date(todayDate);
             weekAgo.setDate(weekAgo.getDate() - 7);
             return reportDate >= weekAgo;
-          case 'month':
+          }
+          case 'month': {
             const monthAgo = new Date(todayDate);
             monthAgo.setMonth(monthAgo.getMonth() - 1);
             return reportDate >= monthAgo;
-          default:
-            return true;
+          }
+          default: return true;
         }
       });
     }
 
     return filtered;
-  }, [reports, searchTerm, costCenterFilter, userFilter, dateFilter, teamMembers]);
+  }, [reports, searchTerm, costCenterFilter, userFilter, dateFilter, teamMembers, expenses, cardFilter, yearFilter, regionalFilter, approverFilter, reportFilter]);
 
-  // Calcular KPIs
+  // KPIs
   const kpis = useMemo(() => {
     const totalReports = filteredReports.length;
     const approvedReports = filteredReports.filter(r => r.status === 'APROVADO');
     const rejectedReports = filteredReports.filter(r => r.status === 'REPROVADO');
-    const sentReports = filteredReports.filter(r => r.status === 'ENVIADO');
 
-    // Calcular valor total por status usando os dados de expenses
     const reportValueMap = expenses.reduce((acc, exp) => {
-      // A API VExpenses retorna expense_id que corresponde ao ID do report
       const reportId = exp.expense_id || exp.report?.data?.id;
-      if (reportId) {
-        acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
-      }
+      if (reportId) acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
       return acc;
     }, {} as Record<number, number>);
 
-    const valueByStatus = filteredReports.reduce((acc, r) => {
-      const reportValue = reportValueMap[r.id] || 0;
-      acc[r.status] = (acc[r.status] || 0) + reportValue;
-      return acc;
-    }, {} as Record<string, number>);
+    const totalApprovedValue = approvedReports.reduce((sum, r) => sum + (reportValueMap[r.id] || 0), 0);
 
-    // Calcular tempo médio de aprovação
     const approvedWithDate = approvedReports.filter(r => r.approval_date);
     const avgApprovalTime = approvedWithDate.length > 0
       ? approvedWithDate.reduce((sum, r) => {
-          const created = new Date(r.created_at).getTime();
-          const approved = new Date(r.approval_date).getTime();
-          return sum + (approved - created);
+          return sum + (new Date(r.approval_date).getTime() - new Date(r.created_at).getTime());
         }, 0) / approvedWithDate.length
       : 0;
-
-    // Taxa de aprovação
-    const approvalRate = totalReports > 0 ? (approvedReports.length / totalReports) * 100 : 0;
-
-    // Taxa de reprovação
-    const rejectionRate = totalReports > 0 ? (rejectedReports.length / totalReports) * 100 : 0;
 
     return {
       totalReports,
       approvedCount: approvedReports.length,
       rejectedCount: rejectedReports.length,
-      sentCount: sentReports.length,
-      totalApprovedValue: valueByStatus['APROVADO'] || 0,
-      avgApprovalTime: Math.round(avgApprovalTime / (1000 * 60 * 60 * 24)), // em dias
-      approvalRate: Math.round(approvalRate),
-      rejectionRate: Math.round(rejectionRate),
+      totalApprovedValue,
+      avgApprovalTime: Math.round(avgApprovalTime / (1000 * 60 * 60 * 24)),
+      approvalRate: totalReports > 0 ? Math.round((approvedReports.length / totalReports) * 100) : 0,
+      rejectionRate: totalReports > 0 ? Math.round((rejectedReports.length / totalReports) * 100) : 0,
     };
   }, [filteredReports, expenses]);
 
-  // Dados para gráfico de evolução temporal
+  // Gráficos
   const monthlyData = useMemo(() => {
-    const dataMap = new Map();
-
-    filteredReports.forEach(report => {
-      const date = new Date(report.created_at);
-      const monthKey = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
-
-      if (!dataMap.has(monthKey)) {
-        dataMap.set(monthKey, { month: monthKey, Aprovados: 0, Reprovados: 0, Enviados: 0 });
-      }
-
-      const data = dataMap.get(monthKey);
-      if (report.status === 'APROVADO') data.Aprovados++;
-      else if (report.status === 'REPROVADO') data.Reprovados++;
-      else if (report.status === 'ENVIADO') data.Enviados++;
+    const map = new Map<string, { month: string; Aprovados: number; Reprovados: number; Enviados: number }>();
+    filteredReports.forEach(r => {
+      const key = new Date(r.created_at).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
+      if (!map.has(key)) map.set(key, { month: key, Aprovados: 0, Reprovados: 0, Enviados: 0 });
+      const d = map.get(key)!;
+      if (r.status === 'APROVADO') d.Aprovados++;
+      else if (r.status === 'REPROVADO') d.Reprovados++;
+      else if (r.status === 'ENVIADO') d.Enviados++;
     });
-
-    return Array.from(dataMap.values()).sort((a, b) =>
-      new Date(a.month).getTime() - new Date(b.month).getTime()
-    );
+    return Array.from(map.values());
   }, [filteredReports]);
 
-  // Dados para gráfico de distribuição por status
   const statusDistribution = useMemo(() => {
     const byStatus = filteredReports.reduce((acc, r) => {
       acc[r.status] = (acc[r.status] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
-    return Object.entries(byStatus).map(([status, count]) => ({
-      name: status === 'ABERTO' ? 'Aberto' :
-             status === 'ENVIADO' ? 'Enviado' :
-             status === 'APROVADO' ? 'Aprovado' :
-             status === 'REPROVADO' ? 'Reprovado' :
-             status === 'REABERTO' ? 'Reaberto' : status,
-      value: count,
-    })).filter(item => item.value > 0);
+    const labels: Record<string, string> = { ABERTO: 'Aberto', ENVIADO: 'Enviado', APROVADO: 'Aprovado', REPROVADO: 'Reprovado', REABERTO: 'Reaberto' };
+    return Object.entries(byStatus).map(([s, v]) => ({ name: labels[s] || s, value: v })).filter(i => i.value > 0);
   }, [filteredReports]);
 
-  // Dados para gráfico de top usuários
   const topUsers = useMemo(() => {
-    const userStats = filteredReports.reduce((acc, r) => {
-      const userName = r.user?.data?.name || 'Desconhecido';
-      if (!acc[userName]) {
-        acc[userName] = { name: userName, count: 0, approved: 0 };
-      }
-      acc[userName].count++;
-      if (r.status === 'APROVADO') acc[userName].approved++;
+    const stats = filteredReports.reduce((acc, r) => {
+      const name = r.user?.data?.name || 'Desconhecido';
+      if (!acc[name]) acc[name] = { name, count: 0, approved: 0 };
+      acc[name].count++;
+      if (r.status === 'APROVADO') acc[name].approved++;
       return acc;
     }, {} as Record<string, { name: string; count: number; approved: number }>);
-
-    return Object.values(userStats)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10);
+    return Object.values(stats).sort((a, b) => b.count - a.count).slice(0, 10);
   }, [filteredReports]);
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
-  };
+  // Rankings por regional
+  const regionalRankings = useMemo(() => {
+    const stats = filteredReports.reduce((acc, r) => {
+      const cc = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+      if (!cc) return acc;
+      const m = cc.match(/\b([A-Z]{2})\b$/);
+      const regional = m ? m[1] : 'Outros';
+      if (!acc[regional]) acc[regional] = { name: regional, count: 0, value: 0 };
+      acc[regional].count++;
+      const exps = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+      acc[regional].value += exps.reduce((s, e) => s + (e.value || 0), 0);
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number }>);
+    return Object.values(stats).sort((a, b) => b.value - a.value).slice(0, 10);
+  }, [filteredReports, expenses, teamMembers]);
+
+  // Tabela de colaboradores
+  const collaboratorTable = useMemo(() => {
+    const stats = filteredReports.reduce((acc, r) => {
+      const name = r.user?.data?.name || 'Desconhecido';
+      const cc = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+      const m = cc?.match(/\b([A-Z]{2})\b$/);
+      const regional = m ? m[1] : 'Outros';
+      if (!acc[name]) acc[name] = { name, count: 0, value: 0, regional };
+      acc[name].count++;
+      const exps = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+      acc[name].value += exps.reduce((s, e) => s + (e.value || 0), 0);
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number; regional: string }>);
+    return Object.values(stats).sort((a, b) => b.value - a.value);
+  }, [filteredReports, expenses, teamMembers]);
+
+  // Top 10 Naturezas
+  const topNaturezas = useMemo(() => {
+    const stats = expenses.reduce((acc, exp) => {
+      const n = exp.expense_type?.data?.description || 'Outros';
+      if (!acc[n]) acc[n] = { name: n, count: 0, value: 0 };
+      acc[n].count++;
+      acc[n].value += exp.value || 0;
+      return acc;
+    }, {} as Record<string, { name: string; count: number; value: number }>);
+    return Object.values(stats).sort((a, b) => b.value - a.value).slice(0, 10);
+  }, [expenses]);
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
   const resetFilters = () => {
     setSearchTerm('');
     setDateFilter('month');
     setCostCenterFilter('all');
     setUserFilter('all');
+    setCardFilter('all');
+    setYearFilter('all');
+    setRegionalFilter('all');
+    setApproverFilter('all');
+    setReportFilter('all');
   };
 
   if (isLoading) {
@@ -247,6 +308,18 @@ export default function Analytics() {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Carregando analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (reportsError) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Erro ao carregar dados</h2>
+          <p className="text-gray-600 mb-4">{reportsError instanceof Error ? reportsError.message : 'Tente novamente'}</p>
+          <Button onClick={() => window.location.reload()}>Recarregar</Button>
         </div>
       </div>
     );
@@ -263,17 +336,14 @@ export default function Analytics() {
         <div className="flex gap-2">
           <Button
             onClick={() => setShowFilters(!showFilters)}
-            variant={showFilters ? "default" : "outline"}
+            variant={showFilters ? 'default' : 'outline'}
             className="w-full sm:w-auto"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filtros
             <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
           </Button>
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto"
-          >
+          <Button variant="outline" className="w-full sm:w-auto">
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
@@ -295,11 +365,8 @@ export default function Analytics() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Período</label>
-                <select
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select value={dateFilter} onChange={(e) => setDateFilter(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="all">Todos</option>
                   <option value="today">Hoje</option>
                   <option value="week">Última semana</option>
@@ -308,31 +375,64 @@ export default function Analytics() {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Usuário</label>
-                <select
-                  value={userFilter}
-                  onChange={(e) => setUserFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select value={userFilter} onChange={(e) => setUserFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="all">Todos</option>
-                  {teamMembers.map(member => (
-                    <option key={member.id} value={member.id}>{member.name}</option>
-                  ))}
+                  {teamMembers.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Centro de Custo</label>
-                <select
-                  value={costCenterFilter}
-                  onChange={(e) => setCostCenterFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select value={costCenterFilter} onChange={(e) => setCostCenterFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="all">Todos</option>
-                  {costCenters.map(cc => (
-                    <option key={cc.id} value={cc.name}>{cc.name}</option>
-                  ))}
+                  {costCenters.map(cc => <option key={cc.id} value={cc.name}>{cc.name}</option>)}
                 </select>
               </div>
-              <div className="flex items-end md:col-span-2 lg:col-span-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Cartão</label>
+                <select value={cardFilter} onChange={(e) => setCardFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all">Todos</option>
+                  {availableCards.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Ano</label>
+                <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all">Todos</option>
+                  {availableYears.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Regional</label>
+                <select value={regionalFilter} onChange={(e) => setRegionalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all">Todas</option>
+                  {availableRegionals.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Aprovador</label>
+                <select value={approverFilter} onChange={(e) => setApproverFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all">Todos</option>
+                  {availableApprovers.map(id => {
+                    const approver = teamMembers.find(m => m.id === id);
+                    return <option key={id} value={id}>{approver?.name || `ID ${id}`}</option>;
+                  })}
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Relatório</label>
+                <select value={reportFilter} onChange={(e) => setReportFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all">Todos</option>
+                  {availableReports.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+              <div className="flex items-end">
                 <Button onClick={resetFilters} variant="outline" className="w-full">
                   Limpar Filtros
                 </Button>
@@ -342,65 +442,34 @@ export default function Analytics() {
         </Card>
       )}
 
-      {/* KPIs Principais */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Tempo Médio de Aprovação
-            </CardTitle>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Clock className="h-4 w-4 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{kpis.avgApprovalTime} dias</div>
-            <p className="text-xs text-gray-500 mt-2">Média geral</p>
+      {/* KPIs */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <Clock className="h-8 w-8 mb-3 text-blue-100" />
+            <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-2">Tempo Médio de Aprovação</p>
+            <p className="text-3xl font-bold">{kpis.avgApprovalTime} dias</p>
           </CardContent>
         </Card>
-
-        <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Taxa de Aprovação
-            </CardTitle>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{kpis.approvalRate}%</div>
-            <p className="text-xs text-gray-500 mt-2">Dos relatórios</p>
+        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <CheckCircle className="h-8 w-8 mb-3 text-green-100" />
+            <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-2">Taxa de Aprovação</p>
+            <p className="text-3xl font-bold">{kpis.approvalRate}%</p>
           </CardContent>
         </Card>
-
-        <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Valor Total Aprovado
-            </CardTitle>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <DollarSign className="h-4 w-4 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{formatCurrency(kpis.totalApprovedValue)}</div>
-            <p className="text-xs text-gray-500 mt-2">No período</p>
+        <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-0">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <DollarSign className="h-8 w-8 mb-3 text-purple-100" />
+            <p className="text-sm font-medium text-purple-100 uppercase tracking-wide mb-2">Valor Total Aprovado</p>
+            <p className="text-2xl font-bold">{formatCurrency(kpis.totalApprovedValue)}</p>
           </CardContent>
         </Card>
-
-        <Card className="hover:shadow-lg transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Taxa de Reprovação
-            </CardTitle>
-            <div className="p-2 bg-red-100 rounded-lg">
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{kpis.rejectionRate}%</div>
-            <p className="text-xs text-gray-500 mt-2">Dos relatórios</p>
+        <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white border-0">
+          <CardContent className="p-6 flex flex-col items-center justify-center text-center">
+            <XCircle className="h-8 w-8 mb-3 text-red-100" />
+            <p className="text-sm font-medium text-red-100 uppercase tracking-wide mb-2">Taxa de Reprovação</p>
+            <p className="text-3xl font-bold">{kpis.rejectionRate}%</p>
           </CardContent>
         </Card>
       </div>
@@ -409,53 +478,35 @@ export default function Analytics() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Total de Relatórios
-            </CardTitle>
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <BarChart3 className="h-4 w-4 text-blue-600" />
-            </div>
+            <CardTitle className="text-sm font-medium text-gray-600">Total de Relatórios</CardTitle>
+            <div className="p-2 bg-blue-100 rounded-lg"><BarChart3 className="h-4 w-4 text-blue-600" /></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">{kpis.totalReports}</div>
-            <p className="text-xs text-gray-500 mt-2">No período</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Relatórios Aprovados
-            </CardTitle>
-            <div className="p-2 bg-green-100 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </div>
+            <CardTitle className="text-sm font-medium text-gray-600">Relatórios Aprovados</CardTitle>
+            <div className="p-2 bg-green-100 rounded-lg"><CheckCircle className="h-4 w-4 text-green-600" /></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">{kpis.approvedCount}</div>
-            <p className="text-xs text-gray-500 mt-2">No período</p>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              Relatórios Reprovados
-            </CardTitle>
-            <div className="p-2 bg-red-100 rounded-lg">
-              <XCircle className="h-4 w-4 text-red-600" />
-            </div>
+            <CardTitle className="text-sm font-medium text-gray-600">Relatórios Reprovados</CardTitle>
+            <div className="p-2 bg-red-100 rounded-lg"><XCircle className="h-4 w-4 text-red-600" /></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">{kpis.rejectedCount}</div>
-            <p className="text-xs text-gray-500 mt-2">No período</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Gráficos */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Gráfico de Evolução Temporal */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -479,7 +530,6 @@ export default function Analytics() {
           </CardContent>
         </Card>
 
-        {/* Gráfico de Distribuição por Status */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -492,12 +542,10 @@ export default function Analytics() {
               <PieChart>
                 <Pie
                   data={statusDistribution}
-                  cx="50%"
-                  cy="50%"
+                  cx="50%" cy="50%"
                   labelLine={false}
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   outerRadius={80}
-                  fill="#8884d8"
                   dataKey="value"
                 >
                   <Cell fill="#3b82f6" />
@@ -533,6 +581,102 @@ export default function Analytics() {
               <Bar dataKey="approved" fill="#10b981" name="Aprovados" />
             </BarChart>
           </ResponsiveContainer>
+        </CardContent>
+      </Card>
+
+      {/* Rankings por Regional */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            Rankings por Regional (Top 10 por Valor)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {regionalRankings.length > 0 ? regionalRankings.map((regional, index) => (
+              <div key={regional.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                    {index + 1}
+                  </Badge>
+                  <span className="font-medium">{regional.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(regional.value)}</p>
+                  <p className="text-xs text-gray-500">{regional.count} relatórios</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhum dado disponível</p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Tabela de Colaboradores */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Tabela Detalhada de Colaboradores
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Colaborador</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Valor</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">QTD</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Regional</th>
+                </tr>
+              </thead>
+              <tbody>
+                {collaboratorTable.length > 0 ? collaboratorTable.map(collab => (
+                  <tr key={collab.name} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm font-medium">{collab.name}</td>
+                    <td className="py-3 px-4 text-sm font-bold">{formatCurrency(collab.value)}</td>
+                    <td className="py-3 px-4 text-sm">{collab.count}</td>
+                    <td className="py-3 px-4 text-sm"><Badge variant="outline">{collab.regional}</Badge></td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={4} className="py-4 text-center text-gray-500 text-sm">Nenhum dado disponível</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Top 10 Naturezas */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Top 10 Naturezas por Valor
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {topNaturezas.length > 0 ? topNaturezas.map((natureza, index) => (
+              <div key={natureza.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Badge variant="outline" className="w-8 h-8 flex items-center justify-center rounded-full">
+                    {index + 1}
+                  </Badge>
+                  <span className="font-medium">{natureza.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold">{formatCurrency(natureza.value)}</p>
+                  <p className="text-xs text-gray-500">{natureza.count} ocorrências</p>
+                </div>
+              </div>
+            )) : (
+              <p className="text-gray-500 text-sm text-center py-4">Nenhum dado disponível</p>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

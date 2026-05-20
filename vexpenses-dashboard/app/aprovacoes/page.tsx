@@ -20,7 +20,7 @@ import {
   Calendar,
   Building2
 } from 'lucide-react';
-import { useReports, useReportDetails, useApproveReport } from '@/lib/hooks';
+import { useReports, useReportDetails, useApproveReport, useExpenses, useCostCenters, useTeamMembers } from '@/lib/hooks';
 import { Report } from '@/lib/api';
 
 export default function AprovacoesPage() {
@@ -28,15 +28,63 @@ export default function AprovacoesPage() {
   const [showApprovalModal, setShowApprovalModal] = useState(false);
   const [observation, setObservation] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'APROVADO' | 'REPROVADO'>('ABERTO');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'APROVADO' | 'REPROVADO' | 'CONFERIDO'>('ABERTO');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+  const [cardFilter, setCardFilter] = useState('all');
+  const [yearFilter, setYearFilter] = useState('all');
+  const [regionalFilter, setRegionalFilter] = useState('all');
   
-  const { data: reports = [], isLoading, refetch } = useReports();
+  const { data: reports = [], isLoading, refetch, error: reportsError } = useReports();
   const { data: reportDetails } = useReportDetails(selectedReport?.id || 0);
   const { approveReport, rejectReport } = useApproveReport();
+
+  // Data padrão: último mês (mesmo range das outras páginas - não usar 1 ano pois é muita data)
+  const today = new Date();
+  const defaultStartDate = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate()).toISOString().split('T')[0];
+  const defaultEndDate = today.toISOString().split('T')[0];
+
+  // expenses apenas para popular filtro de cartão - erro aqui NÃO bloqueia a página
+  const { data: expenses = [] } = useExpenses({
+    startDate: defaultStartDate,
+    endDate: defaultEndDate,
+  });
+  const { data: costCenters = [] } = useCostCenters();
+  const { data: teamMembers = [] } = useTeamMembers();
+
+  // Extrair filtros disponíveis
+  const availableCards = useMemo(() => {
+    const cards = new Set<string>();
+    expenses.forEach(exp => {
+      if (exp.payment_method?.data?.description) {
+        cards.add(exp.payment_method.data.description);
+      }
+    });
+    return Array.from(cards).sort();
+  }, [expenses]);
+
+  const availableYears = useMemo(() => {
+    const years = new Set<number>();
+    reports.forEach(report => {
+      const year = new Date(report.created_at).getFullYear();
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a);
+  }, [reports]);
+
+  const availableRegionals = useMemo(() => {
+    const regionals = new Set<string>();
+    costCenters.forEach(cc => {
+      // Extrair sigla de estado do nome (ex: "CLARO INFRA SC" -> "SC")
+      const match = cc.name.match(/\b([A-Z]{2})\b$/);
+      if (match) {
+        regionals.add(match[1]);
+      }
+    });
+    return Array.from(regionals).sort();
+  }, [costCenters]);
   
   // Filtrar relatórios
   const filteredReports = useMemo(() => {
@@ -60,10 +108,10 @@ export default function AprovacoesPage() {
     if (dateFilter !== 'all') {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      
+
       filtered = filtered.filter(r => {
         const reportDate = new Date(r.created_at);
-        
+
         switch (dateFilter) {
           case 'today':
             return reportDate >= today;
@@ -80,9 +128,35 @@ export default function AprovacoesPage() {
         }
       });
     }
-    
+
+    // Filtro de cartão (baseado nas despesas do relatório)
+    if (cardFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const reportExpenses = expenses.filter(e => e.expense_id === r.id || e.report?.data?.id === r.id);
+        return reportExpenses.some(e => e.payment_method?.data?.description === cardFilter);
+      });
+    }
+
+    // Filtro de ano
+    if (yearFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const year = new Date(r.created_at).getFullYear();
+        return year === parseInt(yearFilter);
+      });
+    }
+
+    // Filtro de regional (baseado no centro de custo do usuário)
+    if (regionalFilter !== 'all') {
+      filtered = filtered.filter(r => {
+        const userCostCenter = teamMembers.find(m => m.id === r.user_id)?.costs_center?.data?.name;
+        if (!userCostCenter) return false;
+        // Verificar se o nome do centro de custo contém a sigla da regional
+        return userCostCenter.includes(regionalFilter);
+      });
+    }
+
     return filtered;
-  }, [reports, statusFilter, searchTerm, dateFilter]);
+  }, [reports, statusFilter, searchTerm, dateFilter, expenses, cardFilter, yearFilter, regionalFilter, teamMembers]);
   
   // Paginação
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
@@ -175,6 +249,9 @@ export default function AprovacoesPage() {
     setSearchTerm('');
     setStatusFilter('ABERTO');
     setDateFilter('all');
+    setCardFilter('all');
+    setYearFilter('all');
+    setRegionalFilter('all');
     setCurrentPage(1);
   };
 
@@ -248,7 +325,7 @@ export default function AprovacoesPage() {
                   className="w-full"
                 />
               </div>
-              
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Clock className="h-4 w-4" />
@@ -263,9 +340,10 @@ export default function AprovacoesPage() {
                   <option value="ABERTO">Pendentes</option>
                   <option value="APROVADO">Aprovados</option>
                   <option value="REPROVADO">Reprovados</option>
+                  <option value="CONFERIDO">Conferido</option>
                 </select>
               </div>
-              
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
@@ -282,7 +360,60 @@ export default function AprovacoesPage() {
                   <option value="month">Último mês</option>
                 </select>
               </div>
-              
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Cartão
+                </label>
+                <select
+                  value={cardFilter}
+                  onChange={(e) => setCardFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                  <option value="all">Todos</option>
+                  {availableCards.length > 0 ? availableCards.map(card => (
+                    <option key={card} value={card}>{card}</option>
+                  )) : (
+                    <option value="" disabled>Nenhum cartão disponível</option>
+                  )}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Ano
+                </label>
+                <select
+                  value={yearFilter}
+                  onChange={(e) => setYearFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todos</option>
+                  {availableYears.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-4">
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Regional
+                </label>
+                <select
+                  value={regionalFilter}
+                  onChange={(e) => setRegionalFilter(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">Todas</option>
+                  {availableRegionals.map(regional => (
+                    <option key={regional} value={regional}>{regional}</option>
+                  ))}
+                </select>
+              </div>
+
               <div className="space-y-4">
                 <label className="text-sm font-medium text-gray-700">Ações</label>
                 <Button
@@ -315,6 +446,13 @@ export default function AprovacoesPage() {
             <div className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p className="mt-4 text-gray-600 font-medium">Carregando relatórios...</p>
+            </div>
+          ) : reportsError ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="text-red-500 text-6xl mb-4">⚠️</div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Erro ao carregar relatórios</h2>
+              <p className="text-gray-600 mb-4">{reportsError instanceof Error ? reportsError.message : 'Tente novamente mais tarde'}</p>
+              <Button onClick={() => window.location.reload()}>Recarregar página</Button>
             </div>
           ) : filteredReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
