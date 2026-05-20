@@ -522,10 +522,137 @@ Este documento apresenta uma análise detalhada das planilhas disponíveis no di
 
 ---
 
-## Conclusão
+## Investigação Adicional da API VExpenses
 
-A planilha **BASE PREST** (54.518 linhas) é a que tem maior correspondência com a API VExpenses, contendo dados de despesas e relatórios que podem ser obtidos diretamente através dos endpoints `/v2/expenses` e `/v2/reports`.
+Realizada investigação detalhada da API VExpenses para verificar se dados considerados "não disponíveis" podem ser obtidos através de endpoints alternativos ou cálculos.
 
-As planilhas de controle financeiro (SALDO CARTAO, QUINZENAS, ADICIONAIS, etc.) contêm dados que **NÃO estão disponíveis na API VExpenses**, pois se referem ao controle financeiro dos cartões corporativos (saldos, cargas, descargas) que é gerenciado separadamente.
+### Descobertas Importantes
 
-**Recomendação:** Utilizar a API VExpenses para dados operacionais (despesas, relatórios, colaboradores, centros de custo) e manter as planilhas ou sistema separado para controle financeiro dos cartões corporativos.
+#### ✅ Dados que PODEM ser obtidos/calculados via API
+
+**1. Quinzenas (1ª QZ e 2ª QZ)**
+- **Como calcular:** Baseado no campo `date` das despesas
+- **Lógica:** Se `day <= 15` → 1ª QZ, senão → 2ª QZ
+- **Exemplo prático:**
+  - Abril 2025: 163 despesas na 1ª QZ, 1045 na 2ª QZ
+  - É possível calcular por usuário, por centro de custo, por método de pagamento
+- **Correspondência planilha:** ABA QUINZENAS (10.148 linhas)
+
+**2. Hierarquia de Aprovação (Gestores/Diretores)**
+- **Endpoint:** `/v2/approval-flows`
+- **Dados disponíveis:**
+  - 38 fluxos de aprovação configurados
+  - Cada fluxo tem `steps` com `entrance_value` (limites monetários)
+  - Exemplo: Step 3 = R$ 3000, Step 4 = R$ 5000, Step 5 = R$ 10000
+  - Cada step tem `groups` com `approvers` (IDs dos aprovadores)
+- **Como mapear para nomes:** Usar `/v2/team-members/{id}` para obter nome/email do approver
+- **Exemplo de flows:**
+  - REGIONAL CO, MG, RS, NE, BA, SP, RJ, PR, etc.
+  - DIRETORIA, DIRETORIA ADMINISTRATIVA, DIRETORIA FINANCEIRA
+  - FINANCEIRO, COMERCIAL, GESTÃO DE PESSOAS
+- **Correspondência planilha:** GESTOR e DIREÇÃO nas planilhas podem ser derivados dos approval flows
+
+**3. Limites de Aprovação por Valor**
+- **Como obter:** Do campo `entrance_value` nos steps do approval flow
+- **Padrão encontrado:**
+  - Até R$ 3000: Aprovação automática ou nível 1
+  - R$ 3001 - R$ 5000: Nível 2 de aprovação
+  - R$ 5001 - R$ 10000: Nível 3 de aprovação
+  - Acima de R$ 10000: Nível 4 de aprovação
+- **Aplicação:** Mostrar qual nível de aprovação uma despesa requer
+
+**4. Políticas de Limite (expense_limit_policy_id)**
+- **Descoberta:** Existem 6 políticas diferentes configuradas
+  - Policy 16805: 705 membros
+  - Policy 16807: 10 membros
+  - Policy 16806: 23 membros
+  - Policy 17467: 16 membros
+  - Policy 17797: 4 membros
+  - Policy 20340: 11 membros
+- **Limitação:** Não há endpoint GET para `/v2/expense-limit-policies` (retorna 405)
+- **Conclusão:** IDs existem mas valores dos limites não são acessíveis via API
+
+#### ❌ Dados que REALMENTE NÃO estão disponíveis na API
+
+**1. Saldo Atual do Cartão**
+- **Tentativas:** `/v2/cards`, `/v2/corporate-cards`, `/v2/card-balances` - todos retornam 405
+- **Conclusão:** Não há endpoints para saldo de cartão corporativo
+
+**2. Limite do Cartão**
+- **Tentativa:** expense_limit_policy_id não acessível via GET
+- **Conclusão:** Limite configurado mas não exposto via API
+
+**3. Cargas e Descargas (Recargas)**
+- **Tentativa:** Não há endpoints para transações de carga/descarga
+- **Conclusão:** Dados de recarga de cartão não disponíveis
+
+**4. Status Físico do Cartão**
+- **Tentativa:** Não há campos de status do plástico
+- **Conclusão:** Status "Cartão ativo/bloqueado" não disponível
+
+**5. Número do Cartão**
+- **Tentativa:** Dados sensíveis não expostos
+- **Conclusão:** Número do cartão físico não disponível (por segurança)
+
+**6. Validações Externas (Agillitas)**
+- **Tentativa:** Integrações externas não disponíveis na API
+- **Conclusão:** Validação junto a Agillitas não disponível
+
+**7. Estornos**
+- **Tentativa:** Não há endpoint para estornos
+- **Conclusão:** Operações de estorno não disponíveis
+
+### Cálculos Possíveis a Partir da API
+
+| Dado Planilha | Como Calcular via API | Complexidade |
+|---------------|----------------------|--------------|
+| 1ª QZ / 2ª QZ | `date.day <= 15 ? 1ª QZ : 2ª QZ` | Baixa |
+| Total por período | Soma de `Expense.value` filtrado por data | Baixa |
+| Total por método de pagamento | Group by `payment_method.description` | Baixa |
+| Total por usuário | Group by `user_id` | Baixa |
+| Total por centro de custo | Group by `costs_center.id` | Baixa |
+| Gestor/Aprovador | Mapear `approval_flow_id` → approvers → nomes | Média |
+| Nível de aprovação | Comparar valor com `entrance_value` do flow | Média |
+| Taxa de aprovação | `count(APROVADO) / count(total)` | Baixa |
+| Tempo médio de aprovação | Média de `approval_date - created_at` | Baixa |
+
+### Atualização do Mapeamento
+
+#### Dados que AGORA PODEM ser obtidos (novo)
+
+| Dado da Planilha | Fonte API | Método |
+|-----------------|-----------|--------|
+| 1ª QZ / 2ª QZ | Expenses | Calcular a partir de `date.day` |
+| Gestor | Approval Flows + Team Members | Mapear approvers IDs para nomes |
+| Diretor | Approval Flows + Team Members | Mapear approvers IDs para nomes |
+| Nível de aprovação | Approval Flows | Comparar valor com `entrance_value` |
+
+#### Dados que AINDA NÃO podem ser obtidos
+
+| Dado da Planilha | Motivo |
+|-----------------|--------|
+| Saldo do cartão | Não há endpoint |
+| Limite do cartão | Policy não acessível via GET |
+| Cargas/Descargas | Não há endpoint |
+| Status físico do cartão | Não disponível |
+| Número do cartão | Dado sensível não exposto |
+| Validações Agillitas | Integração externa |
+
+---
+
+## Conclusão Atualizada
+
+A planilha **BASE PREST** (54.518 linhas) é a que tem maior correspondência com a API VExpenses.
+
+**Descobertas importantes da investigação:**
+1. **Quinzenas podem ser calculadas** a partir das datas das despesas (não dependem da API)
+2. **Gestores/Diretores podem ser mapeados** através dos approval flows (aprovadores)
+3. **Limites de aprovação por valor** estão disponíveis nos approval flows
+4. **Políticas de limite existem** mas não são acessíveis via GET endpoint
+
+**Recomendação atualizada:**
+- ✅ Usar API para dados operacionais (despesas, relatórios, colaboradores, centros de custo)
+- ✅ **Calcular quinzenas via código** (baseado em `date.day <= 15`)
+- ✅ **Mapear gestores/diretores** via approval flows (approvers → team members)
+- ❌ Manter planilhas para controle financeiro (saldos, limites de cartão, cargas/descargas)
+- ❌ Manter planilhas para validações externas (Agillitas)
