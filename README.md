@@ -157,3 +157,6 @@ O banco PostgreSQL contém as seguintes tabelas:
 ## 📄 Licença
 
 Projeto interno para controle de automações financeiras.
+
+---
+**Última atualização:** 20/05/2026 - Análise de planilhas e API VExpenses concluída
