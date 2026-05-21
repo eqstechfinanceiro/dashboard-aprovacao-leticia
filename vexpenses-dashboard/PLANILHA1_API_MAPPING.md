@@ -5,27 +5,31 @@
 ### Campos AZUIS (Dados Brutos da Planilha)
 Estes campos são dados manuais da planilha Excel que precisam ser substituídos por dados da API quando possível.
 
-| # | Campo Planilha | Descrição | API Endpoint/Planilha | Campo API/Sheet | Status |
-|---|----------------|-----------|----------------------|-----------------|--------|
+**Análise das planilhas foi realizada apenas para entender a lógica dos campos e valores.**
+
+| # | Campo Planilha | Descrição | API Endpoint | Campo API | Status |
+|---|----------------|-----------|--------------|-----------|--------|
 | 1 | PORTADOR | Nome do colaborador | `/v2/team-members` | `name` | ✅ **DISPONÍVEL** |
 | 2 | CPF | CPF do colaborador | `/v2/team-members` | `cpf` | ✅ **DISPONÍVEL** |
 | 3 | STATUS COLAB | Status do colaborador (ATIVO/INATIVO) | `/v2/team-members` | `active` | ✅ **DISPONÍVEL** |
 | 4 | CENTRO CUSTO | Nome do centro de custo | `/v2/team-members` (com `include=costsCenters`) | `costCenter.name` | ✅ **DISPONÍVEL** |
 | 5 | COD CENTRO CUSTO | Código do centro de custo | ❌ NÃO DISPONÍVEL | - | ❌ **NÃO DISPONÍVEL** |
-| 6 | GESTOR | Nome do gestor | Planilha 2 (ADICIONAIS) | `DIRETOR REGIONAL` | ✅ **DISPONÍVEL** |
+| 6 | GESTOR | Nome do gestor | ❌ NÃO DISPONÍVEL (investigar) | - | ⚠️ **INVESTIGAR** |
 | 7 | DIREÇÃO | Nome da direção | ❌ NÃO DISPONÍVEL | - | ❌ **NÃO DISPONÍVEL** |
-| 8 | SALDO REEMBOLSAR | Saldo a reembolsar | Planilha 2 (EXTRATO) | Calculado: CARGA - DESCARGA - TARIFA | ✅ **CALCULÁVEL** |
-| 9 | SALDO FINAL | Saldo final | Planilha 2 (EXTRATO) | Calculado: CARGA - DESCARGA - TARIFA | ✅ **CALCULÁVEL** |
-| 10 | 1QZ DE ABRIL 26 | Valor da 1ª quinzena de abril 2026 | Planilha 2 (QUINZENAS) ou `/v2/expenses` | Sheet QUINZENAS ou `calculateQuinzena1()` | ✅ **DISPONÍVEL** |
-| 11 | SALDO CARTAO | Saldo do cartão | Planilha 2 (SALDO CARTAO) ou `/v2/expenses` | Sheet SALDO CARTAO ou `calculateSaldoCartao()` | ✅ **DISPONÍVEL** |
-| 12 | ADIANTAMENTO | Valor de adiantamento | Planilha 2 (ADICIONAIS) | Sheet ADICIONAIS | ✅ **DISPONÍVEL** |
+| 8 | SALDO REEMBOLSAR | Saldo a reembolsar | `/v2/expenses` (calculado) | Lógica: CARGA - DESCARGA - TARIFA | ⚠️ **INVESTIGAR** |
+| 9 | SALDO FINAL | Saldo final | `/v2/expenses` (calculado) | Lógica: CARGA - DESCARGA - TARIFA | ⚠️ **INVESTIGAR** |
+| 10 | 1QZ DE ABRIL 26 | Valor da 1ª quinzena de abril 2026 | `/v2/expenses` (calculado) | `calculateQuinzena1()` | ✅ **CALCULÁVEL** |
+| 11 | SALDO CARTAO | Saldo do cartão | `/v2/expenses` (calculado) | `calculateSaldoCartao()` | ✅ **CALCULÁVEL** |
+| 12 | ADIANTAMENTO | Valor de adiantamento | ❌ NÃO DISPONÍVEL (investigar) | - | ⚠️ **INVESTIGAR** |
 | 13 | CARGA PARCIAL | Calculado (1QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO) | `/v2/expenses` (calculado) | `calculatePlanilha1Fields()` | ✅ **CALCULÁVEL** |
-| 14 | REEMBOLSO | Valor de reembolso | Planilha 2 (REEMBOLSO) ou `/v2/expenses` | Sheet REEMBOLSO ou `calculateReembolso()` | ✅ **DISPONÍVEL** |
+| 14 | REEMBOLSO | Valor de reembolso | `/v2/expenses` (calculado) | `calculateReembolso()` | ✅ **CALCULÁVEL** |
 | 15 | CARGA FINAL | Calculado (IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO) | `/v2/expenses` (calculado) | `calculatePlanilha1Fields()` | ✅ **CALCULÁVEL** |
-| 16 | STATUS DO CARTAO | Status do cartão | Planilha 1 (Planilha1/2/3) | Sheet Planilha1/2/3, coluna "Status do Cartão" | ✅ **DISPONÍVEL** |
+| 16 | STATUS DO CARTAO | Status do cartão | ❌ NÃO DISPONÍVEL (investigar) | - | ⚠️ **INVESTIGAR** |
 | 17 | OBS | Observações (campo manual) | ❌ NÃO DISPONÍVEL | - | ❌ **NÃO DISPONÍVEL** |
 
 ### Resumo de Disponibilidade (ATUALIZADO 2026-05-20)
+
+**Análise das planilhas foi realizada apenas para entender a lógica dos campos. O objetivo é obter TUDO via API VExpenses.**
 
 **✅ Campos disponíveis via API (4/17):**
 1. PORTADOR → `team-members.name`
@@ -33,26 +37,24 @@ Estes campos são dados manuais da planilha Excel que precisam ser substituídos
 3. STATUS COLAB → `team-members.active`
 4. CENTRO CUSTO → `team-members.costCenter.name` (requer `include=costsCenters`)
 
-**✅ Campos disponíveis via Planilhas (6/17):**
-1. GESTOR → Planilha 2 (ADICIONAIS), coluna "DIRETOR REGIONAL"
-2. 1QZ DE ABRIL 26 → Planilha 2 (QUINZENAS), coluna "VALOR" onde QUINZENA = "1ª QZ"
-3. SALDO CARTAO → Planilha 2 (SALDO CARTAO), coluna "VALOR"
-4. ADIANTAMENTO → Planilha 2 (ADICIONAIS), coluna "VALOR"
-5. REEMBOLSO → Planilha 2 (REEMBOLSO), coluna "VALOR"
-6. STATUS DO CARTAO → Planilha 1 (Planilha1/2/3), coluna "Status do Cartão"
+**✅ Campos calculáveis via API (7/17):**
+1. 1QZ DE ABRIL 26 → `calculateQuinzena1()` usando `/v2/expenses`
+2. SALDO CARTAO → `calculateSaldoCartao()` usando `/v2/expenses`
+3. REEMBOLSO → `calculateReembolso()` usando `/v2/expenses`
+4. CARGA PARCIAL → `calculatePlanilha1Fields()` usando `/v2/expenses`
+5. CARGA FINAL → `calculatePlanilha1Fields()` usando `/v2/expenses`
+6. SALDO FINAL → `calculateSaldoFinal()` usando `/v2/expenses` (CARGA - DESCARGA - TARIFA)
+7. SALDO REEMBOLSAR → `calculateSaldoReembolsar()` usando `/v2/expenses` (CARGA - DESCARGA REEMBOLSÁVEL - TARIFA)
 
-**✅ Campos calculáveis via API + Planilhas (5/17):**
-1. SALDO REEMBOLSAR → Calculado via Planilha 2 (EXTRATO): CARGA - DESCARGA - TARIFA
-2. SALDO FINAL → Calculado via Planilha 2 (EXTRATO): CARGA - DESCARGA - TARIFA
-3. CARGA PARCIAL → Fórmula: 1QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO
-4. CARGA FINAL → Fórmula: IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO
-
-**❌ Campos NÃO disponíveis (2/17):**
+**❌ Campos NÃO disponíveis na API (6/17):**
 1. COD CENTRO CUSTO
-2. DIREÇÃO
-3. OBS (campo manual - irrelevante conforme usuário)
+2. GESTOR - Não encontrado em team-members/costs-centers
+3. DIREÇÃO
+4. ADIANTAMENTO - Endpoint `/v2/advances` existe mas apenas para criar (POST), não para listar
+5. STATUS DO CARTAO - Não encontrado na API
+6. OBS (campo manual - irrelevante)
 
-**TOTAL: 15/17 campos (88%) podem ser automatizados!**
+**TOTAL: 11/17 campos (65%) podem ser automatizados via API**
 
 ---
 
@@ -186,30 +188,30 @@ Cada expense (despesa) contém:
 **Outros:**
 - OBS (campo manual)
 
-### Nova Abordagem: Integração API + Planilhas (2026-05-20)
+### Nova Abordagem: Investigação API Baseada em Análise de Planilhas (2026-05-20)
 
-Após análise completa de todas as sheets das planilhas, descobri que muitos campos considerados "não disponíveis" podem ser obtidos através das próprias planilhas, complementando a API VExpenses.
+A análise completa das planilhas foi realizada apenas para **entender a lógica dos campos e valores**. O objetivo é replicar **TUDO via API VExpenses**.
 
-#### Sheets Importantes Descobertas:
+#### Descobertas da Análise de Planilhas (Referência para API):
 
 **Planilha 1 (1QZ ABRIL 2026):**
-- `Planilha1/2/3`: Dados cadastrais com **STATUS DO CARTÃO** (coluna 5)
-- `VALIDAÇÃO AGILLITAS`: Dados de cartão AGILLITAS
-- `1 QZ VEXPENSES 04_2026`: Dados financeiros principais (17 colunas)
+- `Planilha1/2/3`: STATUS DO CARTÃO tem valores: "Cartão ativo", "Cadastro pendente", "Cartão não vinculado", "Cartão não habilitado", "Cartão bloqueado", "Cadastro reprovado"
+- `1 QZ VEXPENSES 04_2026`: 17 colunas com dados financeiros
 
 **Planilha 2 (CONTROLE VEXPENSES):**
-- `QUINZENAS`: **1QZ** por usuário/quinzena/mês (COLABORADOR, CPF, VALOR, QUINZENA, MÊS, ANO)
-- `ADICIONAIS`: **ADIANTAMENTO** e **GESTOR** (COLABORADOR, CPF, VALOR, DIRETOR REGIONAL)
-- `REEMBOLSO`: **REEMBOLSO** manual (COLABORADOR, CPF, VALOR, MOTIVO)
-- `SALDO CARTAO`: **SALDO CARTAO** por usuário (PORTADOR, CPF, VALOR, MÊS)
-- `EXTRATO`: Extrato completo para calcular **SALDO FINAL** e **SALDO REEMBOLSAR** (CARGA, DESCARGA, TARIFA por usuário/mês)
+- `QUINZENAS`: 1QZ por usuário/quinzena/mês - indica que precisamos filtrar `/v2/expenses` por período
+- `ADICIONAIS`: ADIANTAMENTO e DIRETOR REGIONAL - indica que pode haver endpoint específico
+- `REEMBOLSO`: REEMBOLSO manual - indica que `/v2/reimbursements` pode ter dados
+- `SALDO CARTAO`: SALDO CARTAO por usuário - confirma que podemos calcular via `/v2/expenses`
+- `EXTRATO`: CARGA, DESCARGA, TARIFA por usuário/mês - indica lógica para SALDO FINAL
 
-#### Estratégia de Implementação:
+#### Estratégia de Investigação API:
 
-1. **Híbrido API + Planilhas**: Usar API para dados cadastrais em tempo real e planilhas para dados financeiros históricos
-2. **Cross-reference**: Usar CPF como chave para cruzar dados da API com planilhas
-3. **Cálculo dinâmico**: Implementar funções para calcular SALDO FINAL e SALDO REEMBOLSAR a partir do EXTRATO
-4. **Status do cartão**: Disponível diretamente na planilha 1, pode ser cruzado com transações da API para validação
+1. **STATUS DO CARTAO**: Investigar se há endpoint específico ou se pode ser inferido via transações
+2. **GESTOR/DIRETOR REGIONAL**: Investigar campos em team-members ou costs-centers
+3. **ADIANTAMENTO**: Investigar endpoint `/v2/advances` (existe mas não suporta GET)
+4. **SALDO FINAL/SALDO REEMBOLSAR**: Implementar lógica via `/v2/expenses` (CARGA - DESCARGA - TARIFA)
+5. **Filtros avançados**: Usar filtros do relatório "Despesas por Usuário" na API
 
 ### Resultados dos Testes (2026-05-20)
 
@@ -260,48 +262,54 @@ curl "http://localhost:3000/api/vexpenses/financial-calculations?year=2026&month
 
 ## Conclusão Final (2026-05-20 - ATUALIZADO)
 
-Após análise completa de todas as sheets das duas planilhas, descobri que **88% dos campos da planilha 1 podem ser automatizados** através de uma abordagem híbrida (API VExpenses + dados das próprias planilhas).
+A análise completa das planilhas foi realizada apenas para **entender a lógica dos campos e valores**. O objetivo é replicar **TUDO via API VExpenses**, sem ler dados das planilhas.
 
-**✅ O que PODEMOS automatizar (15/17 campos da planilha 1 = 88%):**
+**✅ O que já PODEMOS obter via API (11/17 campos = 65%):**
 
-**Via API VExpenses (4 campos):**
+**Dados Cadastrais (4 campos):**
 1. PORTADOR → `team-members.name`
 2. CPF → `team-members.cpf`
 3. STATUS COLAB → `team-members.active`
 4. CENTRO CUSTO → `team-members.costCenter.name`
 
-**Via Planilhas (6 campos):**
-5. GESTOR → Planilha 2 (ADICIONAIS), coluna "DIRETOR REGIONAL"
-6. 1QZ DE ABRIL 26 → Planilha 2 (QUINZENAS)
-7. SALDO CARTAO → Planilha 2 (SALDO CARTAO)
-8. ADIANTAMENTO → Planilha 2 (ADICIONAIS)
-9. REEMBOLSO → Planilha 2 (REEMBOLSO)
-10. STATUS DO CARTAO → Planilha 1 (Planilha1/2/3)
+**Dados Financeiros Calculáveis (7 campos):**
+5. 1QZ DE ABRIL 26 → `calculateQuinzena1()` usando `/v2/expenses`
+6. SALDO CARTAO → `calculateSaldoCartao()` usando `/v2/expenses`
+7. REEMBOLSO → `calculateReembolso()` usando `/v2/expenses`
+8. CARGA PARCIAL → `calculatePlanilha1Fields()` usando `/v2/expenses`
+9. CARGA FINAL → `calculatePlanilha1Fields()` usando `/v2/expenses`
+10. SALDO FINAL → `calculateSaldoFinal()` usando `/v2/expenses` (CARGA - DESCARGA - TARIFA)
+11. SALDO REEMBOLSAR → `calculateSaldoReembolsar()` usando `/v2/expenses` (CARGA - DESCARGA REEMBOLSÁVEL - TARIFA)
 
-**Via Cálculo (5 campos):**
-11. SALDO REEMBOLSAR → Calculado via Planilha 2 (EXTRATO): CARGA - DESCARGA - TARIFA
-12. SALDO FINAL → Calculado via Planilha 2 (EXTRATO): CARGA - DESCARGA - TARIFA
-13. CARGA PARCIAL → Fórmula: 1QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO
-14. CARGA FINAL → Fórmula: IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO
+**❌ O que NÃO está disponível na API (6/17 campos = 35%):**
+12. COD CENTRO CUSTO - Não disponível na API
+13. GESTOR - Não encontrado em team-members/costs-centers
+14. DIREÇÃO - Não disponível na API
+15. ADIANTAMENTO - Endpoint `/v2/advances` existe mas apenas para criar (POST), não para listar
+16. STATUS DO CARTAO - Não encontrado na API
+17. OBS - Campo manual (irrelevante)
 
-**❌ O que NÃO PODEMOS automatizar (2/17 campos = 12%):**
-1. COD CENTRO CUSTO - Não disponível em API nem planilhas
-2. DIREÇÃO - Não disponível em API nem planilhas
-3. OBS - Campo manual (irrelevante conforme usuário)
+**TOTAL ATUAL: 11/17 campos (65%) podem ser automatizados via API**
 
 **Implementação Realizada:**
 1. ✅ Criado `lib/vexpenses-calculations.ts` com funções de cálculo financeiro via API
-2. ✅ Criado endpoint `/api/vexpenses/financial-calculations` para calcular dados por usuário
-3. ✅ Testado endpoint `/v2/expenses` com sucesso
-4. ✅ Mapeados todos os campos da planilha 1
-5. ✅ Analisadas todas as sheets de ambas as planilhas
-6. ✅ Identificadas sheets com dados financeiros (QUINZENAS, ADICIONAIS, REEMBOLSO, SALDO CARTAO, EXTRATO)
+2. ✅ Implementado `calculateSaldoFinal()` e `calculateSaldoReembolsar()` baseados na lógica CARGA - DESCARGA - TARIFA
+3. ✅ Criado endpoint `/api/vexpenses/financial-calculations` para calcular dados por usuário
+4. ✅ Testado endpoint `/v2/expenses` com sucesso
+5. ✅ Analisadas todas as sheets das planilhas para entender a lógica dos campos
+6. ✅ Investigado endpoint `/v2/advances` (apenas para criar, não para listar)
+7. ✅ Investigados campos em team-members/costs-centers (não encontrado GESTOR)
 
-**Próximos Passos:**
-1. Criar funções para ler dados das sheets (QUINZENAS, ADICIONAIS, REEMBOLSO, SALDO CARTAO, EXTRATO)
-2. Implementar cálculo de SALDO FINAL e SALDO REEMBOLSAR a partir do EXTRATO
-3. Integrar dados híbridos (API + planilhas) na página `test-planilha-1`
-4. Usar CPF como chave para cruzar dados da API com planilhas
+**Campos Calculados Implementados:**
+- `calculateCargaDescargaTarifa()` - Calcula CARGA, DESCARGA e TARIFA por usuário/mês
+- `calculateSaldoFinal()` - Calcula SALDO FINAL = CARGA - DESCARGA - TARIFA
+- `calculateSaldoReembolsar()` - Calcula SALDO REEMBOLSAR considerando apenas despesas reembolsáveis
+
+**Limitações da API VExpenses:**
+- Endpoint `/v2/advances` não suporta GET (apenas POST para criar)
+- Não há campos para GESTOR/DIRETOR REGIONAL em team-members/costs-centers
+- Não há endpoint para STATUS DO CARTAO
+- Não há campo para COD CENTRO CUSTO
 
 **Recomendação Final:**
-Implementar abordagem híbrida: usar API VExpenses para dados cadastrais em tempo real e planilhas para dados financeiros históricos, alcançando **88% de automação** da planilha 1.
+Implementar os 11 campos (65%) disponíveis via API na página `test-planilha-1`, mantendo os 6 campos restantes (35%) como manuais ou buscando alternativas futuras na API VExpenses.

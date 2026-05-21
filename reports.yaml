@@ -1,0 +1,126 @@
+get:
+  tags:
+    - Relatórios
+  summary: Returns an array of reports
+  operationId: GETReports
+  parameters:
+    - in: query
+      name: include
+      schema:
+        type: string
+        enum: [expenses,expenses.apportionment,expenses.expense_type,expenses.gps,expenses.costs_center,user,payment_method,advance,approval,invoice,history]
+        default: expenses
+      description: "Flag used to return related objects,if you want to return multiple relations, you must separate them using comma. e.g.: 'expenses,user'"
+  security:
+    - Authorization: []
+  responses:
+    '200':
+      description: successful operation
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  request:
+                    type: string
+                    example: https://api.vexpenses.com/v2/reports
+                  method:
+                    type: string
+                    example: GET
+                  success:
+                    type: boolean
+                    example: true
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Reports successfully sent!
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '../components/reports-schemas.yaml#/components/schemas/Report'
+                      - type: object
+                        properties:
+                          expenses:
+                            type: object
+                            properties:
+                              data:
+                                type: array
+                                items:
+                                  allOf:
+                                  - $ref: '../components/expenses-schemas.yaml#/components/schemas/Expense'
+                                  - type: object
+                                    properties:
+                                      apportionment:
+                                        type: object
+                                        properties:
+                                          data:
+                                            type: array
+                                            items:
+                                              $ref: '../components/apportionment-schemas.yaml#/components/schemas/Apportionment'
+    '401':
+      description: "Error: Unauthorized"
+post:
+  tags:
+    - Relatórios
+  summary: Inserts an report object
+  operationId: POSTReports
+  requestBody:
+    required: true
+    description: Report model to be inserted
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            user_id:
+              type: number
+              example: 1234
+            external_id:
+              type: string
+              example: a3b52842-2a5a-45cf-a544-9cbee4c8f0e7
+            description:
+              type: string
+              example: Description
+            payment_method_id:
+              type: integer
+              example: 123123
+          required:
+            - user_id
+  security:
+    - Authorization: []
+  responses:
+    '200':
+      description: successful operation
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  request:
+                    type: string
+                    example: https://api.vexpenses.com/v2/reports
+                  method:
+                    type: string
+                    example: POST
+                  success:
+                    type: boolean
+                    example: true
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Reports successfully created!
+              - type: object
+                properties:
+                  data:
+                    $ref: '../components/reports-schemas.yaml#/components/schemas/Report'
+    '401':
+      description: "Error: Unauthorized"

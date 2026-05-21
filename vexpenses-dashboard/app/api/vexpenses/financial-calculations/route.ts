@@ -13,10 +13,12 @@ export async function GET(request: NextRequest) {
     const year = parseInt(searchParams.get('year') || '2026');
     const month = parseInt(searchParams.get('month') || '4');
     const userId = searchParams.get('userId');
+    const dayStart = parseInt(searchParams.get('dayStart') || '1');
+    const dayEnd = parseInt(searchParams.get('dayEnd') || '15');
 
     // Buscar despesas do período
-    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
-    const endDate = `${year}-${String(month).padStart(2, '0')}-31`;
+    const startDate = `${year}-${String(month).padStart(2, '0')}-${String(dayStart).padStart(2, '0')}`;
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(dayEnd).padStart(2, '0')}`;
 
     const params = new URLSearchParams();
     params.append('search', `date:${startDate},${endDate}`);
@@ -47,9 +49,9 @@ export async function GET(request: NextRequest) {
         userIdNum,
         year,
         month,
-        0, // saldoReembolsarManual (não disponível na API)
-        0, // saldoFinalManual (não disponível na API)
-        0  // adiantamentoManual (não disponível na API)
+        dayStart,
+        dayEnd,
+        0  // adiantamentoManual (não disponível na API ainda)
       );
 
       return NextResponse.json({
@@ -57,12 +59,14 @@ export async function GET(request: NextRequest) {
         userId: userIdNum,
         year,
         month,
+        dayStart,
+        dayEnd,
         data: financialData,
       });
     }
 
     // Caso contrário, calcular para todos os usuários
-    const allUsersData = calculateUserFinancialData(expenses, year, month);
+    const allUsersData = calculateUserFinancialData(expenses, year, month, dayStart, dayEnd);
 
     // Converter Map para array
     const usersArray = Array.from(allUsersData.values()).map(userData => {
@@ -71,9 +75,9 @@ export async function GET(request: NextRequest) {
         userData.userId,
         year,
         month,
-        0, // saldoReembolsarManual (não disponível na API)
-        0, // saldoFinalManual (não disponível na API)
-        0  // adiantamentoManual (não disponível na API)
+        dayStart,
+        dayEnd,
+        0  // adiantamentoManual (não disponível na API ainda)
       );
 
       return {
@@ -88,6 +92,8 @@ export async function GET(request: NextRequest) {
       success: true,
       year,
       month,
+      dayStart,
+      dayEnd,
       totalUsers: usersArray.length,
       data: usersArray,
     });

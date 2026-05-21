@@ -48,20 +48,25 @@ export interface UserFinancialData {
 export function calculateUserFinancialData(
   expenses: ExpenseData[],
   year: number,
-  month: number
+  month: number,
+  dayStart: number = 1,
+  dayEnd: number = 15
 ): Map<number, UserFinancialData> {
   const userData = new Map<number, UserFinancialData>();
 
   // Filtrar despesas do período
+  const periodStart = new Date(year, month - 1, dayStart);
+  const periodEnd = new Date(year, month - 1, dayEnd);
+
   const periodExpenses = expenses.filter(exp => {
     const expDate = new Date(exp.date);
-    return expDate.getFullYear() === year && expDate.getMonth() + 1 === month;
+    return expDate >= periodStart && expDate <= periodEnd;
   });
 
   // Calcular datas das quinzenas
-  const quinzena1Start = new Date(year, month - 1, 1);
-  const quinzena1End = new Date(year, month - 1, 15);
-  const quinzena2Start = new Date(year, month - 1, 16);
+  const quinzena1Start = new Date(year, month - 1, dayStart);
+  const quinzena1End = new Date(year, month - 1, dayEnd);
+  const quinzena2Start = new Date(year, month - 1, dayEnd + 1);
   const quinzena2End = new Date(year, month, 0); // Último dia do mês
 
   // Processar cada despesa
@@ -119,16 +124,20 @@ export function calculateUserFinancialData(
  * @param userId - ID do usuário
  * @param year - Ano
  * @param month - Mês
+ * @param dayStart - Dia inicial (padrão: 1)
+ * @param dayEnd - Dia final (padrão: 15)
  * @returns Valor total da 1ª quinzena
  */
 export function calculateQuinzena1(
   expenses: ExpenseData[],
   userId: number,
   year: number,
-  month: number
+  month: number,
+  dayStart: number = 1,
+  dayEnd: number = 15
 ): number {
-  const quinzena1Start = new Date(year, month - 1, 1);
-  const quinzena1End = new Date(year, month - 1, 15);
+  const quinzena1Start = new Date(year, month - 1, dayStart);
+  const quinzena1End = new Date(year, month - 1, dayEnd);
 
   return expenses
     .filter(exp => {
@@ -150,14 +159,21 @@ export function calculateQuinzena1(
  * @param userId - ID do usuário
  * @param year - Ano
  * @param month - Mês
+ * @param dayStart - Dia inicial (padrão: 1)
+ * @param dayEnd - Dia final (padrão: 15)
  * @returns Valor total de despesas com cartão
  */
 export function calculateSaldoCartao(
   expenses: ExpenseData[],
   userId: number,
   year: number,
-  month: number
+  month: number,
+  dayStart: number = 1,
+  dayEnd: number = 15
 ): number {
+  const periodStart = new Date(year, month - 1, dayStart);
+  const periodEnd = new Date(year, month - 1, dayEnd);
+
   return expenses
     .filter(exp => {
       const expDate = new Date(exp.date);
@@ -165,8 +181,8 @@ export function calculateSaldoCartao(
                        exp.payment_method?.data?.description?.toLowerCase().includes('card');
       return (
         exp.user_id === userId &&
-        expDate.getFullYear() === year &&
-        expDate.getMonth() + 1 === month &&
+        expDate >= periodStart &&
+        expDate <= periodEnd &&
         isCartao
       );
     })
@@ -179,25 +195,145 @@ export function calculateSaldoCartao(
  * @param userId - ID do usuário
  * @param year - Ano
  * @param month - Mês
+ * @param dayStart - Dia inicial (padrão: 1)
+ * @param dayEnd - Dia final (padrão: 15)
  * @returns Valor total de despesas reembolsáveis
  */
 export function calculateReembolso(
   expenses: ExpenseData[],
   userId: number,
   year: number,
+  month: number,
+  dayStart: number = 1,
+  dayEnd: number = 15
+): number {
+  const periodStart = new Date(year, month - 1, dayStart);
+  const periodEnd = new Date(year, month - 1, dayEnd);
+
+  return expenses
+    .filter(exp => {
+      const expDate = new Date(exp.date);
+      return (
+        exp.user_id === userId &&
+        expDate >= periodStart &&
+        expDate <= periodEnd &&
+        exp.reimbursable
+      );
+    })
+    .reduce((sum, exp) => sum + exp.value, 0);
+}
+
+/**
+ * Calcula CARGA, DESCARGA e TARIFA para um usuário em um período
+ * Baseado na análise da planilha EXTRATO
+ * @param expenses - Lista de despesas da API VExpenses
+ * @param userId - ID do usuário
+ * @param year - Ano
+ * @param month - Mês
+ * @returns Objeto com carga, descarga e tarifa
+ */
+export function calculateCargaDescargaTarifa(
+  expenses: ExpenseData[],
+  userId: number,
+  year: number,
+  month: number
+) {
+  let carga = 0;
+  let descarga = 0;
+  let tarifa = 0;
+
+  const periodExpenses = expenses.filter(exp => {
+    const expDate = new Date(exp.date);
+    return (
+      exp.user_id === userId &&
+      expDate.getFullYear() === year &&
+      expDate.getMonth() + 1 === month
+    );
+  });
+
+  for (const exp of periodExpenses) {
+    // Inferir tipo de transação baseado na descrição e valor
+    const description = (exp.title || '').toLowerCase();
+    const value = exp.value;
+
+    // CARGA: transferências positivas para o usuário
+    if (description.includes('transf.') || description.includes('carga') || description.includes('quinzena')) {
+      if (value > 0) {
+        carga += value;
+      }
+    }
+    // DESCARGA: despesas negativas ou saques
+    else if (description.includes('saque') || description.includes('estorno') || description.includes('descarga')) {
+      if (value > 0) {
+        descarga += value;
+      }
+    }
+    // TARIFA: taxas e tarifas
+    else if (description.includes('tarifa') || description.includes('taxa')) {
+      if (value > 0) {
+        tarifa += value;
+      }
+    }
+    // Despesas normais são consideradas descarga
+    else if (value > 0 && !exp.reimbursable) {
+      descarga += value;
+    }
+  }
+
+  return { carga, descarga, tarifa };
+}
+
+/**
+ * Calcula SALDO FINAL para um usuário
+ * Baseado na análise da planilha: SALDO FINAL = CARGA - DESCARGA - TARIFA
+ * @param expenses - Lista de despesas da API VExpenses
+ * @param userId - ID do usuário
+ * @param year - Ano
+ * @param month - Mês
+ * @returns Saldo final calculado
+ */
+export function calculateSaldoFinal(
+  expenses: ExpenseData[],
+  userId: number,
+  year: number,
   month: number
 ): number {
-  return expenses
+  const { carga, descarga, tarifa } = calculateCargaDescargaTarifa(expenses, userId, year, month);
+  return carga - descarga - tarifa;
+}
+
+/**
+ * Calcula SALDO REEMBOLSAR para um usuário
+ * Baseado na análise da planilha: Similar ao SALDO FINAL mas focado em reembolsáveis
+ * @param expenses - Lista de despesas da API VExpenses
+ * @param userId - ID do usuário
+ * @param year - Ano
+ * @param month - Mês
+ * @returns Saldo a reembolsar calculado
+ */
+export function calculateSaldoReembolsar(
+  expenses: ExpenseData[],
+  userId: number,
+  year: number,
+  month: number
+): number {
+  const { carga, descarga, tarifa } = calculateCargaDescargaTarifa(expenses, userId, year, month);
+
+  // Considerar apenas despesas reembolsáveis para o cálculo
+  const descargaReembolsavel = expenses
     .filter(exp => {
       const expDate = new Date(exp.date);
       return (
         exp.user_id === userId &&
         expDate.getFullYear() === year &&
         expDate.getMonth() + 1 === month &&
-        exp.reimbursable
+        exp.reimbursable &&
+        exp.value > 0
       );
     })
     .reduce((sum, exp) => sum + exp.value, 0);
+
+  return carga - descargaReembolsavel - tarifa;
 }
 
 /**
@@ -206,9 +342,9 @@ export function calculateReembolso(
  * @param userId - ID do usuário
  * @param year - Ano
  * @param month - Mês
- * @param saldoReembolsarManual - Saldo a reembolsar (manual, não disponível na API)
- * @param saldoFinalManual - Saldo final (manual, não disponível na API)
- * @param adiantamentoManual - Adiantamento (manual, não disponível na API)
+ * @param dayStart - Dia inicial (padrão: 1)
+ * @param dayEnd - Dia final (padrão: 15)
+ * @param adiantamentoManual - Adiantamento (manual, não disponível na API ainda)
  * @returns Objeto com todos os campos calculados
  */
 export function calculatePlanilha1Fields(
@@ -216,16 +352,18 @@ export function calculatePlanilha1Fields(
   userId: number,
   year: number,
   month: number,
-  saldoReembolsarManual: number = 0,
-  saldoFinalManual: number = 0,
+  dayStart: number = 1,
+  dayEnd: number = 15,
   adiantamentoManual: number = 0
 ) {
-  const quinzena1 = calculateQuinzena1(expenses, userId, year, month);
-  const saldoCartao = calculateSaldoCartao(expenses, userId, year, month);
-  const reembolso = calculateReembolso(expenses, userId, year, month);
+  const quinzena1 = calculateQuinzena1(expenses, userId, year, month, dayStart, dayEnd);
+  const saldoCartao = calculateSaldoCartao(expenses, userId, year, month, dayStart, dayEnd);
+  const reembolso = calculateReembolso(expenses, userId, year, month, dayStart, dayEnd);
+  const saldoFinal = calculateSaldoFinal(expenses, userId, year, month, dayStart, dayEnd);
+  const saldoReembolsar = calculateSaldoReembolsar(expenses, userId, year, month, dayStart, dayEnd);
 
   // CARGA PARCIAL = 1QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO
-  const cargaParcial = quinzena1 - saldoFinalManual - saldoCartao - adiantamentoManual;
+  const cargaParcial = quinzena1 - saldoFinal - saldoCartao - adiantamentoManual;
 
   // CARGA FINAL = IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO
   const cargaFinal = (cargaParcial < 0 ? 0 : cargaParcial) + reembolso;
@@ -236,8 +374,8 @@ export function calculatePlanilha1Fields(
     reembolso,           // REEMBOLSO
     cargaParcial,        // CARGA PARCIAL
     cargaFinal,          // CARGA FINAL
-    saldoReembolsar: saldoReembolsarManual,  // SALDO REEMBOLSAR (manual)
-    saldoFinal: saldoFinalManual,            // SALDO FINAL (manual)
-    adiantamento: adiantamentoManual,        // ADIANTAMENTO (manual)
+    saldoReembolsar,     // SALDO REEMBOLSAR (calculado via API)
+    saldoFinal,          // SALDO FINAL (calculado via API)
+    adiantamento: adiantamentoManual,  // ADIANTAMENTO (manual por enquanto)
   };
 }

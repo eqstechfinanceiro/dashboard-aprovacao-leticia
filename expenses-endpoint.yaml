@@ -1,0 +1,142 @@
+get:
+  tags:
+    - expenses
+  summary: Returns an array of expenses
+  operationId: GETExpenses
+  parameters:
+    - in: query
+      name: include
+      schema:
+        type: string
+        enum: [apportionment,user,expense_type,costs_center,payment_method,report,gps,fueling]
+      description: "Flag used to return related objects, if you want to return multiple relations, you must separate them using comma. e.g.: 'expenses,user'"
+    - in: query
+      name: search
+      schema:
+        type: string
+        default: date:2021-01-01,2021-03-31;report.approval_date:2021-01-01,2021-03-31;payment_date:2021-01-01;created_at:2021-01-01;report.id:123
+      description: Field that you can customize your filter in some columns
+    - in: query
+      name: searchFields
+      schema:
+        type: string
+        default: "date:between;report.approval_date:between;payment_date:>=;created_at:=;report.id:="
+      description: Field that you will declare what is the comparator for the columns in the 'search' field, when using between, 2 dates separed by comma are required
+    - in: query
+      name: searchJoin
+      schema:
+        type: string
+        default: and
+      description: Flag that you will say to the filter what is his connection between the fields of the filter
+
+  security:
+    - Authorization: []
+  responses:
+    '200':
+      description: successful operation
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  request:
+                    type: string
+                    example: https://api.vexpenses.com/v2/expenses
+                  method:
+                    type: string
+                    example: GET
+                  success:
+                    type: boolean
+                    example: true
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Expenses successfully sent!
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                      - $ref: '../components/expenses-schemas.yaml#/components/schemas/Expense'
+                      - type: object
+                        properties:
+                          apportionment:
+                            type: array
+                            items:
+                              $ref: '../components/apportionment-schemas.yaml#/components/schemas/Apportionment'
+    '401':
+      description: "Error: Unauthorized"
+post:
+  tags:
+    - expenses
+  summary: Inserts an expense object
+  operationId: POSTExpense
+  parameters:
+    - in: query
+      name: include
+      schema:
+        type: string
+        enum: [apportionment]
+        default: apportionment
+      description: "Flag used to return related objects"
+  requestBody:
+    required: true
+    description: expense model to be inserted
+    content:
+      application/json:
+        schema:
+          allOf:
+            - $ref: '../components/expenses-schemas.yaml#/components/schemas/Expense_clear'
+            - required:
+              - user_id
+              - external_id
+              - date
+              - paying_company_id
+              - value
+              - title
+
+  security:
+    - Authorization: []
+  responses:
+    '200':
+      description: successful operation
+      content:
+        application/json:
+          schema:
+            allOf:
+              - type: object
+                properties:
+                  request:
+                    type: string
+                    example: https://api.vexpenses.com/v2/expenses
+                  method:
+                    type: string
+                    example: POST
+                  success:
+                    type: boolean
+                    example: true
+                  code:
+                    type: integer
+                    example: 200
+                  message:
+                    type: string
+                    example: Expenses successfully created!
+              - type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '../components/expenses-schemas.yaml#/components/schemas/Expense'
+                        - type: object
+                          properties:
+                            apportionment:
+                              type: array
+                              items:
+                                $ref: '../components/apportionment-schemas.yaml#/components/schemas/Apportionment'
+    '401':
+      description: "Error: Unauthorized"
