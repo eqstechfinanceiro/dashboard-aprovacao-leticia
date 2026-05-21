@@ -18,7 +18,6 @@ COPY --from=builder /app/vexpenses-dashboard/package*.json ./vexpenses-dashboard
 RUN cd vexpenses-dashboard && npm ci --only=production
 
 COPY --from=builder /app/vexpenses-dashboard/.next ./vexpenses-dashboard/.next
-COPY --from=builder /app/vexpenses-dashboard/public ./vexpenses-dashboard/public
 
 EXPOSE 3000
 
