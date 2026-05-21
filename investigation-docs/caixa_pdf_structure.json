@@ -1,0 +1,17 @@
+{
+  "investigation_date": "2026-05-21T18:10:09.306071",
+  "report_id": 10121889,
+  "description": "CAIXA 04/2026",
+  "found_keywords": [
+    {
+      "keyword": "RESUMO POR PROJETO",
+      "context": "M MARÍTIMA\nNão\nBRL\n600,00\n80296462\nFRETE FLUVIAL\nCEF AM AC RR\nREGIONAL\nCO\n01/04/2026\nPASSAGEM MARÍTIMA\nNão\nBRL\n130,00\nTotal:\nBRL\n17208,15\n#\nTítulo\nCentro de\nCusto\nProjeto\nData\nTipo\nReembolsável\nValor\nResumo por projeto:\nProjeto\nTotal\nREGIONAL CO\nBRL 17208,15\nResumo por reembolsável:\nTipo\nTotal\nNão reembolsável\nBRL 17208,15\nLinha do Tempo:\nAção\nData\nUsuário\nComentário\nCriado\n12/04/2026\n11:48:40\nABNER\nANDRADE\nCAVALCANTE\nEnviado\n06/05/2026\n12:39:25\nABNER\nANDRADE\nCAVALCANTE\nReprovado\n20/05/2026\n15:1"
+    },
+    {
+      "keyword": "USUÁRIO",
+      "context": "21/05/2026 14:05:09\nDespesas por Usuários\nEnviado\nABNER ANDRADE CAVALCANTE \n- Banco: \n/ AG: \n/ CC: \n/ Pix: \n/ CPF/CNPJ: 020.277.452-03\n#10121889 - CAIXA 04/2026\n#\nTítulo\nCentro de\nCusto\nProjeto\nData\nTipo\nReembolsável\nValor\n81577251\nFRETE FLUVIAL\nCEF AM AC RR\nREGIONAL\nCO\n30/04/2026\nPASSAGEM MARÍTIMA\nNão\nBRL\n600,00\n81578019\nFRETE\nCEF"
+    }
+  ],
+  "found_values": [],
+  "total_caixa_reports": 250
+}

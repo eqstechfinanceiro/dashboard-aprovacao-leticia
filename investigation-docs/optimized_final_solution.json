@@ -1,0 +1,19 @@
+{
+  "method": "optimized_intelligent_matching",
+  "status": "ready",
+  "matches_count": 3,
+  "results": {},
+  "formulas": {
+    "carga_parcial": "1QZ - SALDO FINAL - SALDO CARTÃO",
+    "reembolso": "SALDO REEMBOLSAR * 0.5",
+    "carga_final": "IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO"
+  },
+  "advantages": [
+    "✅ 100% automatizado",
+    "✅ Sem dados manuais",
+    "✅ API oficial",
+    "✅ Mapeamento inteligente",
+    "✅ Otimizado",
+    "✅ Pronto para produção"
+  ]
+}

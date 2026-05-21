@@ -1,0 +1,79 @@
+{
+  "version": "2.0",
+  "creation_date": "2026-05-21T19:07:08.802435",
+  "status": "NEEDS_REFINEMENT",
+  "precision": "66.2%",
+  "taxa_saldo_final": "136.4334%",
+  "method": "TAXA_EXATA_CALCULADA",
+  "discovery_method": "SALDO_FINAL_ESPERADO / TOTAL_ANUAL",
+  "users_processed": 3,
+  "solution_data": {
+    "JONAS CAVALCANTI": {
+      "user_id": 895945,
+      "calculated_values": {
+        "quinzena_1qz": 1749.6200000000001,
+        "saldo_final": 9265.71196111572,
+        "saldo_cartao": 0.174962,
+        "saldo_reembolsar": 87.48100000000001,
+        "adiantamento": 500,
+        "carga_parcial": 0,
+        "reembolso": 43.740500000000004,
+        "carga_final": 43.740500000000004
+      },
+      "validation": {
+        "saldo_final_esperado": 6945.16,
+        "saldo_final_calculado": 9265.71196111572,
+        "diff": 2320.5519611157197,
+        "precision": 66.58749458449165
+      }
+    },
+    "RODRIGO CESAR": {
+      "user_id": 895946,
+      "calculated_values": {
+        "quinzena_1qz": 1641.96,
+        "saldo_final": 7682.634065335866,
+        "saldo_cartao": 0.164196,
+        "saldo_reembolsar": 82.09800000000001,
+        "adiantamento": 500,
+        "carga_parcial": 0,
+        "reembolso": 41.04900000000001,
+        "carga_final": 41.04900000000001
+      },
+      "validation": {
+        "saldo_final_esperado": 6626.04,
+        "saldo_final_calculado": 7682.634065335866,
+        "diff": 1056.5940653358657,
+        "precision": 84.05391356925304
+      }
+    },
+    "CAIO FRANCESCONI": {
+      "user_id": 895947,
+      "calculated_values": {
+        "quinzena_1qz": 411.46,
+        "saldo_final": 3127.053973548416,
+        "saldo_cartao": 0.041146,
+        "saldo_reembolsar": 20.573,
+        "adiantamento": 500,
+        "carga_parcial": 0,
+        "reembolso": 10.2865,
+        "carga_final": 10.2865
+      },
+      "validation": {
+        "saldo_final_esperado": 6504.2,
+        "saldo_final_calculado": 3127.053973548416,
+        "diff": 3377.146026451584,
+        "precision": 48.07745723606924
+      }
+    }
+  },
+  "implementation": {
+    "ready": false,
+    "taxa_type": "dinamica",
+    "validation": "comparacao_direta"
+  },
+  "next_steps": [
+    "Implementar com taxa dinâmica",
+    "Monitorar precisão",
+    "Ajustar se necessário"
+  ]
+}

@@ -1,0 +1,356 @@
+{
+  "investigation_date": "2026-05-21T18:01:33.827053",
+  "user_saldo_data": {
+    "PORTADOR": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 0.0,
+      "saldo_cartao": 0.0,
+      "quinzena_qz": 126.0,
+      "row": 6
+    },
+    "RAFAEL AMORIM VELLO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 291.6600000002072,
+      "saldo_cartao": 20.0,
+      "quinzena_qz": 16000.0,
+      "row": 7
+    },
+    "ABNER ANDRADE CAVALCANTE": {
+      "saldo_reembolsar": -98.92000000007101,
+      "saldo_final": 0.0,
+      "saldo_cartao": 5.0,
+      "quinzena_qz": 9840.0,
+      "row": 8
+    },
+    "ANDRE ARANHA MEISTER": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 18329.5,
+      "saldo_cartao": 1154.94,
+      "quinzena_qz": 9000.0,
+      "row": 9
+    },
+    "JAEDER RODRIGUES JUNIOR": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1614.4399999999296,
+      "saldo_cartao": 2.0,
+      "quinzena_qz": 7000.0,
+      "row": 10
+    },
+    "JUSTINO NOGUEIRA PEIXOTO JUNIOR": {
+      "saldo_reembolsar": -428.8200000000006,
+      "saldo_final": 0.0,
+      "saldo_cartao": 7000.0,
+      "quinzena_qz": 7000.0,
+      "row": 11
+    },
+    "EDSON VEIGA SILVEIRA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 226.65000000002146,
+      "saldo_cartao": 4635.66,
+      "quinzena_qz": 6800.0,
+      "row": 12
+    },
+    "LUDGERO HORACIO DE OLIVEIRA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3693.100000000008,
+      "saldo_cartao": 981.69,
+      "quinzena_qz": 6500.0,
+      "row": 13
+    },
+    "BRUNO OLIVEIRA DIAS": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 4637.600000000019,
+      "saldo_cartao": 4283.83,
+      "quinzena_qz": 6200.0,
+      "row": 14
+    },
+    "JOSE CARLOS BATISTA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1674.2699999999822,
+      "saldo_cartao": 58.0,
+      "quinzena_qz": 6000.0,
+      "row": 15
+    },
+    "LUCAS MARTINS MACAN": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1784.5300000000184,
+      "saldo_cartao": 4.06,
+      "quinzena_qz": 6000.0,
+      "row": 16
+    },
+    "SAULO ARAUJO DE PAULA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3099.9500000000035,
+      "saldo_cartao": 62.3,
+      "quinzena_qz": 5750.0,
+      "row": 17
+    },
+    "FLAVIO FERNANDES DOS REIS LIMA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 7169.960000000001,
+      "saldo_cartao": 284.08,
+      "quinzena_qz": 5700.0,
+      "row": 18
+    },
+    "WALTER DE CAMPOS NUNES NETO": {
+      "saldo_reembolsar": -324.53999999999746,
+      "saldo_final": 0.0,
+      "saldo_cartao": 317.49,
+      "quinzena_qz": 5600.0,
+      "row": 19
+    },
+    "ANTONIO FERREIRA DE MENDONCA NETO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3904.2399999999893,
+      "saldo_cartao": 695.1,
+      "quinzena_qz": 5000.0,
+      "row": 20
+    },
+    "BRUNO FERREIRA DE SOUZA RODRIGUES": {
+      "saldo_reembolsar": -31.869999999908032,
+      "saldo_final": 0.0,
+      "saldo_cartao": 5.0,
+      "quinzena_qz": 5000.0,
+      "row": 21
+    },
+    "JOELSON FERREIRA DOS SANTOS": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 5903.249999999942,
+      "saldo_cartao": 57.18,
+      "quinzena_qz": 5000.0,
+      "row": 22
+    },
+    "MARCO AURELIO DE ANDRADE MORAES": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 2658.659999999996,
+      "saldo_cartao": 5.0,
+      "quinzena_qz": 5000.0,
+      "row": 23
+    },
+    "VICTOR SIGOLO PINHEIRO PIMENTA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3076.0199999999286,
+      "saldo_cartao": 20.13,
+      "quinzena_qz": 5000.0,
+      "row": 24
+    },
+    "SANDRO BARRETO DE SOUZA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1167.3399999999674,
+      "saldo_cartao": 9.0,
+      "quinzena_qz": 4240.0,
+      "row": 25
+    },
+    "CHARLES NEVES MATTIUZZI": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3430.109999999989,
+      "saldo_cartao": 19.73,
+      "quinzena_qz": 4200.0,
+      "row": 26
+    },
+    "CARLOS NASCIMENTO NONATO JUNIOR": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 7077.3199999999915,
+      "saldo_cartao": 582.28,
+      "quinzena_qz": 4000.0,
+      "row": 27
+    },
+    "EDUARDO ANDREY VENSON SILVA": {
+      "saldo_reembolsar": -743.8300000000349,
+      "saldo_final": 0.0,
+      "saldo_cartao": 14.73,
+      "quinzena_qz": 4000.0,
+      "row": 28
+    },
+    "ENZIO CARVALHO DA MOTA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 2472.899999999964,
+      "saldo_cartao": 16.21,
+      "quinzena_qz": 4000.0,
+      "row": 29
+    },
+    "FRANCIELLY FELIX CAVALCANTE DE ANDRADE": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 798.7799999999988,
+      "saldo_cartao": 4002.0,
+      "quinzena_qz": 4000.0,
+      "row": 30
+    },
+    "LEANDRO FIGUEREDO BELCHIOR": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 2786.980000000002,
+      "saldo_cartao": 1213.02,
+      "quinzena_qz": 4000.0,
+      "row": 31
+    },
+    "LUCIANO JOSE DO AMARAL PEREIRA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3591.9099999999203,
+      "saldo_cartao": 49.52,
+      "quinzena_qz": 4000.0,
+      "row": 32
+    },
+    "ORESTE BARBOSA DA SILVA JUNIOR": {
+      "saldo_reembolsar": -2304.479999999798,
+      "saldo_final": 0.0,
+      "saldo_cartao": 2.15,
+      "quinzena_qz": 4000.0,
+      "row": 33
+    },
+    "RONALDO RUFINO SANTANA": {
+      "saldo_reembolsar": -927.0200000000367,
+      "saldo_final": 0.0,
+      "saldo_cartao": 6.59,
+      "quinzena_qz": 4000.0,
+      "row": 34
+    },
+    "SANDRO CAPISTRANO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3452.979999999961,
+      "saldo_cartao": 15.15,
+      "quinzena_qz": 4000.0,
+      "row": 35
+    },
+    "TERCILA DA SILVA LOPES": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 4162.209999999999,
+      "saldo_cartao": 1.42,
+      "quinzena_qz": 4000.0,
+      "row": 36
+    },
+    "UBIRAJARA DE ARAUJO TEIXEIRA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3920.1699999999987,
+      "saldo_cartao": 6.94,
+      "quinzena_qz": 4000.0,
+      "row": 37
+    },
+    "CAIO FRANCESCONI RIBEIRO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 6499.380000000004,
+      "saldo_cartao": 4.82,
+      "quinzena_qz": 3900.0,
+      "row": 38
+    },
+    "MICHAEL RODRIGUES SANTOS": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1798.5599999999467,
+      "saldo_cartao": 2.0,
+      "quinzena_qz": 3350.0,
+      "row": 39
+    },
+    "FERNANDO RODRIGUES DUARTE": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 553.3900000000067,
+      "saldo_cartao": 2.0,
+      "quinzena_qz": 3200.0,
+      "row": 40
+    },
+    "ALESSANDRO DE OLIVEIRA AZEVEDO": {
+      "saldo_reembolsar": -807.6099999999881,
+      "saldo_final": 0.0,
+      "saldo_cartao": 337.99,
+      "quinzena_qz": 3000.0,
+      "row": 41
+    },
+    "CLERITON BACILA DOS SANTOS": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 4815.379999999993,
+      "saldo_cartao": 1087.63,
+      "quinzena_qz": 3000.0,
+      "row": 42
+    },
+    "EMERSON LEITE DE BARROS": {
+      "saldo_reembolsar": -2799.1900000000023,
+      "saldo_final": 0.0,
+      "saldo_cartao": 0.0,
+      "quinzena_qz": 3000.0,
+      "row": 43
+    },
+    "JESSICA DE MIRANDA MEDEIROS FELICIANO": {
+      "saldo_reembolsar": -4.350000000033178,
+      "saldo_final": 0.0,
+      "saldo_cartao": 6.58,
+      "quinzena_qz": 3000.0,
+      "row": 44
+    },
+    "PAULO NILTON COSTA MOREIRA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 994.1399999999703,
+      "saldo_cartao": 402.0,
+      "quinzena_qz": 3000.0,
+      "row": 45
+    },
+    "ANDRE LUIZ SANTANA": {
+      "saldo_reembolsar": -476.1000000000204,
+      "saldo_final": 0.0,
+      "saldo_cartao": 9.0,
+      "quinzena_qz": 2800.0,
+      "row": 46
+    },
+    "CARLOS RENATO PACHECO DA SILVA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 3205.39,
+      "saldo_cartao": 8.77,
+      "quinzena_qz": 2800.0,
+      "row": 47
+    },
+    "EVERTON CAMARGO DE LOURETO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1624.3099999999272,
+      "saldo_cartao": 12.44,
+      "quinzena_qz": 2800.0,
+      "row": 48
+    },
+    "FABIO DIOGO BITTENCOURT": {
+      "saldo_reembolsar": -5689.280000000072,
+      "saldo_final": 0.0,
+      "saldo_cartao": 9.0,
+      "quinzena_qz": 2800.0,
+      "row": 49
+    },
+    "JAFER DA FONTOURA AHMAD": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1709.0099999999882,
+      "saldo_cartao": 6.86,
+      "quinzena_qz": 2800.0,
+      "row": 50
+    },
+    "RODRIGO VANZETTA": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 52.87000000000262,
+      "saldo_cartao": 9.0,
+      "quinzena_qz": 2800.0,
+      "row": 51
+    },
+    "DANIEL DA SILVA LOPES": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 396.44999999999817,
+      "saldo_cartao": 289.55,
+      "quinzena_qz": 2710.0,
+      "row": 52
+    },
+    "WESLLEY GABRIEL DA SILVA CARDOSO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1574.6900000000037,
+      "saldo_cartao": 8.81,
+      "quinzena_qz": 2700.0,
+      "row": 53
+    },
+    "CAIOS VINICIUS NUNES BROERING": {
+      "saldo_reembolsar": -31.299999999997567,
+      "saldo_final": 0.0,
+      "saldo_cartao": 350.6,
+      "quinzena_qz": 2520.0,
+      "row": 54
+    },
+    "DAVID DE OLIVEIRA FRIGERIO": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 1047.399999999998,
+      "saldo_cartao": 2.84,
+      "quinzena_qz": 2500.0,
+      "row": 55
+    }
+  },
+  "correlations": []
+}

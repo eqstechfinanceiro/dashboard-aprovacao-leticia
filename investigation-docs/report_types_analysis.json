@@ -1,0 +1,269 @@
+{
+  "investigation_date": "2026-05-21T18:05:59.265155",
+  "total_reports": 6534,
+  "unique_types": 830,
+  "saldo_reports_count": 57,
+  "saldo_reports": [
+    {
+      "id": 7542195,
+      "description": "CAIXA 05/25 CARTÃO VEXPENSES"
+    },
+    {
+      "id": 7573940,
+      "description": "CAIXA 06/2025 CARTÃO VEXPENSES"
+    },
+    {
+      "id": 7659645,
+      "description": "FATURA 06/25 CREDITO ITAU"
+    },
+    {
+      "id": 7850775,
+      "description": "FATURA 07/25 CREDITO ITAU"
+    },
+    {
+      "id": 8278689,
+      "description": "CAIXA 09/25 CARTÃO VEXPENSES"
+    },
+    {
+      "id": 8278799,
+      "description": "FATURA 09/25 CREDITO ITAU"
+    },
+    {
+      "id": 7514578,
+      "description": "MAIO/25 - CARTÃO CORPORATIVO ITAÚ"
+    },
+    {
+      "id": 7514711,
+      "description": "ABRIL/25 - CARTÃO CORPORATIVO ITAÚ"
+    },
+    {
+      "id": 7665439,
+      "description": "Cartão de Crédito -06/2025"
+    },
+    {
+      "id": 7802541,
+      "description": "Cartão de Crédito - 07/2025"
+    },
+    {
+      "id": 7938134,
+      "description": "Cartão de Crédito - 08/2025"
+    },
+    {
+      "id": 8393169,
+      "description": "Cartão de Crédito - 09/2025"
+    },
+    {
+      "id": 8580684,
+      "description": "Cartão de Crédito - 10/2025"
+    },
+    {
+      "id": 9041481,
+      "description": "Cartão de Crédito - 11/2025"
+    },
+    {
+      "id": 9451717,
+      "description": "Cartão de Crédito - 12/2025"
+    },
+    {
+      "id": 9451756,
+      "description": "Cartão de Crédito - 01/2026"
+    },
+    {
+      "id": 9451775,
+      "description": "Cartão de Crédito - 02/2026"
+    },
+    {
+      "id": 7634925,
+      "description": "CARTÃO DE CRÉDITO ITAÚ- FATURA 04/2025"
+    },
+    {
+      "id": 7831093,
+      "description": "Cartão de crédito 06/2025"
+    },
+    {
+      "id": 7831436,
+      "description": "Cartão de Crédito 07/2025"
+    },
+    {
+      "id": 7843373,
+      "description": "Cartão de Crédito 05/2025"
+    },
+    {
+      "id": 7990903,
+      "description": "Cartão de crédito 08/2025"
+    },
+    {
+      "id": 8339562,
+      "description": "Cartão de crédito 09/2025"
+    },
+    {
+      "id": 8570282,
+      "description": "Cartão de crédito 10/2025"
+    },
+    {
+      "id": 8928463,
+      "description": "Cartão de Crédito 11/2025"
+    },
+    {
+      "id": 9244838,
+      "description": "Cartão de Crédito 12/2025"
+    },
+    {
+      "id": 9401041,
+      "description": "Cartão de Crédito 01/2026"
+    },
+    {
+      "id": 9591313,
+      "description": "Cartão de Crédito 02/2026"
+    },
+    {
+      "id": 8219659,
+      "description": "Relatório gastos cartão de crédito Itaú fatura 07/2025"
+    },
+    {
+      "id": 7712356,
+      "description": "FATURA 07/2025 CARTÃO "
+    },
+    {
+      "id": 7901487,
+      "description": "Cartão 04/2025"
+    },
+    {
+      "id": 7618874,
+      "description": "CARTÃO DE CREDITO 04/2025"
+    },
+    {
+      "id": 7747205,
+      "description": "CARTÃO DE CREDITO - 06/2025"
+    },
+    {
+      "id": 8052153,
+      "description": "CARTÃO DE CREDITO 07/2025"
+    },
+    {
+      "id": 7802955,
+      "description": "Cartão Vexpenses (CAIXA 06/2025)"
+    },
+    {
+      "id": 7572612,
+      "description": "CARTÃO DE CREDITO 05/2025"
+    },
+    {
+      "id": 7628732,
+      "description": "CARTÃO DE CREDITO 04/2025"
+    },
+    {
+      "id": 7765270,
+      "description": "CARTÃO DE CREDITO - 06/2025"
+    },
+    {
+      "id": 8054139,
+      "description": "CARTAO DE CRÉDITO - 07/2025"
+    },
+    {
+      "id": 9302713,
+      "description": "Cartão vexpenses 11/2025"
+    },
+    {
+      "id": 7488552,
+      "description": "FAtura 05/2025 (Cartão Corporativo Itaú)"
+    },
+    {
+      "id": 7739077,
+      "description": "Fatura 07/2025 (Cartão Corporativo Itaú )"
+    },
+    {
+      "id": 7815008,
+      "description": "Fatura 08/2025 ( Cartão corporativo Itaú )"
+    },
+    {
+      "id": 8125172,
+      "description": "Fatura 08/2025 (Cartão Corporativo Itaú)"
+    },
+    {
+      "id": 8301027,
+      "description": "Fatura - 09/2025 (Cartão Corporativo Itaú )"
+    },
+    {
+      "id": 8595770,
+      "description": "Fatura 10/2025 (Cartão Itaú Coorporativo )"
+    },
+    {
+      "id": 8897892,
+      "description": "Fatura 11/2025 (Cartão Corporativo Itau)"
+    },
+    {
+      "id": 9281103,
+      "description": "FATURA 01/2026(Cartão corporativo Itaú)"
+    },
+    {
+      "id": 9318216,
+      "description": "Fatura 02/2026 ( Cartão Itaú  Corporativo )"
+    },
+    {
+      "id": 9581884,
+      "description": "FATURA 03/2026 (Cartão Corporativo Itau)"
+    },
+    {
+      "id": 10065760,
+      "description": "FATURA 04/2026 (Cartão Corporativo)"
+    },
+    {
+      "id": 7618780,
+      "description": "despesa 05/25 fatura cartão de credito Itaú   "
+    },
+    {
+      "id": 7777531,
+      "description": "despesa 06/25 fatura cartão de credito Itaú    "
+    },
+    {
+      "id": 8116392,
+      "description": "CAIXA 08/2025 - COMPRAS COM O CARTÃO"
+    },
+    {
+      "id": 7881844,
+      "description": "FATURA CARTÃO JULHO 25"
+    },
+    {
+      "id": 7904207,
+      "description": "FATURA CARTÃO MAIO 2025"
+    },
+    {
+      "id": 7914113,
+      "description": "FATURA CARTÃO 06/2025"
+    }
+  ],
+  "common_types": {
+    "CAIXA 10/2025": 297,
+    "CAIXA 09/2025": 293,
+    "CAIXA 12/2025": 291,
+    "CAIXA 08/2025": 286,
+    "CAIXA 07/2025": 281,
+    "CAIXA 01/2026": 275,
+    "CAIXA 02/2026": 266,
+    "CAIXA 11/2025": 263,
+    "CAIXA 06/2025": 252,
+    "CAIXA 03/2026": 250,
+    "CAIXA 04/2026": 247,
+    "CAIXA 05/2026": 173,
+    "FATURA 06/2025": 168,
+    "FATURA 09/2025": 160,
+    "FATURA 08/2025": 158,
+    "FATURA 12/2025": 156,
+    "FATURA 07/2025": 154,
+    "FATURA 10/2025": 153,
+    "FATURA 03/2026": 153,
+    "FATURA 02/2026": 151,
+    "FATURA 11/2025": 150,
+    "FATURA 04/2026": 146,
+    "FATURA 01/2026": 141,
+    "FATURA 05/2026": 127,
+    "CAIXA 05/2025": 97,
+    "FATURA 06/2026": 62,
+    "FATURA 05/2025": 39,
+    "Caixa 03/2026": 29,
+    "Caixa 01/2026": 22,
+    "Caixa 07/2025": 20
+  },
+  "conclusion": "ENCONTRADOS 57 REPORTS POTENCIALMENTE RELACIONADOS A SALDO"
+}

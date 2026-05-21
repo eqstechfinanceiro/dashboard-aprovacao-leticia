@@ -1,0 +1,45 @@
+{
+  "implementation_date": "2026-05-21T17:09:10.064612",
+  "general_report": {
+    "user_id": null,
+    "period": "Maio 2026 (1ª Quinzena)",
+    "calculated_values": {
+      "saldo_reembolsar": 0.0,
+      "saldo_final": 0,
+      "quinzena_qz": 587976.23,
+      "saldo_cartao": 50,
+      "adiantamento": 119500,
+      "carga_parcial": 468426.23,
+      "reembolso": 0.0,
+      "carga_final": 468426.23
+    },
+    "formulas_used": {
+      "carga_parcial": "1ª QZ - SALDO FINAL - SALDO CARTÃO - ADIANTAMENTO",
+      "reembolso": "SALDO REEMBOLSAR * taxa_multiplicadora",
+      "carga_final": "IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO"
+    }
+  },
+  "sheet_comparison": {
+    "JONAS CAVALCANTI": {
+      "saldo_final": 6945.16,
+      "quinzena_qz": 1750,
+      "saldo_cartao": 15.21
+    },
+    "RODRIGO CESAR": {
+      "saldo_final": 6626.04,
+      "quinzena_qz": 700,
+      "saldo_cartao": 0
+    },
+    "CAIO FRANCESCONI": {
+      "saldo_final": 6504.2,
+      "quinzena_qz": 3900,
+      "saldo_cartao": 0
+    }
+  },
+  "formulas_discovered": {
+    "carga_parcial": "=Tabela1[[#This Row],[1ª QZ]]-Tabela1[[#This Row],[SALDO FINAL]]-Tabela1[[#This Row],[SALDO CARTAO]]-Tabela1[[#This Row],[ADIANTAMENTO]]",
+    "reembolso": "=Tabela1[[#This Row],[SALDO REEMBOLSAR]]*$N$4",
+    "carga_final": "=IF(Tabela1[[#This Row],[CARGA PARCIAL]]<0,0,Tabela1[[#This Row],[CARGA PARCIAL]])+Tabela1[[#This Row],[REEMBOLSO]]"
+  },
+  "status": "Formulas exatas implementadas com sucesso"
+}

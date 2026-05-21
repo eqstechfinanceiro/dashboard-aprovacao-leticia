@@ -1,0 +1,47 @@
+{
+  "report_10121889": {
+    "description": "CAIXA 04/2026",
+    "pdf_size": 9662003,
+    "text_length": 39519,
+    "saldo_matches": [
+      {
+        "target": 20,
+        "found": true
+      },
+      {
+        "target": 5,
+        "found": true
+      }
+    ]
+  },
+  "report_10344046": {
+    "description": "CAIXA 05/2026",
+    "pdf_size": 2146010,
+    "text_length": 14319,
+    "saldo_matches": [
+      {
+        "target": 20,
+        "found": true
+      },
+      {
+        "target": 5,
+        "found": true
+      }
+    ]
+  },
+  "report_9980059": {
+    "description": "despesas/ saque 03/2026",
+    "pdf_size": 96033,
+    "text_length": 3834,
+    "saldo_matches": [
+      {
+        "target": 20,
+        "found": true
+      },
+      {
+        "target": 5,
+        "found": true
+      }
+    ]
+  }
+}

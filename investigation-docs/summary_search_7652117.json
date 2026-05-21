@@ -1,0 +1,24 @@
+{
+  "investigation_date": "2026-05-21T18:09:05.275474",
+  "report_id": 7652117,
+  "description": "FATURA 06/2025",
+  "summary_sections": [
+    {
+      "keyword": "RESUMO",
+      "context": "25611\nTOKIO COMPONENT\nCEF AM AC RR\nREGIONAL CO\n07/05/2025\nMATERIAL\nNão\nBRL 25,00\nTotal:\nBRL 1901,02\nResumo por projeto:\nProjeto\nTotal\nREGIONAL CO\nBRL 1901,02\nResumo por reembolsável:\nTipo\nTotal\nNão reembolsável\nBRL 1901,02\nLinha do Tempo:\nAção\nData\nUsuário\nComentário\nCriado\n13/06/2025\n13:41:52\nABNER\nANDRADE\nCAVALCANTE\nEnviado\n19/06/2025\n14:53:34\nABNER\nANDRADE\nCAVALCANTE\nAprovado\n02/07/2025\n10:44:14\nFABIO\nNOGUEIRA\nPEIXOTO\nReprovado\npelo\nadministrador\n27/08/2025\n10:43:01\nJULIA\nFIGUEIREDO\nNECHEL\nREPROVANDO POIS O RELATORIO FOI APROVADO ANTES DE PASSAR PELO CAIXA E O NOME ESTA\nINCORRETO - ENVIAR N"
+    },
+    {
+      "keyword": "RESUMO POR PROJETO",
+      "context": "25611\nTOKIO COMPONENT\nCEF AM AC RR\nREGIONAL CO\n07/05/2025\nMATERIAL\nNão\nBRL 25,00\nTotal:\nBRL 1901,02\nResumo por projeto:\nProjeto\nTotal\nREGIONAL CO\nBRL 1901,02\nResumo por reembolsável:\nTipo\nTotal\nNão reembolsável\nBRL 1901,02\nLinha do Tempo:\nAção\nData\nUsuário\nComentário\nCriado\n13/06/2025\n13:41:52\nABNER\nANDRADE\nCAVALCANTE\nEnviado\n19/06/2025\n14:53:34\nABNER\nANDRADE\nCAVALCANTE\nAprovado\n02/07/2025\n10:44:14\nFABIO\nNOGUEIRA\nPEIXOTO\nReprovado\npelo\nadministrador\n27/08/2025\n10:43:01\nJULIA\nFIGUEIREDO\nNECHEL\nREPROVANDO POIS O RELATORIO FOI APROVADO ANTES DE PASSAR PELO CAIXA E O NOME ESTA\nINCORRETO - ENVIAR N"
+    },
+    {
+      "keyword": "USUÁRIO",
+      "context": "21/05/2026 18:06:28\nDespesas por Usuários\nAprovado\nABNER ANDRADE CAVALCANTE \n- Banco: \n/ AG: \n/ CC: \n/ Pix: \n/ CPF/CNPJ: 020.277.452-03\n#7652117 - FATURA 06/2025\n#\nTítulo\nCentro de Custo\nProjeto\nData\nTipo\nReembolsável\nValor\n61523302\nMRJMATWRIASDE\nCEF AM AC RR\nREGIONAL CO\n31/05/2025\nMATERIAL\nNão\nBRL 55,00\n61381154\nPAYGO*REFRIGASE\nCEF AM AC RR\nREGIONAL CO\n28/05/2025\nMATERIAL\nNão\nBRL 55,00\n61381153\nMP *CLIMAXTEMP\nCEF AM AC RR\nREGIONAL CO\n28/05/2025\nMATERIAL\nNão\nBRL 49,00\n61307523\nP0NT0 DA ELETRI\nCEF AM AC RR\nREGIONAL CO\n27/05/2025"
+    },
+    {
+      "keyword": "POR USUÁRIO",
+      "context": "21/05/2026 18:06:28\nDespesas por Usuários\nAprovado\nABNER ANDRADE CAVALCANTE \n- Banco: \n/ AG: \n/ CC: \n/ Pix: \n/ CPF/CNPJ: 020.277.452-03\n#7652117 - FATURA 06/2025\n#\nTítulo\nCentro de Custo\nProjeto\nData\nTipo\nReembolsável\nValor\n61523302\nMRJMATWRIASDE\nCEF AM AC RR\nREGIONAL CO\n31/05/2025\nMATERIAL\nNão\nBRL 55,00\n61381154\nPAYGO*REFRIGASE\nCEF AM AC RR\nREGIONAL CO\n28/05/2025\nMATERIAL\nNão\nBRL 55,00\n61381153\nMP *CLIMAXTEMP\nCEF AM AC RR\nREGIONAL CO\n28/05/2025\nMATERIAL\nNão\nBRL 49,00\n61307523\nP0NT0 DA ELETRI\nCEF AM AC RR\nREGIONAL CO\n27/05/"
+    }
+  ],
+  "table_lines": []
+}

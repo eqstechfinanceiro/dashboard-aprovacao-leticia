@@ -1,0 +1,227 @@
+{
+  "investigation_date": "2026-05-21T18:08:34.953851",
+  "report_id": 7521153,
+  "description": "FATURA 06/2025",
+  "user_value_patterns": [
+    {
+      "user": "Reembolsável",
+      "value": 21.49,
+      "line": "BRL 21,49"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 116.0,
+      "line": "BRL 116,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 41.55,
+      "line": "BRL 41,55"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 6.9,
+      "line": "BRL 6,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 36.0,
+      "line": "BRL 36,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 26.51,
+      "line": "BRL 26,51"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 360.0,
+      "line": "BRL 360,00"
+    },
+    {
+      "user": "MATERIAL",
+      "value": 145.5,
+      "line": "BRL 145,50"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 83.0,
+      "line": "BRL 83,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 50.82,
+      "line": "BRL 50,82"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 69.0,
+      "line": "BRL 69,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 124.0,
+      "line": "BRL 124,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 107.08,
+      "line": "BRL 107,08"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 14.9,
+      "line": "BRL 14,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 28.5,
+      "line": "BRL 28,50"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 18.0,
+      "line": "BRL 18,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 9.9,
+      "line": "BRL 9,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 13.9,
+      "line": "BRL 13,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 20.9,
+      "line": "BRL 20,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 240.0,
+      "line": "BRL 240,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 41.89,
+      "line": "BRL 41,89"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 41.89,
+      "line": "BRL 41,89"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 88.0,
+      "line": "BRL 88,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 31.7,
+      "line": "BRL 31,70"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 96.38,
+      "line": "BRL 96,38"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 5.4,
+      "line": "BRL 5,40"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 47.25,
+      "line": "BRL 47,25"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 70.0,
+      "line": "BRL 70,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 57.0,
+      "line": "BRL 57,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 5.0,
+      "line": "BRL 5,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 25.5,
+      "line": "BRL 25,50"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 84.6,
+      "line": "BRL 84,60"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 5.94,
+      "line": "BRL 5,94"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 7.8,
+      "line": "BRL 7,80"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 20.0,
+      "line": "BRL 20,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 71.7,
+      "line": "BRL 71,70"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 63.54,
+      "line": "BRL 63,54"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 20.9,
+      "line": "BRL 20,90"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 20.0,
+      "line": "BRL 20,00"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 69.87,
+      "line": "BRL 69,87"
+    },
+    {
+      "user": "ITENS CONSUMO INTERNO",
+      "value": 51.4,
+      "line": "BRL 51,40"
+    },
+    {
+      "user": "BRL 69,87",
+      "value": 2339.71,
+      "line": "BRL 2339,71"
+    },
+    {
+      "user": "Centro de Custo",
+      "value": 2339.71,
+      "line": "BRL 2339,71"
+    },
+    {
+      "user": "Resumo por projeto:",
+      "value": 2339.71,
+      "line": "BRL 2339,71"
+    }
+  ]
+}

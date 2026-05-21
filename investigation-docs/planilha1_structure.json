@@ -1,0 +1,547 @@
+{
+  "sheet_name": "1 QZ VEXPENSES 04_2026",
+  "header_row": 5,
+  "data_start_row": 6,
+  "total_rows": 337,
+  "total_cols": 50,
+  "columns": {
+    "A": {
+      "header": "COL_A",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "B": {
+      "header": "COL_B",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "PORTADOR",
+        "RAFAEL AMORIM VELLO",
+        "ABNER ANDRADE CAVALCANTE",
+        "ANDRE ARANHA MEISTER",
+        "JAEDER RODRIGUES JUNIOR"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "C": {
+      "header": "COL_C",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "CPF",
+        "01677920599",
+        "02027745203",
+        "03032275326",
+        "07505987607"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "D": {
+      "header": "COL_D",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "STATUS COLAB"
+      ],
+      "sample_formulas": [
+        "=_xlfn.XLOOKUP(Tabela1[[#This Row],[CPF]],[1]Funcionário!$B:$B,[1]Funcionário!$H:$H)",
+        "=_xlfn.XLOOKUP(Tabela1[[#This Row],[CPF]],[1]Funcionário!$B:$B,[1]Funcionário!$H:$H)",
+        "=_xlfn.XLOOKUP(Tabela1[[#This Row],[CPF]],[1]Funcionário!$B:$B,[1]Funcionário!$H:$H)"
+      ],
+      "has_formulas": true
+    },
+    "E": {
+      "header": "COL_E",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "CENTRO CUSTO",
+        "CEF NORTE OESTE BA",
+        "CEF AM AC RR",
+        "BB MARANHAO MA",
+        "CEF NORDESTE MG"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "F": {
+      "header": "COL_F",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 1,
+      "sample_values": [
+        "COD CENTRO CUSTO"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "G": {
+      "header": "COL_G",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "GESTOR",
+        "GERSON OLIVEIRA",
+        "ANGELICA SOARES",
+        "ANGELICA SOARES",
+        "HUGO ALEXANDRE"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "H": {
+      "header": "COL_H",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "DIREÇÃO",
+        "ROGERIO SCATAMBULO",
+        "ROGERIO SCATAMBULO",
+        "ROGERIO SCATAMBULO",
+        "MARCOS CARIAS"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "I": {
+      "header": "=SUBTOTAL(9,I7:I1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,I7:I1048576)",
+      "data_sample_count": 3,
+      "sample_values": [
+        "SALDO REEMBOLSAR",
+        -98.92000000007101,
+        -428.8200000000006
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "J": {
+      "header": "=SUBTOTAL(9,J7:J1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,J7:J1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "SALDO FINAL",
+        291.6600000002072,
+        0,
+        18329.5,
+        1614.4399999999296
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "K": {
+      "header": "=SUBTOTAL(9,K7:K1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,K7:K1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "1QZ DE ABRIL 26",
+        16000,
+        9840,
+        9000,
+        7000
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "L": {
+      "header": "=SUBTOTAL(9,L7:L1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,L7:L1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "SALDO CARTAO",
+        20,
+        5,
+        1154.94,
+        2
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "M": {
+      "header": "=SUBTOTAL(9,M7:M1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,M7:M1048576)",
+      "data_sample_count": 1,
+      "sample_values": [
+        "ADIANTAMENTO"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "N": {
+      "header": "=SUBTOTAL(9,N332:N1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,N332:N1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "CARGA PARCIAL"
+      ],
+      "sample_formulas": [
+        "=Tabela1[[#This Row],[1QZ DE ABRIL 26]]-Tabela1[[#This Row],[SALDO FINAL]]-Tabela1[[#This Row],[SALDO CARTAO]]-Tabela1[[#This Row],[ADIANTAMENTO]]",
+        "=Tabela1[[#This Row],[1QZ DE ABRIL 26]]-Tabela1[[#This Row],[SALDO FINAL]]-Tabela1[[#This Row],[SALDO CARTAO]]-Tabela1[[#This Row],[ADIANTAMENTO]]",
+        "=Tabela1[[#This Row],[1QZ DE ABRIL 26]]-Tabela1[[#This Row],[SALDO FINAL]]-Tabela1[[#This Row],[SALDO CARTAO]]-Tabela1[[#This Row],[ADIANTAMENTO]]"
+      ],
+      "has_formulas": true
+    },
+    "O": {
+      "header": "=SUBTOTAL(9,O7:O1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,O7:O1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "REEMBOLSO",
+        0,
+        0,
+        0,
+        0
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "P": {
+      "header": "=SUBTOTAL(9,P7:P1048576)",
+      "header_has_formula": true,
+      "header_formula": "=SUBTOTAL(9,P7:P1048576)",
+      "data_sample_count": 10,
+      "sample_values": [
+        "CARGA  FINAL "
+      ],
+      "sample_formulas": [
+        "=IF(Tabela1[[#This Row],[CARGA PARCIAL]]<0,0,Tabela1[[#This Row],[CARGA PARCIAL]])+Tabela1[[#This Row],[REEMBOLSO]]",
+        "=IF(Tabela1[[#This Row],[CARGA PARCIAL]]<0,0,Tabela1[[#This Row],[CARGA PARCIAL]])+Tabela1[[#This Row],[REEMBOLSO]]",
+        "=IF(Tabela1[[#This Row],[CARGA PARCIAL]]<0,0,Tabela1[[#This Row],[CARGA PARCIAL]])+Tabela1[[#This Row],[REEMBOLSO]]"
+      ],
+      "has_formulas": true
+    },
+    "Q": {
+      "header": "COL_Q",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 10,
+      "sample_values": [
+        "STATUS DO CARTAO",
+        "Cartão ativo",
+        "Cartão ativo",
+        "Cartão ativo",
+        "Cartão ativo"
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "R": {
+      "header": "COL_R",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 1,
+      "sample_values": [
+        "OBS "
+      ],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "S": {
+      "header": "COL_S",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "T": {
+      "header": "COL_T",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "U": {
+      "header": "COL_U",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "V": {
+      "header": "COL_V",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "W": {
+      "header": "COL_W",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "X": {
+      "header": "COL_X",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "Y": {
+      "header": "COL_Y",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "Z": {
+      "header": "COL_Z",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AA": {
+      "header": "COL_AA",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AB": {
+      "header": "COL_AB",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AC": {
+      "header": "COL_AC",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AD": {
+      "header": "COL_AD",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AE": {
+      "header": "COL_AE",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AF": {
+      "header": "COL_AF",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AG": {
+      "header": "COL_AG",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AH": {
+      "header": "COL_AH",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AI": {
+      "header": "COL_AI",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AJ": {
+      "header": "COL_AJ",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AK": {
+      "header": "COL_AK",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AL": {
+      "header": "COL_AL",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AM": {
+      "header": "COL_AM",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AN": {
+      "header": "COL_AN",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AO": {
+      "header": "COL_AO",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AP": {
+      "header": "COL_AP",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AQ": {
+      "header": "COL_AQ",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AR": {
+      "header": "COL_AR",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AS": {
+      "header": "COL_AS",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AT": {
+      "header": "COL_AT",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AU": {
+      "header": "COL_AU",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AV": {
+      "header": "COL_AV",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AW": {
+      "header": "COL_AW",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    },
+    "AX": {
+      "header": "COL_AX",
+      "header_has_formula": false,
+      "header_formula": null,
+      "data_sample_count": 0,
+      "sample_values": [],
+      "sample_formulas": [],
+      "has_formulas": false
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "investigation_date": "2026-05-21T18:09:10.001191",
+  "report_id": 7718339,
+  "description": "FATURA 07/2025",
+  "summary_sections": [
+    {
+      "keyword": "RESUMO",
+      "context": "62305718\nJAComercioDe\nCEF AM AC RR\nREGIONAL CO\n09/06/2025\nMATERIAL\nNão\nBRL 66,00\nTotal:\nBRL 1877,23\nResumo por projeto:\nProjeto\nTotal\nREGIONAL CO\nBRL 1877,23\nResumo por reembolsável:\nTipo\nTotal\nNão reembolsável\nBRL 1877,23\nLinha do Tempo:\nAção\nData\nUsuário\nComentário\nCriado\n23/06/2025\n21:07:51\nABNER\nANDRADE\nCAVALCANTE\nEnviado\n21/07/2025\n12:54:32\nABNER\nANDRADE\nCAVALCANTE\nAprovado\n04/08/2025\n10:04:33\nFABIO\nNOGUEIRA\nPEIXOTO\nAprovado\n05/09/2025\n09:04:06\nFABIO\nNOGUEIRA\nPEIXOTO\nReprovado\npelo\nadministrador\n14/10/2025\n15:10:26\nANDREY\nCARDOSO\nREGINALDO\nCORREÇÃO NOME DO RELATORIO \nNOME CORRETO FATURA 0"
+    },
+    {
+      "keyword": "RESUMO POR PROJETO",
+      "context": "62305718\nJAComercioDe\nCEF AM AC RR\nREGIONAL CO\n09/06/2025\nMATERIAL\nNão\nBRL 66,00\nTotal:\nBRL 1877,23\nResumo por projeto:\nProjeto\nTotal\nREGIONAL CO\nBRL 1877,23\nResumo por reembolsável:\nTipo\nTotal\nNão reembolsável\nBRL 1877,23\nLinha do Tempo:\nAção\nData\nUsuário\nComentário\nCriado\n23/06/2025\n21:07:51\nABNER\nANDRADE\nCAVALCANTE\nEnviado\n21/07/2025\n12:54:32\nABNER\nANDRADE\nCAVALCANTE\nAprovado\n04/08/2025\n10:04:33\nFABIO\nNOGUEIRA\nPEIXOTO\nAprovado\n05/09/2025\n09:04:06\nFABIO\nNOGUEIRA\nPEIXOTO\nReprovado\npelo\nadministrador\n14/10/2025\n15:10:26\nANDREY\nCARDOSO\nREGINALDO\nCORREÇÃO NOME DO RELATORIO \nNOME CORRETO FATURA 0"
+    },
+    {
+      "keyword": "USUÁRIO",
+      "context": "21/05/2026 18:06:34\nDespesas por Usuários\nAprovado\nABNER ANDRADE CAVALCANTE \n- Banco: \n/ AG: \n/ CC: \n/ Pix: \n/ CPF/CNPJ: 020.277.452-03\n#7718339 - FATURA 07/2025\n#\nTítulo\nCentro de Custo\nProjeto\nData\nTipo\nReembolsável\nValor\n63086652\nSUPER NOVA OSWA\nCEF AM AC RR\nREGIONAL CO\n27/06/2025\nMATERIAL\nNão\nBRL 19,95\n62992550\nLOJAS AMERICANA\nCEF AM AC RR\nREGIONAL CO\n26/06/2025\nMATERIAL\nNão\nBRL 14,99\n62992549\nAGROSANTO\nCEF AM AC RR\nREGIONAL CO\n26/06/2025\nESTACIONAMENTO\nNão\nBRL 14,00\n62942835\nMARCODIESEL\nCEF AM AC RR\nREGIONAL CO\n25/06/2025\n"
+    },
+    {
+      "keyword": "POR USUÁRIO",
+      "context": "21/05/2026 18:06:34\nDespesas por Usuários\nAprovado\nABNER ANDRADE CAVALCANTE \n- Banco: \n/ AG: \n/ CC: \n/ Pix: \n/ CPF/CNPJ: 020.277.452-03\n#7718339 - FATURA 07/2025\n#\nTítulo\nCentro de Custo\nProjeto\nData\nTipo\nReembolsável\nValor\n63086652\nSUPER NOVA OSWA\nCEF AM AC RR\nREGIONAL CO\n27/06/2025\nMATERIAL\nNão\nBRL 19,95\n62992550\nLOJAS AMERICANA\nCEF AM AC RR\nREGIONAL CO\n26/06/2025\nMATERIAL\nNão\nBRL 14,99\n62992549\nAGROSANTO\nCEF AM AC RR\nREGIONAL CO\n26/06/2025\nESTACIONAMENTO\nNão\nBRL 14,00\n62942835\nMARCODIESEL\nCEF AM AC RR\nREGIONAL CO\n25/06/2"
+    }
+  ],
+  "table_lines": []
+}

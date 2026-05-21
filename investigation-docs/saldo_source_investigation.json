@@ -1,0 +1,11 @@
+{
+  "investigation_date": "2026-05-21T19:08:18.216376",
+  "annual_candidate": null,
+  "report_candidates_count": 1,
+  "next_steps": [
+    "Testar períodos anuais alternativos",
+    "Analisar reports com dados de saldo",
+    "Investigar critérios de cálculo diferentes",
+    "Verificar se dados são de outro ano/período"
+  ]
+}
