@@ -1,0 +1,99 @@
+PLANILHA 2: CONTROLE VEXPENSES (xlsb)
+================================================================================
+
+ABA: PAINEL
+Linhas: 718
+Estrutura:
+   0   1   2   3   4   5   6   7   8   9   10  11  12        13    14     15       16       17     18      19      20    21     22   23  24      25   26
+0 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+1 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+2 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+3 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+4 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+5 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+6 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   ANO   2026  NaN NaN     NaN  NaN
+7 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   MÊS  ABRIL  NaN NaN     NaN  NaN
+8 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN       NaN   NaN    NaN      NaN      NaN    NaN     NaN     NaN   NaN    NaN  NaN NaN     NaN  NaN
+9 NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN NaN  28420.55 -8.79 -287.0  27069.0  1055.76  44.76  1011.0  1500.0  1500   1500  0.0 NaN  2000.0  0.0
+--------------------------------------------------------------------------------
+
+ABA: SALDO CARTAO
+Linhas: 6989
+Estrutura:
+   0                            1            2           3      4      5        6   7   8                                       9            10         11     12
+0 NaN                          NaN          NaN         NaN    NaN    NaN      NaN NaN NaN                                     NaN          NaN        NaN    NaN
+1 NaN                          NaN          NaN         NaN    NaN    NaN      NaN NaN NaN                                     NaN          NaN        NaN    NaN
+2 NaN                          NaN          NaN  1901578.66    NaN    NaN      NaN NaN NaN                                     NaN          NaN  101552.24    NaN
+3 NaN                     PORTADOR          CPF       VALOR   DATA    MÊS  EMPRESA NaN NaN                                PORTADOR          CPF      VALOR   DATA
+4 NaN     ABNER ANDRADE CAVALCANTE  02027745203        6.86  45849  JULHO      EQS NaN NaN         JUSTINO NOGUEIRA PEIXOTO JUNIOR  09246793790       7000  46124
+5 NaN     ABNER ANDRADE CAVALCANTE  02027745203     3815.86  45834  JUNHO      EQS NaN NaN                  Deise Soares de Campos  69116709004    5038.04  46124
+6 NaN     ABNER ANDRADE CAVALCANTE  02027745203        3.15  45833  JUNHO      EQS NaN NaN                    Edson Veiga Silveira  62063774072    4635.66  46124
+7 NaN     ABNER ANDRADE CAVALCANTE  02027745203          10  45819  JUNHO      EQS NaN NaN                     BRUNO OLIVEIRA DIAS  11992259755    4283.83  46124
+8 NaN  ADAN LEONARDO SOUZA BATISTA  01932662537      710.21  45849  JULHO      EQS NaN NaN                   Marcio Campos Ribeiro  17427326822    2973.44  46124
+9 NaN  ADAN LEONARDO SOUZA BATISTA  01932662537      710.21  45834  JUNHO      EQS NaN NaN  Francielly Felix Cavalcante de Andrade  09276240446       4002  46124
+--------------------------------------------------------------------------------
+
+ABA: ADICIONAIS
+Linhas: 538
+Estrutura:
+   0                                     1            2          3      4      5     6                     7                    8                  9                                10         11      12        13  14     15      16      17              18       19
+0 NaN                                   NaN          NaN        NaN    NaN    NaN   NaN                   NaN                  NaN                NaN                              NaN        NaN     NaN       NaN NaN    NaN     NaN     NaN             NaN      NaN
+1 NaN                                   NaN          NaN  699025.38    NaN    NaN   NaN                   NaN                  NaN                NaN                              NaN        NaN     NaN       NaN NaN    NaN     NaN  691400       691085.38      NaN
+2 NaN                           COLABORADOR          CPF      VALOR   DATA    MÊS   ANO       CENTRO DE CUSTO     DIRETOR REGIONAL  >DIRETOR REGIONAL                           MOTIVO  APROVADOR  PEDIDO    STATUS NaN    MÊS  PEDIDO   VALOR  VLR. UTILIZADO  Coluna1
+3 NaN       CLEBER RICARDO NASCIMENTO SILVA  84743603404       1500  45813  JUNHO  2025  CLARO INFRA NORDESTE   ROGERIO SCATAMBULO                NaN  CARGA PARA DEMANDAS DO CONTRATO        NaN  CBICAB  APROVADO NaN  JUNHO  CBICAB   10000           10000      NaN
+4 NaN             DANIEL SANTOS DE ASSUNCAO  97592439549       1500  45814  JUNHO  2025         BANCO ITAU BA   ROGERIO SCATAMBULO                NaN       ADIANTAMENTO 1 QZ DE JUNHO        NaN  CBICAB  APROVADO NaN  JUNHO  CBIFGK   10000         10000.0      NaN
+5 NaN         GUILHERME FELIPPE DE MEDEIROS  04879971901        900  45814  JUNHO  2025             COMERCIAL        FELIPE FONTAN                NaN      ADC CUSTA DA FEIRA INFRA FM        NaN  CBICAB  APROVADO NaN  JUNHO  CBIGCS   10000           10000      NaN
+6 NaN  KEVIN WILLIAMS COUTINHO BEZERRA PENA  02061809260        360  45814  JUNHO  2025             COMERCIAL        FELIPE FONTAN                NaN      ADC CUSTA DA FEIRA INFRA FM        NaN  CBICAB  APROVADO NaN  JUNHO  CBIGE6   10000           10000      NaN
+7 NaN  KEVIN WILLIAMS COUTINHO BEZERRA PENA  02061809260        120  45818  JUNHO  2025     GESTAO DE PESSOAS        FELIPE FONTAN                NaN         ADC ESTACIONAMENTO HOTEL        NaN  CBICAB  APROVADO NaN  JULHO  CBIO18   10000           10000      NaN
+8 NaN        PATRICK FERNANDO GOULART ALVES  07214272946        900  45818  JUNHO  2025         TELEFONICA PR  EVERSON GAIDSTIECHI                NaN     ADC ELEGIBILIDADE - ENTREGAS        NaN  CBICAB  APROVADO NaN  JULHO  CBIO29   10000           10000      NaN
+9 NaN                 MARCO AURELIO DE LIMA  01356318665         90  45818  JUNHO  2025         TELEFONICA MG   ROGERIO SCATAMBULO                NaN                        ADC JANTA        NaN  CBICAB  APROVADO NaN  JULHO  CBIO33   10000           10000      NaN
+--------------------------------------------------------------------------------
+
+ABA: ADICIONAL ITAÚ
+Linhas: 18
+Estrutura:
+   0                                 1            2             3              4           5      6       7                     8                 9                                 10                 11
+0 NaN                               NaN          NaN           NaN            NaN         NaN    NaN     NaN                   NaN               NaN                               NaN                NaN
+1 NaN                               NaN          NaN           NaN            NaN         NaN    NaN     NaN                   NaN               NaN                               NaN                NaN
+2 NaN                               NaN          NaN           NaN            NaN     31016.1    NaN     NaN                   NaN               NaN                               NaN                NaN
+3 NaN                       COLABORADOR          CPF  LIMITE ANTES  LIMITE DEPOIS  ADICIONADO   DATA     MÊS       CENTRO DE CUSTO  DIRETOR REGIONAL                            MOTIVO          APROVADOR
+4 NaN           EMERSON LEITE DE BARROS  34168918807          5000           6000        1000  45860   JULHO     PTB INFRA SUDESTE     EVERSON CESAR        ADC CONSERTO DE ROÇADEIRAS      EVERSON CESAR
+5 NaN  HERLANDSON BRUNO CARNEIRO MATIAS  67192793353             1           1000        1000  45868   JULHO         PTB LUBNOR CE           ROGERIO                  ADC SUBSTITUIÇÃO            LETICIA
+6 NaN          ANELISE DE MENDOCA AVILA   2873491019          6000          11203        5203  45873  AGOSTO        ADMINISTRATIVO           ROGERIO  ADC RESERVA PARA IMPLTAÇÃO UTGCA  ADILSON RODRIGUES
+7 NaN                   RONIO JOSE ROSA  83649603691          3150         4706.1      1556.1  45887  AGOSTO        CLARO INFRA MG               NaN          ADC ESTORNO DESPESA ITAÚ             ANDREY
+8 NaN              ATILA LOPES DE MOURA   3975647400          2500           3500        1000  45887  AGOSTO  CLARO INFRA NORDESTE               NaN      ADC COMPRA DE MATERIAL FAT B            ROGERIO
+9 NaN                     LEANDRO SOUSA    584427905             1           1500        1500  45888  AGOSTO   PTB AREAS VERDES SC               NaN         ADC RETORNO 60% DO LIMITE            RONALDO
+--------------------------------------------------------------------------------
+
+ABA: QUINZENAS
+Linhas: 10148
+Estrutura:
+                             0            1           2         3      4      5     6            7           8
+0                          NaN          NaN         NaN       NaN    NaN    NaN   NaN          NaN         NaN
+1                          NaN          NaN         NaN       NaN    NaN    NaN   NaN          NaN         NaN
+2                          NaN          NaN  15621856.8       NaN    NaN    NaN   NaN          NaN         NaN
+3                  COLABORADOR          CPF       VALOR  QUINZENA   DATA    MÊS   ANO     REGIONAL  OBSERVAÇÃO
+4     ABNER ANDRADE CAVALCANTE  02027745203        9840     1ª QZ  45819  JUNHO  2025  REGIONAL CO         NaN
+5  ADAN LEONARDO SOUZA BATISTA  01932662537         700     1ª QZ  45819  JUNHO  2025  REGIONAL NE         NaN
+6          ADAUTO JOSE PEREIRA  85087572634         500     1ª QZ  45819  JUNHO  2025  REGIONAL MG         NaN
+7       ADEMARCIO DUARTE LOPES  06223031980        5500     1ª QZ  45819  JUNHO  2025  REGIONAL SC         NaN
+8      ADILSON GOMES DE MORAES         0x2a        1000     1ª QZ  45819  JUNHO  2025         0x2a         NaN
+9     ADILSON MELLO DE CAMARGO  67324398049         800     1ª QZ  45819  JUNHO  2025  REGIONAL RS         NaN
+--------------------------------------------------------------------------------
+
+ABA: REEMBOLSO
+Linhas: 283
+Estrutura:
+    0                                     1            2          3      4        5                  6                    7                   8                           9
+0 NaN                                   NaN          NaN        NaN    NaN      NaN                NaN                  NaN                 NaN                         NaN
+1 NaN                                   NaN          NaN  59267.968    NaN      NaN                NaN                  NaN                 NaN                         NaN
+2 NaN                           COLABORADOR          CPF      VALOR   DATA      MÊS    CENTRO DE CUSTO     DIRETOR REGIONAL   >DIRETOR REGIONAL                      MOTIVO
+3 NaN             MELSO CEZAR DA SILVA NETO  02079878077      916.9  45839    JULHO     CLARO INFRA RS  EVERSON GAIDSTIECHI                 NaN                         NaN
+4 NaN                 MARCIO CAMPOS RIBEIRO  17427326822     656.87  45863    JULHO          COMERCIAL        FELIPE FONTAN       FELIPE FONTAN               REEMBOLSO VEX
+5 NaN           EDUARDO ANDREY VENSON SILVA  02960685946   18745.85  45863    JULHO       CEF OESTE SC   ROGERIO SCATAMBULO  ROGERIO SCATAMBULO                         NaN
+6 NaN                  EDMAR RODRIGUES MOTA  06559830900        477  45863    JULHO                 TI         THIAGO NEVES        THIAGO NEVES               REEMBOLSO VEX
+7 NaN  TANDARA MARIA DO VALES PEREIRA ALVES  17074849707    696.196  46034  JANEIRO      ADM FILIAL RJ   ROGERIO SCATAMBULO   ADILSON RODRIGUES  REEMBOLSO VEX - 1QZ JAN/26
+8 NaN             LEONARDO MURATORI ATHAYDE  03374811647    643.222  46034  JANEIRO  CEF FACILITIES CE   ROGERIO SCATAMBULO   ADILSON RODRIGUES  REEMBOLSO VEX - 1QZ JAN/26
+9 NaN           ARLEY HENRIQUE DE SOUZA LUZ  01170402232    636.842  46034  JANEIRO     CEF GOIANIA CO   ROGERIO SCATAMBULO   ADILSON RODRIGUES  REEMBOLSO VEX - 1QZ JAN/26
+--------------------------------------------------------------------------------
+

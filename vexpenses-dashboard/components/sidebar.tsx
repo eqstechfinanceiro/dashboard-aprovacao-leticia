@@ -9,7 +9,8 @@ import {
   BarChart3, 
   Wallet, 
   Settings,
-  TrendingUp
+  TrendingUp,
+  FileSpreadsheet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,8 @@ const navigation = [
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
   { name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
+  { name: 'Teste Planilha 1', href: '/test-planilha-1', icon: FileSpreadsheet },
+  { name: 'Teste Planilha 2', href: '/test-planilha-2', icon: FileSpreadsheet },
   { name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 
