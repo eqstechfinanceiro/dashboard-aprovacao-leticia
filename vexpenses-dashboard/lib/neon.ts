@@ -16,6 +16,11 @@ let tableCreationAttempted = false;
 
 // Funções auxiliares para o cache
 export async function createCacheTable() {
+  if (!sql) {
+    console.log('[Neon] Banco não disponível, não é possível criar tabela');
+    return;
+  }
+
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS api_cache (
@@ -51,15 +56,30 @@ export async function ensureCacheTable() {
 }
 
 export async function clearCacheTable() {
+  if (!sql) {
+    console.log('[Neon] Banco não disponível, não é possível limpar tabela');
+    return;
+  }
+
   await sql`DELETE FROM api_cache`;
 }
 
 export async function dropCacheTable() {
+  if (!sql) {
+    console.log('[Neon] Banco não disponível, não é possível dropar tabela');
+    return;
+  }
+
   await sql`DROP TABLE IF EXISTS api_cache`;
 }
 
 // Funções para estatísticas de pré-carregamento
 export async function createPreloadStatsTable() {
+  if (!sql) {
+    console.log('[Neon] Banco não disponível, não é possível criar tabela de preload_stats');
+    return;
+  }
+
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS preload_stats (

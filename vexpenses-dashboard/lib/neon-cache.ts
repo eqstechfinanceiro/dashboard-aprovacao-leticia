@@ -196,11 +196,17 @@ class NeonCache {
 
   // Implementação de stale-while-revalidate
   // Retorna dados stale se existirem e inicia refresh em background
-  async getWithStale<T>(key: string): Promise<{ 
-    data: T | null; 
-    isStale: boolean; 
+  async getWithStale<T>(key: string): Promise<{
+    data: T | null;
+    isStale: boolean;
     shouldRefresh: boolean;
   }> {
+    // Se o banco não estiver disponível (build time), retornar null
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando null para getWithStale');
+      return { data: null, isStale: false, shouldRefresh: true };
+    }
+
     try {
       // Buscar o cache (mesmo se expirado)
       const result = await sql`
@@ -355,14 +361,20 @@ class NeonCache {
   }
 
   // Obter metadados de uma chave específica (incluindo timestamp)
-  async getMetadata(key: string): Promise<{ 
-    exists: boolean; 
-    timestamp: number; 
-    age: number; 
-    ttl: number; 
+  async getMetadata(key: string): Promise<{
+    exists: boolean;
+    timestamp: number;
+    age: number;
+    ttl: number;
     expiresAt: string;
     dataType: string;
   } | null> {
+    // Se o banco não estiver disponível (build time), retornar null
+    if (!isDatabaseAvailable || !sql) {
+      console.log('[Neon Cache] Banco não disponível, retornando null para getMetadata');
+      return null;
+    }
+
     try {
       const result = await sql`
         SELECT 

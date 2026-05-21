@@ -12,7 +12,7 @@ FROM node:18-alpine AS runner
 
 WORKDIR /app
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 COPY --from=builder /app/vexpenses-dashboard/package*.json ./vexpenses-dashboard/
 RUN cd vexpenses-dashboard && npm ci --only=production
