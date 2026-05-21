@@ -19,7 +19,6 @@ RUN cd vexpenses-dashboard && npm ci --only=production
 
 COPY --from=builder /app/vexpenses-dashboard/.next ./vexpenses-dashboard/.next
 COPY --from=builder /app/vexpenses-dashboard/public ./vexpenses-dashboard/public
-COPY --from=builder /app/vexpenses-dashboard/node_modules/.prisma ./vexpenses-dashboard/node_modules/.prisma
 
 EXPOSE 3000
 
