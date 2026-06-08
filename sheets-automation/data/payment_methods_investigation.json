@@ -1,0 +1,74 @@
+[
+  {
+    "endpoint": "/payment-methods",
+    "status": "failed",
+    "code": 405
+  },
+  {
+    "endpoint": "/payment_methods",
+    "status": "failed",
+    "code": 405
+  },
+  {
+    "endpoint": "/payment-method",
+    "status": "failed",
+    "code": 405
+  },
+  {
+    "endpoint": "expenses_payment_methods",
+    "status": "success",
+    "paymentMethods": [
+      {
+        "id": 627401,
+        "description": "Cartão Corporativo Itaú",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 627721,
+        "description": "Saque VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 627508,
+        "description": "Cartão VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 668240,
+        "description": "Pix VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 630113,
+        "description": "Recurso Próprio",
+        "reimbursable": false,
+        "affects_advance": true
+      }
+    ],
+    "itauMethods": [],
+    "vexpensesMethods": [
+      {
+        "id": 627721,
+        "description": "Saque VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 627508,
+        "description": "Cartão VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      },
+      {
+        "id": 668240,
+        "description": "Pix VExpenses",
+        "reimbursable": false,
+        "affects_advance": true
+      }
+    ]
+  }
+]

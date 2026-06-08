@@ -1,0 +1,89 @@
+{
+  "file": "CARGA 1 QZ MAIO 26 VEXPENSES EQS.xlsx",
+  "sheets": [
+    "Planilha1"
+  ],
+  "main_sheet": {
+    "name": "Planilha1",
+    "rows": 345,
+    "columns": [
+      "Unnamed: 0",
+      "Unnamed: 1",
+      "Unnamed: 2",
+      "Unnamed: 3",
+      "Unnamed: 4",
+      "Unnamed: 5",
+      "Unnamed: 6",
+      "Unnamed: 7",
+      "Unnamed: 8",
+      "Unnamed: 9",
+      "Unnamed: 10",
+      "Unnamed: 11",
+      "Unnamed: 12",
+      "Unnamed: 13",
+      "Unnamed: 14",
+      "Unnamed: 15",
+      "Unnamed: 16"
+    ],
+    "sample_data": [
+      {
+        "Unnamed: 0": NaN,
+        "Unnamed: 1": NaN,
+        "Unnamed: 2": NaN,
+        "Unnamed: 3": NaN,
+        "Unnamed: 4": NaN,
+        "Unnamed: 5": NaN,
+        "Unnamed: 6": NaN,
+        "Unnamed: 7": NaN,
+        "Unnamed: 8": NaN,
+        "Unnamed: 9": NaN,
+        "Unnamed: 10": NaN,
+        "Unnamed: 11": NaN,
+        "Unnamed: 12": NaN,
+        "Unnamed: 13": NaN,
+        "Unnamed: 14": NaN,
+        "Unnamed: 15": NaN,
+        "Unnamed: 16": NaN
+      },
+      {
+        "Unnamed: 0": NaN,
+        "Unnamed: 1": NaN,
+        "Unnamed: 2": NaN,
+        "Unnamed: 3": NaN,
+        "Unnamed: 4": NaN,
+        "Unnamed: 5": NaN,
+        "Unnamed: 6": NaN,
+        "Unnamed: 7": NaN,
+        "Unnamed: 8": NaN,
+        "Unnamed: 9": NaN,
+        "Unnamed: 10": NaN,
+        "Unnamed: 11": NaN,
+        "Unnamed: 12": NaN,
+        "Unnamed: 13": NaN,
+        "Unnamed: 14": NaN,
+        "Unnamed: 15": NaN,
+        "Unnamed: 16": NaN
+      },
+      {
+        "Unnamed: 0": NaN,
+        "Unnamed: 1": NaN,
+        "Unnamed: 2": NaN,
+        "Unnamed: 3": NaN,
+        "Unnamed: 4": NaN,
+        "Unnamed: 5": NaN,
+        "Unnamed: 6": NaN,
+        "Unnamed: 7": NaN,
+        "Unnamed: 8": NaN,
+        "Unnamed: 9": NaN,
+        "Unnamed: 10": NaN,
+        "Unnamed: 11": NaN,
+        "Unnamed: 12": NaN,
+        "Unnamed: 13": 0.5,
+        "Unnamed: 14": NaN,
+        "Unnamed: 15": NaN,
+        "Unnamed: 16": NaN
+      }
+    ],
+    "financial_columns": []
+  }
+}

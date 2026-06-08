@@ -1,0 +1,609 @@
+{
+  "matches": 0,
+  "total": 20,
+  "precisao": 0,
+  "erros": [
+    {
+      "nome": "RAFAEL AMORIM VELLO",
+      "qz": {
+        "planilha": 16000,
+        "gerado": 16000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 291.6600000002072,
+        "gerado": 37,
+        "diff": 254.66000000020722,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 20,
+        "gerado": 20,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "qz": {
+        "planilha": 9840,
+        "gerado": 9840,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 0,
+        "gerado": 58,
+        "diff": 58,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "gerado": 5,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "ANDRE ARANHA MEISTER",
+      "qz": {
+        "planilha": 9000,
+        "gerado": 9000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 18329.5,
+        "gerado": 42.27,
+        "diff": 18287.23,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 1154.94,
+        "gerado": 1154.94,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "qz": {
+        "planilha": 7000,
+        "gerado": 7000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 1614.4399999999296,
+        "gerado": 2,
+        "diff": 1612.4399999999296,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 2,
+        "gerado": 2,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "qz": {
+        "planilha": 7000,
+        "gerado": 7000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 0,
+        "gerado": 6211.66,
+        "diff": 6211.66,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 7000,
+        "gerado": 7000,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "qz": {
+        "planilha": 6800,
+        "gerado": 400,
+        "diff": 6400,
+        "match": false
+      },
+      "saldoFinal": {
+        "planilha": 226.65000000002146,
+        "gerado": 1770,
+        "diff": 1543.3499999999785,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 4635.66,
+        "gerado": 4635.66,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "qz": {
+        "planilha": 6500,
+        "gerado": 6500,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 3693.100000000008,
+        "gerado": 2450.35,
+        "diff": 1242.7500000000082,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 981.69,
+        "gerado": 981.69,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "qz": {
+        "planilha": 6200,
+        "gerado": 6200,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 4637.600000000019,
+        "gerado": 4437.55,
+        "diff": 200.05000000001837,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 4283.83,
+        "gerado": 4283.83,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "JOSE CARLOS BATISTA",
+      "qz": {
+        "planilha": 6000,
+        "gerado": 6000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 1674.2699999999822,
+        "gerado": 10.73,
+        "diff": 1663.5399999999822,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 58,
+        "gerado": 58,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "LUCAS MARTINS MACAN",
+      "qz": {
+        "planilha": 6000,
+        "gerado": 6000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 1784.5300000000184,
+        "gerado": 949.44,
+        "diff": 835.0900000000183,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 4.06,
+        "gerado": 4.06,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "qz": {
+        "planilha": 5750,
+        "gerado": 5750,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 3099.9500000000035,
+        "gerado": 3030.05,
+        "diff": 69.90000000000327,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 62.3,
+        "gerado": 62.3,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "qz": {
+        "planilha": 5700,
+        "gerado": 5700,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 7169.960000000001,
+        "gerado": 277.08,
+        "diff": 6892.880000000001,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 284.08,
+        "gerado": 284.08,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "qz": {
+        "planilha": 5600,
+        "gerado": 5600,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 0,
+        "gerado": 4441.84,
+        "diff": 4441.84,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 317.49,
+        "gerado": 317.49,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "qz": {
+        "planilha": 5000,
+        "gerado": 5000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 3904.2399999999893,
+        "gerado": 1166.47,
+        "diff": 2737.7699999999895,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 695.1,
+        "gerado": 695.1,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "qz": {
+        "planilha": 5000,
+        "gerado": 5000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 0,
+        "gerado": 5,
+        "diff": 5,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "gerado": 5,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "qz": {
+        "planilha": 5000,
+        "gerado": 5000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 5903.249999999942,
+        "gerado": 0.18,
+        "diff": 5903.0699999999415,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 57.18,
+        "gerado": 57.18,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "qz": {
+        "planilha": 5000,
+        "gerado": 5000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 2658.659999999996,
+        "gerado": 5.32,
+        "diff": 2653.339999999996,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "gerado": 5,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "qz": {
+        "planilha": 5000,
+        "gerado": 5000,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 3076.0199999999286,
+        "gerado": 37.29,
+        "diff": 3038.7299999999286,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 20.13,
+        "gerado": 20.13,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "qz": {
+        "planilha": 4240,
+        "gerado": 4240,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 1167.3399999999674,
+        "gerado": 0.67,
+        "diff": 1166.6699999999673,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 9,
+        "gerado": 9,
+        "diff": 0,
+        "match": true
+      }
+    },
+    {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "qz": {
+        "planilha": 4200,
+        "gerado": 4200,
+        "diff": 0,
+        "match": true
+      },
+      "saldoFinal": {
+        "planilha": 3430.109999999989,
+        "gerado": 3.45,
+        "diff": 3426.6599999999894,
+        "match": false
+      },
+      "saldoCartao": {
+        "planilha": 19.73,
+        "gerado": 19.73,
+        "diff": 0,
+        "match": true
+      }
+    }
+  ],
+  "planilhaGerada": [
+    {
+      "nome": "RAFAEL AMORIM VELLO",
+      "cpf": "01677920599",
+      "qz1": 16000,
+      "saldoFinal": 37,
+      "saldoCartao": 20,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "cpf": "02027745203",
+      "qz1": 9840,
+      "saldoFinal": 58,
+      "saldoCartao": 5,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "ANDRE ARANHA MEISTER",
+      "cpf": "03032275326",
+      "qz1": 9000,
+      "saldoFinal": 42.27,
+      "saldoCartao": 1154.94,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "cpf": "07505987607",
+      "qz1": 7000,
+      "saldoFinal": 2,
+      "saldoCartao": 2,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "cpf": "09246793790",
+      "qz1": 7000,
+      "saldoFinal": 6211.66,
+      "saldoCartao": 7000,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "cpf": "62063774072",
+      "qz1": 400,
+      "saldoFinal": 1770,
+      "saldoCartao": 4635.66,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "cpf": "06576198922",
+      "qz1": 6500,
+      "saldoFinal": 2450.35,
+      "saldoCartao": 981.69,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "cpf": "11992259755",
+      "qz1": 6200,
+      "saldoFinal": 4437.55,
+      "saldoCartao": 4283.83,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "JOSE CARLOS BATISTA",
+      "cpf": "26652452804",
+      "qz1": 6000,
+      "saldoFinal": 10.73,
+      "saldoCartao": 58,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "LUCAS MARTINS MACAN",
+      "cpf": "00975748998",
+      "qz1": 6000,
+      "saldoFinal": 949.44,
+      "saldoCartao": 4.06,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "cpf": "31040091806",
+      "qz1": 5750,
+      "saldoFinal": 3030.05,
+      "saldoCartao": 62.3,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "cpf": "01767960107",
+      "qz1": 5700,
+      "saldoFinal": 277.08,
+      "saldoCartao": 284.08,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "cpf": "99114160030",
+      "qz1": 5600,
+      "saldoFinal": 4441.84,
+      "saldoCartao": 317.49,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "cpf": "05766838760",
+      "qz1": 5000,
+      "saldoFinal": 1166.47,
+      "saldoCartao": 695.1,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "cpf": "16306431730",
+      "qz1": 5000,
+      "saldoFinal": 5,
+      "saldoCartao": 5,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "cpf": "07690263623",
+      "qz1": 5000,
+      "saldoFinal": 0.18,
+      "saldoCartao": 57.18,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "cpf": "72756284220",
+      "qz1": 5000,
+      "saldoFinal": 5.32,
+      "saldoCartao": 5,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "cpf": "12237490619",
+      "qz1": 5000,
+      "saldoFinal": 37.29,
+      "saldoCartao": 20.13,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "cpf": "78021324953",
+      "qz1": 4240,
+      "saldoFinal": 0.67,
+      "saldoCartao": 9,
+      "quinzena": 0,
+      "match": false
+    },
+    {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "cpf": "12547938790",
+      "qz1": 4200,
+      "saldoFinal": 3.45,
+      "saldoCartao": 19.73,
+      "quinzena": 0,
+      "match": false
+    }
+  ]
+}

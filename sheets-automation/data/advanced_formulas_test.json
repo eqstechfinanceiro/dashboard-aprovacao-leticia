@@ -1,0 +1,903 @@
+[
+  {
+    "formula": "SALDO FINAL = 1QZ - ExpensesQZ",
+    "matchesFinal": 0,
+    "matchesCartao": 0,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 0,
+    "erros": []
+  },
+  {
+    "formula": "SALDO FINAL = ExpensesYear - ExpensesQZ",
+    "matchesFinal": 0,
+    "matchesCartao": 0,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 0,
+    "erros": []
+  },
+  {
+    "formula": "SALDO FINAL = (ExpensesYear - ExpensesQZ) * 0.5",
+    "matchesFinal": 0,
+    "matchesCartao": 0,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 0,
+    "erros": []
+  },
+  {
+    "formula": "SALDO FINAL = 1QZ - ReportsQZ",
+    "matchesFinal": 0,
+    "matchesCartao": 1,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 5.88,
+    "precisaoReembolsar": 0,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 16000,
+        "diffFinal": 15708.339999999793,
+        "diffCartao": 15980,
+        "diffReembolsar": 16000
+      },
+      {
+        "nome": "ABNER ANDRADE CAVALCANTE",
+        "saldoFinal": 0,
+        "saldoCartao": 5,
+        "saldoReembolsar": -98.92000000007101,
+        "calculado": 9840,
+        "diffFinal": 9840,
+        "diffCartao": 9835,
+        "diffReembolsar": 9938.920000000071
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 7000,
+        "diffFinal": 5385.56000000007,
+        "diffCartao": 6998,
+        "diffReembolsar": 7000
+      },
+      {
+        "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+        "saldoFinal": 0,
+        "saldoCartao": 7000,
+        "saldoReembolsar": -428.8200000000006,
+        "calculado": 7000,
+        "diffFinal": 7000,
+        "diffCartao": 0,
+        "diffReembolsar": 7428.820000000001
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 6800,
+        "diffFinal": 6573.3499999999785,
+        "diffCartao": 2164.34,
+        "diffReembolsar": 6800
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = ExpensesYear porPaymentMethodQZ[627401]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = ExpensesYear porPaymentMethodQZ[627508]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO CARTÃO = porPaymentMethodQZ[627401]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO CARTÃO = porPaymentMethodQZ[627508]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO CARTÃO = porPaymentMethodQZ[627401] + porPaymentMethodQZ[627508]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO CARTÃO = porPaymentMethodYear[627401] - porPaymentMethodQZ[627401]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO REEMBOLSAR = porPaymentMethodQZ[630113]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO REEMBOLSAR = porPaymentMethodQZ[668240]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO REEMBOLSAR = porPaymentMethodYear[630113] - porPaymentMethodQZ[630113]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = porStatusQZ[APROVADO]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = porStatusQZ[ENVIADO]",
+    "matchesFinal": 4,
+    "matchesCartao": 0,
+    "matchesReembolsar": 13,
+    "total": 17,
+    "precisaoFinal": 23.53,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 76.47,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 291.6600000002072,
+        "diffCartao": 20,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 1614.4399999999296,
+        "diffCartao": 2,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 226.65000000002146,
+        "diffCartao": 4635.66,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "LUDGERO HORACIO DE OLIVEIRA",
+        "saldoFinal": 3693.100000000008,
+        "saldoCartao": 981.69,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 3693.100000000008,
+        "diffCartao": 981.69,
+        "diffReembolsar": 0
+      },
+      {
+        "nome": "BRUNO OLIVEIRA DIAS",
+        "saldoFinal": 4637.600000000019,
+        "saldoCartao": 4283.83,
+        "saldoReembolsar": 0,
+        "calculado": 0,
+        "diffFinal": 4637.600000000019,
+        "diffCartao": 4283.83,
+        "diffReembolsar": 0
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = 1QZ * 0.1",
+    "matchesFinal": 0,
+    "matchesCartao": 0,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 0,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 1600,
+        "diffFinal": 1308.3399999997928,
+        "diffCartao": 1580,
+        "diffReembolsar": 1600
+      },
+      {
+        "nome": "ABNER ANDRADE CAVALCANTE",
+        "saldoFinal": 0,
+        "saldoCartao": 5,
+        "saldoReembolsar": -98.92000000007101,
+        "calculado": 984,
+        "diffFinal": 984,
+        "diffCartao": 979,
+        "diffReembolsar": 1082.920000000071
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 700,
+        "diffFinal": 914.4399999999296,
+        "diffCartao": 698,
+        "diffReembolsar": 700
+      },
+      {
+        "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+        "saldoFinal": 0,
+        "saldoCartao": 7000,
+        "saldoReembolsar": -428.8200000000006,
+        "calculado": 700,
+        "diffFinal": 700,
+        "diffCartao": 6300,
+        "diffReembolsar": 1128.8200000000006
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 680,
+        "diffFinal": 453.34999999997854,
+        "diffCartao": 3955.66,
+        "diffReembolsar": 680
+      }
+    ]
+  },
+  {
+    "formula": "SALDO FINAL = 1QZ * 0.2",
+    "matchesFinal": 0,
+    "matchesCartao": 0,
+    "matchesReembolsar": 0,
+    "total": 17,
+    "precisaoFinal": 0,
+    "precisaoCartao": 0,
+    "precisaoReembolsar": 0,
+    "erros": [
+      {
+        "nome": "RAFAEL AMORIM VELLO",
+        "saldoFinal": 291.6600000002072,
+        "saldoCartao": 20,
+        "saldoReembolsar": 0,
+        "calculado": 3200,
+        "diffFinal": 2908.339999999793,
+        "diffCartao": 3180,
+        "diffReembolsar": 3200
+      },
+      {
+        "nome": "ABNER ANDRADE CAVALCANTE",
+        "saldoFinal": 0,
+        "saldoCartao": 5,
+        "saldoReembolsar": -98.92000000007101,
+        "calculado": 1968,
+        "diffFinal": 1968,
+        "diffCartao": 1963,
+        "diffReembolsar": 2066.920000000071
+      },
+      {
+        "nome": "JAEDER RODRIGUES JUNIOR",
+        "saldoFinal": 1614.4399999999296,
+        "saldoCartao": 2,
+        "saldoReembolsar": 0,
+        "calculado": 1400,
+        "diffFinal": 214.43999999992957,
+        "diffCartao": 1398,
+        "diffReembolsar": 1400
+      },
+      {
+        "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+        "saldoFinal": 0,
+        "saldoCartao": 7000,
+        "saldoReembolsar": -428.8200000000006,
+        "calculado": 1400,
+        "diffFinal": 1400,
+        "diffCartao": 5600,
+        "diffReembolsar": 1828.8200000000006
+      },
+      {
+        "nome": "EDSON VEIGA SILVEIRA",
+        "saldoFinal": 226.65000000002146,
+        "saldoCartao": 4635.66,
+        "saldoReembolsar": 0,
+        "calculado": 1360,
+        "diffFinal": 1133.3499999999785,
+        "diffCartao": 3275.66,
+        "diffReembolsar": 1360
+      }
+    ]
+  }
+]

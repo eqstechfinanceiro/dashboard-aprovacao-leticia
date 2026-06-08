@@ -1,0 +1,511 @@
+{
+  "mapeamento": {
+    "RAFAEL AMORIM VELLO": {
+      "id": 896300,
+      "nome_vexpenses": "RAFAEL AMORIM VELLO",
+      "linha": 1
+    },
+    "ABNER ANDRADE CAVALCANTE": {
+      "id": 895944,
+      "nome_vexpenses": "ABNER ANDRADE CAVALCANTE",
+      "linha": 2
+    },
+    "ANDRE ARANHA MEISTER": {
+      "id": 1059840,
+      "nome_vexpenses": "ANDRE ARANHA MEISTER",
+      "linha": 3
+    },
+    "JAEDER RODRIGUES JUNIOR": {
+      "id": 896163,
+      "nome_vexpenses": "JAEDER RODRIGUES JUNIOR",
+      "linha": 4
+    },
+    "JUSTINO NOGUEIRA PEIXOTO JUNIOR": {
+      "id": 896206,
+      "nome_vexpenses": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "linha": 5
+    },
+    "EDSON VEIGA SILVEIRA": {
+      "id": 896082,
+      "nome_vexpenses": "EDSON VEIGA SILVEIRA",
+      "linha": 6
+    },
+    "LUDGERO HORACIO DE OLIVEIRA": {
+      "id": 896230,
+      "nome_vexpenses": "LUDGERO HORACIO DE OLIVEIRA",
+      "linha": 7
+    },
+    "BRUNO OLIVEIRA DIAS": {
+      "id": 896006,
+      "nome_vexpenses": "BRUNO OLIVEIRA DIAS",
+      "linha": 8
+    },
+    "JOSE CARLOS BATISTA": {
+      "id": 896186,
+      "nome_vexpenses": "JOSE CARLOS BATISTA",
+      "linha": 9
+    },
+    "LUCAS MARTINS MACAN": {
+      "id": 1010647,
+      "nome_vexpenses": "LUCAS MARTINS MACAN",
+      "linha": 10
+    },
+    "SAULO ARAUJO DE PAULA": {
+      "id": 896344,
+      "nome_vexpenses": "SAULO ARAUJO DE PAULA",
+      "linha": 11
+    },
+    "FLAVIO FERNANDES DOS REIS LIMA": {
+      "id": 896117,
+      "nome_vexpenses": "FLAVIO FERNANDES DOS REIS LIMA",
+      "linha": 12
+    },
+    "WALTER DE CAMPOS NUNES NETO": {
+      "id": 896381,
+      "nome_vexpenses": "WALTER DE CAMPOS NUNES NETO",
+      "linha": 13
+    },
+    "ANTONIO FERREIRA DE MENDONCA NETO": {
+      "id": 895992,
+      "nome_vexpenses": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "linha": 14
+    },
+    "BRUNO FERREIRA DE SOUZA RODRIGUES": {
+      "id": 896004,
+      "nome_vexpenses": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "linha": 15
+    },
+    "JOELSON FERREIRA DOS SANTOS": {
+      "id": 896178,
+      "nome_vexpenses": "JOELSON FERREIRA DOS SANTOS",
+      "linha": 16
+    },
+    "MARCO AURELIO DE ANDRADE MORAES": {
+      "id": 1001913,
+      "nome_vexpenses": "MARCO AURELIO DE ANDRADE MORAES",
+      "linha": 17
+    },
+    "VICTOR SIGOLO PINHEIRO PIMENTA": {
+      "id": 896376,
+      "nome_vexpenses": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "linha": 18
+    },
+    "SANDRO BARRETO DE SOUZA": {
+      "id": 896339,
+      "nome_vexpenses": "SANDRO BARRETO DE SOUZA",
+      "linha": 19
+    },
+    "CHARLES NEVES MATTIUZZI": {
+      "id": 896023,
+      "nome_vexpenses": "CHARLES NEVES MATTIUZZI",
+      "linha": 20
+    },
+    "CARLOS NASCIMENTO NONATO JUNIOR": {
+      "id": 896018,
+      "nome_vexpenses": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "linha": 21
+    },
+    "EDUARDO ANDREY VENSON SILVA": {
+      "id": 896083,
+      "nome_vexpenses": "EDUARDO ANDREY VENSON SILVA",
+      "linha": 22
+    },
+    "ENZIO CARVALHO DA MOTA": {
+      "id": 944251,
+      "nome_vexpenses": "ENZIO CARVALHO DA MOTA",
+      "linha": 23
+    },
+    "FRANCIELLY FELIX CAVALCANTE DE ANDRADE": {
+      "id": 896119,
+      "nome_vexpenses": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "linha": 24
+    },
+    "LEANDRO FIGUEREDO BELCHIOR": {
+      "id": 896215,
+      "nome_vexpenses": "LEANDRO FIGUEREDO BELCHIOR",
+      "linha": 25
+    },
+    "LUCIANO JOSE DO AMARAL PEREIRA": {
+      "id": 896229,
+      "nome_vexpenses": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "linha": 26
+    },
+    "ORESTE BARBOSA DA SILVA JUNIOR": {
+      "id": 896288,
+      "nome_vexpenses": "ORESTE BARBOSA DA SILVA JUNIOR",
+      "linha": 27
+    },
+    "RONALDO RUFINO SANTANA": {
+      "id": 896336,
+      "nome_vexpenses": "RONALDO RUFINO SANTANA",
+      "linha": 28
+    },
+    "SANDRO CAPISTRANO": {
+      "id": 896340,
+      "nome_vexpenses": "SANDRO CAPISTRANO",
+      "linha": 29
+    },
+    "TERCILA DA SILVA LOPES": {
+      "id": 1010644,
+      "nome_vexpenses": "TERCILA DA SILVA LOPES",
+      "linha": 30
+    },
+    "UBIRAJARA DE ARAUJO TEIXEIRA": {
+      "id": 896367,
+      "nome_vexpenses": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "linha": 31
+    },
+    "CAIO FRANCESCONI RIBEIRO": {
+      "id": 896007,
+      "nome_vexpenses": "CAIO FRANCESCONI RIBEIRO",
+      "linha": 32
+    },
+    "MICHAEL RODRIGUES SANTOS": {
+      "id": 896271,
+      "nome_vexpenses": "MICHAEL RODRIGUES SANTOS",
+      "linha": 33
+    },
+    "FERNANDO RODRIGUES DUARTE": {
+      "id": 896115,
+      "nome_vexpenses": "FERNANDO RODRIGUES DUARTE",
+      "linha": 34
+    },
+    "ALESSANDRO DE OLIVEIRA AZEVEDO": {
+      "id": 895963,
+      "nome_vexpenses": "ALESSANDRO DE OLIVEIRA AZEVEDO",
+      "linha": 35
+    },
+    "CLERITON BACILA DOS SANTOS": {
+      "id": 896035,
+      "nome_vexpenses": "CLERITON BACILA DOS SANTOS",
+      "linha": 36
+    },
+    "EMERSON LEITE DE BARROS": {
+      "id": 896090,
+      "nome_vexpenses": "EMERSON LEITE DE BARROS",
+      "linha": 37
+    },
+    "JESSICA DE MIRANDA MEDEIROS FELICIANO": {
+      "id": 896172,
+      "nome_vexpenses": "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+      "linha": 38
+    },
+    "PAULO NILTON COSTA MOREIRA": {
+      "id": 896297,
+      "nome_vexpenses": "PAULO NILTON COSTA MOREIRA",
+      "linha": 39
+    },
+    "ANDRE LUIZ SANTANA": {
+      "id": 895983,
+      "nome_vexpenses": "ANDRE LUIZ SANTANA",
+      "linha": 40
+    },
+    "CARLOS RENATO PACHECO DA SILVA": {
+      "id": 896019,
+      "nome_vexpenses": "CARLOS RENATO PACHECO DA SILVA",
+      "linha": 41
+    },
+    "EVERTON CAMARGO DE LOURETO": {
+      "id": 896096,
+      "nome_vexpenses": "EVERTON CAMARGO DE LOURETO",
+      "linha": 42
+    },
+    "FABIO DIOGO BITTENCOURT": {
+      "id": 896102,
+      "nome_vexpenses": "FABIO DIOGO BITTENCOURT",
+      "linha": 43
+    },
+    "JAFER DA FONTOURA AHMAD": {
+      "id": 916884,
+      "nome_vexpenses": "JAFER DA FONTOURA AHMAD",
+      "linha": 44
+    },
+    "RODRIGO VANZETTA": {
+      "id": 896331,
+      "nome_vexpenses": "RODRIGO VANZETTA",
+      "linha": 45
+    },
+    "DANIEL DA SILVA LOPES": {
+      "id": 896419,
+      "nome_vexpenses": "DANIEL DA SILVA LOPES",
+      "linha": 46
+    },
+    "WESLLEY GABRIEL DA SILVA CARDOSO": {
+      "id": 896391,
+      "nome_vexpenses": "WESLLEY GABRIEL DA SILVA CARDOSO",
+      "linha": 47
+    },
+    "CAIOS VINICIUS NUNES BROERING": {
+      "id": 896008,
+      "nome_vexpenses": "CAIOS VINICIUS NUNES BROERING",
+      "linha": 48
+    },
+    "DAVID DE OLIVEIRA FRIGERIO": {
+      "id": 966214,
+      "nome_vexpenses": "DAVID DE OLIVEIRA FRIGERIO",
+      "linha": 49
+    },
+    "EDUARDO SANTOS": {
+      "id": 896084,
+      "nome_vexpenses": "EDUARDO SANTOS",
+      "linha": 50
+    },
+    "FELIPE MORAES COSTA DE BRITTO": {
+      "id": 927567,
+      "nome_vexpenses": "FELIPE MORAES COSTA DE BRITTO",
+      "linha": 51
+    },
+    "CARLOS EDUARDO SCATAMBULO": {
+      "id": 896012,
+      "nome_vexpenses": "CARLOS EDUARDO SCATAMBULO",
+      "linha": 52
+    },
+    "BEATRIZ SILVA DE SIQUEIRA": {
+      "id": 895999,
+      "nome_vexpenses": "BEATRIZ SILVA DE SIQUEIRA",
+      "linha": 53
+    },
+    "ADSON SANTOS DA SILVA": {
+      "id": 985870,
+      "nome_vexpenses": "ADSON SANTOS DA SILVA",
+      "linha": 54
+    },
+    "ARLEY HENRIQUE DE SOUZA LUZ": {
+      "id": 920071,
+      "nome_vexpenses": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "linha": 55
+    },
+    "DHIEGO RIBEIRO DINIZ": {
+      "id": 896053,
+      "nome_vexpenses": "DHIEGO RIBEIRO DINIZ",
+      "linha": 56
+    },
+    "EVERSON ESTEVES DOS SANTOS": {
+      "id": 896095,
+      "nome_vexpenses": "EVERSON ESTEVES DOS SANTOS",
+      "linha": 57
+    },
+    "FABIO APARECIDO DE SOUSA PEREIRA": {
+      "id": 896101,
+      "nome_vexpenses": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "linha": 58
+    },
+    "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA": {
+      "id": 917058,
+      "nome_vexpenses": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "linha": 59
+    },
+    "FILIPE MENEZES KLING": {
+      "id": 1064227,
+      "nome_vexpenses": "FILIPE MENEZES KLING",
+      "linha": 60
+    },
+    "GUILHERME FERREIRA DA SILVA": {
+      "id": 954733,
+      "nome_vexpenses": "GUILHERME FERREIRA DA SILVA",
+      "linha": 61
+    },
+    "GUILHERME MOTTA RIBEIRO SILVA": {
+      "id": 896140,
+      "nome_vexpenses": "GUILHERME MOTTA RIBEIRO SILVA",
+      "linha": 62
+    },
+    "LEANDRO SOUSA": {
+      "id": 896217,
+      "nome_vexpenses": "LEANDRO SOUSA",
+      "linha": 63
+    },
+    "MARCELO GIMENEZ ARGEMON": {
+      "id": 896245,
+      "nome_vexpenses": "MARCELO GIMENEZ ARGEMON",
+      "linha": 64
+    },
+    "MARCO AURELIO DE LIMA": {
+      "id": 896254,
+      "nome_vexpenses": "MARCO AURELIO DE LIMA",
+      "linha": 65
+    },
+    "MATHEUS FERNANDES GUIMARAES": {
+      "id": 896264,
+      "nome_vexpenses": "MATHEUS FERNANDES GUIMARAES",
+      "linha": 66
+    },
+    "RODRIGO SANTOS DA SILVA": {
+      "id": 963612,
+      "nome_vexpenses": "RODRIGO SANTOS DA SILVA",
+      "linha": 67
+    },
+    "SHELDA CRISTINE LIMA TRINDADE": {
+      "id": 1100086,
+      "nome_vexpenses": "SHELDA CRISTINE LIMA TRINDADE",
+      "linha": 68
+    },
+    "MARIA EDUARDA ARAGAO": {
+      "id": 896259,
+      "nome_vexpenses": "MARIA EDUARDA ARAGAO",
+      "linha": 69
+    },
+    "RICARDO MURCIA GARCIA FILHO": {
+      "id": 896314,
+      "nome_vexpenses": "RICARDO MURCIA GARCIA FILHO",
+      "linha": 70
+    },
+    "THIAGO PEREIRA DE LIMA": {
+      "id": 896358,
+      "nome_vexpenses": "THIAGO PEREIRA DE LIMA",
+      "linha": 71
+    },
+    "JONAS CAVALCANTI DE OLIVEIRA": {
+      "id": 896180,
+      "nome_vexpenses": "JONAS CAVALCANTI DE OLIVEIRA",
+      "linha": 72
+    },
+    "JAIME ALVES DE ABREU SILVA": {
+      "id": 986346,
+      "nome_vexpenses": "JAIME ALVES DE ABREU SILVA",
+      "linha": 73
+    },
+    "ADMILSON DOS SANTOS GALAN": {
+      "id": 895950,
+      "nome_vexpenses": "ADMILSON DOS SANTOS GALAN",
+      "linha": 74
+    },
+    "ADSON ARAUJO DA SILVA": {
+      "id": 895956,
+      "nome_vexpenses": "ADSON ARAUJO DA SILVA",
+      "linha": 75
+    },
+    "DEISE SOARES DE CAMPOS": {
+      "id": 896049,
+      "nome_vexpenses": "DEISE SOARES DE CAMPOS",
+      "linha": 76
+    },
+    "EDIPO SANTOS BARRETO": {
+      "id": 920845,
+      "nome_vexpenses": "EDIPO SANTOS BARRETO",
+      "linha": 77
+    },
+    "DANIEL SANTOS DE ASSUNCAO": {
+      "id": 896044,
+      "nome_vexpenses": "DANIEL SANTOS DE ASSUNCAO",
+      "linha": 78
+    },
+    "EDER AUGUSTO DE ARAUJO CARVALHO": {
+      "id": 896070,
+      "nome_vexpenses": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "linha": 79
+    },
+    "ERICSON PINHEIRO DOS SANTOS": {
+      "id": 896092,
+      "nome_vexpenses": "ERICSON PINHEIRO DOS SANTOS",
+      "linha": 80
+    },
+    "FABIO DA CONCEICAO LIMA": {
+      "id": 961342,
+      "nome_vexpenses": "FABIO DA CONCEICAO LIMA",
+      "linha": 81
+    },
+    "FABIO PROVESI": {
+      "id": 896106,
+      "nome_vexpenses": "FABIO PROVESI",
+      "linha": 82
+    },
+    "ICARO MEDEIROS SILVA": {
+      "id": 896151,
+      "nome_vexpenses": "ICARO MEDEIROS SILVA",
+      "linha": 83
+    },
+    "JORGE NEGRI NETO": {
+      "id": 896185,
+      "nome_vexpenses": "JORGE NEGRI NETO",
+      "linha": 84
+    },
+    "JOSE EUSTAQUIO DE SOUZA": {
+      "id": 1008337,
+      "nome_vexpenses": "JOSE EUSTAQUIO DE SOUZA",
+      "linha": 85
+    },
+    "LARISSA SANTOS DA SILVA": {
+      "id": 1023033,
+      "nome_vexpenses": "LARISSA SANTOS DA SILVA",
+      "linha": 86
+    },
+    "LUCAS PEREIRA GONCALVES": {
+      "id": 896225,
+      "nome_vexpenses": "LUCAS PEREIRA GONCALVES",
+      "linha": 87
+    },
+    "MARCEL DA HORA CARVALHO": {
+      "id": 896241,
+      "nome_vexpenses": "MARCEL DA HORA CARVALHO",
+      "linha": 88
+    },
+    "MILTON FERREIRA DAS NEVES JUNIOR": {
+      "id": 1042864,
+      "nome_vexpenses": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "linha": 89
+    },
+    "RAMON GOMES TEIXEIRA": {
+      "id": 996627,
+      "nome_vexpenses": "RAMON GOMES TEIXEIRA",
+      "linha": 90
+    },
+    "RODRIGO ROBERTO DE SOUZA": {
+      "id": 896329,
+      "nome_vexpenses": "RODRIGO ROBERTO DE SOUZA",
+      "linha": 91
+    },
+    "SARA ARAGAO DA SILVA BARBOSA": {
+      "id": 896343,
+      "nome_vexpenses": "SARA ARAGAO DA SILVA BARBOSA",
+      "linha": 92
+    },
+    "SILMARA CHAVES": {
+      "id": 896349,
+      "nome_vexpenses": "SILMARA CHAVES",
+      "linha": 93
+    },
+    "THIAGO LEANDRO DOS SANTOS": {
+      "id": 896356,
+      "nome_vexpenses": "THIAGO LEANDRO DOS SANTOS",
+      "linha": 94
+    },
+    "THIEGO LEANDRO ALVES DE OLIVEIRA": {
+      "id": 930440,
+      "nome_vexpenses": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "linha": 95
+    },
+    "WELERSON PUFF RODRIGUES": {
+      "id": 896385,
+      "nome_vexpenses": "WELERSON PUFF RODRIGUES",
+      "linha": 96
+    },
+    "GIOVANNA SIDOTI MARQUES ROLLO": {
+      "id": 1106587,
+      "nome_vexpenses": "GIOVANNA SIDOTI MARQUES ROLLO",
+      "linha": 97
+    },
+    "RODRIGO FRANCISCO DE SOUSA": {
+      "id": 1106584,
+      "nome_vexpenses": "RODRIGO FRANCISCO DE SOUSA",
+      "linha": 98
+    },
+    "ROGERIO MACARIO PINTO": {
+      "id": 1106577,
+      "nome_vexpenses": "ROGERIO MACARIO PINTO",
+      "linha": 99
+    },
+    "ALISON FERREIRA DA SILVA": {
+      "id": 1106575,
+      "nome_vexpenses": "ALISON FERREIRA DA SILVA",
+      "linha": 100
+    }
+  },
+  "nao_encontrados": [],
+  "estatisticas": {
+    "total_planilha": 100,
+    "mapeados": 100,
+    "nao_encontrados": 0,
+    "taxa_sucesso": 100.0
+  }
+}

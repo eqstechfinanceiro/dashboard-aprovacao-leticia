@@ -10,7 +10,9 @@ import {
   Wallet, 
   Settings,
   TrendingUp,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Calculator,
+  FileSpreadsheet as FileSpreadsheetIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -22,6 +24,8 @@ const navigation = [
   { name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
   { name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
   { name: 'Planilha Quinzena', href: '/quinzena', icon: FileSpreadsheet },
+  { name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheetIcon },
+  { name: 'Automação Saldos', href: '/saldo-automacao', icon: Calculator },
   { name: 'Teste Planilha 1', href: '/test-planilha-1', icon: FileSpreadsheet },
   { name: 'Verificação API', href: '/test-planilha-1-api', icon: FileSpreadsheet },
   { name: 'Teste Planilha 2', href: '/test-planilha-2', icon: FileSpreadsheet },

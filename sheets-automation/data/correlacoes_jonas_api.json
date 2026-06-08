@@ -1,0 +1,477 @@
+{
+  "dados_jonas": {
+    "Colaborador": "JONAS CAVALCANTI DE OLIVEIRA",
+    "CPF": "01696239478",
+    "Status": "ATIVO",
+    "Regional": "REGIONAL NE",
+    "Centro de Custo": "3R PETROLEUM NE",
+    "Gestor 1": "GERSON OLIVEIRA",
+    "Gestor 2": "ROGERIO SCATAMBULO",
+    "Campo 8": "0",
+    "Valor Total": "6945.160000000003",
+    "1ª QZ": "1750",
+    "Percentual": "15.21",
+    "Campo 12": "",
+    "Campo 13": "-5210.370000000003",
+    "Campo 14": "0",
+    "Campo 15": "0",
+    "Campo 16": "",
+    "Status Cartão": "Cartão ativo"
+  },
+  "costs_centers_relacionados": [
+    {
+      "id": 1861405,
+      "integration_id": "11062350001",
+      "name": "3R PETROLEUM NE",
+      "company_group_id": 1825947,
+      "on": true,
+      "approval_flow_id": null
+    }
+  ],
+  "projetos_relacionados": [
+    {
+      "id": 1861293,
+      "name": "REGIONAL NE",
+      "company_name": null,
+      "cnpj": null,
+      "address": null,
+      "neighborhood": null,
+      "city": null,
+      "state": null,
+      "zip_code": null,
+      "phone1": null,
+      "phone2": null,
+      "on": true,
+      "integration_id": null
+    }
+  ],
+  "usuarios_regionais_ne": [
+    {
+      "user": {
+        "id": 895951,
+        "integration_id": null,
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172535,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADRIANA DA CONCEICAO PEREIRA DE MELO",
+        "email": "adriana.melo@eqsengenharia.com.br",
+        "cpf": "10279969490",
+        "phone1": "81986327208",
+        "phone2": "81986327208",
+        "birth_date": "1994-03-16",
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:22",
+        "updated_at": "2026-01-30 09:36:51",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 895956,
+        "integration_id": "008083",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 217812,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADSON ARAUJO DA SILVA",
+        "email": "adson.silva@eqsengenharia.com.br",
+        "cpf": "94551804304",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:31",
+        "updated_at": "2026-02-05 09:00:40",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 895961,
+        "integration_id": "025308",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172536,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ALAN RODRIGO SILVA ANDRADE",
+        "email": "alan.andrade@eqseng.com.br",
+        "cpf": "07722232469",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:41",
+        "updated_at": "2025-07-10 08:46:59",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 895962,
+        "integration_id": "008071",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 217812,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ALAN WAGNER MEDEIROS DE SOUZA",
+        "email": "alan.peacv@gmail.com",
+        "cpf": "94567050487",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:43",
+        "updated_at": "2026-02-05 09:00:40",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 895993,
+        "integration_id": "024578",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172535,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ANTONIO JOSE PEREIRA DA SILVA",
+        "email": "antonio.j1.silva26@gmail.com",
+        "cpf": "08326260401",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:34:40",
+        "updated_at": "2026-01-30 09:36:51",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 896001,
+        "integration_id": "010857",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": 42328,
+        "approval_flow_id": 217812,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "BRUNA LAIS AZEVEDO CUNHA",
+        "email": "brunalais_ac@hotmail.com",
+        "cpf": "07747008406",
+        "phone1": "84988425064",
+        "phone2": null,
+        "birth_date": "1992-04-16",
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:34:55",
+        "updated_at": "2026-02-05 09:00:40",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    },
+    {
+      "user": {
+        "id": 896032,
+        "integration_id": null,
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172535,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "CLEBER RICARDO NASCIMENTO SILVA",
+        "email": "cleber.rns@uol.com.br",
+        "cpf": "84743603404",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": false,
+        "parameters": null,
+        "created_at": "2025-04-16 17:35:53",
+        "updated_at": "2026-03-02 15:37:47",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "project": {
+        "id": 1861293,
+        "name": "REGIONAL NE",
+        "company_name": null,
+        "cnpj": null,
+        "address": null,
+        "neighborhood": null,
+        "city": null,
+        "state": null,
+        "zip_code": null,
+        "phone1": null,
+        "phone2": null,
+        "on": true,
+        "integration_id": null
+      }
+    }
+  ]
+}

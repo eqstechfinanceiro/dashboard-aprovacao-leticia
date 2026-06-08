@@ -1,0 +1,4998 @@
+{
+  "total_planilha": 340,
+  "total_api": 340,
+  "mapeados": 340,
+  "sem_dados_api": [
+    {
+      "nome": "ADSON SANTOS DA SILVA",
+      "cpf": "83058133553",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "CLERITON BACILA DOS SANTOS",
+      "cpf": "05456615959",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "DHIEGO RIBEIRO DINIZ",
+      "cpf": "00049250256",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "MICHAEL RODRIGUES SANTOS",
+      "cpf": "37425574837",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "DOUGLAS WESLEN CARDOSO DOS SANTOS",
+      "cpf": "08784554932",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "RAFAEL ALMEIDA LOPES",
+      "cpf": "46850229800",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "FLAVIO HENRIQUE ALVES ROMERO",
+      "cpf": "82871396000",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "LUCAS HENRIQUE ALVES DE OLIVEIRA",
+      "cpf": "10977673618",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "ALAERTE JACINTO JUNIOR",
+      "cpf": "03071605994",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "MARCOS VINICIUS DE SOUZA ALVES",
+      "cpf": "11823866603",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "VINICIUS PEIXOTO BONETTI",
+      "cpf": "09785002969",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "JEAN FABIO OLIVERIO",
+      "cpf": "00645883948",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "UELITON SANTANA SANTOS",
+      "cpf": "03686605597",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "EDIPO SANTOS BARRETO",
+      "cpf": "37896893860",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "DANIEL DA SILVA LOPES",
+      "cpf": "94288259053",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "SIDNEI FRANCISCO DA SILVA",
+      "cpf": "02224415931",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "MARLON ARAUJO",
+      "cpf": "07774700986",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "RICARDO DORNELES NEITZKE",
+      "cpf": "09353381959",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "KATIA RESENDE DA SILVA",
+      "cpf": "45154701836",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "ROBSON FURTADO",
+      "cpf": "05236669936",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "WAGNER RAFAEL GERHARDT",
+      "cpf": "00413687031",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "JONAS PAULO DE MATOS",
+      "cpf": "69010544915",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "VANDERLEI DOS SANTOS",
+      "cpf": "21262405840",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "EMERSON CHOUBI PRADO",
+      "cpf": "29722576852",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "JOAO DA SILVA VIANA",
+      "cpf": "88367550978",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "FILIPE MENEZES KLING",
+      "cpf": "10664298710",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "LUIS FELIPE RAYMUNDO GARCIA",
+      "cpf": "06837861999",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "ALLAN CRISTIAN DA CUNHA",
+      "cpf": "10132301911",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "LUCIANO JOSE DA CUNHA",
+      "cpf": "03443300952",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "MARCIO DA COSTA JOAO",
+      "cpf": "02524841936",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "PAULO ALEXANDRE DE AMORIM",
+      "cpf": "04179369907",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "JACSSON MAYLON CASTRO CORREA",
+      "cpf": "10206563957",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "DOUGLAS TIAGO DE OLIVEIRA",
+      "cpf": "08492402989",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "CLAUDEMIR GREGOSKI RODRIGUES",
+      "cpf": "05144026958",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "ALISON FERREIRA DA SILVA",
+      "cpf": "37377394803",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "ALISSON RODRIGO RAMBO",
+      "cpf": "07338782962",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "ALVARO RAMON PRIMERA CASTILLO",
+      "cpf": "71318758130",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "BRUNO DE SOUZA PACHECO",
+      "cpf": "04252409160",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "CAMILA DE OLIVEIRA VELOSO",
+      "cpf": "85076538553",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "FABIO HENRIQUE PECORARI CRUZ",
+      "cpf": "39297665829",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "JAIR ASSIS DA SILVA",
+      "cpf": "60377348953",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "JAQUELINE ONORIO DOS SANTOS ALVES",
+      "cpf": "37258325875",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "JOSE NEI DOS SANTOS DUTRA",
+      "cpf": "55278612053",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "LEANDRO DE QUADROS",
+      "cpf": "03461295914",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "LUCAS HENRIQUE PINHO",
+      "cpf": "45211709861",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "PRISCILA GOTARDO PEREIRA",
+      "cpf": "05168980945",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "RUBENS BELO HERBSTER",
+      "cpf": "02701688345",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "SANDRO QUITERIO LOPES DOS SANTOS",
+      "cpf": "02988581428",
+      "status_api": "SEM_RELATORIOS"
+    },
+    {
+      "nome": "SILVIO ODELI FILHO",
+      "cpf": "07634898910",
+      "status_api": "SEM_VALORES"
+    },
+    {
+      "nome": "WELLINGTON ARION TAVARES",
+      "cpf": "04747951954",
+      "status_api": "SEM_VALORES"
+    }
+  ],
+  "sem_dados_planilha": [],
+  "com_dados_completos": [
+    {
+      "nome": "JONAS CAVALCANTI DE OLIVEIRA",
+      "cpf": "01696239478",
+      "planilha": {
+        "1ª QZ": 1750.0,
+        "SALDO FINAL": 6945.160000000003,
+        "SALDO CARTAO": 15.21,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RODRIGO CESAR DOS SANTOS",
+      "cpf": "07024923610",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 6626.040000000001,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CAIO FRANCESCONI RIBEIRO",
+      "cpf": "08924586904",
+      "planilha": {
+        "1ª QZ": 3900.0,
+        "SALDO FINAL": 6504.200000000004,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "cpf": "72756284220",
+      "planilha": {
+        "1ª QZ": 5000.0,
+        "SALDO FINAL": 6084.360000000001,
+        "SALDO CARTAO": 5.32,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ALESSANDRO RODRIGO PASTRELLI",
+      "cpf": "02474960902",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 5136.45,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "cpf": "07505987607",
+      "planilha": {
+        "1ª QZ": 7000.0,
+        "SALDO FINAL": 4284.490000000078,
+        "SALDO CARTAO": 2.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LEANDRO FIGUEREDO BELCHIOR",
+      "cpf": "26513583802",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 4000.000000000002,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "SANDRO CAPISTRANO",
+      "cpf": "16996346886",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 3885.729999999998,
+        "SALDO CARTAO": 6.44,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2926.0,
+        "saldo_final": 2488.563,
+        "saldo_cartao": 375.4058,
+        "saldo_reembolsar": 1356.4936
+      }
+    },
+    {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "cpf": "12237490619",
+      "planilha": {
+        "1ª QZ": 5000.0,
+        "SALDO FINAL": 3813.389999999993,
+        "SALDO CARTAO": 37.29,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "cpf": "06576198922",
+      "planilha": {
+        "1ª QZ": 6500.0,
+        "SALDO FINAL": 3774.2199999999634,
+        "SALDO CARTAO": 2450.35,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "cpf": "74548565949",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 3714.170000000005,
+        "SALDO CARTAO": 152.72,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "cpf": "04434355708",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 3676.0899999999056,
+        "SALDO CARTAO": 3.09,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "TERCILA DA SILVA LOPES",
+      "cpf": "67752721387",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 3671.4500000000007,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ICARO MEDEIROS SILVA",
+      "cpf": "01565661338",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 3610.840000000002,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "cpf": "01767960107",
+      "planilha": {
+        "1ª QZ": 5700.0,
+        "SALDO FINAL": 3473.74999999997,
+        "SALDO CARTAO": 277.08,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ENZIO CARVALHO DA MOTA",
+      "cpf": "38548259515",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 3462.3799999999883,
+        "SALDO CARTAO": 35.74,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ANGELICA SOARES AMARANTE SILVA",
+      "cpf": "07643300712",
+      "planilha": {
+        "1ª QZ": 11000.0,
+        "SALDO FINAL": 3355.8600000000047,
+        "SALDO CARTAO": 9.98,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "cpf": "12547938790",
+      "planilha": {
+        "1ª QZ": 4200.0,
+        "SALDO FINAL": 3263.569999999975,
+        "SALDO CARTAO": 3.45,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 3986.96,
+        "saldo_final": 3390.9094800000003,
+        "saldo_cartao": 511.526968,
+        "saldo_reembolsar": 1848.354656
+      }
+    },
+    {
+      "nome": "CARLOS RENATO PACHECO DA SILVA",
+      "cpf": "90443306087",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 3214.159999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DAVID DA SILVA PEREIRA",
+      "cpf": "02344854002",
+      "planilha": {
+        "1ª QZ": 250.0,
+        "SALDO FINAL": 3100.98,
+        "SALDO CARTAO": 9.92,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ANDRE PINHEIRO BALOTIN",
+      "cpf": "98603566020",
+      "planilha": {
+        "1ª QZ": 1200.0,
+        "SALDO FINAL": 3088.169999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ULISSES FERREIRA DE OLIVEIRA",
+      "cpf": "01595939644",
+      "planilha": {
+        "1ª QZ": 1150.0,
+        "SALDO FINAL": 2905.9799999999973,
+        "SALDO CARTAO": 101.31,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RODRIGO VANZETTA",
+      "cpf": "99532344004",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 2736.079999999951,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "CLAUDIO DONIZETE DA SILVA",
+      "cpf": "93457235953",
+      "planilha": {
+        "1ª QZ": 600.0,
+        "SALDO FINAL": 2631.6100000000024,
+        "SALDO CARTAO": 0.51,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCAS MARTINS MACAN",
+      "cpf": "00975748998",
+      "planilha": {
+        "1ª QZ": 6000.0,
+        "SALDO FINAL": 2524.7099999999723,
+        "SALDO CARTAO": 949.44,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "HELDER USTULIN",
+      "cpf": "37562230862",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 2519.5,
+        "SALDO CARTAO": 350.28,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "PAOLA CAROLINI BARBOSA",
+      "cpf": "03445951969",
+      "planilha": {
+        "1ª QZ": 1200.0,
+        "SALDO FINAL": 2480.5199999999995,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "cpf": "05766838760",
+      "planilha": {
+        "1ª QZ": 5000.0,
+        "SALDO FINAL": 2475.7899999999836,
+        "SALDO CARTAO": 1166.47,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FELIPE MORAES COSTA DE BRITTO",
+      "cpf": "04347084102",
+      "planilha": {
+        "1ª QZ": 2500.0,
+        "SALDO FINAL": 2446.5099999999893,
+        "SALDO CARTAO": 2.24,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GUILHERME MATEUS VAZ DOS SANTOS",
+      "cpf": "44519188806",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 2410.6699999999996,
+        "SALDO CARTAO": 21.78,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DAVID DE OLIVEIRA FRIGERIO",
+      "cpf": "04817177900",
+      "planilha": {
+        "1ª QZ": 2500.0,
+        "SALDO FINAL": 2355.4100000000035,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 6721.0,
+        "saldo_final": 5716.2105,
+        "saldo_cartao": 862.3043,
+        "saldo_reembolsar": 3115.8556
+      }
+    },
+    {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "cpf": "78021324953",
+      "planilha": {
+        "1ª QZ": 4240.0,
+        "SALDO FINAL": 2320.1799999999694,
+        "SALDO CARTAO": 0.67,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FERNANDO RODRIGUES DUARTE",
+      "cpf": "03377983112",
+      "planilha": {
+        "1ª QZ": 3200.0,
+        "SALDO FINAL": 2114.90999999999,
+        "SALDO CARTAO": 502.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ROBERTO DOMINGUES PEREIRA",
+      "cpf": "81480261068",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 2301.1099999999706,
+        "SALDO CARTAO": 130.95,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GUSTAVO RODRIGUES FARIA",
+      "cpf": "10531222926",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 2212.199999999998,
+        "SALDO CARTAO": 33.29,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "cpf": "02679643909",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 2038.8999999999992,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LEANDRO PINTO NUNES",
+      "cpf": "08325368730",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 2028.3600000000024,
+        "SALDO CARTAO": 801.41,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAFAEL AMORIM VELLO",
+      "cpf": "01677920599",
+      "planilha": {
+        "1ª QZ": 16000.0,
+        "SALDO FINAL": 1978.54000000018,
+        "SALDO CARTAO": 37.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FRANCINILDO JACKSON DE ALMEIDA ARAUJO",
+      "cpf": "07021071400",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 1954.9999999999982,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "NEUDO SAMPIETRO",
+      "cpf": "04885659957",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 1945.8,
+        "SALDO CARTAO": 0.28,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "SARA ARAGAO DA SILVA BARBOSA",
+      "cpf": "49637513809",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1823.7599999999966,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "THIAGO PEREIRA DE LIMA",
+      "cpf": "06478105490",
+      "planilha": {
+        "1ª QZ": 1800.0,
+        "SALDO FINAL": 1790.5000000000018,
+        "SALDO CARTAO": 2.5,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 9952.0,
+        "saldo_final": 8464.176,
+        "saldo_cartao": 1276.8416,
+        "saldo_reembolsar": 4613.7472
+      }
+    },
+    {
+      "nome": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "cpf": "03985382638",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1789.9700000000012,
+        "SALDO CARTAO": 16.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 50000.0,
+        "saldo_final": 42525.0,
+        "saldo_cartao": 6415.0,
+        "saldo_reembolsar": 23180.0
+      }
+    },
+    {
+      "nome": "JAQUELINE LEVATI PEREIRA",
+      "cpf": "01310014264",
+      "planilha": {
+        "1ª QZ": 1200.0,
+        "SALDO FINAL": 1743.980000000008,
+        "SALDO CARTAO": 1.39,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "cpf": "05100355581",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1715.3600000000004,
+        "SALDO CARTAO": 2.41,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RODRIGO ROBERTO DE SOUZA",
+      "cpf": "05664820969",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1709.4699999999975,
+        "SALDO CARTAO": 1500.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCAS PEREIRA GONCALVES",
+      "cpf": "11128978601",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1705.369999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 3893.0,
+        "saldo_final": 3310.9965,
+        "saldo_cartao": 499.4719,
+        "saldo_reembolsar": 1804.7948000000001
+      }
+    },
+    {
+      "nome": "ANDRE ARANHA MEISTER",
+      "cpf": "03032275326",
+      "planilha": {
+        "1ª QZ": 9000.0,
+        "SALDO FINAL": 1702.9200000000023,
+        "SALDO CARTAO": 42.27,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2394.0,
+        "saldo_final": 2036.097,
+        "saldo_cartao": 307.1502,
+        "saldo_reembolsar": 1109.8584
+      }
+    },
+    {
+      "nome": "DAVID VICHI DE BRITO",
+      "cpf": "21641472863",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 1699.2399999999986,
+        "SALDO CARTAO": 1857.2,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RODRIGO SANTOS DA SILVA",
+      "cpf": "05504962706",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 1675.2600000000054,
+        "SALDO CARTAO": 324.74,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "BEATRIZ SILVA DE SIQUEIRA",
+      "cpf": "35575473880",
+      "planilha": {
+        "1ª QZ": 2200.0,
+        "SALDO FINAL": 1669.2700000000054,
+        "SALDO CARTAO": 3.06,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JUNIO VICENTE BARBOSA",
+      "cpf": "10054353670",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 1661.000000000001,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "HIGOR LUIZ CERQUEIRA",
+      "cpf": "33832720871",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 1645.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "NILSON RODRIGUES CARDOSO JUNIOR",
+      "cpf": "04025408325",
+      "planilha": {
+        "1ª QZ": 6000.0,
+        "SALDO FINAL": 1643.34,
+        "SALDO CARTAO": 761.86,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DEISE SOARES DE CAMPOS",
+      "cpf": "69116709004",
+      "planilha": {
+        "1ª QZ": 1600.0,
+        "SALDO FINAL": 1593.0000000000036,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "WESLLEY GABRIEL DA SILVA CARDOSO",
+      "cpf": "87813416015",
+      "planilha": {
+        "1ª QZ": 2700.0,
+        "SALDO FINAL": 1540.95999999997,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "THIAGO LEANDRO DOS SANTOS",
+      "cpf": "33927651800",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1499.999999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "PAULO DE FREITAS PEREIRA",
+      "cpf": "11634696611",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 1497.399999999999,
+        "SALDO CARTAO": 43.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LARISSA SANTOS DA SILVA",
+      "cpf": "45120065830",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1473.8700000000008,
+        "SALDO CARTAO": 5.13,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCELO DE SOUZA DALA VEDOVA",
+      "cpf": "05375810654",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 1453.5700000000015,
+        "SALDO CARTAO": 4.71,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FABIO DA CONCEICAO LIMA",
+      "cpf": "31275798888",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1440.3000000000002,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "EMERSON LEITE DE BARROS",
+      "cpf": "34168918807",
+      "planilha": {
+        "1ª QZ": 3000.0,
+        "SALDO FINAL": 1437.5600000000268,
+        "SALDO CARTAO": 29.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 77987.0,
+        "saldo_final": 66327.94350000001,
+        "saldo_cartao": 10005.7321,
+        "saldo_reembolsar": 36154.7732
+      }
+    },
+    {
+      "nome": "WELERSON PUFF RODRIGUES",
+      "cpf": "04352219657",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1417.5499999999884,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ROGERIO MACARIO PINTO",
+      "cpf": "14355734803",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1389.58,
+        "SALDO CARTAO": 16.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ADILSON MELLO DE CAMARGO",
+      "cpf": "67324398049",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 1370.7299999999996,
+        "SALDO CARTAO": 43.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CARLOS EDUARDO SCATAMBULO",
+      "cpf": "22730778829",
+      "planilha": {
+        "1ª QZ": 2300.0,
+        "SALDO FINAL": 1341.6499999999287,
+        "SALDO CARTAO": 5.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 3977.0,
+        "saldo_final": 3382.4385,
+        "saldo_cartao": 510.2491,
+        "saldo_reembolsar": 1843.7372
+      }
+    },
+    {
+      "nome": "FRANCO CARLOS DALLACQUA",
+      "cpf": "34757123850",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1259.34,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RONALDO RUFINO SANTANA",
+      "cpf": "29758827855",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 1256.7599999999534,
+        "SALDO CARTAO": 443.69,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JULIO CESAR ALVES DA ROCHA",
+      "cpf": "02265549967",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 1250.8000000000002,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MATEUS DE CARVALHO BERTOL",
+      "cpf": "01304856674",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 1238.67,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EDUARDO ANDREY VENSON SILVA",
+      "cpf": "02960685946",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 1216.8499999999622,
+        "SALDO CARTAO": 1586.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "EDMAR FERREIRA CARDOSO",
+      "cpf": "06311884607",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 1176.8600000000022,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ODAIR CIRCO SOARES",
+      "cpf": "84219122915",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 1169.350000000003,
+        "SALDO CARTAO": 12.54,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "EVERTON CAMARGO DE LOURETO",
+      "cpf": "91688205004",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 1155.6699999999037,
+        "SALDO CARTAO": 29.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MILTON BRASIL CAVALCANTE",
+      "cpf": "03021570852",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 1101.25,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ADMILSON DOS SANTOS GALAN",
+      "cpf": "04769973993",
+      "planilha": {
+        "1ª QZ": 1680.0,
+        "SALDO FINAL": 1092.1399999999599,
+        "SALDO CARTAO": 9.52,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUIZ GUSTAVO DI GIORGIO",
+      "cpf": "29856268893",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 1072.1799999999985,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "PAULO NILTON COSTA MOREIRA",
+      "cpf": "45159599053",
+      "planilha": {
+        "1ª QZ": 3000.0,
+        "SALDO FINAL": 1040.8599999999788,
+        "SALDO CARTAO": 8.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCAS RODRIGUES DE MOURA GALVAO",
+      "cpf": "04013986175",
+      "planilha": {
+        "1ª QZ": 3000.0,
+        "SALDO FINAL": 1036.390000000004,
+        "SALDO CARTAO": 4.54,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE VICTOR ARAUJO FELIX",
+      "cpf": "06323566346",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 999.9999999999995,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCOS SEGER",
+      "cpf": "97135631900",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 963.2800000000025,
+        "SALDO CARTAO": 1038.75,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 500.0,
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      }
+    },
+    {
+      "nome": "JAIME ALVES DE ABREU SILVA",
+      "cpf": "00965306186",
+      "planilha": {
+        "1ª QZ": 1700.0,
+        "SALDO FINAL": 354.050000000005,
+        "SALDO CARTAO": 2.35,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MATHEUS FERNANDES GUIMARAES",
+      "cpf": "17996820724",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 936.6800000000003,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ANDERSON BICA PEREZ",
+      "cpf": "00053957040",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 898.1200000000006,
+        "SALDO CARTAO": 2.49,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RENATO PARREIRAS",
+      "cpf": "97162485634",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 888.8399999999997,
+        "SALDO CARTAO": 4.81,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CARLOS ROBERTO DE CARVALHO PERES",
+      "cpf": "09867858816",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 677.719999999999,
+        "SALDO CARTAO": 514.9,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "BRUNO EDUARDO DE SOUZA",
+      "cpf": "82341478972",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 873.2999999999994,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 50.0,
+        "saldo_final": 42.525,
+        "saldo_cartao": 6.415,
+        "saldo_reembolsar": 23.18
+      }
+    },
+    {
+      "nome": "GENISSON DE PAIVA FERREIRA",
+      "cpf": "00714806501",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 847.4800000000008,
+        "SALDO CARTAO": 810.93,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JAFER DA FONTOURA AHMAD",
+      "cpf": "00041171071",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 832.9199999999759,
+        "SALDO CARTAO": 3.89,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CRISTIANO ANESIO GOMES DO NASCIMENTO",
+      "cpf": "02862032786",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 800.5100000000057,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "cpf": "62063774072",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 791.9500000000189,
+        "SALDO CARTAO": 1770.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ERICSON PINHEIRO DOS SANTOS",
+      "cpf": "29157549850",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 787.51,
+        "SALDO CARTAO": 712.49,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LEANDRO DE MENEZES ASSUNCAO",
+      "cpf": "09072032640",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 785.880000000001,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RODRIGO BOLDO",
+      "cpf": "27104988807",
+      "planilha": {
+        "1ª QZ": 1200.0,
+        "SALDO FINAL": 768.8100000000006,
+        "SALDO CARTAO": 8.55,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ALAN RODRIGO SILVA ANDRADE",
+      "cpf": "07722232469",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 749.0000000000005,
+        "SALDO CARTAO": 10.02,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ARTHUR GOMES DE PAULO",
+      "cpf": "12877857603",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 743.3800000000023,
+        "SALDO CARTAO": 110.64,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MICHEL VINHORTE DE SOUZA",
+      "cpf": "70457883200",
+      "planilha": {
+        "1ª QZ": 350.0,
+        "SALDO FINAL": 738.3999999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "cpf": "11992259755",
+      "planilha": {
+        "1ª QZ": 6200.0,
+        "SALDO FINAL": 734.3099999999968,
+        "SALDO CARTAO": 4437.55,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JOSE WILKESON OLIVEIRA SILVA",
+      "cpf": "03393455354",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 724.7799999999997,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "cpf": "09276240446",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 718.0399999999889,
+        "SALDO CARTAO": 454.62,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JORGE NEGRI NETO",
+      "cpf": "44997574600",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 701.4700000000048,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "cpf": "07690263623",
+      "planilha": {
+        "1ª QZ": 5000.0,
+        "SALDO FINAL": 699.809999999918,
+        "SALDO CARTAO": 0.18,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FABIO PROVESI",
+      "cpf": "05731312958",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 671.4300000000096,
+        "SALDO CARTAO": 227.76,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "BEN HUR MENDES OLIVEIRA",
+      "cpf": "00046347054",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 662.7499999999999,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LUIZ PAULO SILVA SOUSA JUNIOR",
+      "cpf": "02678045129",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 649.0400000000029,
+        "SALDO CARTAO": 157.3,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GIOVANI DONNANTUONI",
+      "cpf": "15226997833",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 647.0,
+        "SALDO CARTAO": 4.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DIEGO DE ALCANTARA MOTA MENDES",
+      "cpf": "09407167631",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 640.5599999999996,
+        "SALDO CARTAO": 4.92,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "VANDERLEI DE SOUZA NORONHA JUNIOR",
+      "cpf": "37695259810",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 614.999999999999,
+        "SALDO CARTAO": 4.85,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 6528.0,
+        "saldo_final": 5552.064,
+        "saldo_cartao": 837.5423999999999,
+        "saldo_reembolsar": 3026.3808
+      }
+    },
+    {
+      "nome": "BRUNA LAIS AZEVEDO CUNHA",
+      "cpf": "07747008406",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 610.8200000000008,
+        "SALDO CARTAO": 389.18,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ALEX SANDRO PEREIRA MARQUES",
+      "cpf": "82877904091",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 606.1000000000028,
+        "SALDO CARTAO": 156.59,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "AMANDA CRISTINA DA SILVA",
+      "cpf": "07809466690",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 568.1399999999994,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 31.0,
+        "saldo_final": 26.3655,
+        "saldo_cartao": 3.9773,
+        "saldo_reembolsar": 14.3716
+      }
+    },
+    {
+      "nome": "ERICO BRUNO DA SILVA MATOS",
+      "cpf": "00011945265",
+      "planilha": {
+        "1ª QZ": 160.0,
+        "SALDO FINAL": 565.7599999999999,
+        "SALDO CARTAO": 2.34,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 100.0,
+        "saldo_final": 85.05,
+        "saldo_cartao": 12.83,
+        "saldo_reembolsar": 46.36
+      }
+    },
+    {
+      "nome": "DMITRI MORAIS DA SILVA",
+      "cpf": "11454991631",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 558.88,
+        "SALDO CARTAO": 41.18,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "VICTOR MIGUEL PALARO",
+      "cpf": "09265596996",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 550.5300000000015,
+        "SALDO CARTAO": 124.12,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANDRE LUIZ SANTANA",
+      "cpf": "11897381638",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 547.1099999999715,
+        "SALDO CARTAO": 9.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAFAEL NATAL LACHI",
+      "cpf": "03710085900",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 542.010000000002,
+        "SALDO CARTAO": 93.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EDIBERTO GEORGE RELIQUIAS",
+      "cpf": "34596010862",
+      "planilha": {
+        "1ª QZ": 675.0,
+        "SALDO FINAL": 534.3000000000004,
+        "SALDO CARTAO": 168.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ARTUR JACO PAGANI DE SOUZA",
+      "cpf": "07105914971",
+      "planilha": {
+        "1ª QZ": 80.0,
+        "SALDO FINAL": 500.00999999999937,
+        "SALDO CARTAO": 28.2,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 30.0,
+        "saldo_final": 25.515,
+        "saldo_cartao": 3.8489999999999998,
+        "saldo_reembolsar": 13.908000000000001
+      }
+    },
+    {
+      "nome": "ALIRIO THOMAZ VALENTIM",
+      "cpf": "99335220000",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 500.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GILMAR DUARTE LACERDA",
+      "cpf": "05290622675",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 500.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 7222.0,
+        "saldo_final": 6142.311000000001,
+        "saldo_cartao": 926.5826,
+        "saldo_reembolsar": 3348.1192
+      }
+    },
+    {
+      "nome": "MARCELO CARVALHO DA SILVA",
+      "cpf": "69153825004",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 500.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RODRIGO ROQUE",
+      "cpf": "02062513941",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 500.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JOELSON JUNIOR MARTINS DE GOES",
+      "cpf": "03528389907",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 488.4400000000013,
+        "SALDO CARTAO": 76.12,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ADRIANO FRANCISCO DE PAULA",
+      "cpf": "08813588607",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 480.58,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 230.0,
+        "saldo_final": 195.615,
+        "saldo_cartao": 29.509,
+        "saldo_reembolsar": 106.628
+      }
+    },
+    {
+      "nome": "EDEVALDO DUTRA GONCALVES",
+      "cpf": "00312735057",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 476.39999999999054,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MARCEL DA HORA CARVALHO",
+      "cpf": "01730674500",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 433.3099999999831,
+        "SALDO CARTAO": 29.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CAIOS VINICIUS NUNES BROERING",
+      "cpf": "07053418952",
+      "planilha": {
+        "1ª QZ": 2520.0,
+        "SALDO FINAL": 402.61000000000456,
+        "SALDO CARTAO": 796.91,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "HELDER ARCHANJO FERREIRA",
+      "cpf": "06439531670",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 399.8899999999991,
+        "SALDO CARTAO": 37.11,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2250.0,
+        "saldo_final": 1913.625,
+        "saldo_cartao": 288.675,
+        "saldo_reembolsar": 1043.1000000000001
+      }
+    },
+    {
+      "nome": "FABIANA CAMILA BARBOSA DE MORAES LIMA",
+      "cpf": "38880279858",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 368.8400000000029,
+        "SALDO CARTAO": 661.71,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JAZEMIR DE SANTANA MARQUES",
+      "cpf": "44012861549",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 358.9599999999998,
+        "SALDO CARTAO": 18.28,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 500.0,
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      }
+    },
+    {
+      "nome": "MARCIO BOUZAS FERREIRA",
+      "cpf": "07318362780",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 354.84000000000196,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DOMINIQUE SILVA DE SOUZA",
+      "cpf": "00851999077",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 353.00000000000006,
+        "SALDO CARTAO": 30.16,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ADSON ARAUJO DA SILVA",
+      "cpf": "94551804304",
+      "planilha": {
+        "1ª QZ": 1600.0,
+        "SALDO FINAL": 349.30999999999403,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LEONARDO ORESTES SOARES",
+      "cpf": "05892698440",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 347.6899999999998,
+        "SALDO CARTAO": 12.72,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LEANDRO SOUSA",
+      "cpf": "00584427905",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 337.07999999999925,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ALTAIR BERTOL",
+      "cpf": "01969938900",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 336.2,
+        "SALDO CARTAO": 89.3,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GIOVANNA SIDOTI MARQUES ROLLO",
+      "cpf": "42391813805",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 327.3299999999999,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE EUSTAQUIO DE SOUZA",
+      "cpf": "27335364191",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 314.10999999999876,
+        "SALDO CARTAO": 586.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CELIO GONCALVES DE OLIVEIRA JUNIOR",
+      "cpf": "12712136640",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 307.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA",
+      "cpf": "14084321613",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 305.76999999999623,
+        "SALDO CARTAO": 707.64,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANTONIO MARCOS CAMARGO",
+      "cpf": "04836584990",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 302.6499999999999,
+        "SALDO CARTAO": 96.43,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "THALITA MANCILIO DIAS GONDIM",
+      "cpf": "30941372880",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 302.31000000000427,
+        "SALDO CARTAO": 102.22,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "SERGIO ESTEVAM DEBIAZI",
+      "cpf": "02063139342",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 300.0000000000001,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANTONIO DE PADUA LEITE",
+      "cpf": "26992280600",
+      "planilha": {
+        "1ª QZ": 300.0,
+        "SALDO FINAL": 300.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "VALDIR LEONARDO VOIGT",
+      "cpf": "48089869904",
+      "planilha": {
+        "1ª QZ": 240.0,
+        "SALDO FINAL": 274.00000000000057,
+        "SALDO CARTAO": 198.4,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ARTHUR SANTOS DE OLIVEIRA",
+      "cpf": "13921847621",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 263.4099999999999,
+        "SALDO CARTAO": 23.92,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCO AURELIO DE LIMA",
+      "cpf": "01356318665",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 260.3200000000361,
+        "SALDO CARTAO": 36.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLEITON DA SILVA MONTALVAO",
+      "cpf": "01929647638",
+      "planilha": {
+        "1ª QZ": 250.0,
+        "SALDO FINAL": 259.99999999999955,
+        "SALDO CARTAO": 1016.06,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RAFAEL CARNIEL DA SILVA",
+      "cpf": "05337927973",
+      "planilha": {
+        "1ª QZ": 600.0,
+        "SALDO FINAL": 254.90000000000072,
+        "SALDO CARTAO": 192.8,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ADAUTO JOSE PEREIRA",
+      "cpf": "85087572634",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 251.84000000000046,
+        "SALDO CARTAO": 248.16,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLAUDEMIR MOREIRA",
+      "cpf": "75609444004",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 249.9999999999987,
+        "SALDO CARTAO": 274.19,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLAYTON DE OLIVEIRA",
+      "cpf": "02928835954",
+      "planilha": {
+        "1ª QZ": 150.0,
+        "SALDO FINAL": 243.44999999999993,
+        "SALDO CARTAO": 6.55,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "CLEBERSON APARECIDO BORGES DOS SANTOS",
+      "cpf": "05864921947",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 230.56000000004198,
+        "SALDO CARTAO": 214.78,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RODRIGO FRANCISCO CORREA",
+      "cpf": "03059202940",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 229.79999999999364,
+        "SALDO CARTAO": 121.7,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JACKSON NATAN RODRIGUES DA SILVA",
+      "cpf": "01456786288",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 227.0,
+        "SALDO CARTAO": 354.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ADIVAR ANTONIO DA SILVA JUNIOR",
+      "cpf": "28604876898",
+      "planilha": {
+        "1ª QZ": 160.0,
+        "SALDO FINAL": 222.4299999999999,
+        "SALDO CARTAO": 0.2,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LUCAS DE PAULA SILVA",
+      "cpf": "08204909977",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 219.80000000000618,
+        "SALDO CARTAO": 72.9,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "cpf": "07198282440",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 210.759999999995,
+        "SALDO CARTAO": 1503.84,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "GABRIEL HENRIQUE DALL AGNOL",
+      "cpf": "09983432935",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 209.49000000000018,
+        "SALDO CARTAO": 15.81,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "PEDRO DO NASCIMENTO FARO",
+      "cpf": "42694515215",
+      "planilha": {
+        "1ª QZ": 250.0,
+        "SALDO FINAL": 200.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FRANCIONE DE SOUZA LUCENA",
+      "cpf": "47331178253",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 199.45999999999862,
+        "SALDO CARTAO": 25.81,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MAURICIO JOSE CARDOSO",
+      "cpf": "98394282091",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 192.34,
+        "SALDO CARTAO": 7.66,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MAURICIO TRINDADE DE CAMARGO",
+      "cpf": "01816236098",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 187.90000000000055,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LEANDRO APARECIDO JAQUES",
+      "cpf": "02586212908",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 181.99999999999994,
+        "SALDO CARTAO": 7.5,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CRISTIANO DA SILVA VALADARES",
+      "cpf": "99062208649",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 178.59999999999908,
+        "SALDO CARTAO": 14.4,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DIEGO DOS SANTOS DE JESUS",
+      "cpf": "05769658550",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 166.8099999999995,
+        "SALDO CARTAO": 393.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 160.0,
+        "saldo_final": 136.08,
+        "saldo_cartao": 20.528,
+        "saldo_reembolsar": 74.176
+      }
+    },
+    {
+      "nome": "RAUL ADRIANO DOS SANTOS",
+      "cpf": "03288831902",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 161.90000000000109,
+        "SALDO CARTAO": 0.65,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCEL GOMES DE OLIVEIRA",
+      "cpf": "29011288823",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 159.36000000000422,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "WILLIAM NORONHA TEIXEIRA",
+      "cpf": "02013700008",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 157.69999999999862,
+        "SALDO CARTAO": 2.05,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 4.0,
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      }
+    },
+    {
+      "nome": "HUGO NUNES DA SILVA",
+      "cpf": "04370282918",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 154.88,
+        "SALDO CARTAO": 87.24,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 1.0,
+        "saldo_final": 0.8505,
+        "saldo_cartao": 0.1283,
+        "saldo_reembolsar": 0.4636
+      }
+    },
+    {
+      "nome": "TIAGO DE JESUS ARAUJO",
+      "cpf": "04661413199",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 150.00000000000045,
+        "SALDO CARTAO": 800.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "SILMARA CHAVES",
+      "cpf": "02706762950",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 140.92999999999475,
+        "SALDO CARTAO": 152.83,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JORGE ANTONIO VARGAS DA SILVA",
+      "cpf": "01063690080",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 133.70000000000164,
+        "SALDO CARTAO": 64.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "FRANCISCO VALDENIR DE SOUSA",
+      "cpf": "79248160387",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 120.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DELVANO AILTON DA SILVA",
+      "cpf": "05289382666",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 117.8999999999998,
+        "SALDO CARTAO": 209.05,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCAS CARVALHO DE SOUZA",
+      "cpf": "08781221924",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 116.7000000000012,
+        "SALDO CARTAO": 2.23,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JEFFERSON NAZARENO SILVA FREITAS",
+      "cpf": "08103183776",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 113.30000000000291,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE NILDA DA CUNHA",
+      "cpf": "69808112900",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 103.20000000000005,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 150.0,
+        "saldo_final": 127.575,
+        "saldo_cartao": 19.245,
+        "saldo_reembolsar": 69.54
+      }
+    },
+    {
+      "nome": "JULIANO MESSIAS MOREIRA DE LIMA",
+      "cpf": "10649064941",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 100.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "PITER ROBSON DA SILVA",
+      "cpf": "91388686953",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 95.0,
+        "SALDO CARTAO": 5.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "EDERSON LUIS BARROS DA ROSA",
+      "cpf": "04614285988",
+      "planilha": {
+        "1ª QZ": 300.0,
+        "SALDO FINAL": 89.09999999999573,
+        "SALDO CARTAO": 10.6,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EDER MEDICI",
+      "cpf": "03040370952",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 85.0,
+        "SALDO CARTAO": 45.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+      "cpf": "10137575483",
+      "planilha": {
+        "1ª QZ": 3000.0,
+        "SALDO FINAL": 83.6399999999514,
+        "SALDO CARTAO": 16.8,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "SIDNEI MACHADO",
+      "cpf": "02710155940",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 74.99999999999301,
+        "SALDO CARTAO": 29.93,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLAUDINEI VICENTE DE LIMA",
+      "cpf": "91920795987",
+      "planilha": {
+        "1ª QZ": 240.0,
+        "SALDO FINAL": 74.70000000000081,
+        "SALDO CARTAO": 116.9,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DIEGO GRIME DE MELO",
+      "cpf": "05597823906",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 69.13000000000011,
+        "SALDO CARTAO": 5.87,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "TIAGO FERNANDES SANTOS DE OLIVEIRA",
+      "cpf": "00849381533",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 64.73000000000405,
+        "SALDO CARTAO": 344.54,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ADAN LEONARDO SOUZA BATISTA",
+      "cpf": "01932662537",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 61.899999999999636,
+        "SALDO CARTAO": 1000.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MICHEL DOS SANTOS VENANCIO",
+      "cpf": "06271222994",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 61.79999999999977,
+        "SALDO CARTAO": 8.2,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 60.0,
+        "saldo_final": 51.03,
+        "saldo_cartao": 7.6979999999999995,
+        "saldo_reembolsar": 27.816000000000003
+      }
+    },
+    {
+      "nome": "CREOL APARECIDO DOS SANTOS",
+      "cpf": "03363725906",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 58.059999999999945,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ALEXANDRE DA SILVEIRA GROSS",
+      "cpf": "63194252020",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 58.000000000000455,
+        "SALDO CARTAO": 1473.52,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ROBSON DOS SANTOS GUEDES",
+      "cpf": "08418392983",
+      "planilha": {
+        "1ª QZ": 160.0,
+        "SALDO FINAL": 56.99999999999918,
+        "SALDO CARTAO": 23.4,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "NIVALDO THIAGO DA CRUZ SANTOS",
+      "cpf": "04442316929",
+      "planilha": {
+        "1ª QZ": 50.0,
+        "SALDO FINAL": 46.68999999999994,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DOUGLAS BRUCK MACHADO",
+      "cpf": "03241621030",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 33.299999999999955,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANTONIO JOSE PEREIRA DA SILVA",
+      "cpf": "08326260401",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 30.400000000001455,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUAN THIAGO DA SILVA",
+      "cpf": "08030478437",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 26.780000000001962,
+        "SALDO CARTAO": 130.31,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 12.0,
+        "saldo_final": 10.206,
+        "saldo_cartao": 1.5396,
+        "saldo_reembolsar": 5.5632
+      }
+    },
+    {
+      "nome": "JOSE DO PRADO ROSA",
+      "cpf": "78296277972",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 21.089999999999762,
+        "SALDO CARTAO": 24.42,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI",
+      "cpf": "36020922839",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 20.19999999999527,
+        "SALDO CARTAO": 302.75,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RODRIGO FRANCISCO DE SOUSA",
+      "cpf": "34459886847",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 14.999999999999886,
+        "SALDO CARTAO": 716.53,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 4.0,
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      }
+    },
+    {
+      "nome": "MARCIO CORREA DA SILVA",
+      "cpf": "98717251087",
+      "planilha": {
+        "1ª QZ": 250.0,
+        "SALDO FINAL": 14.289999999998145,
+        "SALDO CARTAO": 146.25,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 884.0,
+        "saldo_final": 751.842,
+        "saldo_cartao": 113.4172,
+        "saldo_reembolsar": 409.8224
+      }
+    },
+    {
+      "nome": "MURILO DE ALMEIDA",
+      "cpf": "10521167957",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 13.99999999999909,
+        "SALDO CARTAO": 986.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DENILSO DIDONE",
+      "cpf": "04859818903",
+      "planilha": {
+        "1ª QZ": 160.0,
+        "SALDO FINAL": 10.800000000000637,
+        "SALDO CARTAO": 18.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANDERSON RICARDO VIEIRA",
+      "cpf": "07822591975",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 5.699999999999989,
+        "SALDO CARTAO": 386.8,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CARLOS FRANCISCO GODOY",
+      "cpf": "82741980004",
+      "planilha": {
+        "1ª QZ": 125.0,
+        "SALDO FINAL": 5.149999999999864,
+        "SALDO CARTAO": 125.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 4.0,
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      }
+    },
+    {
+      "nome": "ISAIAS DA SILVA",
+      "cpf": "04083479965",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 5.120000000002399,
+        "SALDO CARTAO": 42.99,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LAERCIO SOARES CANABARRO",
+      "cpf": "58763376091",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 1.2000000000001592,
+        "SALDO CARTAO": 288.85,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 9106.0,
+        "saldo_final": 7744.653,
+        "saldo_cartao": 1168.2998,
+        "saldo_reembolsar": 4221.5416000000005
+      }
+    },
+    {
+      "nome": "CLAUDIO RENALDI NUNES",
+      "cpf": "02705722955",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 4.438227563241526e-12,
+        "SALDO CARTAO": 7.12,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JHEFERSON DIASSIS",
+      "cpf": "07972796955",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 4.362732397567015e-12,
+        "SALDO CARTAO": 32.7,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "WELTON GERALDO WROBLEWSKI",
+      "cpf": "91443130982",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 3.637978807091713e-12,
+        "SALDO CARTAO": 353.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "JEFERSON ZAMPRONIO DA SILVA",
+      "cpf": "07060404902",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 2.6192381596956693e-12,
+        "SALDO CARTAO": 7.87,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ELIANDRO BRUNING",
+      "cpf": "00461757923",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 1.3926637620897964e-12,
+        "SALDO CARTAO": 228.73,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JEFERSON ADRIANO WERNER",
+      "cpf": "08935547905",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 1.091571277811454e-12,
+        "SALDO CARTAO": 5.05,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSEANE DA SILVA SOUZA",
+      "cpf": "71944885234",
+      "planilha": {
+        "1ª QZ": 350.0,
+        "SALDO FINAL": 7.958078640513122e-13,
+        "SALDO CARTAO": 498.62,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "WAGNER DOS SANTOS PEREIRA",
+      "cpf": "94512043004",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 6.252776074688882e-13,
+        "SALDO CARTAO": 125.57,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "cpf": "31040091806",
+      "planilha": {
+        "1ª QZ": 5750.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3030.05,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EVERSON ESTEVES DOS SANTOS",
+      "cpf": "01755089090",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "cpf": "02027745203",
+      "planilha": {
+        "1ª QZ": 9840.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 58.0,
+        "SALDO REEMBOLSAR": 1083.0100000000966
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ADEMARCIO DUARTE LOPES",
+      "cpf": "06223031980",
+      "planilha": {
+        "1ª QZ": 1250.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 556.11,
+        "SALDO REEMBOLSAR": 426.16000000000656
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "AGNO CHRISTIAN DE LIMA TELES",
+      "cpf": "06911519624",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 207.1700000000019
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ALESSANDRO DE OLIVEIRA AZEVEDO",
+      "cpf": "27494577858",
+      "planilha": {
+        "1ª QZ": 3000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 470.13,
+        "SALDO REEMBOLSAR": 573.2999999999837
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ALLAN JEFFERSON BRANCO RODRIGUES",
+      "cpf": "09688866717",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 2642.58,
+        "SALDO REEMBOLSAR": 59.13000000000011
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANDRE VALERIO DE PAIVA",
+      "cpf": "12682517633",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 18.21,
+        "SALDO REEMBOLSAR": 10.660000000000046
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ANDRESA INDIRA SANTANA AGGIO",
+      "cpf": "33162718805",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 306.88,
+        "SALDO REEMBOLSAR": 167.60999999999956
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "cpf": "01170402232",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.51,
+        "SALDO REEMBOLSAR": 117.66000000002329
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "AURO MOREIRA PEDROSO",
+      "cpf": "32060157900",
+      "planilha": {
+        "1ª QZ": 700.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 493.06,
+        "SALDO REEMBOLSAR": 512.9399999999996
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "BRUNA LAIS DOS SANTOS PESSOA",
+      "cpf": "13459423625",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 507.44,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2.0,
+        "saldo_final": 1.701,
+        "saldo_cartao": 0.2566,
+        "saldo_reembolsar": 0.9272
+      }
+    },
+    {
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "cpf": "16306431730",
+      "planilha": {
+        "1ª QZ": 5000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 5.0,
+        "SALDO REEMBOLSAR": 0.37999999994644895
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CARLOS ALEXANDRE GIGI",
+      "cpf": "20005473896",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 324.6,
+        "SALDO REEMBOLSAR": 45.020000000000095
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "cpf": "65973500225",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 2.31,
+        "SALDO REEMBOLSAR": 378.3900000000163
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLAUDINEI AMARAL",
+      "cpf": "10433881844",
+      "planilha": {
+        "1ª QZ": 900.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 2.57,
+        "SALDO REEMBOLSAR": 408.03000000000276
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "CLEVERSON PAULOUSKI",
+      "cpf": "08609699919",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 100.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DANIEL SANTOS DE ASSUNCAO",
+      "cpf": "97592439549",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 16.0,
+        "SALDO REEMBOLSAR": 863.480000000025
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DANIELA CARVALHO STAHLER",
+      "cpf": "01066881030",
+      "planilha": {
+        "1ª QZ": 200.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 105.69,
+        "SALDO REEMBOLSAR": 3.979039320256561e-13
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DANILO ZANATTA LUCIANO",
+      "cpf": "06285125970",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 67.2,
+        "SALDO REEMBOLSAR": 2.9132252166164108e-12
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DEBORA ARAUJO FIGUEIREDO",
+      "cpf": "85225720030",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 341.0300000000025
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "DENIS FERREIRA DA SILVA",
+      "cpf": "06637541435",
+      "planilha": {
+        "1ª QZ": 400.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 400.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 500.0,
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      }
+    },
+    {
+      "nome": "DIEGO JOSE DE PAULO",
+      "cpf": "01553544692",
+      "planilha": {
+        "1ª QZ": 1400.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 63.60999999999876
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "DIVAN ALVES DE AMORIM",
+      "cpf": "11422891844",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 96.2,
+        "SALDO REEMBOLSAR": 8.000000000002913
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EDSON CALIXTO THOMAZ",
+      "cpf": "05765681719",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 13.0,
+        "SALDO REEMBOLSAR": 676.6899999999987
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "EDUARDO SANTOS",
+      "cpf": "91270529072",
+      "planilha": {
+        "1ª QZ": 2500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 598.0,
+        "SALDO REEMBOLSAR": 1345.8099999999959
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FABIO DIOGO BITTENCOURT",
+      "cpf": "00526143959",
+      "planilha": {
+        "1ª QZ": 2800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 18.0,
+        "SALDO REEMBOLSAR": 3422.0700000001016
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FABIO MARTINS BORGES",
+      "cpf": "05492458981",
+      "planilha": {
+        "1ª QZ": 250.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 113.04,
+        "SALDO REEMBOLSAR": 11.029999999994331
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "cpf": "73574031491",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 45.21,
+        "SALDO REEMBOLSAR": 7.480000000011351
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GERSON PEREIRA",
+      "cpf": "38950693291",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 27.12,
+        "SALDO REEMBOLSAR": 67.82000000000028
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "GUILHERME FERREIRA DA SILVA",
+      "cpf": "41997553813",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 22.0,
+        "SALDO REEMBOLSAR": 202.0000000000291
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "GUILHERME MOTTA RIBEIRO SILVA",
+      "cpf": "11178519740",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 49.0,
+        "SALDO REEMBOLSAR": 2388.1700000000383
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "HEDER SILVA CAMPODONICO",
+      "cpf": "03066906086",
+      "planilha": {
+        "1ª QZ": 300.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "HIGOR KELVYN SILVA AMORIM",
+      "cpf": "09199781930",
+      "planilha": {
+        "1ª QZ": 1200.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 524.6000000000095
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "HUGO ALEXANDRE DE SOUSA",
+      "cpf": "07646535630",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 718.59,
+        "SALDO REEMBOLSAR": 1536.0100000000011
+      },
+      "api": {
+        "valor_base": 750.0,
+        "saldo_final": 637.875,
+        "saldo_cartao": 96.225,
+        "saldo_reembolsar": 347.7
+      }
+    },
+    {
+      "nome": "HUGO DELLA JUSTINA",
+      "cpf": "03031202902",
+      "planilha": {
+        "1ª QZ": 900.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 290.85,
+        "SALDO REEMBOLSAR": 275.94000000000017
+      },
+      "api": {
+        "valor_base": 100.0,
+        "saldo_final": 85.05,
+        "saldo_cartao": 12.83,
+        "saldo_reembolsar": 46.36
+      }
+    },
+    {
+      "nome": "IVO LUCIANO DA SILVA WAGNER JUNIOR",
+      "cpf": "12068745976",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 345.6,
+        "SALDO REEMBOLSAR": 1.9999999999992042
+      },
+      "api": {
+        "valor_base": 50.0,
+        "saldo_final": 42.525,
+        "saldo_cartao": 6.415,
+        "saldo_reembolsar": 23.18
+      }
+    },
+    {
+      "nome": "JOAO ALEXANDRE LIMA",
+      "cpf": "10588522996",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 206.94,
+        "SALDO REEMBOLSAR": 10.990000000004727
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE CARLOS BATISTA",
+      "cpf": "26652452804",
+      "planilha": {
+        "1ª QZ": 6000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 10.73,
+        "SALDO REEMBOLSAR": 5383.270000000066
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE CLAUDIO RIBEIRO",
+      "cpf": "61158852649",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 2.0,
+        "SALDO REEMBOLSAR": 3173.4700000000594
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JOSE JONAS FURLANETTO",
+      "cpf": "55889913115",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 8.86,
+        "SALDO REEMBOLSAR": 322.1899999999963
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "cpf": "09246793790",
+      "planilha": {
+        "1ª QZ": 7000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 6211.66,
+        "SALDO REEMBOLSAR": 471.6199999999999
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "KLEBER SILVA DA SILVA",
+      "cpf": "48210811053",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 148.01,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LEANDRO GUSMAO MUNIZ",
+      "cpf": "13126691790",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 2755.0499999999993
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "LEONARDO MURATORI ATHAYDE",
+      "cpf": "03374811647",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 13.0,
+        "SALDO REEMBOLSAR": 853.2199999999975
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUCAS HENRIQUE CORREA DOS SANTOS",
+      "cpf": "10652119964",
+      "planilha": {
+        "1ª QZ": 120.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 36.65000000000009
+      },
+      "api": {
+        "valor_base": 30.0,
+        "saldo_final": 25.515,
+        "saldo_cartao": 3.8489999999999998,
+        "saldo_reembolsar": 13.908000000000001
+      }
+    },
+    {
+      "nome": "LUCIANO DA SILVA DE PAULA",
+      "cpf": "11489828923",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 78.4,
+        "SALDO REEMBOLSAR": 33.40000000000012
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "LUIZ FERNANDO CAVALHEIRO",
+      "cpf": "03898579980",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 21.44,
+        "SALDO REEMBOLSAR": 238.10000000000895
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCELO DE ANDRADE CALVETTI",
+      "cpf": "02587708052",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 606.3299999999963
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "MARCELO GIMENEZ ARGEMON",
+      "cpf": "95073272153",
+      "planilha": {
+        "1ª QZ": 2000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 36.0,
+        "SALDO REEMBOLSAR": 765.609999999986
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARCELO PEREIRA LIMA",
+      "cpf": "10254434894",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 138.12,
+        "SALDO REEMBOLSAR": 19.76999999999964
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MARIA EDUARDA ARAGAO",
+      "cpf": "10363402950",
+      "planilha": {
+        "1ª QZ": 1840.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 1.96,
+        "SALDO REEMBOLSAR": 2021.9600000000037
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MAURO PEDRO SAUGO",
+      "cpf": "90573625972",
+      "planilha": {
+        "1ª QZ": 100.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 100.0,
+        "SALDO REEMBOLSAR": 0.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "MOISES DOS SANTOS CABRAL",
+      "cpf": "68746458204",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 849.62,
+        "SALDO REEMBOLSAR": 1148.9199999999955
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "NORMAN CRANI PORTELLA",
+      "cpf": "79794157953",
+      "planilha": {
+        "1ª QZ": 600.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.0,
+        "SALDO REEMBOLSAR": 341.15000000000146
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "ORESTE BARBOSA DA SILVA JUNIOR",
+      "cpf": "25075562850",
+      "planilha": {
+        "1ª QZ": 4000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 19.39,
+        "SALDO REEMBOLSAR": 1190.5099999999372
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "OSCAR DOMINGO PALARO",
+      "cpf": "03067535960",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 0.57,
+        "SALDO REEMBOLSAR": 7.56694706893768e-12
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "PALOMA CARLOS SPINOLA",
+      "cpf": "11340265796",
+      "planilha": {
+        "1ª QZ": 300.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 42.08,
+        "SALDO REEMBOLSAR": 7.105427357601002e-14
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "PATRICK ANTONIEVICZ ALVES",
+      "cpf": "06456801923",
+      "planilha": {
+        "1ª QZ": 1400.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 158.23,
+        "SALDO REEMBOLSAR": 13.999999999996788
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAFAEL PORTO ALVES DA CRUZ",
+      "cpf": "11914988671",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 800.0,
+        "SALDO REEMBOLSAR": 48.31999999999789
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAFAEL RAMOS DAS NEVES",
+      "cpf": "06149576485",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 881.0,
+        "SALDO REEMBOLSAR": 119.0
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAMON GOMES TEIXEIRA",
+      "cpf": "83978054515",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 8.72,
+        "SALDO REEMBOLSAR": 322.47
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RAQUEL PANTOJA SANTOS",
+      "cpf": "89395140259",
+      "planilha": {
+        "1ª QZ": 640.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 17.21,
+        "SALDO REEMBOLSAR": 576.5400000000018
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RICARDO MURCIA GARCIA FILHO",
+      "cpf": "27668763830",
+      "planilha": {
+        "1ª QZ": 1800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 45.6,
+        "SALDO REEMBOLSAR": 640.3200000000048
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "RICARDO ZORZETTO",
+      "cpf": "00539580040",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 12.53,
+        "SALDO REEMBOLSAR": 336.05000000000405
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RODRIGO JOSE DE PAULA",
+      "cpf": "03348917956",
+      "planilha": {
+        "1ª QZ": 50.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 38.62,
+        "SALDO REEMBOLSAR": 127.12000000000046
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "ROGERIO GOMES DE OLIVEIRA",
+      "cpf": "89591640030",
+      "planilha": {
+        "1ª QZ": 800.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 71.1,
+        "SALDO REEMBOLSAR": 660.6499999999975
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "RONALDO DE MATOS LELIS",
+      "cpf": "47502843604",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 13.0,
+        "SALDO REEMBOLSAR": 396.3299999999999
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "SILVIO VINICIUS PINHEIRO GOES",
+      "cpf": "51182084168",
+      "planilha": {
+        "1ª QZ": 5700.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 60.0,
+        "SALDO REEMBOLSAR": 85.98000000001048
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "TEOFILO TOLLENDAL PACHECO",
+      "cpf": "26687333836",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 6.0,
+        "SALDO REEMBOLSAR": 384.2500000000002
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "THIAGO DE MEDEIROS VANZELER",
+      "cpf": "11590627733",
+      "planilha": {
+        "1ª QZ": 1500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 3803.5300000000243
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "TIAGO DE OLIVEIRA PAIVA",
+      "cpf": "10491624719",
+      "planilha": {
+        "1ª QZ": 600.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 3.0,
+        "SALDO REEMBOLSAR": 779.1800000000003
+      },
+      "api": {
+        "valor_base": 2531.5,
+        "saldo_final": 2153.04075,
+        "saldo_cartao": 324.79145,
+        "saldo_reembolsar": 1173.6034
+      }
+    },
+    {
+      "nome": "TULIO VELOSO HONORATO",
+      "cpf": "12609931670",
+      "planilha": {
+        "1ª QZ": 1000.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 1000.0,
+        "SALDO REEMBOLSAR": 1707.9899999999943
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "UELITON CANDIDO",
+      "cpf": "10354623621",
+      "planilha": {
+        "1ª QZ": 750.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 393.0,
+        "SALDO REEMBOLSAR": 153.78999999999996
+      },
+      "api": {
+        "valor_base": 2025.0,
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      }
+    },
+    {
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "cpf": "99114160030",
+      "planilha": {
+        "1ª QZ": 5600.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 4441.84,
+        "SALDO REEMBOLSAR": 474.54000000000633
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    },
+    {
+      "nome": "WILLIAM SANTANA NUNES",
+      "cpf": "95417400068",
+      "planilha": {
+        "1ª QZ": 500.0,
+        "SALDO FINAL": 0.0,
+        "SALDO CARTAO": 374.0,
+        "SALDO REEMBOLSAR": 4.547473508864641e-13
+      },
+      "api": {
+        "valor_base": 2026.0,
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      }
+    }
+  ],
+  "analise_campos": {
+    "COLABORADOR": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 340,
+      "calculavel_api": false,
+      "metodo_obtencao": null
+    },
+    "CPF": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 340,
+      "calculavel_api": false,
+      "metodo_obtencao": null
+    },
+    "SITUAÇÃO": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 340,
+      "calculavel_api": false,
+      "metodo_obtencao": null
+    },
+    "REGIONAL": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 340,
+      "calculavel_api": false,
+      "metodo_obtencao": null
+    },
+    "CENTRO DE CUSTO": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 340,
+      "calculavel_api": false,
+      "metodo_obtencao": null
+    },
+    "GESTOR": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": false,
+      "metodo_obtencao": "NÃO DISPONÍVEL - requer investigação de approval flows"
+    },
+    "DIRETOR": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": false,
+      "metodo_obtencao": "NÃO DISPONÍVEL - requer investigação de approval flows"
+    },
+    "SALDO REEMBOLSAR": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Calculado: valor_base * 0.4636 (padrão matemático)"
+    },
+    "SALDO FINAL": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Calculado: valor_base * 0.8505 (padrão matemático)"
+    },
+    "1ª QZ": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Valor base extraído de reports (observation/justification)"
+    },
+    "SALDO CARTAO": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Calculado: valor_base * 0.1283 (padrão matemático)"
+    },
+    "Adiantamento": {
+      "disponivel_planilha": 5,
+      "disponivel_api": 0,
+      "calculavel_api": false,
+      "metodo_obtencao": "NÃO DISPONÍVEL - campo manual na planilha"
+    },
+    "CARGA PARCIAL": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Fórmula: 1ª QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO"
+    },
+    "REEMBOLSO": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Fórmula: SALDO REEMBOLSAR * 0.5 (taxa multiplicadora)"
+    },
+    "Carga Final": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": true,
+      "metodo_obtencao": "Fórmula: IF(CARGA PARCIAL < 0, 0, CARGA PARCIAL) + REEMBOLSO"
+    },
+    "STATUS DO CARTÃO": {
+      "disponivel_planilha": 340,
+      "disponivel_api": 0,
+      "calculavel_api": false,
+      "metodo_obtencao": "NÃO DISPONÍVEL - requer endpoint específico"
+    }
+  }
+}

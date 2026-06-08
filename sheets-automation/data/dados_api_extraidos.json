@@ -1,0 +1,7465 @@
+{
+  "data_extracao": "2026-05-21T22:52:13.623306",
+  "periodo": "2026-05 (1ª quinzena)",
+  "total_usuarios_mapeados": 340,
+  "usuarios_com_dados": 290,
+  "padroes_matematicos": {
+    "SALDO_FINAL": 0.8505,
+    "SALDO_CARTAO": 0.1283,
+    "SALDO_REEMBOLSAR": 0.4636
+  },
+  "dados": {
+    "JONAS CAVALCANTI DE OLIVEIRA": {
+      "cpf": "01696239478",
+      "api_id": 896180,
+      "api_name": "JONAS CAVALCANTI DE OLIVEIRA",
+      "email": "Jcavalcanti2412@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RODRIGO CESAR DOS SANTOS": {
+      "cpf": "07024923610",
+      "api_id": 896324,
+      "api_name": "RODRIGO CESAR DOS SANTOS",
+      "email": "rodrigocesar@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        82.0
+      ]
+    },
+    "CAIO FRANCESCONI RIBEIRO": {
+      "cpf": "08924586904",
+      "api_id": 896007,
+      "api_name": "CAIO FRANCESCONI RIBEIRO",
+      "email": "caio.ribeiro@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        360.0,
+        360.0,
+        360.0,
+        360.0,
+        80.5,
+        80.5
+      ]
+    },
+    "MARCO AURELIO DE ANDRADE MORAES": {
+      "cpf": "72756284220",
+      "api_id": 1001913,
+      "api_name": "MARCO AURELIO DE ANDRADE MORAES",
+      "email": "marco.moraes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        327.5,
+        327.5,
+        327.5,
+        327.0
+      ]
+    },
+    "ALESSANDRO RODRIGO PASTRELLI": {
+      "cpf": "02474960902",
+      "api_id": 895964,
+      "api_name": "ALESSANDRO RODRIGO PASTRELLI",
+      "email": "pastrellia044@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        414.96,
+        414.96
+      ]
+    },
+    "JAEDER RODRIGUES JUNIOR": {
+      "cpf": "07505987607",
+      "api_id": 896163,
+      "api_name": "JAEDER RODRIGUES JUNIOR",
+      "email": "jaeder.junior@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        520.0,
+        520.0
+      ]
+    },
+    "LEANDRO FIGUEREDO BELCHIOR": {
+      "cpf": "26513583802",
+      "api_id": 896215,
+      "api_name": "LEANDRO FIGUEREDO BELCHIOR",
+      "email": "leandro.figueredo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        6.0,
+        5.0
+      ]
+    },
+    "SANDRO CAPISTRANO": {
+      "cpf": "16996346886",
+      "api_id": 896340,
+      "api_name": "SANDRO CAPISTRANO",
+      "email": "capistrano@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2926.0,
+      "saldos": {
+        "saldo_final": 2488.563,
+        "saldo_cartao": 375.4058,
+        "saldo_reembolsar": 1356.4936
+      },
+      "todos_valores": [
+        2926.0,
+        2926.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "VICTOR SIGOLO PINHEIRO PIMENTA": {
+      "cpf": "12237490619",
+      "api_id": 896376,
+      "api_name": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "email": "victor@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "LUDGERO HORACIO DE OLIVEIRA": {
+      "cpf": "06576198922",
+      "api_id": 896230,
+      "api_name": "LUDGERO HORACIO DE OLIVEIRA",
+      "email": "ludgeroh@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 33,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        80.0,
+        58.8,
+        58.8,
+        58.8
+      ]
+    },
+    "UBIRAJARA DE ARAUJO TEIXEIRA": {
+      "cpf": "74548565949",
+      "api_id": 896367,
+      "api_name": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "email": "birateixeira@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "LUCIANO JOSE DO AMARAL PEREIRA": {
+      "cpf": "04434355708",
+      "api_id": 896229,
+      "api_name": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "email": "luciano.pereira@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "TERCILA DA SILVA LOPES": {
+      "cpf": "67752721387",
+      "api_id": 1010644,
+      "api_name": "TERCILA DA SILVA LOPES",
+      "email": "TERCILA.lopes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0
+      ]
+    },
+    "ICARO MEDEIROS SILVA": {
+      "cpf": "01565661338",
+      "api_id": 896151,
+      "api_name": "ICARO MEDEIROS SILVA",
+      "email": "icaro.medeiros5532@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "FLAVIO FERNANDES DOS REIS LIMA": {
+      "cpf": "01767960107",
+      "api_id": 896117,
+      "api_name": "FLAVIO FERNANDES DOS REIS LIMA",
+      "email": "flavio.fernandes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "ENZIO CARVALHO DA MOTA": {
+      "cpf": "38548259515",
+      "api_id": 944251,
+      "api_name": "ENZIO CARVALHO DA MOTA",
+      "email": "enzio.mota@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 21,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        220.0,
+        215.3,
+        215.3,
+        215.0,
+        119.33
+      ]
+    },
+    "ANGELICA SOARES AMARANTE SILVA": {
+      "cpf": "07643300712",
+      "api_id": 1047085,
+      "api_name": "ANGELICA SOARES AMARANTE SILVA",
+      "email": "angelica.amarante@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        102.0,
+        93.0,
+        90.0,
+        90.0,
+        87.0,
+        84.0,
+        79.93
+      ]
+    },
+    "CHARLES NEVES MATTIUZZI": {
+      "cpf": "12547938790",
+      "api_id": 896023,
+      "api_name": "CHARLES NEVES MATTIUZZI",
+      "email": "cmattyuzzy@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 3986.96,
+      "saldos": {
+        "saldo_final": 3390.9094800000003,
+        "saldo_cartao": 511.526968,
+        "saldo_reembolsar": 1848.354656
+      },
+      "todos_valores": [
+        3986.96,
+        3842.91,
+        2108.25,
+        2108.25,
+        2108.25,
+        2108.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "CARLOS RENATO PACHECO DA SILVA": {
+      "cpf": "90443306087",
+      "api_id": 896019,
+      "api_name": "CARLOS RENATO PACHECO DA SILVA",
+      "email": "crenps@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        55.35,
+        55.35,
+        55.35
+      ]
+    },
+    "DAVID DA SILVA PEREIRA": {
+      "cpf": "02344854002",
+      "api_id": 896048,
+      "api_name": "DAVID DA SILVA PEREIRA",
+      "email": "davidspereira92@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ANDRE PINHEIRO BALOTIN": {
+      "cpf": "98603566020",
+      "api_id": 895984,
+      "api_name": "ANDRE PINHEIRO BALOTIN",
+      "email": "andre.balotin@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "ADSON SANTOS DA SILVA": {
+      "cpf": "83058133553",
+      "api_id": 985870,
+      "api_name": "ADSON SANTOS DA SILVA",
+      "email": "adson.santos@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 5
+    },
+    "ULISSES FERREIRA DE OLIVEIRA": {
+      "cpf": "01595939644",
+      "api_id": 896369,
+      "api_name": "ULISSES FERREIRA DE OLIVEIRA",
+      "email": "ulisses.oliveira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 28,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RODRIGO VANZETTA": {
+      "cpf": "99532344004",
+      "api_id": 896331,
+      "api_name": "RODRIGO VANZETTA",
+      "email": "rodrigo.vanzetta@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 29,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        215.6,
+        215.6,
+        215.6,
+        215.0
+      ]
+    },
+    "CLERITON BACILA DOS SANTOS": {
+      "cpf": "05456615959",
+      "api_id": 896035,
+      "api_name": "CLERITON BACILA DOS SANTOS",
+      "email": "cleriton.santos@hotmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 12
+    },
+    "CLAUDIO DONIZETE DA SILVA": {
+      "cpf": "93457235953",
+      "api_id": 896028,
+      "api_name": "CLAUDIO DONIZETE DA SILVA",
+      "email": "claudiodonizete8321@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        223.28,
+        223.28,
+        223.28,
+        223.0,
+        30.0,
+        28.0,
+        1.0
+      ]
+    },
+    "LUCAS MARTINS MACAN": {
+      "cpf": "00975748998",
+      "api_id": 1010647,
+      "api_name": "LUCAS MARTINS MACAN",
+      "email": "lucas.macan@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "HELDER USTULIN": {
+      "cpf": "37562230862",
+      "api_id": 896145,
+      "api_name": "HELDER USTULIN",
+      "email": "helder.ustulin@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        271.06,
+        271.06,
+        271.06,
+        271.0,
+        27.0,
+        23.0,
+        11.0
+      ]
+    },
+    "PAOLA CAROLINI BARBOSA": {
+      "cpf": "03445951969",
+      "api_id": 896292,
+      "api_name": "PAOLA CAROLINI BARBOSA",
+      "email": "paolacarolini@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 18,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        720.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        50.0,
+        30.0
+      ]
+    },
+    "ANTONIO FERREIRA DE MENDONCA NETO": {
+      "cpf": "05766838760",
+      "api_id": 895992,
+      "api_name": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "email": "adimendonca@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        508.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0
+      ]
+    },
+    "FELIPE MORAES COSTA DE BRITTO": {
+      "cpf": "04347084102",
+      "api_id": 927567,
+      "api_name": "FELIPE MORAES COSTA DE BRITTO",
+      "email": "FELIPE-BRITTO@HOTMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "GUILHERME MATEUS VAZ DOS SANTOS": {
+      "cpf": "44519188806",
+      "api_id": 1106552,
+      "api_name": "GUILHERME MATEUS VAZ DOS SANTOS",
+      "email": "guilhermemateus31@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        5.0,
+        4.0
+      ]
+    },
+    "DAVID DE OLIVEIRA FRIGERIO": {
+      "cpf": "04817177900",
+      "api_id": 966214,
+      "api_name": "DAVID DE OLIVEIRA FRIGERIO",
+      "email": "david.frigerio@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 6721.0,
+      "saldos": {
+        "saldo_final": 5716.2105,
+        "saldo_cartao": 862.3043,
+        "saldo_reembolsar": 3115.8556
+      },
+      "todos_valores": [
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        6721.0,
+        5529.0
+      ]
+    },
+    "SANDRO BARRETO DE SOUZA": {
+      "cpf": "78021324953",
+      "api_id": 896339,
+      "api_name": "SANDRO BARRETO DE SOUZA",
+      "email": "sandro.barreto@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "FERNANDO RODRIGUES DUARTE": {
+      "cpf": "03377983112",
+      "api_id": 896115,
+      "api_name": "FERNANDO RODRIGUES DUARTE",
+      "email": "fernando.duarte@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ROBERTO DOMINGUES PEREIRA": {
+      "cpf": "81480261068",
+      "api_id": 896316,
+      "api_name": "ROBERTO DOMINGUES PEREIRA",
+      "email": "robertodominguespereira@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        150.0,
+        150.0,
+        150.0,
+        150.0
+      ]
+    },
+    "GUSTAVO RODRIGUES FARIA": {
+      "cpf": "10531222926",
+      "api_id": 896142,
+      "api_name": "GUSTAVO RODRIGUES FARIA",
+      "email": "gustavorfaria1000@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        70.0,
+        37.7,
+        37.7,
+        37.7,
+        37.0
+      ]
+    },
+    "FABIO APARECIDO DE SOUSA PEREIRA": {
+      "cpf": "02679643909",
+      "api_id": 896101,
+      "api_name": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "email": "fabio.pereira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        6.0,
+        6.0
+      ]
+    },
+    "LEANDRO PINTO NUNES": {
+      "cpf": "08325368730",
+      "api_id": 896216,
+      "api_name": "LEANDRO PINTO NUNES",
+      "email": "leandro.nunes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 18,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2.0
+      ]
+    },
+    "RAFAEL AMORIM VELLO": {
+      "cpf": "01677920599",
+      "api_id": 896300,
+      "api_name": "RAFAEL AMORIM VELLO",
+      "email": "rafael.vello@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "FRANCINILDO JACKSON DE ALMEIDA ARAUJO": {
+      "cpf": "07021071400",
+      "api_id": 896120,
+      "api_name": "FRANCINILDO JACKSON DE ALMEIDA ARAUJO",
+      "email": "francinildo.araujo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        205.0,
+        205.0,
+        205.0,
+        195.17,
+        195.17,
+        195.0,
+        17.0,
+        15.0
+      ]
+    },
+    "NEUDO SAMPIETRO": {
+      "cpf": "04885659957",
+      "api_id": 896282,
+      "api_name": "NEUDO SAMPIETRO",
+      "email": "neudoengeman@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        150.0,
+        150.0,
+        150.0,
+        150.0,
+        150.0
+      ]
+    },
+    "DHIEGO RIBEIRO DINIZ": {
+      "cpf": "00049250256",
+      "api_id": 920074,
+      "api_name": "DHIEGO RIBEIRO DINIZ",
+      "email": "dhiego.diniz@eqsengenharia.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "SARA ARAGAO DA SILVA BARBOSA": {
+      "cpf": "49637513809",
+      "api_id": 896343,
+      "api_name": "SARA ARAGAO DA SILVA BARBOSA",
+      "email": "sara.barbosa@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "THIAGO PEREIRA DE LIMA": {
+      "cpf": "06478105490",
+      "api_id": 896358,
+      "api_name": "THIAGO PEREIRA DE LIMA",
+      "email": "thiagolima.benco@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 9952.0,
+      "saldos": {
+        "saldo_final": 8464.176,
+        "saldo_cartao": 1276.8416,
+        "saldo_reembolsar": 4613.7472
+      },
+      "todos_valores": [
+        9952.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "EDER AUGUSTO DE ARAUJO CARVALHO": {
+      "cpf": "03985382638",
+      "api_id": 896070,
+      "api_name": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "email": "edercarvalho@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 50000.0,
+      "saldos": {
+        "saldo_final": 42525.0,
+        "saldo_cartao": 6415.0,
+        "saldo_reembolsar": 23180.0
+      },
+      "todos_valores": [
+        50000.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "JAQUELINE LEVATI PEREIRA": {
+      "cpf": "01310014264",
+      "api_id": 896164,
+      "api_name": "JAQUELINE LEVATI PEREIRA",
+      "email": "Jaqueline.pereira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        145.0,
+        145.0,
+        145.0,
+        145.0
+      ]
+    },
+    "MILTON FERREIRA DAS NEVES JUNIOR": {
+      "cpf": "05100355581",
+      "api_id": 1042864,
+      "api_name": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "email": "milton.neves@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 4,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        793.94,
+        793.94,
+        793.94,
+        793.0,
+        500.0,
+        500.0
+      ]
+    },
+    "RODRIGO ROBERTO DE SOUZA": {
+      "cpf": "05664820969",
+      "api_id": 896329,
+      "api_name": "RODRIGO ROBERTO DE SOUZA",
+      "email": "rodrigo.roberto@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        7.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0,
+        4.0
+      ]
+    },
+    "LUCAS PEREIRA GONCALVES": {
+      "cpf": "11128978601",
+      "api_id": 896225,
+      "api_name": "LUCAS PEREIRA GONCALVES",
+      "email": "lucas_pe18@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 21,
+      "valor_base": 3893.0,
+      "saldos": {
+        "saldo_final": 3310.9965,
+        "saldo_cartao": 499.4719,
+        "saldo_reembolsar": 1804.7948000000001
+      },
+      "todos_valores": [
+        3893.0,
+        3893.0,
+        781.99,
+        781.99,
+        781.0,
+        300.0,
+        300.0,
+        300.0,
+        151.1,
+        151.1
+      ]
+    },
+    "ANDRE ARANHA MEISTER": {
+      "cpf": "03032275326",
+      "api_id": 1059840,
+      "api_name": "ANDRE ARANHA MEISTER",
+      "email": "andre.meister@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 3,
+      "valor_base": 2394.0,
+      "saldos": {
+        "saldo_final": 2036.097,
+        "saldo_cartao": 307.1502,
+        "saldo_reembolsar": 1109.8584
+      },
+      "todos_valores": [
+        2394.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "DAVID VICHI DE BRITO": {
+      "cpf": "21641472863",
+      "api_id": 1066365,
+      "api_name": "DAVID VICHI DE BRITO",
+      "email": "david.brito@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 3,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        6.0
+      ]
+    },
+    "MICHAEL RODRIGUES SANTOS": {
+      "cpf": "37425574837",
+      "api_id": 1106582,
+      "api_name": "MICHAEL RODRIGUES SANTOS",
+      "email": "michaelgaby89@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "RODRIGO SANTOS DA SILVA": {
+      "cpf": "05504962706",
+      "api_id": 963612,
+      "api_name": "RODRIGO SANTOS DA SILVA",
+      "email": "rodrigo.santosdasilva@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "BEATRIZ SILVA DE SIQUEIRA": {
+      "cpf": "35575473880",
+      "api_id": 895999,
+      "api_name": "BEATRIZ SILVA DE SIQUEIRA",
+      "email": "beatriz.siqueira@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "JUNIO VICENTE BARBOSA": {
+      "cpf": "10054353670",
+      "api_id": 998959,
+      "api_name": "JUNIO VICENTE BARBOSA",
+      "email": "juniovb7@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        91.83,
+        91.83,
+        91.83,
+        91.0,
+        83.0,
+        30.0,
+        10.0
+      ]
+    },
+    "HIGOR LUIZ CERQUEIRA": {
+      "cpf": "33832720871",
+      "api_id": 896148,
+      "api_name": "HIGOR LUIZ CERQUEIRA",
+      "email": "higorlcerqueira@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        8.0,
+        8.0
+      ]
+    },
+    "NILSON RODRIGUES CARDOSO JUNIOR": {
+      "cpf": "04025408325",
+      "api_id": 1109489,
+      "api_name": "NILSON RODRIGUES CARDOSO JUNIOR",
+      "email": "nilson.cardoso@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        5.0
+      ]
+    },
+    "DEISE SOARES DE CAMPOS": {
+      "cpf": "69116709004",
+      "api_id": 896049,
+      "api_name": "DEISE SOARES DE CAMPOS",
+      "email": "deise@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        6.0,
+        5.0
+      ]
+    },
+    "WESLLEY GABRIEL DA SILVA CARDOSO": {
+      "cpf": "87813416015",
+      "api_id": 896391,
+      "api_name": "WESLLEY GABRIEL DA SILVA CARDOSO",
+      "email": "wesleygabriel30@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        30.0,
+        6.0,
+        6.0,
+        5.0
+      ]
+    },
+    "THIAGO LEANDRO DOS SANTOS": {
+      "cpf": "33927651800",
+      "api_id": 896356,
+      "api_name": "THIAGO LEANDRO DOS SANTOS",
+      "email": "thiago.santos@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        9.0
+      ]
+    },
+    "PAULO DE FREITAS PEREIRA": {
+      "cpf": "11634696611",
+      "api_id": 973950,
+      "api_name": "PAULO DE FREITAS PEREIRA",
+      "email": "paulo92freitas@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        12.0,
+        11.0,
+        1.0
+      ]
+    },
+    "LARISSA SANTOS DA SILVA": {
+      "cpf": "45120065830",
+      "api_id": 1023033,
+      "api_name": "LARISSA SANTOS DA SILVA",
+      "email": "larissa.silva@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        3.0,
+        2.0
+      ]
+    },
+    "MARCELO DE SOUZA DALA VEDOVA": {
+      "cpf": "05375810654",
+      "api_id": 896244,
+      "api_name": "MARCELO DE SOUZA DALA VEDOVA",
+      "email": "marcelo.vedova@yahoo.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        81.8,
+        81.8
+      ]
+    },
+    "FABIO DA CONCEICAO LIMA": {
+      "cpf": "31275798888",
+      "api_id": 961342,
+      "api_name": "FABIO DA CONCEICAO LIMA",
+      "email": "FABIOLIMA01@YAHOO.COM.BR",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "EMERSON LEITE DE BARROS": {
+      "cpf": "34168918807",
+      "api_id": 896090,
+      "api_name": "EMERSON LEITE DE BARROS",
+      "email": "emerson1002barros@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 77987.0,
+      "saldos": {
+        "saldo_final": 66327.94350000001,
+        "saldo_cartao": 10005.7321,
+        "saldo_reembolsar": 36154.7732
+      },
+      "todos_valores": [
+        77987.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "WELERSON PUFF RODRIGUES": {
+      "cpf": "04352219657",
+      "api_id": 896385,
+      "api_name": "WELERSON PUFF RODRIGUES",
+      "email": "welerson.rodrigues@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ROGERIO MACARIO PINTO": {
+      "cpf": "14355734803",
+      "api_id": 1106577,
+      "api_name": "ROGERIO MACARIO PINTO",
+      "email": "rogeriomacariopinto@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 1,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        5.0
+      ]
+    },
+    "ADILSON MELLO DE CAMARGO": {
+      "cpf": "67324398049",
+      "api_id": 895947,
+      "api_name": "ADILSON MELLO DE CAMARGO",
+      "email": "adilsoncamargo@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        155.0,
+        155.0,
+        155.0,
+        155.0,
+        70.0
+      ]
+    },
+    "CARLOS EDUARDO SCATAMBULO": {
+      "cpf": "22730778829",
+      "api_id": 896012,
+      "api_name": "CARLOS EDUARDO SCATAMBULO",
+      "email": "carlos.eduardo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 3977.0,
+      "saldos": {
+        "saldo_final": 3382.4385,
+        "saldo_cartao": 510.2491,
+        "saldo_reembolsar": 1843.7372
+      },
+      "todos_valores": [
+        3977.0,
+        3977.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "FRANCO CARLOS DALLACQUA": {
+      "cpf": "34757123850",
+      "api_id": 1106565,
+      "api_name": "FRANCO CARLOS DALLACQUA",
+      "email": "franco_dallacqua@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        6.0
+      ]
+    },
+    "RONALDO RUFINO SANTANA": {
+      "cpf": "29758827855",
+      "api_id": 896336,
+      "api_name": "RONALDO RUFINO SANTANA",
+      "email": "ronaldorsantana@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        70.0,
+        31.7,
+        31.7,
+        31.7,
+        31.0,
+        26.0
+      ]
+    },
+    "JULIO CESAR ALVES DA ROCHA": {
+      "cpf": "02265549967",
+      "api_id": 921952,
+      "api_name": "JULIO CESAR ALVES DA ROCHA",
+      "email": "juliorocha160877@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        10.0,
+        10.0,
+        9.0,
+        9.0,
+        1.0,
+        1.0
+      ]
+    },
+    "MATEUS DE CARVALHO BERTOL": {
+      "cpf": "01304856674",
+      "api_id": 896262,
+      "api_name": "MATEUS DE CARVALHO BERTOL",
+      "email": "mateus.bertol@yahoo.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        6.0,
+        5.0
+      ]
+    },
+    "EDUARDO ANDREY VENSON SILVA": {
+      "cpf": "02960685946",
+      "api_id": 896083,
+      "api_name": "EDUARDO ANDREY VENSON SILVA",
+      "email": "eduardo.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "EDMAR FERREIRA CARDOSO": {
+      "cpf": "06311884607",
+      "api_id": 946535,
+      "api_name": "EDMAR FERREIRA CARDOSO",
+      "email": "edmar.cardoso@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        7.0,
+        7.0,
+        6.0,
+        6.0
+      ]
+    },
+    "ODAIR CIRCO SOARES": {
+      "cpf": "84219122915",
+      "api_id": 896287,
+      "api_name": "ODAIR CIRCO SOARES",
+      "email": "odairsoares.eqsengenharia@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "EVERTON CAMARGO DE LOURETO": {
+      "cpf": "91688205004",
+      "api_id": 896096,
+      "api_name": "EVERTON CAMARGO DE LOURETO",
+      "email": "everton.loureto@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "MILTON BRASIL CAVALCANTE": {
+      "cpf": "03021570852",
+      "api_id": 1106570,
+      "api_name": "MILTON BRASIL CAVALCANTE",
+      "email": "v.tiomilton@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        4.0
+      ]
+    },
+    "ADMILSON DOS SANTOS GALAN": {
+      "cpf": "04769973993",
+      "api_id": 895950,
+      "api_name": "ADMILSON DOS SANTOS GALAN",
+      "email": "admilsongalan@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 17,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        2.0
+      ]
+    },
+    "LUIZ GUSTAVO DI GIORGIO": {
+      "cpf": "29856268893",
+      "api_id": 896237,
+      "api_name": "LUIZ GUSTAVO DI GIORGIO",
+      "email": "luiz.giorgio@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        395.75,
+        395.75,
+        395.0,
+        75.0,
+        50.0,
+        28.5,
+        28.5,
+        28.5
+      ]
+    },
+    "PAULO NILTON COSTA MOREIRA": {
+      "cpf": "45159599053",
+      "api_id": 896297,
+      "api_name": "PAULO NILTON COSTA MOREIRA",
+      "email": "paulonilton.costa@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2.0
+      ]
+    },
+    "LUCAS RODRIGUES DE MOURA GALVAO": {
+      "cpf": "04013986175",
+      "api_id": 896226,
+      "api_name": "LUCAS RODRIGUES DE MOURA GALVAO",
+      "email": "lucas.galvao@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 21,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "JOSE VICTOR ARAUJO FELIX": {
+      "cpf": "06323566346",
+      "api_id": 896197,
+      "api_name": "JOSE VICTOR ARAUJO FELIX",
+      "email": "jose.felix@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        1932.67,
+        1932.67,
+        1932.0,
+        407.5,
+        407.5,
+        407.5,
+        407.0
+      ]
+    },
+    "DOUGLAS WESLEN CARDOSO DOS SANTOS": {
+      "cpf": "08784554932",
+      "api_id": 896069,
+      "api_name": "DOUGLAS WESLEN CARDOSO DOS SANTOS",
+      "email": "drywtop@outlook.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 5
+    },
+    "MARCOS SEGER": {
+      "cpf": "97135631900",
+      "api_id": 896257,
+      "api_name": "MARCOS SEGER",
+      "email": "seger@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 500.0,
+      "saldos": {
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      },
+      "todos_valores": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "JAIME ALVES DE ABREU SILVA": {
+      "cpf": "00965306186",
+      "api_id": 986346,
+      "api_name": "JAIME ALVES DE ABREU SILVA",
+      "email": "jaime.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        523.8,
+        523.8,
+        523.8,
+        523.0,
+        80.0,
+        2.0,
+        2.0
+      ]
+    },
+    "MATHEUS FERNANDES GUIMARAES": {
+      "cpf": "17996820724",
+      "api_id": 896264,
+      "api_name": "MATHEUS FERNANDES GUIMARAES",
+      "email": "matheus.guimaraes@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        490.99,
+        490.99,
+        490.0,
+        99.0,
+        77.0,
+        77.0
+      ]
+    },
+    "RAFAEL ALMEIDA LOPES": {
+      "cpf": "46850229800",
+      "api_id": 1117263,
+      "api_name": "RAFAEL ALMEIDA LOPES",
+      "email": "raafinhalopes06@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "ANDERSON BICA PEREZ": {
+      "cpf": "00053957040",
+      "api_id": 895977,
+      "api_name": "ANDERSON BICA PEREZ",
+      "email": "anderson.perez@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        8.0
+      ]
+    },
+    "RENATO PARREIRAS": {
+      "cpf": "97162485634",
+      "api_id": 896311,
+      "api_name": "RENATO PARREIRAS",
+      "email": "renato.parreiras@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        358.5
+      ]
+    },
+    "FLAVIO HENRIQUE ALVES ROMERO": {
+      "cpf": "82871396000",
+      "api_id": 896421,
+      "api_name": "FLAVIO HENRIQUE ALVES ROMERO",
+      "email": "flavio.romero@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 13
+    },
+    "CARLOS ROBERTO DE CARVALHO PERES": {
+      "cpf": "09867858816",
+      "api_id": 952397,
+      "api_name": "CARLOS ROBERTO DE CARVALHO PERES",
+      "email": "carlos.peres@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0
+      ]
+    },
+    "BRUNO EDUARDO DE SOUZA": {
+      "cpf": "82341478972",
+      "api_id": 896003,
+      "api_name": "BRUNO EDUARDO DE SOUZA",
+      "email": "bruno@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 50.0,
+      "saldos": {
+        "saldo_final": 42.525,
+        "saldo_cartao": 6.415,
+        "saldo_reembolsar": 23.18
+      },
+      "todos_valores": [
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        11.0,
+        4.0
+      ]
+    },
+    "GENISSON DE PAIVA FERREIRA": {
+      "cpf": "00714806501",
+      "api_id": 896132,
+      "api_name": "GENISSON DE PAIVA FERREIRA",
+      "email": "genisson.ferreira@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        25.0,
+        25.0,
+        25.0
+      ]
+    },
+    "JAFER DA FONTOURA AHMAD": {
+      "cpf": "00041171071",
+      "api_id": 916884,
+      "api_name": "JAFER DA FONTOURA AHMAD",
+      "email": "jafer.ahmad@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "CRISTIANO ANESIO GOMES DO NASCIMENTO": {
+      "cpf": "02862032786",
+      "api_id": 916919,
+      "api_name": "CRISTIANO ANESIO GOMES DO NASCIMENTO",
+      "email": "cristiano.anesio@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 20,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        375.0,
+        375.0,
+        375.0
+      ]
+    },
+    "EDSON VEIGA SILVEIRA": {
+      "cpf": "62063774072",
+      "api_id": 896082,
+      "api_name": "EDSON VEIGA SILVEIRA",
+      "email": "edson.silveira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ERICSON PINHEIRO DOS SANTOS": {
+      "cpf": "29157549850",
+      "api_id": 896092,
+      "api_name": "ERICSON PINHEIRO DOS SANTOS",
+      "email": "ericsonjucap@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        744.0,
+        744.0,
+        744.0,
+        744.0,
+        16.0
+      ]
+    },
+    "LEANDRO DE MENEZES ASSUNCAO": {
+      "cpf": "09072032640",
+      "api_id": 896213,
+      "api_name": "LEANDRO DE MENEZES ASSUNCAO",
+      "email": "leandrodemenezesassuncao@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "RODRIGO BOLDO": {
+      "cpf": "27104988807",
+      "api_id": 896322,
+      "api_name": "RODRIGO BOLDO",
+      "email": "rodrigo.boldo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "LUCAS HENRIQUE ALVES DE OLIVEIRA": {
+      "cpf": "10977673618",
+      "api_id": 1040939,
+      "api_name": "LUCAS HENRIQUE ALVES DE OLIVEIRA",
+      "email": "lucas.alves@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 6
+    },
+    "ALAN RODRIGO SILVA ANDRADE": {
+      "cpf": "07722232469",
+      "api_id": 895961,
+      "api_name": "ALAN RODRIGO SILVA ANDRADE",
+      "email": "alan.andrade@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        27.0,
+        27.0,
+        27.0,
+        27.0,
+        25.0,
+        25.0,
+        25.0,
+        25.0
+      ]
+    },
+    "ARTHUR GOMES DE PAULO": {
+      "cpf": "12877857603",
+      "api_id": 895996,
+      "api_name": "ARTHUR GOMES DE PAULO",
+      "email": "arthur.gomes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        800.0,
+        800.0,
+        800.0,
+        800.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "MICHEL VINHORTE DE SOUZA": {
+      "cpf": "70457883200",
+      "api_id": 896274,
+      "api_name": "MICHEL VINHORTE DE SOUZA",
+      "email": "michellmvs@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 4,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        7.0,
+        7.0
+      ]
+    },
+    "BRUNO OLIVEIRA DIAS": {
+      "cpf": "11992259755",
+      "api_id": 896006,
+      "api_name": "BRUNO OLIVEIRA DIAS",
+      "email": "bruno.dias@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ALAERTE JACINTO JUNIOR": {
+      "cpf": "03071605994",
+      "api_id": 895959,
+      "api_name": "ALAERTE JACINTO JUNIOR",
+      "email": "alaerte.junior@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 11
+    },
+    "JOSE WILKESON OLIVEIRA SILVA": {
+      "cpf": "03393455354",
+      "api_id": 896198,
+      "api_name": "JOSE WILKESON OLIVEIRA SILVA",
+      "email": "jose.oliveira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        1773.1,
+        773.1,
+        773.0,
+        500.0,
+        500.0,
+        500.0,
+        177.0,
+        12.0,
+        10.0
+      ]
+    },
+    "FRANCIELLY FELIX CAVALCANTE DE ANDRADE": {
+      "cpf": "09276240446",
+      "api_id": 896119,
+      "api_name": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "email": "francielly.andrade@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "JORGE NEGRI NETO": {
+      "cpf": "44997574600",
+      "api_id": 896185,
+      "api_name": "JORGE NEGRI NETO",
+      "email": "jorge.neto@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "JOELSON FERREIRA DOS SANTOS": {
+      "cpf": "07690263623",
+      "api_id": 896178,
+      "api_name": "JOELSON FERREIRA DOS SANTOS",
+      "email": "joelson.santos@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "FABIO PROVESI": {
+      "cpf": "05731312958",
+      "api_id": 896106,
+      "api_name": "FABIO PROVESI",
+      "email": "provesi85@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.0,
+        95.0,
+        95.0,
+        95.0
+      ]
+    },
+    "BEN HUR MENDES OLIVEIRA": {
+      "cpf": "00046347054",
+      "api_id": 896000,
+      "api_name": "BEN HUR MENDES OLIVEIRA",
+      "email": "mmcanoas@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        8.0,
+        7.0
+      ]
+    },
+    "LUIZ PAULO SILVA SOUSA JUNIOR": {
+      "cpf": "02678045129",
+      "api_id": 896238,
+      "api_name": "LUIZ PAULO SILVA SOUSA JUNIOR",
+      "email": "luiz.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        225.0
+      ]
+    },
+    "GIOVANI DONNANTUONI": {
+      "cpf": "15226997833",
+      "api_id": 997009,
+      "api_name": "GIOVANI DONNANTUONI",
+      "email": "giovani.dunnantuoni@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        35.0,
+        12.0,
+        11.0,
+        10.0,
+        3.0,
+        2.0
+      ]
+    },
+    "DIEGO DE ALCANTARA MOTA MENDES": {
+      "cpf": "09407167631",
+      "api_id": 896054,
+      "api_name": "DIEGO DE ALCANTARA MOTA MENDES",
+      "email": "diegoalcan@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "VANDERLEI DE SOUZA NORONHA JUNIOR": {
+      "cpf": "37695259810",
+      "api_id": 920868,
+      "api_name": "VANDERLEI DE SOUZA NORONHA JUNIOR",
+      "email": "JUNNIORNORONHA9@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 6528.0,
+      "saldos": {
+        "saldo_final": 5552.064,
+        "saldo_cartao": 837.5423999999999,
+        "saldo_reembolsar": 3026.3808
+      },
+      "todos_valores": [
+        6528.0,
+        6528.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        121.0,
+        50.0
+      ]
+    },
+    "BRUNA LAIS AZEVEDO CUNHA": {
+      "cpf": "07747008406",
+      "api_id": 896001,
+      "api_name": "BRUNA LAIS AZEVEDO CUNHA",
+      "email": "brunalais_ac@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 18,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        592.25,
+        592.0,
+        171.06,
+        171.06,
+        171.0,
+        159.0
+      ]
+    },
+    "ALEX SANDRO PEREIRA MARQUES": {
+      "cpf": "82877904091",
+      "api_id": 917314,
+      "api_name": "ALEX SANDRO PEREIRA MARQUES",
+      "email": "alex.marques@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "AMANDA CRISTINA DA SILVA": {
+      "cpf": "07809466690",
+      "api_id": 895974,
+      "api_name": "AMANDA CRISTINA DA SILVA",
+      "email": "amanda.cristina@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 31.0,
+      "saldos": {
+        "saldo_final": 26.3655,
+        "saldo_cartao": 3.9773,
+        "saldo_reembolsar": 14.3716
+      },
+      "todos_valores": [
+        31.0,
+        7.0
+      ]
+    },
+    "ERICO BRUNO DA SILVA MATOS": {
+      "cpf": "00011945265",
+      "api_id": 896091,
+      "api_name": "ERICO BRUNO DA SILVA MATOS",
+      "email": "matosbrunomatos89@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 100.0,
+      "saldos": {
+        "saldo_final": 85.05,
+        "saldo_cartao": 12.83,
+        "saldo_reembolsar": 46.36
+      },
+      "todos_valores": [
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "DMITRI MORAIS DA SILVA": {
+      "cpf": "11454991631",
+      "api_id": 896063,
+      "api_name": "DMITRI MORAIS DA SILVA",
+      "email": "dmitri92silva@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        116.42,
+        116.42
+      ]
+    },
+    "VICTOR MIGUEL PALARO": {
+      "cpf": "09265596996",
+      "api_id": 896424,
+      "api_name": "VICTOR MIGUEL PALARO",
+      "email": "victor23pb@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        8.0,
+        8.0,
+        8.0
+      ]
+    },
+    "ANDRE LUIZ SANTANA": {
+      "cpf": "11897381638",
+      "api_id": 895983,
+      "api_name": "ANDRE LUIZ SANTANA",
+      "email": "andre.santana@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 31,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "RAFAEL NATAL LACHI": {
+      "cpf": "03710085900",
+      "api_id": 896303,
+      "api_name": "RAFAEL NATAL LACHI",
+      "email": "rafael_natal_lachi@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        10.0,
+        8.0
+      ]
+    },
+    "EDIBERTO GEORGE RELIQUIAS": {
+      "cpf": "34596010862",
+      "api_id": 896075,
+      "api_name": "EDIBERTO GEORGE RELIQUIAS",
+      "email": "ediberto@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        26.0,
+        12.0,
+        3.0
+      ]
+    },
+    "ARTUR JACO PAGANI DE SOUZA": {
+      "cpf": "07105914971",
+      "api_id": 895997,
+      "api_name": "ARTUR JACO PAGANI DE SOUZA",
+      "email": "arturpagani@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 30.0,
+      "saldos": {
+        "saldo_final": 25.515,
+        "saldo_cartao": 3.8489999999999998,
+        "saldo_reembolsar": 13.908000000000001
+      },
+      "todos_valores": [
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        6.0,
+        5.0
+      ]
+    },
+    "ALIRIO THOMAZ VALENTIM": {
+      "cpf": "99335220000",
+      "api_id": 1033749,
+      "api_name": "ALIRIO THOMAZ VALENTIM",
+      "email": "alirio.valentim@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "GILMAR DUARTE LACERDA": {
+      "cpf": "05290622675",
+      "api_id": 896133,
+      "api_name": "GILMAR DUARTE LACERDA",
+      "email": "gilmar.lacerda@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 7222.0,
+      "saldos": {
+        "saldo_final": 6142.311000000001,
+        "saldo_cartao": 926.5826,
+        "saldo_reembolsar": 3348.1192
+      },
+      "todos_valores": [
+        7222.0,
+        7222.0,
+        3050.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        199.9
+      ]
+    },
+    "MARCELO CARVALHO DA SILVA": {
+      "cpf": "69153825004",
+      "api_id": 917057,
+      "api_name": "MARCELO CARVALHO DA SILVA",
+      "email": "marcelo.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RODRIGO ROQUE": {
+      "cpf": "02062513941",
+      "api_id": 896330,
+      "api_name": "RODRIGO ROQUE",
+      "email": "rodrigosc@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        11.0,
+        9.0,
+        1.0
+      ]
+    },
+    "JOELSON JUNIOR MARTINS DE GOES": {
+      "cpf": "03528389907",
+      "api_id": 896179,
+      "api_name": "JOELSON JUNIOR MARTINS DE GOES",
+      "email": "joelson001@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0
+      ]
+    },
+    "ADRIANO FRANCISCO DE PAULA": {
+      "cpf": "08813588607",
+      "api_id": 895955,
+      "api_name": "ADRIANO FRANCISCO DE PAULA",
+      "email": "adriano.paula@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 230.0,
+      "saldos": {
+        "saldo_final": 195.615,
+        "saldo_cartao": 29.509,
+        "saldo_reembolsar": 106.628
+      },
+      "todos_valores": [
+        230.0,
+        230.0,
+        230.0,
+        230.0,
+        4.0,
+        3.0
+      ]
+    },
+    "EDEVALDO DUTRA GONCALVES": {
+      "cpf": "00312735057",
+      "api_id": 896074,
+      "api_name": "EDEVALDO DUTRA GONCALVES",
+      "email": "ede_dutra@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        124.6,
+        124.6,
+        124.6,
+        124.0,
+        60.0,
+        30.0
+      ]
+    },
+    "MARCOS VINICIUS DE SOUZA ALVES": {
+      "cpf": "11823866603",
+      "api_id": 1100052,
+      "api_name": "MARCOS VINICIUS DE SOUZA ALVES",
+      "email": "marcosvinicius@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 2
+    },
+    "VINICIUS PEIXOTO BONETTI": {
+      "cpf": "09785002969",
+      "api_id": 896378,
+      "api_name": "VINICIUS PEIXOTO BONETTI",
+      "email": "viniciuspeixotobonetti@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 1
+    },
+    "JEAN FABIO OLIVERIO": {
+      "cpf": "00645883948",
+      "api_id": 896166,
+      "api_name": "JEAN FABIO OLIVERIO",
+      "email": "jeanfabiooliverio@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 2
+    },
+    "MARCEL DA HORA CARVALHO": {
+      "cpf": "01730674500",
+      "api_id": 896241,
+      "api_name": "MARCEL DA HORA CARVALHO",
+      "email": "marcel.hcssa@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 28,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "CAIOS VINICIUS NUNES BROERING": {
+      "cpf": "07053418952",
+      "api_id": 896008,
+      "api_name": "CAIOS VINICIUS NUNES BROERING",
+      "email": "caios.nunes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        6.0,
+        6.0,
+        5.0,
+        5.0
+      ]
+    },
+    "HELDER ARCHANJO FERREIRA": {
+      "cpf": "06439531670",
+      "api_id": 896144,
+      "api_name": "HELDER ARCHANJO FERREIRA",
+      "email": "helder.ferreira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2250.0,
+      "saldos": {
+        "saldo_final": 1913.625,
+        "saldo_cartao": 288.675,
+        "saldo_reembolsar": 1043.1000000000001
+      },
+      "todos_valores": [
+        2250.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        250.0,
+        250.0,
+        225.0
+      ]
+    },
+    "UELITON SANTANA SANTOS": {
+      "cpf": "03686605597",
+      "api_id": 1023079,
+      "api_name": "UELITON SANTANA SANTOS",
+      "email": "ueliton.santos@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 7
+    },
+    "FABIANA CAMILA BARBOSA DE MORAES LIMA": {
+      "cpf": "38880279858",
+      "api_id": 940437,
+      "api_name": "FABIANA CAMILA BARBOSA DE MORAES LIMA",
+      "email": "fabiana.lima@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        10.0,
+        4.0,
+        3.0
+      ]
+    },
+    "JAZEMIR DE SANTANA MARQUES": {
+      "cpf": "44012861549",
+      "api_id": 896165,
+      "api_name": "JAZEMIR DE SANTANA MARQUES",
+      "email": "jazemir.marques@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 500.0,
+      "saldos": {
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      },
+      "todos_valores": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        340.0,
+        340.0,
+        340.0,
+        257.6,
+        257.6,
+        257.0
+      ]
+    },
+    "MARCIO BOUZAS FERREIRA": {
+      "cpf": "07318362780",
+      "api_id": 896250,
+      "api_name": "MARCIO BOUZAS FERREIRA",
+      "email": "marcio.ferreira@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "DOMINIQUE SILVA DE SOUZA": {
+      "cpf": "00851999077",
+      "api_id": 896064,
+      "api_name": "DOMINIQUE SILVA DE SOUZA",
+      "email": "dominique.souza@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        8.0,
+        7.0
+      ]
+    },
+    "ADSON ARAUJO DA SILVA": {
+      "cpf": "94551804304",
+      "api_id": 895956,
+      "api_name": "ADSON ARAUJO DA SILVA",
+      "email": "adson.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        405.0,
+        405.0,
+        405.0,
+        405.0,
+        367.4,
+        367.4,
+        367.4,
+        367.0
+      ]
+    },
+    "LEONARDO ORESTES SOARES": {
+      "cpf": "05892698440",
+      "api_id": 896219,
+      "api_name": "LEONARDO ORESTES SOARES",
+      "email": "leonardo_orestes@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        300.0,
+        300.0,
+        300.0,
+        300.0,
+        250.0,
+        250.0,
+        250.0,
+        250.0
+      ]
+    },
+    "LEANDRO SOUSA": {
+      "cpf": "00584427905",
+      "api_id": 896217,
+      "api_name": "LEANDRO SOUSA",
+      "email": "souza@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 20,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        420.0,
+        420.0,
+        420.0,
+        420.0,
+        225.0,
+        225.0,
+        225.0
+      ]
+    },
+    "ALTAIR BERTOL": {
+      "cpf": "01969938900",
+      "api_id": 895972,
+      "api_name": "ALTAIR BERTOL",
+      "email": "jocabertol@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "EDIPO SANTOS BARRETO": {
+      "cpf": "37896893860",
+      "api_id": 920845,
+      "api_name": "EDIPO SANTOS BARRETO",
+      "email": "edipo.barreto@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 12
+    },
+    "GIOVANNA SIDOTI MARQUES ROLLO": {
+      "cpf": "42391813805",
+      "api_id": 1106587,
+      "api_name": "GIOVANNA SIDOTI MARQUES ROLLO",
+      "email": "giovannasidoti04@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 1,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        4.0
+      ]
+    },
+    "DANIEL DA SILVA LOPES": {
+      "cpf": "94288259053",
+      "api_id": 896419,
+      "api_name": "DANIEL DA SILVA LOPES",
+      "email": "daniel.lopes@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 7
+    },
+    "JOSE EUSTAQUIO DE SOUZA": {
+      "cpf": "27335364191",
+      "api_id": 1008337,
+      "api_name": "JOSE EUSTAQUIO DE SOUZA",
+      "email": "jose.eustaquio@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        500.0,
+        500.0
+      ]
+    },
+    "CELIO GONCALVES DE OLIVEIRA JUNIOR": {
+      "cpf": "12712136640",
+      "api_id": 1040885,
+      "api_name": "Celio Goncalves de Oliveira Junior",
+      "email": "CELIO.OLIVEIRA.CJ@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 4,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        21.0,
+        3.0
+      ]
+    },
+    "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA": {
+      "cpf": "14084321613",
+      "api_id": 896353,
+      "api_name": "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA",
+      "email": "rh.mg@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        1000.0
+      ]
+    },
+    "ANTONIO MARCOS CAMARGO": {
+      "cpf": "04836584990",
+      "api_id": 895994,
+      "api_name": "ANTONIO MARCOS CAMARGO",
+      "email": "camargo0713@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        6.0
+      ]
+    },
+    "THALITA MANCILIO DIAS GONDIM": {
+      "cpf": "30941372880",
+      "api_id": 920862,
+      "api_name": "THALITA MANCILIO DIAS GONDIM",
+      "email": "thalita.gondim@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "SERGIO ESTEVAM DEBIAZI": {
+      "cpf": "02063139342",
+      "api_id": 896346,
+      "api_name": "SERGIO ESTEVAM DEBIAZI",
+      "email": "sergio.debiazi@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        120.0,
+        120.0,
+        120.0,
+        120.0,
+        9.0,
+        9.0
+      ]
+    },
+    "ANTONIO DE PADUA LEITE": {
+      "cpf": "26992280600",
+      "api_id": 895991,
+      "api_name": "ANTONIO DE PADUA LEITE",
+      "email": "antonio@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "SIDNEI FRANCISCO DA SILVA": {
+      "cpf": "02224415931",
+      "api_id": 1109493,
+      "api_name": "SIDNEI FRANCISCO DA SILVA",
+      "email": "sidney010409@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 10
+    },
+    "MARLON ARAUJO": {
+      "cpf": "07774700986",
+      "api_id": 1109482,
+      "api_name": "MARLON ARAUJO",
+      "email": "marlonaraujo1991@hotmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 2
+    },
+    "VALDIR LEONARDO VOIGT": {
+      "cpf": "48089869904",
+      "api_id": 896373,
+      "api_name": "VALDIR LEONARDO VOIGT",
+      "email": "valdir.voigt@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        8.0,
+        6.0
+      ]
+    },
+    "ARTHUR SANTOS DE OLIVEIRA": {
+      "cpf": "13921847621",
+      "api_id": 973987,
+      "api_name": "ARTHUR SANTOS DE OLIVEIRA",
+      "email": "arthursantos58@live.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        124.99,
+        124.99,
+        124.99,
+        124.0,
+        99.0,
+        28.0,
+        2.0
+      ]
+    },
+    "MARCO AURELIO DE LIMA": {
+      "cpf": "01356318665",
+      "api_id": 896254,
+      "api_name": "MARCO AURELIO DE LIMA",
+      "email": "marco.lima@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "CLEITON DA SILVA MONTALVAO": {
+      "cpf": "01929647638",
+      "api_id": 935041,
+      "api_name": "CLEITON DA SILVA MONTALVAO",
+      "email": "cleiton.montalvao@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        6.0
+      ]
+    },
+    "RAFAEL CARNIEL DA SILVA": {
+      "cpf": "05337927973",
+      "api_id": 896301,
+      "api_name": "RAFAEL CARNIEL DA SILVA",
+      "email": "carnielrafael3@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        45.0,
+        45.0
+      ]
+    },
+    "ADAUTO JOSE PEREIRA": {
+      "cpf": "85087572634",
+      "api_id": 895945,
+      "api_name": "ADAUTO JOSE PEREIRA",
+      "email": "adautojosepereira@yahoo.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 20,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        360.0,
+        360.0,
+        360.0,
+        130.33,
+        130.33,
+        130.33
+      ]
+    },
+    "CLAUDEMIR MOREIRA": {
+      "cpf": "75609444004",
+      "api_id": 896025,
+      "api_name": "CLAUDEMIR MOREIRA",
+      "email": "claudemir.moreura054@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        701.9,
+        701.9,
+        701.9,
+        701.0,
+        90.0,
+        13.0,
+        1.0
+      ]
+    },
+    "CLAYTON DE OLIVEIRA": {
+      "cpf": "02928835954",
+      "api_id": 896031,
+      "api_name": "CLAYTON DE OLIVEIRA",
+      "email": "claytonpr@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    "RICARDO DORNELES NEITZKE": {
+      "cpf": "09353381959",
+      "api_id": 896313,
+      "api_name": "RICARDO DORNELES NEITZKE",
+      "email": "ricardo.dorneles@eqseng.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "CLEBERSON APARECIDO BORGES DOS SANTOS": {
+      "cpf": "05864921947",
+      "api_id": 896033,
+      "api_name": "CLEBERSON APARECIDO BORGES DOS SANTOS",
+      "email": "binhoclebersonsantos@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RODRIGO FRANCISCO CORREA": {
+      "cpf": "03059202940",
+      "api_id": 896326,
+      "api_name": "RODRIGO FRANCISCO CORREA",
+      "email": "rodrigo.fran.correa@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        20.0,
+        17.0,
+        10.2,
+        10.2,
+        10.2
+      ]
+    },
+    "JACKSON NATAN RODRIGUES DA SILVA": {
+      "cpf": "01456786288",
+      "api_id": 930413,
+      "api_name": "JACKSON NATAN RODRIGUES DA SILVA",
+      "email": "jackson.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        27.0,
+        20.0
+      ]
+    },
+    "ADIVAR ANTONIO DA SILVA JUNIOR": {
+      "cpf": "28604876898",
+      "api_id": 895949,
+      "api_name": "ADIVAR ANTONIO DA SILVA JUNIOR",
+      "email": "adivarjunior@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        6.0
+      ]
+    },
+    "LUCAS DE PAULA SILVA": {
+      "cpf": "08204909977",
+      "api_id": 896423,
+      "api_name": "LUCAS DE PAULA SILVA",
+      "email": "lucasdepaulasilva2411@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "THIEGO LEANDRO ALVES DE OLIVEIRA": {
+      "cpf": "07198282440",
+      "api_id": 930440,
+      "api_name": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "email": "thiego.oliveira@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        318.0,
+        318.0
+      ]
+    },
+    "KATIA RESENDE DA SILVA": {
+      "cpf": "45154701836",
+      "api_id": 1106567,
+      "api_name": "KATIA RESENDE DA SILVA",
+      "email": "katiaaclf98@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 2
+    },
+    "GABRIEL HENRIQUE DALL AGNOL": {
+      "cpf": "09983432935",
+      "api_id": 896128,
+      "api_name": "GABRIEL HENRIQUE DALL AGNOL",
+      "email": "gabriel.agnol@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        30.0,
+        6.0,
+        5.0,
+        3.0
+      ]
+    },
+    "ROBSON FURTADO": {
+      "cpf": "05236669936",
+      "api_id": 896319,
+      "api_name": "ROBSON FURTADO",
+      "email": "robsonfurtado3284@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 12
+    },
+    "PEDRO DO NASCIMENTO FARO": {
+      "cpf": "42694515215",
+      "api_id": 1056032,
+      "api_name": "PEDRO DO NASCIMENTO FARO",
+      "email": "penfaro02@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 1,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        1.0
+      ]
+    },
+    "FRANCIONE DE SOUZA LUCENA": {
+      "cpf": "47331178253",
+      "api_id": 896121,
+      "api_name": "FRANCIONE DE SOUZA LUCENA",
+      "email": "francione.souza.lucena@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        52.0,
+        52.0,
+        52.0,
+        52.0,
+        11.0,
+        7.0,
+        6.0
+      ]
+    },
+    "MAURICIO JOSE CARDOSO": {
+      "cpf": "98394282091",
+      "api_id": 924050,
+      "api_name": "MAURICIO JOSE CARDOSO",
+      "email": "mauricio.jose@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        25.0,
+        12.0
+      ]
+    },
+    "MAURICIO TRINDADE DE CAMARGO": {
+      "cpf": "01816236098",
+      "api_id": 917363,
+      "api_name": "MAURICIO TRINDADE DE CAMARGO",
+      "email": "mauricio.camargo@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        20.0,
+        20.0,
+        20.0,
+        20.0,
+        11.0
+      ]
+    },
+    "WAGNER RAFAEL GERHARDT": {
+      "cpf": "00413687031",
+      "api_id": 896380,
+      "api_name": "WAGNER RAFAEL GERHARDT",
+      "email": "wagner.gerhardt@eqsengenharia.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "JONAS PAULO DE MATOS": {
+      "cpf": "69010544915",
+      "api_id": 896181,
+      "api_name": "JONAS PAULO DE MATOS",
+      "email": "desplanchesjonas@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "LEANDRO APARECIDO JAQUES": {
+      "cpf": "02586212908",
+      "api_id": 896211,
+      "api_name": "LEANDRO APARECIDO JAQUES",
+      "email": "leandjaques@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        18.0,
+        18.0,
+        18.0,
+        18.0,
+        5.0
+      ]
+    },
+    "CRISTIANO DA SILVA VALADARES": {
+      "cpf": "99062208649",
+      "api_id": 896040,
+      "api_name": "CRISTIANO DA SILVA VALADARES",
+      "email": "cristianovaladares4@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        270.0,
+        270.0,
+        270.0,
+        270.0
+      ]
+    },
+    "VANDERLEI DOS SANTOS": {
+      "cpf": "21262405840",
+      "api_id": 1073269,
+      "api_name": "VANDERLEI DOS SANTOS",
+      "email": "vanderleid1@yahoo.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "EMERSON CHOUBI PRADO": {
+      "cpf": "29722576852",
+      "api_id": 1072512,
+      "api_name": "EMERSON CHOUBI PRADO",
+      "email": "emerson.prado@eqseng.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "DIEGO DOS SANTOS DE JESUS": {
+      "cpf": "05769658550",
+      "api_id": 896055,
+      "api_name": "DIEGO DOS SANTOS DE JESUS",
+      "email": "diego.jesus_92@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 160.0,
+      "saldos": {
+        "saldo_final": 136.08,
+        "saldo_cartao": 20.528,
+        "saldo_reembolsar": 74.176
+      },
+      "todos_valores": [
+        160.0,
+        160.0,
+        160.0,
+        160.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        2.0,
+        1.0
+      ]
+    },
+    "RAUL ADRIANO DOS SANTOS": {
+      "cpf": "03288831902",
+      "api_id": 896308,
+      "api_name": "RAUL ADRIANO DOS SANTOS",
+      "email": "adriano_rsraul@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "MARCEL GOMES DE OLIVEIRA": {
+      "cpf": "29011288823",
+      "api_id": 896242,
+      "api_name": "MARCEL GOMES DE OLIVEIRA",
+      "email": "eng.marcelgomes@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        116.63,
+        116.63,
+        116.63,
+        116.0,
+        63.0,
+        3.0,
+        1.0
+      ]
+    },
+    "WILLIAM NORONHA TEIXEIRA": {
+      "cpf": "02013700008",
+      "api_id": 896394,
+      "api_name": "WILLIAM NORONHA TEIXEIRA",
+      "email": "teixeira.will@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 4.0,
+      "saldos": {
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      },
+      "todos_valores": [
+        4.0
+      ]
+    },
+    "HUGO NUNES DA SILVA": {
+      "cpf": "04370282918",
+      "api_id": 923651,
+      "api_name": "HUGO NUNES DA SILVA",
+      "email": "hugoeletric@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 3,
+      "valor_base": 1.0,
+      "saldos": {
+        "saldo_final": 0.8505,
+        "saldo_cartao": 0.1283,
+        "saldo_reembolsar": 0.4636
+      },
+      "todos_valores": [
+        1.0
+      ]
+    },
+    "TIAGO DE JESUS ARAUJO": {
+      "cpf": "04661413199",
+      "api_id": 920855,
+      "api_name": "TIAGO DE JESUS ARAUJO",
+      "email": "TIAGO_JESUS_ARAUJO@HOTMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        2.0
+      ]
+    },
+    "SILMARA CHAVES": {
+      "cpf": "02706762950",
+      "api_id": 896349,
+      "api_name": "SILMARA CHAVES",
+      "email": "silmara@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "JORGE ANTONIO VARGAS DA SILVA": {
+      "cpf": "01063690080",
+      "api_id": 896184,
+      "api_name": "JORGE ANTONIO VARGAS DA SILVA",
+      "email": "jorge.vargas@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 17,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "JOAO DA SILVA VIANA": {
+      "cpf": "88367550978",
+      "api_id": 896175,
+      "api_name": "JOAO DA SILVA VIANA",
+      "email": "joaoviana631@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 3
+    },
+    "FRANCISCO VALDENIR DE SOUSA": {
+      "cpf": "79248160387",
+      "api_id": 896124,
+      "api_name": "FRANCISCO VALDENIR DE SOUSA",
+      "email": "franvalsousafv@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 4,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        10.0,
+        10.0
+      ]
+    },
+    "DELVANO AILTON DA SILVA": {
+      "cpf": "05289382666",
+      "api_id": 1033724,
+      "api_name": "DELVANO AILTON DA SILVA",
+      "email": "delvano.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        12.0,
+        1.0
+      ]
+    },
+    "LUCAS CARVALHO DE SOUZA": {
+      "cpf": "08781221924",
+      "api_id": 979939,
+      "api_name": "LUCAS CARVALHO DE SOUZA",
+      "email": "luucascarvalho@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        40.0,
+        40.0,
+        40.0,
+        40.0,
+        12.0,
+        10.0,
+        10.0
+      ]
+    },
+    "JEFFERSON NAZARENO SILVA FREITAS": {
+      "cpf": "08103183776",
+      "api_id": 896171,
+      "api_name": "JEFFERSON NAZARENO SILVA FREITAS",
+      "email": "jeffersonnfreitas.36@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 28,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        233.94,
+        233.94
+      ]
+    },
+    "JOSE NILDA DA CUNHA": {
+      "cpf": "69808112900",
+      "api_id": 896193,
+      "api_name": "JOSE NILDA DA CUNHA",
+      "email": "josenildodacunha@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 150.0,
+      "saldos": {
+        "saldo_final": 127.575,
+        "saldo_cartao": 19.245,
+        "saldo_reembolsar": 69.54
+      },
+      "todos_valores": [
+        150.0,
+        150.0,
+        150.0,
+        80.0,
+        36.8,
+        36.8,
+        36.0
+      ]
+    },
+    "FILIPE MENEZES KLING": {
+      "cpf": "10664298710",
+      "api_id": 1064227,
+      "api_name": "FILIPE MENEZES KLING",
+      "email": "filipekling.eqs@petrobras.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 2
+    },
+    "JULIANO MESSIAS MOREIRA DE LIMA": {
+      "cpf": "10649064941",
+      "api_id": 923628,
+      "api_name": "JULIANO MESSIAS MOREIRA DE LIMA",
+      "email": "Julianomessiassk8@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 3,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        10.0,
+        10.0,
+        9.0,
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    "PITER ROBSON DA SILVA": {
+      "cpf": "91388686953",
+      "api_id": 918849,
+      "api_name": "PITER ROBSON DA SILVA",
+      "email": "terpiprs@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        10.0,
+        2.0,
+        2.0
+      ]
+    },
+    "LUIS FELIPE RAYMUNDO GARCIA": {
+      "cpf": "06837861999",
+      "api_id": 896232,
+      "api_name": "LUIS FELIPE RAYMUNDO GARCIA",
+      "email": "luis.felipe.1992@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 13
+    },
+    "EDERSON LUIS BARROS DA ROSA": {
+      "cpf": "04614285988",
+      "api_id": 896072,
+      "api_name": "EDERSON LUIS BARROS DA ROSA",
+      "email": "Ederson_tjmsn@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        7.0,
+        6.0,
+        5.0
+      ]
+    },
+    "EDER MEDICI": {
+      "cpf": "03040370952",
+      "api_id": 896071,
+      "api_name": "EDER MEDICI",
+      "email": "eder.medici@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        33.0,
+        9.0,
+        5.0
+      ]
+    },
+    "JESSICA DE MIRANDA MEDEIROS FELICIANO": {
+      "cpf": "10137575483",
+      "api_id": 896172,
+      "api_name": "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+      "email": "jessicamirandamedeiros@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        500.0,
+        80.0,
+        65.8,
+        65.8,
+        65.8,
+        65.0,
+        25.0,
+        2.0
+      ]
+    },
+    "SIDNEI MACHADO": {
+      "cpf": "02710155940",
+      "api_id": 896348,
+      "api_name": "SIDNEI MACHADO",
+      "email": "sidneimachado1979@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "CLAUDINEI VICENTE DE LIMA": {
+      "cpf": "91920795987",
+      "api_id": 896027,
+      "api_name": "CLAUDINEI VICENTE DE LIMA",
+      "email": "claudinei.lima@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        450.0,
+        450.0,
+        450.0
+      ]
+    },
+    "DIEGO GRIME DE MELO": {
+      "cpf": "05597823906",
+      "api_id": 896057,
+      "api_name": "DIEGO GRIME DE MELO",
+      "email": "diego.grime@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        11.0,
+        11.0,
+        6.0,
+        5.0,
+        5.0
+      ]
+    },
+    "TIAGO FERNANDES SANTOS DE OLIVEIRA": {
+      "cpf": "00849381533",
+      "api_id": 896363,
+      "api_name": "TIAGO FERNANDES SANTOS DE OLIVEIRA",
+      "email": "tiago.oliveira.afe@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ADAN LEONARDO SOUZA BATISTA": {
+      "cpf": "01932662537",
+      "api_id": 923558,
+      "api_name": "ADAN LEONARDO SOUZA BATISTA",
+      "email": "adan.batista@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        9.0,
+        9.0,
+        7.0,
+        7.0
+      ]
+    },
+    "MICHEL DOS SANTOS VENANCIO": {
+      "cpf": "06271222994",
+      "api_id": 896272,
+      "api_name": "MICHEL DOS SANTOS VENANCIO",
+      "email": "michel.venancio29@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 6,
+      "valor_base": 60.0,
+      "saldos": {
+        "saldo_final": 51.03,
+        "saldo_cartao": 7.6979999999999995,
+        "saldo_reembolsar": 27.816000000000003
+      },
+      "todos_valores": [
+        60.0
+      ]
+    },
+    "CREOL APARECIDO DOS SANTOS": {
+      "cpf": "03363725906",
+      "api_id": 896037,
+      "api_name": "CREOL APARECIDO DOS SANTOS",
+      "email": "creol.santos@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ALEXANDRE DA SILVEIRA GROSS": {
+      "cpf": "63194252020",
+      "api_id": 895967,
+      "api_name": "ALEXANDRE DA SILVEIRA GROSS",
+      "email": "alexandre.gross@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        92.0,
+        92.0,
+        92.0,
+        10.0
+      ]
+    },
+    "ROBSON DOS SANTOS GUEDES": {
+      "cpf": "08418392983",
+      "api_id": 896318,
+      "api_name": "ROBSON DOS SANTOS GUEDES",
+      "email": "robson.guedes@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        100.4,
+        100.4
+      ]
+    },
+    "ALLAN CRISTIAN DA CUNHA": {
+      "cpf": "10132301911",
+      "api_id": 918852,
+      "api_name": "ALLAN CRISTIAN DA CUNHA",
+      "email": "ALLANCRISTIAN20@HOTMAIL.COM",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 3
+    },
+    "NIVALDO THIAGO DA CRUZ SANTOS": {
+      "cpf": "04442316929",
+      "api_id": 896286,
+      "api_name": "NIVALDO THIAGO DA CRUZ SANTOS",
+      "email": "thiagonival@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 20,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "LUCIANO JOSE DA CUNHA": {
+      "cpf": "03443300952",
+      "api_id": 896228,
+      "api_name": "LUCIANO JOSE DA CUNHA",
+      "email": "lucianoljc@hotmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 5
+    },
+    "DOUGLAS BRUCK MACHADO": {
+      "cpf": "03241621030",
+      "api_id": 896066,
+      "api_name": "DOUGLAS BRUCK MACHADO",
+      "email": "bruckdoug@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        30.0,
+        25.0,
+        25.0,
+        25.0
+      ]
+    },
+    "ANTONIO JOSE PEREIRA DA SILVA": {
+      "cpf": "08326260401",
+      "api_id": 895993,
+      "api_name": "ANTONIO JOSE PEREIRA DA SILVA",
+      "email": "antonio.j1.silva26@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "LUAN THIAGO DA SILVA": {
+      "cpf": "08030478437",
+      "api_id": 896222,
+      "api_name": "LUAN THIAGO DA SILVA",
+      "email": "luan.silva@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 12.0,
+      "saldos": {
+        "saldo_final": 10.206,
+        "saldo_cartao": 1.5396,
+        "saldo_reembolsar": 5.5632
+      },
+      "todos_valores": [
+        12.0,
+        10.0
+      ]
+    },
+    "JOSE DO PRADO ROSA": {
+      "cpf": "78296277972",
+      "api_id": 896189,
+      "api_name": "JOSE DO PRADO ROSA",
+      "email": "zepradoeqs@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 17,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        10.0,
+        9.0,
+        9.0,
+        8.0
+      ]
+    },
+    "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI": {
+      "cpf": "36020922839",
+      "api_id": 922276,
+      "api_name": "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI",
+      "email": "LEANDROAPSTEFANINI@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "RODRIGO FRANCISCO DE SOUSA": {
+      "cpf": "34459886847",
+      "api_id": 1106584,
+      "api_name": "RODRIGO FRANCISCO DE SOUSA",
+      "email": "rodrigo.sousa25@outlook.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 4.0,
+      "saldos": {
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      },
+      "todos_valores": [
+        4.0
+      ]
+    },
+    "MARCIO DA COSTA JOAO": {
+      "cpf": "02524841936",
+      "api_id": 896425,
+      "api_name": "MARCIO DA COSTA JOAO",
+      "email": "marcio.joao@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 10
+    },
+    "MARCIO CORREA DA SILVA": {
+      "cpf": "98717251087",
+      "api_id": 896251,
+      "api_name": "MARCIO CORREA DA SILVA",
+      "email": "marcio.correa@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 884.0,
+      "saldos": {
+        "saldo_final": 751.842,
+        "saldo_cartao": 113.4172,
+        "saldo_reembolsar": 409.8224
+      },
+      "todos_valores": [
+        884.0
+      ]
+    },
+    "MURILO DE ALMEIDA": {
+      "cpf": "10521167957",
+      "api_id": 896279,
+      "api_name": "MURILO DE ALMEIDA",
+      "email": "murilo.almeida@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "PAULO ALEXANDRE DE AMORIM": {
+      "cpf": "04179369907",
+      "api_id": 896295,
+      "api_name": "PAULO ALEXANDRE DE AMORIM",
+      "email": "pamorim22@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 9
+    },
+    "DENILSO DIDONE": {
+      "cpf": "04859818903",
+      "api_id": 896051,
+      "api_name": "DENILSO DIDONE",
+      "email": "denilsodidone@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        41.0,
+        6.0,
+        2.0
+      ]
+    },
+    "ANDERSON RICARDO VIEIRA": {
+      "cpf": "07822591975",
+      "api_id": 934784,
+      "api_name": "ANDERSON RICARDO VIEIRA",
+      "email": "anderson.vieira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        12.0,
+        9.0,
+        1.0
+      ]
+    },
+    "CARLOS FRANCISCO GODOY": {
+      "cpf": "82741980004",
+      "api_id": 896015,
+      "api_name": "CARLOS FRANCISCO GODOY",
+      "email": "godoy.equisul@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 4.0,
+      "saldos": {
+        "saldo_final": 3.402,
+        "saldo_cartao": 0.5132,
+        "saldo_reembolsar": 1.8544
+      },
+      "todos_valores": [
+        4.0
+      ]
+    },
+    "ISAIAS DA SILVA": {
+      "cpf": "04083479965",
+      "api_id": 896157,
+      "api_name": "ISAIAS DA SILVA",
+      "email": "isaiasnego4@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        96.0,
+        96.0,
+        96.0,
+        96.0
+      ]
+    },
+    "LAERCIO SOARES CANABARRO": {
+      "cpf": "58763376091",
+      "api_id": 896208,
+      "api_name": "LAERCIO SOARES CANABARRO",
+      "email": "lscanabarro@yahoo.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 9106.0,
+      "saldos": {
+        "saldo_final": 7744.653,
+        "saldo_cartao": 1168.2998,
+        "saldo_reembolsar": 4221.5416000000005
+      },
+      "todos_valores": [
+        9106.0,
+        9106.0,
+        7646.0,
+        7646.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        7.0,
+        6.0,
+        1.0
+      ]
+    },
+    "JACSSON MAYLON CASTRO CORREA": {
+      "cpf": "10206563957",
+      "api_id": 896161,
+      "api_name": "JACSSON MAYLON CASTRO CORREA",
+      "email": "jacssonmaylon693@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 11
+    },
+    "DOUGLAS TIAGO DE OLIVEIRA": {
+      "cpf": "08492402989",
+      "api_id": 896067,
+      "api_name": "DOUGLAS TIAGO DE OLIVEIRA",
+      "email": "odouglastiago@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 12
+    },
+    "CLAUDIO RENALDI NUNES": {
+      "cpf": "02705722955",
+      "api_id": 896030,
+      "api_name": "CLAUDIO RENALDI NUNES",
+      "email": "clrenaldinunes@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        7.0,
+        7.0,
+        6.0
+      ]
+    },
+    "JHEFERSON DIASSIS": {
+      "cpf": "07972796955",
+      "api_id": 896173,
+      "api_name": "JHEFERSON DIASSIS",
+      "email": "jhefersondiassis@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        338.92,
+        338.92,
+        338.92,
+        338.0,
+        92.0,
+        14.0
+      ]
+    },
+    "WELTON GERALDO WROBLEWSKI": {
+      "cpf": "91443130982",
+      "api_id": 896389,
+      "api_name": "WELTON GERALDO WROBLEWSKI",
+      "email": "geraldowelton1@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0
+      ]
+    },
+    "JEFERSON ZAMPRONIO DA SILVA": {
+      "cpf": "07060404902",
+      "api_id": 896168,
+      "api_name": "JEFERSON ZAMPRONIO DA SILVA",
+      "email": "zamproniodasilva@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ELIANDRO BRUNING": {
+      "cpf": "00461757923",
+      "api_id": 896085,
+      "api_name": "ELIANDRO BRUNING",
+      "email": "eliandrobruning@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        187.46
+      ]
+    },
+    "JEFERSON ADRIANO WERNER": {
+      "cpf": "08935547905",
+      "api_id": 999216,
+      "api_name": "JEFERSON ADRIANO WERNER",
+      "email": "JWERNER95@OUTLOOK.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        90.0,
+        90.0,
+        39.9,
+        39.9
+      ]
+    },
+    "JOSEANE DA SILVA SOUZA": {
+      "cpf": "71944885234",
+      "api_id": 896199,
+      "api_name": "JOSEANE DA SILVA SOUZA",
+      "email": "joseane.souza@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        157.95,
+        157.95,
+        157.95
+      ]
+    },
+    "WAGNER DOS SANTOS PEREIRA": {
+      "cpf": "94512043004",
+      "api_id": 923842,
+      "api_name": "WAGNER DOS SANTOS PEREIRA",
+      "email": "wagner.pereira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        91.0,
+        91.0,
+        91.0,
+        91.0,
+        78.0,
+        78.0
+      ]
+    },
+    "SAULO ARAUJO DE PAULA": {
+      "cpf": "31040091806",
+      "api_id": 896344,
+      "api_name": "SAULO ARAUJO DE PAULA",
+      "email": "sauloap30@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        107.6,
+        107.6
+      ]
+    },
+    "CLAUDEMIR GREGOSKI RODRIGUES": {
+      "cpf": "05144026958",
+      "api_id": 896024,
+      "api_name": "CLAUDEMIR GREGOSKI RODRIGUES",
+      "email": "claudemir.rodrigues@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 11
+    },
+    "EVERSON ESTEVES DOS SANTOS": {
+      "cpf": "01755089090",
+      "api_id": 896095,
+      "api_name": "EVERSON ESTEVES DOS SANTOS",
+      "email": "eversonesteves7@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        25.0,
+        25.0,
+        12.0
+      ]
+    },
+    "ABNER ANDRADE CAVALCANTE": {
+      "cpf": "02027745203",
+      "api_id": 895944,
+      "api_name": "ABNER ANDRADE CAVALCANTE",
+      "email": "abner.cavalcante@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ADEMARCIO DUARTE LOPES": {
+      "cpf": "06223031980",
+      "api_id": 895946,
+      "api_name": "ADEMARCIO DUARTE LOPES",
+      "email": "ctba_projetos@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        15.0,
+        8.0
+      ]
+    },
+    "AGNO CHRISTIAN DE LIMA TELES": {
+      "cpf": "06911519624",
+      "api_id": 895957,
+      "api_name": "AGNO CHRISTIAN DE LIMA TELES",
+      "email": "agno.teles@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        25.0,
+        8.0,
+        7.0,
+        6.0,
+        6.0,
+        4.0
+      ]
+    },
+    "ALESSANDRO DE OLIVEIRA AZEVEDO": {
+      "cpf": "27494577858",
+      "api_id": 895963,
+      "api_name": "ALESSANDRO DE OLIVEIRA AZEVEDO",
+      "email": "alessandrooa@bol.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ALISON FERREIRA DA SILVA": {
+      "cpf": "37377394803",
+      "api_id": 1106575,
+      "api_name": "ALISON FERREIRA DA SILVA",
+      "email": "alisonsilva-artur@hotmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "ALISSON RODRIGO RAMBO": {
+      "cpf": "07338782962",
+      "api_id": 895969,
+      "api_name": "ALISSON RODRIGO RAMBO",
+      "email": "alisson.rambo@eqseng.com.br",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "ALLAN JEFFERSON BRANCO RODRIGUES": {
+      "cpf": "09688866717",
+      "api_id": 895970,
+      "api_name": "ALLAN JEFFERSON BRANCO RODRIGUES",
+      "email": "allan.rodrigues@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        718.14
+      ]
+    },
+    "ALVARO RAMON PRIMERA CASTILLO": {
+      "cpf": "71318758130",
+      "api_id": 966263,
+      "api_name": "ALVARO RAMON PRIMERA CASTILLO",
+      "email": "primeraalvaro51@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "ANDRE VALERIO DE PAIVA": {
+      "cpf": "12682517633",
+      "api_id": 895985,
+      "api_name": "ANDRE VALERIO DE PAIVA",
+      "email": "toxcroen@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        8.0
+      ]
+    },
+    "ANDRESA INDIRA SANTANA AGGIO": {
+      "cpf": "33162718805",
+      "api_id": 895986,
+      "api_name": "ANDRESA INDIRA SANTANA AGGIO",
+      "email": "andresa.aggio@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        507.0,
+        507.0,
+        507.0,
+        507.0,
+        23.0,
+        11.0
+      ]
+    },
+    "ARLEY HENRIQUE DE SOUZA LUZ": {
+      "cpf": "01170402232",
+      "api_id": 920071,
+      "api_name": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "email": "arley.luz@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 14,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        200.0,
+        200.0,
+        200.0,
+        200.0,
+        45.0
+      ]
+    },
+    "AURO MOREIRA PEDROSO": {
+      "cpf": "32060157900",
+      "api_id": 930416,
+      "api_name": "AURO MOREIRA PEDROSO",
+      "email": "auro.pedroso@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "BRUNA LAIS DOS SANTOS PESSOA": {
+      "cpf": "13459423625",
+      "api_id": 1017677,
+      "api_name": "BRUNA LAIS DOS SANTOS PESSOA",
+      "email": "bruna.pessoa@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2.0,
+      "saldos": {
+        "saldo_final": 1.701,
+        "saldo_cartao": 0.2566,
+        "saldo_reembolsar": 0.9272
+      },
+      "todos_valores": [
+        2.0
+      ]
+    },
+    "BRUNO DE SOUZA PACHECO": {
+      "cpf": "04252409160",
+      "api_id": 896002,
+      "api_name": "BRUNO DE SOUZA PACHECO",
+      "email": "bruninhopacheco44@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 1
+    },
+    "BRUNO FERREIRA DE SOUZA RODRIGUES": {
+      "cpf": "16306431730",
+      "api_id": 896004,
+      "api_name": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "email": "brunoenf02@icloud.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "CAMILA DE OLIVEIRA VELOSO": {
+      "cpf": "85076538553",
+      "api_id": 896009,
+      "api_name": "CAMILA DE OLIVEIRA VELOSO",
+      "email": "camila.veloso@bcb.gov.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 10
+    },
+    "CARLOS ALEXANDRE GIGI": {
+      "cpf": "20005473896",
+      "api_id": 896011,
+      "api_name": "CARLOS ALEXANDRE GIGI",
+      "email": "carlos.gigi@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        11.0,
+        10.0,
+        8.0
+      ]
+    },
+    "CARLOS NASCIMENTO NONATO JUNIOR": {
+      "cpf": "65973500225",
+      "api_id": 896018,
+      "api_name": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "email": "carlosengenheiro33@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "CLAUDINEI AMARAL": {
+      "cpf": "10433881844",
+      "api_id": 896026,
+      "api_name": "CLAUDINEI AMARAL",
+      "email": "amaralclaudinei@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        85.0
+      ]
+    },
+    "CLEVERSON PAULOUSKI": {
+      "cpf": "08609699919",
+      "api_id": 896036,
+      "api_name": "CLEVERSON PAULOUSKI",
+      "email": "bmx_sdr@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        10.0,
+        10.0
+      ]
+    },
+    "DANIEL SANTOS DE ASSUNCAO": {
+      "cpf": "97592439549",
+      "api_id": 896044,
+      "api_name": "DANIEL SANTOS DE ASSUNCAO",
+      "email": "dsassuncao@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        425.0,
+        425.0,
+        425.0,
+        99.0
+      ]
+    },
+    "DANIELA CARVALHO STAHLER": {
+      "cpf": "01066881030",
+      "api_id": 917345,
+      "api_name": "DANIELA CARVALHO STAHLER",
+      "email": "daniela.carvalho@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        113.29,
+        113.29,
+        113.29,
+        113.0,
+        29.0,
+        9.0,
+        9.0
+      ]
+    },
+    "DANILO ZANATTA LUCIANO": {
+      "cpf": "06285125970",
+      "api_id": 896045,
+      "api_name": "DANILO ZANATTA LUCIANO",
+      "email": "danilo.zanatta@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 10,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        6.0
+      ]
+    },
+    "DEBORA ARAUJO FIGUEIREDO": {
+      "cpf": "85225720030",
+      "api_id": 985850,
+      "api_name": "DEBORA ARAUJO FIGUEIREDO",
+      "email": "deboraaf2017@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        10.0
+      ]
+    },
+    "DENIS FERREIRA DA SILVA": {
+      "cpf": "06637541435",
+      "api_id": 896052,
+      "api_name": "DENIS FERREIRA DA SILVA",
+      "email": "denis.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 4,
+      "valor_base": 500.0,
+      "saldos": {
+        "saldo_final": 425.25,
+        "saldo_cartao": 64.15,
+        "saldo_reembolsar": 231.8
+      },
+      "todos_valores": [
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "DIEGO JOSE DE PAULO": {
+      "cpf": "01553544692",
+      "api_id": 896058,
+      "api_name": "DIEGO JOSE DE PAULO",
+      "email": "diegojpudi@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        10.0,
+        9.0,
+        7.0,
+        7.0,
+        2.0
+      ]
+    },
+    "DIVAN ALVES DE AMORIM": {
+      "cpf": "11422891844",
+      "api_id": 896061,
+      "api_name": "DIVAN ALVES DE AMORIM",
+      "email": "divanmiroma@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        5.0,
+        5.0
+      ]
+    },
+    "EDSON CALIXTO THOMAZ": {
+      "cpf": "05765681719",
+      "api_id": 961468,
+      "api_name": "EDSON CALIXTO THOMAZ",
+      "email": "CALITHOMAZ.EDSON@HOTMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 16,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        358.0,
+        358.0,
+        358.0,
+        10.0,
+        6.0,
+        5.0,
+        2.0
+      ]
+    },
+    "EDUARDO SANTOS": {
+      "cpf": "91270529072",
+      "api_id": 896084,
+      "api_name": "EDUARDO SANTOS",
+      "email": "eduardo.santos@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "FABIO DIOGO BITTENCOURT": {
+      "cpf": "00526143959",
+      "api_id": 896102,
+      "api_name": "FABIO DIOGO BITTENCOURT",
+      "email": "fabio.hidelma@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "FABIO HENRIQUE PECORARI CRUZ": {
+      "cpf": "39297665829",
+      "api_id": 896103,
+      "api_name": "FABIO HENRIQUE PECORARI CRUZ",
+      "email": "fabiohenriquepcruz@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "FABIO MARTINS BORGES": {
+      "cpf": "05492458981",
+      "api_id": 896104,
+      "api_name": "FABIO MARTINS BORGES",
+      "email": "fabinhomborges0304@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        7.0,
+        7.0,
+        6.0,
+        4.0
+      ]
+    },
+    "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA": {
+      "cpf": "73574031491",
+      "api_id": 917058,
+      "api_name": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "email": "felipe.albuquerque@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        329.18,
+        329.18,
+        329.18,
+        329.0
+      ]
+    },
+    "GERSON PEREIRA": {
+      "cpf": "38950693291",
+      "api_id": 917353,
+      "api_name": "GERSON PEREIRA",
+      "email": "gerson.pereira.gerson@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        498.09,
+        498.09,
+        498.09,
+        498.0,
+        90.0,
+        50.0,
+        23.0,
+        18.0
+      ]
+    },
+    "GUILHERME FERREIRA DA SILVA": {
+      "cpf": "41997553813",
+      "api_id": 954733,
+      "api_name": "GUILHERME FERREIRA DA SILVA",
+      "email": "g.ferreira3093@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 18,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "GUILHERME MOTTA RIBEIRO SILVA": {
+      "cpf": "11178519740",
+      "api_id": 896140,
+      "api_name": "GUILHERME MOTTA RIBEIRO SILVA",
+      "email": "guilherme.silva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 21,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "HEDER SILVA CAMPODONICO": {
+      "cpf": "03066906086",
+      "api_id": 896143,
+      "api_name": "HEDER SILVA CAMPODONICO",
+      "email": "hedersilva22@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        409.0,
+        409.0,
+        409.0,
+        50.0,
+        50.0,
+        50.0,
+        50.0,
+        29.0,
+        29.0
+      ]
+    },
+    "HIGOR KELVYN SILVA AMORIM": {
+      "cpf": "09199781930",
+      "api_id": 969231,
+      "api_name": "HIGOR KELVYN SILVA AMORIM",
+      "email": "SILVAHIGOR356@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        10.0,
+        9.0
+      ]
+    },
+    "HUGO ALEXANDRE DE SOUSA": {
+      "cpf": "07646535630",
+      "api_id": 896149,
+      "api_name": "HUGO ALEXANDRE DE SOUSA",
+      "email": "hugo.alexandre@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 750.0,
+      "saldos": {
+        "saldo_final": 637.875,
+        "saldo_cartao": 96.225,
+        "saldo_reembolsar": 347.7
+      },
+      "todos_valores": [
+        750.0,
+        750.0,
+        750.0,
+        750.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        318.0,
+        258.7
+      ]
+    },
+    "HUGO DELLA JUSTINA": {
+      "cpf": "03031202902",
+      "api_id": 896150,
+      "api_name": "HUGO DELLA JUSTINA",
+      "email": "hugo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 100.0,
+      "saldos": {
+        "saldo_final": 85.05,
+        "saldo_cartao": 12.83,
+        "saldo_reembolsar": 46.36
+      },
+      "todos_valores": [
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0,
+        100.0
+      ]
+    },
+    "IVO LUCIANO DA SILVA WAGNER JUNIOR": {
+      "cpf": "12068745976",
+      "api_id": 978694,
+      "api_name": "IVO LUCIANO DA SILVA WAGNER JUNIOR",
+      "email": "LOGISTICA@EQSENGENHARIA.COM.BR",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 50.0,
+      "saldos": {
+        "saldo_final": 42.525,
+        "saldo_cartao": 6.415,
+        "saldo_reembolsar": 23.18
+      },
+      "todos_valores": [
+        50.0,
+        50.0,
+        30.0,
+        30.0,
+        22.0,
+        22.0
+      ]
+    },
+    "JAIR ASSIS DA SILVA": {
+      "cpf": "60377348953",
+      "api_id": 1008341,
+      "api_name": "JAIR ASSIS DA SILVA",
+      "email": "JAIRASSIS@HOTMAIL.COM",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 6
+    },
+    "JAQUELINE ONORIO DOS SANTOS ALVES": {
+      "cpf": "37258325875",
+      "api_id": 1106549,
+      "api_name": "JAQUELINE ONORIO DOS SANTOS ALVES",
+      "email": "jaquelineonorioa@hotmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "JOAO ALEXANDRE LIMA": {
+      "cpf": "10588522996",
+      "api_id": 957803,
+      "api_name": "JOAO ALEXANDRE LIMA",
+      "email": "ALEXANDRELIMASJBV@OUTLOOK.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        5.0
+      ]
+    },
+    "JOSE CARLOS BATISTA": {
+      "cpf": "26652452804",
+      "api_id": 896186,
+      "api_name": "JOSE CARLOS BATISTA",
+      "email": "jose.batista@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "JOSE CLAUDIO RIBEIRO": {
+      "cpf": "61158852649",
+      "api_id": 896188,
+      "api_name": "JOSE CLAUDIO RIBEIRO",
+      "email": "avnribeiro@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        92.0,
+        18.0
+      ]
+    },
+    "JOSE JONAS FURLANETTO": {
+      "cpf": "55889913115",
+      "api_id": 958523,
+      "api_name": "JOSE JONAS FURLANETTO",
+      "email": "jose.furlanetto@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        6.0,
+        6.0,
+        6.0
+      ]
+    },
+    "JOSE NEI DOS SANTOS DUTRA": {
+      "cpf": "55278612053",
+      "api_id": 896192,
+      "api_name": "JOSE NEI DOS SANTOS DUTRA",
+      "email": "nei.engeman@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "JUSTINO NOGUEIRA PEIXOTO JUNIOR": {
+      "cpf": "09246793790",
+      "api_id": 896206,
+      "api_name": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "email": "justino.nogueira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "KLEBER SILVA DA SILVA": {
+      "cpf": "48210811053",
+      "api_id": 1117250,
+      "api_name": "KLEBER SILVA DA SILVA",
+      "email": "kleber4766@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        7.0,
+        5.0,
+        5.0,
+        5.0,
+        5.0
+      ]
+    },
+    "LEANDRO DE QUADROS": {
+      "cpf": "03461295914",
+      "api_id": 896214,
+      "api_name": "LEANDRO DE QUADROS",
+      "email": "leandro@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 1
+    },
+    "LEANDRO GUSMAO MUNIZ": {
+      "cpf": "13126691790",
+      "api_id": 961469,
+      "api_name": "LEANDRO GUSMAO MUNIZ",
+      "email": "LEANDRO.GMUNIZ@OUTLOOK.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        62.4,
+        62.4,
+        62.4,
+        62.0
+      ]
+    },
+    "LEONARDO MURATORI ATHAYDE": {
+      "cpf": "03374811647",
+      "api_id": 1011271,
+      "api_name": "LEONARDO MURATORI ATHAYDE",
+      "email": "leonardo.athayde@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 7,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "LUCAS HENRIQUE CORREA DOS SANTOS": {
+      "cpf": "10652119964",
+      "api_id": 896223,
+      "api_name": "LUCAS HENRIQUE CORREA DOS SANTOS",
+      "email": "lucas.santos@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 30.0,
+      "saldos": {
+        "saldo_final": 25.515,
+        "saldo_cartao": 3.8489999999999998,
+        "saldo_reembolsar": 13.908000000000001
+      },
+      "todos_valores": [
+        30.0,
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    "LUCAS HENRIQUE PINHO": {
+      "cpf": "45211709861",
+      "api_id": 896224,
+      "api_name": "LUCAS HENRIQUE PINHO",
+      "email": "lucas1.cta1@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 13
+    },
+    "LUCIANO DA SILVA DE PAULA": {
+      "cpf": "11489828923",
+      "api_id": 896227,
+      "api_name": "LUCIANO DA SILVA DE PAULA",
+      "email": "lucianoreal13@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        31.0,
+        10.0,
+        10.0
+      ]
+    },
+    "LUIZ FERNANDO CAVALHEIRO": {
+      "cpf": "03898579980",
+      "api_id": 896236,
+      "api_name": "LUIZ FERNANDO CAVALHEIRO",
+      "email": "fernandolwt@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        19.0,
+        10.0,
+        9.0,
+        7.0
+      ]
+    },
+    "MARCELO DE ANDRADE CALVETTI": {
+      "cpf": "02587708052",
+      "api_id": 917365,
+      "api_name": "MARCELO DE ANDRADE CALVETTI",
+      "email": "marcelo.calvertti@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        99.1,
+        99.1
+      ]
+    },
+    "MARCELO GIMENEZ ARGEMON": {
+      "cpf": "95073272153",
+      "api_id": 896245,
+      "api_name": "MARCELO GIMENEZ ARGEMON",
+      "email": "marcelo.argemon@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "MARCELO PEREIRA LIMA": {
+      "cpf": "10254434894",
+      "api_id": 896246,
+      "api_name": "MARCELO PEREIRA LIMA",
+      "email": "mpllima13@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 11,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "MARIA EDUARDA ARAGAO": {
+      "cpf": "10363402950",
+      "api_id": 896259,
+      "api_name": "MARIA EDUARDA ARAGAO",
+      "email": "maria.aragao@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 27,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "MAURO PEDRO SAUGO": {
+      "cpf": "90573625972",
+      "api_id": 896269,
+      "api_name": "MAURO PEDRO SAUGO",
+      "email": "mauro.saugo@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        25.0,
+        9.0,
+        9.0,
+        5.0,
+        4.0,
+        3.0
+      ]
+    },
+    "MOISES DOS SANTOS CABRAL": {
+      "cpf": "68746458204",
+      "api_id": 896277,
+      "api_name": "MOISES DOS SANTOS CABRAL",
+      "email": "moises.cabral@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 19,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        939.9,
+        939.9,
+        939.9,
+        939.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    "NORMAN CRANI PORTELLA": {
+      "cpf": "79794157953",
+      "api_id": 921927,
+      "api_name": "NORMAN CRANI PORTELLA",
+      "email": "NORMAMCP2012@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "ORESTE BARBOSA DA SILVA JUNIOR": {
+      "cpf": "25075562850",
+      "api_id": 896288,
+      "api_name": "ORESTE BARBOSA DA SILVA JUNIOR",
+      "email": "oreste.junior@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 15,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        338.0,
+        338.0,
+        338.0,
+        338.0,
+        50.0,
+        42.5,
+        42.5,
+        42.0
+      ]
+    },
+    "OSCAR DOMINGO PALARO": {
+      "cpf": "03067535960",
+      "api_id": 896289,
+      "api_name": "OSCAR DOMINGO PALARO",
+      "email": "oscar.palaro22@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "PALOMA CARLOS SPINOLA": {
+      "cpf": "11340265796",
+      "api_id": 896291,
+      "api_name": "PALOMA CARLOS SPINOLA",
+      "email": "paloma.spinola@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 5,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        90.0,
+        25.0,
+        11.0,
+        5.9,
+        5.9,
+        5.0
+      ]
+    },
+    "PATRICK ANTONIEVICZ ALVES": {
+      "cpf": "06456801923",
+      "api_id": 896293,
+      "api_name": "PATRICK ANTONIEVICZ ALVES",
+      "email": "patrickantonievicz@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 17,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "PRISCILA GOTARDO PEREIRA": {
+      "cpf": "05168980945",
+      "api_id": 896299,
+      "api_name": "PRISCILA GOTARDO PEREIRA",
+      "email": "priscila.pereira@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 10
+    },
+    "RAFAEL PORTO ALVES DA CRUZ": {
+      "cpf": "11914988671",
+      "api_id": 896304,
+      "api_name": "RAFAEL PORTO ALVES DA CRUZ",
+      "email": "rafael.cruz@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RAFAEL RAMOS DAS NEVES": {
+      "cpf": "06149576485",
+      "api_id": 1109495,
+      "api_name": "RAFAEL RAMOS DAS NEVES",
+      "email": "rafael.ramos@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        4.0
+      ]
+    },
+    "RAMON GOMES TEIXEIRA": {
+      "cpf": "83978054515",
+      "api_id": 996627,
+      "api_name": "RAMON GOMES TEIXEIRA",
+      "email": "RGTSSA@GMAIL.COM",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0
+      ]
+    },
+    "RAQUEL PANTOJA SANTOS": {
+      "cpf": "89395140259",
+      "api_id": 896306,
+      "api_name": "RAQUEL PANTOJA SANTOS",
+      "email": "raquel.pantoja@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 12,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "RICARDO MURCIA GARCIA FILHO": {
+      "cpf": "27668763830",
+      "api_id": 896314,
+      "api_name": "RICARDO MURCIA GARCIA FILHO",
+      "email": "ricardo.filho@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        754.41,
+        754.41,
+        754.41,
+        754.0,
+        159.2,
+        159.2
+      ]
+    },
+    "RICARDO ZORZETTO": {
+      "cpf": "00539580040",
+      "api_id": 896315,
+      "api_name": "RICARDO ZORZETTO",
+      "email": "ricazorzetto@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 13,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        5.0
+      ]
+    },
+    "RODRIGO JOSE DE PAULA": {
+      "cpf": "03348917956",
+      "api_id": 896327,
+      "api_name": "RODRIGO JOSE DE PAULA",
+      "email": "rodrigo@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2025.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        220.5,
+        220.5,
+        220.0,
+        50.0
+      ]
+    },
+    "ROGERIO GOMES DE OLIVEIRA": {
+      "cpf": "89591640030",
+      "api_id": 896332,
+      "api_name": "ROGERIO GOMES DE OLIVEIRA",
+      "email": "rogerio.oliveira@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 28,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        718.4,
+        718.4,
+        718.4,
+        718.0,
+        200.0,
+        200.0
+      ]
+    },
+    "RONALDO DE MATOS LELIS": {
+      "cpf": "47502843604",
+      "api_id": 928097,
+      "api_name": "RONALDO DE MATOS LELIS",
+      "email": "ronaldo.lelis@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 22,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        280.0,
+        280.0,
+        280.0,
+        280.0,
+        21.0,
+        12.0
+      ]
+    },
+    "RUBENS BELO HERBSTER": {
+      "cpf": "02701688345",
+      "api_id": 1088596,
+      "api_name": "RUBENS BELO HERBSTER",
+      "email": "rubens.herbester@eqsengenharia.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 3
+    },
+    "SANDRO QUITERIO LOPES DOS SANTOS": {
+      "cpf": "02988581428",
+      "api_id": 896342,
+      "api_name": "SANDRO QUITERIO LOPES DOS SANTOS",
+      "email": "sandroquiteriolopes@gmail.com",
+      "status": "SEM_RELATORIOS",
+      "relatorios_encontrados": 0
+    },
+    "SILVIO ODELI FILHO": {
+      "cpf": "07634898910",
+      "api_id": 896351,
+      "api_name": "SILVIO ODELI FILHO",
+      "email": "silvio.odeli.filho@gmail.com",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 12
+    },
+    "SILVIO VINICIUS PINHEIRO GOES": {
+      "cpf": "51182084168",
+      "api_id": 896352,
+      "api_name": "SILVIO VINICIUS PINHEIRO GOES",
+      "email": "silvio.goes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "TEOFILO TOLLENDAL PACHECO": {
+      "cpf": "26687333836",
+      "api_id": 1117262,
+      "api_name": "TEOFILO TOLLENDAL PACHECO",
+      "email": "teofilo.pacheco@eqseng.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 2,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        4.0
+      ]
+    },
+    "THIAGO DE MEDEIROS VANZELER": {
+      "cpf": "11590627733",
+      "api_id": 896355,
+      "api_name": "THIAGO DE MEDEIROS VANZELER",
+      "email": "thiago_vanzeler@hotmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 24,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "TIAGO DE OLIVEIRA PAIVA": {
+      "cpf": "10491624719",
+      "api_id": 896362,
+      "api_name": "TIAGO DE OLIVEIRA PAIVA",
+      "email": "tiagopaiva@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 23,
+      "valor_base": 2531.5,
+      "saldos": {
+        "saldo_final": 2153.04075,
+        "saldo_cartao": 324.79145,
+        "saldo_reembolsar": 1173.6034
+      },
+      "todos_valores": [
+        2531.5,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0
+      ]
+    },
+    "TULIO VELOSO HONORATO": {
+      "cpf": "12609931670",
+      "api_id": 896366,
+      "api_name": "TULIO VELOSO HONORATO",
+      "email": "velosoengenhariaeletrica@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 26,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        60.0,
+        60.0,
+        60.0,
+        30.0,
+        30.0,
+        30.0
+      ]
+    },
+    "UELITON CANDIDO": {
+      "cpf": "10354623621",
+      "api_id": 968562,
+      "api_name": "UELITON CANDIDO",
+      "email": "ueliton.candido@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 9,
+      "valor_base": 2025.0,
+      "saldos": {
+        "saldo_final": 1722.2625,
+        "saldo_cartao": 259.8075,
+        "saldo_reembolsar": 938.7900000000001
+      },
+      "todos_valores": [
+        2025.0,
+        2025.0,
+        8.0,
+        4.0,
+        4.0
+      ]
+    },
+    "WALTER DE CAMPOS NUNES NETO": {
+      "cpf": "99114160030",
+      "api_id": 896381,
+      "api_name": "WALTER DE CAMPOS NUNES NETO",
+      "email": "walternn79@gmail.com",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 25,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        2026.0,
+        58.2,
+        58.2
+      ]
+    },
+    "WELLINGTON ARION TAVARES": {
+      "cpf": "04747951954",
+      "api_id": 896387,
+      "api_name": "WELLINGTON ARION TAVARES",
+      "email": "welltadaniela@bol.com.br",
+      "status": "SEM_VALORES",
+      "relatorios_encontrados": 11
+    },
+    "WILLIAM SANTANA NUNES": {
+      "cpf": "95417400068",
+      "api_id": 916366,
+      "api_name": "WILLIAM SANTANA NUNES",
+      "email": "william.nunes@eqsengenharia.com.br",
+      "status": "COM_VALORES",
+      "relatorios_analisados": 8,
+      "valor_base": 2026.0,
+      "saldos": {
+        "saldo_final": 1723.113,
+        "saldo_cartao": 259.9358,
+        "saldo_reembolsar": 939.2536
+      },
+      "todos_valores": [
+        2026.0,
+        2026.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        2025.0,
+        169.0,
+        26.0,
+        18.0,
+        18.0
+      ]
+    }
+  }
+}

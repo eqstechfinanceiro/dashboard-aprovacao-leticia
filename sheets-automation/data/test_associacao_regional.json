@@ -1,0 +1,656 @@
+{
+  "total_usuarios": 100,
+  "total_regionais": 1,
+  "usuarios_com_regionais": 89,
+  "jonas_encontrado": false,
+  "jonas_tem_regionais": null,
+  "regionais_disponiveis": [
+    {
+      "id": 1861290,
+      "name": "REGIONAL SC",
+      "company_name": null,
+      "cnpj": null,
+      "address": null,
+      "neighborhood": null,
+      "city": null,
+      "state": null,
+      "zip_code": null,
+      "phone1": null,
+      "phone2": null,
+      "on": true,
+      "integration_id": null
+    }
+  ],
+  "exemplos_usuarios_regionais": [
+    {
+      "user": {
+        "id": 895944,
+        "integration_id": "008647",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172530,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ABNER ANDRADE CAVALCANTE",
+        "email": "abner.cavalcante@eqsengenharia.com.br",
+        "cpf": "02027745203",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:08",
+        "updated_at": "2025-05-13 16:29:19",
+        "projects": {
+          "data": [
+            {
+              "id": 1861280,
+              "name": "REGIONAL CO",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861280,
+          "name": "REGIONAL CO",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895945,
+        "integration_id": "025595",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172531,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADAUTO JOSE PEREIRA",
+        "email": "adautojosepereira@yahoo.com.br",
+        "cpf": "85087572634",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:10",
+        "updated_at": "2025-05-13 14:56:01",
+        "projects": {
+          "data": [
+            {
+              "id": 1861282,
+              "name": "REGIONAL MG",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861282,
+          "name": "REGIONAL MG",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895946,
+        "integration_id": "003023",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 175661,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADEMARCIO DUARTE LOPES",
+        "email": "ctba_projetos@hotmail.com",
+        "cpf": "06223031980",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:12",
+        "updated_at": "2025-06-16 19:06:37",
+        "projects": {
+          "data": [
+            {
+              "id": 1861284,
+              "name": "REGIONAL PR",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861284,
+          "name": "REGIONAL PR",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895947,
+        "integration_id": "006832",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172532,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADILSON MELLO DE CAMARGO",
+        "email": "adilsoncamargo@eqseng.com.br",
+        "cpf": "67324398049",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:14",
+        "updated_at": "2025-06-06 16:48:56",
+        "projects": {
+          "data": [
+            {
+              "id": 1861286,
+              "name": "REGIONAL RS",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861286,
+          "name": "REGIONAL RS",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895949,
+        "integration_id": "012006",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": 42515,
+        "approval_flow_id": 191238,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADIVAR ANTONIO DA SILVA JUNIOR",
+        "email": "adivarjunior@gmail.com",
+        "cpf": "28604876898",
+        "phone1": "48991742878",
+        "phone2": null,
+        "birth_date": "1979-02-21",
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:18",
+        "updated_at": "2025-09-02 17:34:09",
+        "projects": {
+          "data": [
+            {
+              "id": 1861290,
+              "name": "REGIONAL SC",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861290,
+          "name": "REGIONAL SC",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895950,
+        "integration_id": "004171",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172534,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADMILSON DOS SANTOS GALAN",
+        "email": "admilsongalan@gmail.com",
+        "cpf": "04769973993",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": true,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:20",
+        "updated_at": "2025-05-27 13:09:51",
+        "projects": {
+          "data": [
+            {
+              "id": 1861290,
+              "name": "REGIONAL SC",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861290,
+          "name": "REGIONAL SC",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895951,
+        "integration_id": null,
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 172535,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADRIANA DA CONCEICAO PEREIRA DE MELO",
+        "email": "adriana.melo@eqsengenharia.com.br",
+        "cpf": "10279969490",
+        "phone1": "81986327208",
+        "phone2": "81986327208",
+        "birth_date": "1994-03-16",
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:22",
+        "updated_at": "2026-01-30 09:36:51",
+        "projects": {
+          "data": [
+            {
+              "id": 1861293,
+              "name": "REGIONAL NE",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861293,
+          "name": "REGIONAL NE",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895952,
+        "integration_id": "023679",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": 42324,
+        "approval_flow_id": 172534,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADRIANE CARON",
+        "email": "adriane.caron@eqseng.com.br",
+        "cpf": "02801403989",
+        "phone1": "49999222929",
+        "phone2": "49999222929",
+        "birth_date": "1979-05-15",
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:24",
+        "updated_at": "2026-01-27 19:12:23",
+        "projects": {
+          "data": [
+            {
+              "id": 1861290,
+              "name": "REGIONAL SC",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861290,
+          "name": "REGIONAL SC",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895953,
+        "integration_id": null,
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": null,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADRIANO BENEDETTI",
+        "email": "adrianodetti@hotmail.com",
+        "cpf": "91128838915",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": false,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:26",
+        "updated_at": "2025-05-06 17:32:00",
+        "projects": {
+          "data": [
+            {
+              "id": 1861284,
+              "name": "REGIONAL PR",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861284,
+          "name": "REGIONAL PR",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    },
+    {
+      "user": {
+        "id": 895954,
+        "integration_id": "014403",
+        "external_id": null,
+        "company_id": 1825947,
+        "role_id": null,
+        "approval_flow_id": 191236,
+        "expense_limit_policy_id": 16805,
+        "user_type": "USUARIO",
+        "name": "ADRIANO BORGES TEIXEIRA",
+        "email": "adrianoteixeiraeletricista@gmail.com",
+        "cpf": "65085825004",
+        "phone1": null,
+        "phone2": null,
+        "birth_date": null,
+        "bank": null,
+        "agency": null,
+        "account": null,
+        "pix_key": null,
+        "confirmed": false,
+        "active": true,
+        "parameters": null,
+        "created_at": "2025-04-16 17:33:28",
+        "updated_at": "2025-07-08 16:13:06",
+        "projects": {
+          "data": [
+            {
+              "id": 1861286,
+              "name": "REGIONAL RS",
+              "company_name": null,
+              "cnpj": null,
+              "address": null,
+              "neighborhood": null,
+              "city": null,
+              "state": null,
+              "zip_code": null,
+              "phone1": null,
+              "phone2": null,
+              "on": true,
+              "integration_id": null
+            }
+          ]
+        }
+      },
+      "regionais": [
+        {
+          "id": 1861286,
+          "name": "REGIONAL RS",
+          "company_name": null,
+          "cnpj": null,
+          "address": null,
+          "neighborhood": null,
+          "city": null,
+          "state": null,
+          "zip_code": null,
+          "phone1": null,
+          "phone2": null,
+          "on": true,
+          "integration_id": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,196 @@
+[
+  {
+    "portador": "RAFAEL AMORIM VELLO",
+    "cpf": "01677920599",
+    "userId": 896300,
+    "saldoFinal": 291.6600000002072,
+    "qz1": 16000,
+    "saldoCartao": 20,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 24462.760000000002,
+      "totalReportsApril": 2,
+      "totalSaque": 20595.56,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.011922612166419782,
+      "saldo_final_vs_qz1": 0.01822875000001295,
+      "saldo_final_vs_saque": 0.014161304669560197,
+      "saldo_cartao_vs_qz1": 0.00125,
+      "saldo_cartao_vs_saque": 0.0009710830878111592
+    }
+  },
+  {
+    "portador": "ANDRE ARANHA MEISTER",
+    "cpf": "03032275326",
+    "userId": null,
+    "saldoFinal": 18329.5,
+    "qz1": 9000,
+    "saldoCartao": 1154.94,
+    "found": false
+  },
+  {
+    "portador": "JAEDER RODRIGUES JUNIOR",
+    "cpf": "07505987607",
+    "userId": 896163,
+    "saldoFinal": 1614.4399999999296,
+    "qz1": 7000,
+    "saldoCartao": 2,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 11096.889999999998,
+      "totalReportsApril": 2,
+      "totalSaque": 6519.349999999998,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.14548580728473742,
+      "saldo_final_vs_qz1": 0.23063428571427566,
+      "saldo_final_vs_saque": 0.2476381847883501,
+      "saldo_cartao_vs_qz1": 0.00028571428571428574,
+      "saldo_cartao_vs_saque": 0.0003067790500586716
+    }
+  },
+  {
+    "portador": "EDSON VEIGA SILVEIRA",
+    "cpf": "62063774072",
+    "userId": 896082,
+    "saldoFinal": 226.65000000002146,
+    "qz1": 6800,
+    "saldoCartao": 4635.66,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 1597.6999999999998,
+      "totalReportsApril": 1,
+      "totalSaque": 1597.6999999999998,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.14186017400013862,
+      "saldo_final_vs_qz1": 0.03333088235294433,
+      "saldo_final_vs_saque": 0.14186017400013862,
+      "saldo_cartao_vs_qz1": 0.681714705882353,
+      "saldo_cartao_vs_saque": 2.901458346372911
+    }
+  },
+  {
+    "portador": "LUDGERO HORACIO DE OLIVEIRA",
+    "cpf": "06576198922",
+    "userId": 896230,
+    "saldoFinal": 3693.100000000008,
+    "qz1": 6500,
+    "saldoCartao": 981.69,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 9974.4,
+      "totalReportsApril": 2,
+      "totalSaque": 4091.74,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.3702578601219129,
+      "saldo_final_vs_qz1": 0.568169230769232,
+      "saldo_final_vs_saque": 0.9025744548773892,
+      "saldo_cartao_vs_qz1": 0.15102923076923078,
+      "saldo_cartao_vs_saque": 0.23991993626183483
+    }
+  },
+  {
+    "portador": "BRUNO OLIVEIRA DIAS",
+    "cpf": "11992259755",
+    "userId": 896006,
+    "saldoFinal": 4637.600000000019,
+    "qz1": 6200,
+    "saldoCartao": 4283.83,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 3028.8000000000006,
+      "totalReportsApril": 1,
+      "totalSaque": 147.9,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 1.5311674590596993,
+      "saldo_final_vs_qz1": 0.748000000000003,
+      "saldo_final_vs_saque": 31.356321839080582,
+      "saldo_cartao_vs_qz1": 0.6909403225806452,
+      "saldo_cartao_vs_saque": 28.96436781609195
+    }
+  },
+  {
+    "portador": "JOSE CARLOS BATISTA",
+    "cpf": "26652452804",
+    "userId": 896186,
+    "saldoFinal": 1674.2699999999822,
+    "qz1": 6000,
+    "saldoCartao": 58,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 9559.72,
+      "totalReportsApril": 5,
+      "totalSaque": 9559.72,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.17513797475239676,
+      "saldo_final_vs_qz1": 0.27904499999999705,
+      "saldo_final_vs_saque": 0.17513797475239676,
+      "saldo_cartao_vs_qz1": 0.009666666666666667,
+      "saldo_cartao_vs_saque": 0.00606712330486667
+    }
+  },
+  {
+    "portador": "LUCAS MARTINS MACAN",
+    "cpf": "00975748998",
+    "userId": null,
+    "saldoFinal": 1784.5300000000184,
+    "qz1": 6000,
+    "saldoCartao": 4.06,
+    "found": false
+  },
+  {
+    "portador": "SAULO ARAUJO DE PAULA",
+    "cpf": "31040091806",
+    "userId": 896344,
+    "saldoFinal": 3099.9500000000035,
+    "qz1": 5750,
+    "saldoCartao": 62.3,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 3567.8199999999997,
+      "totalReportsApril": 1,
+      "totalSaque": 3567.8199999999997,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 0.8688639000846465,
+      "saldo_final_vs_qz1": 0.5391217391304354,
+      "saldo_final_vs_saque": 0.8688639000846465,
+      "saldo_cartao_vs_qz1": 0.010834782608695652,
+      "saldo_cartao_vs_saque": 0.017461643244334076
+    }
+  },
+  {
+    "portador": "FLAVIO FERNANDES DOS REIS LIMA",
+    "cpf": "01767960107",
+    "userId": 896117,
+    "saldoFinal": 7169.960000000001,
+    "qz1": 5700,
+    "saldoCartao": 284.08,
+    "found": true,
+    "apiData": {
+      "totalExpensesApril": 6466.739999999999,
+      "totalReportsApril": 4,
+      "totalSaque": 2041.7600000000002,
+      "totalReembolsavel": 0
+    },
+    "formulas": {
+      "saldo_final_vs_total_expenses": 1.1087441276439136,
+      "saldo_final_vs_qz1": 1.2578877192982458,
+      "saldo_final_vs_saque": 3.5116566099835436,
+      "saldo_cartao_vs_qz1": 0.049838596491228064,
+      "saldo_cartao_vs_saque": 0.1391348640388684
+    }
+  }
+]

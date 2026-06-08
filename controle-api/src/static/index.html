@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visualizador de Planilhas</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Sticky header for table */
+    .table-wrap { max-height: calc(100vh - 280px); overflow: auto; }
+    thead tr th { position: sticky; top: 0; z-index: 10; }
+    .col-num { position: sticky; left: 0; z-index: 5; }
+    thead .col-num { z-index: 20; }
+
+    /* Formula badge pulse */
+    @keyframes formula-glow { 0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,0.3)} 50%{box-shadow:0 0 0 4px rgba(249,115,22,0)} }
+    .formula-badge { animation: formula-glow 2s infinite; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+    /* Tooltip */
+    #tooltip { pointer-events: none; max-width: 340px; }
+
+    /* Loading skeleton */
+    .skeleton { background: linear-gradient(90deg,#e2e8f0 25%,#f1f5f9 50%,#e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .cell-value { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+<!-- Tooltip -->
+<div id="tooltip" class="fixed hidden bg-gray-900 text-white text-xs rounded-xl shadow-2xl p-3 border border-gray-700 z-50"></div>
+
+<!-- Layout -->
+<div class="flex h-screen overflow-hidden">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white border-r flex flex-col flex-shrink-0 shadow-sm">
+    <div class="px-4 py-4 border-b bg-gradient-to-br from-emerald-50 to-white">
+      <div class="flex items-center gap-2 mb-1">
+        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+        </svg>
+        <span class="font-bold text-sm text-slate-800">Planilhas EQS</span>
+      </div>
+      <p class="text-xs text-slate-500">SQLite · VExpenses</p>
+    </div>
+
+    <!-- File tabs -->
+    <div id="file-tabs" class="flex border-b bg-slate-50"></div>
+
+    <!-- Sheet list -->
+    <div class="flex-1 overflow-y-auto p-2" id="sheet-list">
+      <div class="skeleton h-8 rounded mb-2"></div>
+      <div class="skeleton h-8 rounded mb-2"></div>
+      <div class="skeleton h-8 rounded mb-2"></div>
+    </div>
+
+    <div class="p-3 border-t text-xs text-slate-400 bg-slate-50">
+      <div id="db-status" class="flex items-center gap-1">
+        <span class="w-2 h-2 rounded-full bg-slate-300 inline-block"></span> Conectando...
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 flex flex-col overflow-hidden relative">
+
+    <!-- Top bar -->
+    <header class="bg-white border-b px-5 py-3 flex items-center gap-4 flex-shrink-0 shadow-sm">
+      <div>
+        <h1 id="sheet-title" class="font-semibold text-slate-800 text-base">Selecione uma aba</h1>
+        <p id="sheet-subtitle" class="text-xs text-slate-500 mt-0.5"></p>
+      </div>
+      <div class="flex-1"></div>
+
+      <!-- Search -->
+      <div class="relative">
+        <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+        </svg>
+        <input id="search-input" type="text" placeholder="Buscar..." class="pl-9 pr-3 py-1.5 text-sm border rounded-lg w-52 focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-slate-50" />
+      </div>
+
+      <!-- Legend -->
+      <div class="flex items-center gap-3 text-xs text-slate-500 border-l pl-4">
+        <span class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-emerald-100 border border-emerald-300 inline-block"></span>
+          Dado / API
+        </span>
+        <span class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded bg-orange-100 border border-orange-300 inline-block"></span>
+          Fórmula Excel
+        </span>
+      </div>
+
+      <!-- Info toggle -->
+      <button id="info-btn" class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border hover:bg-slate-50 transition-colors text-slate-600" onclick="toggleInfo()">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Info
+      </button>
+
+      <!-- Export -->
+      <button onclick="exportCSV()" class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        CSV
+      </button>
+
+      <!-- Verify tab -->
+      <button id="verify-tab-btn" onclick="toggleVerifyPanel()" class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg border border-blue-300 text-blue-700 hover:bg-blue-50 transition-colors font-medium">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        Verificar API
+      </button>
+    </header>
+
+    <!-- Info panel -->
+    <div id="info-panel" class="hidden bg-amber-50 border-b border-amber-200 px-5 py-3 text-xs flex-shrink-0">
+      <div id="info-content"></div>
+    </div>
+
+    <!-- Formula summary bar -->
+    <div id="formula-bar" class="hidden bg-orange-50 border-b border-orange-200 px-5 py-1.5 text-xs text-orange-800 flex-shrink-0">
+      <span class="font-medium">⚠ Colunas de fórmula (não vêm da API):</span>
+      <span id="formula-names" class="ml-2"></span>
+    </div>
+
+    <!-- Verification panel (overlay) -->
+    <div id="verify-panel" class="hidden absolute inset-0 bg-white z-30 flex flex-col overflow-hidden" style="top:56px">
+      <div class="bg-blue-700 text-white px-5 py-3 flex items-center gap-3 flex-shrink-0">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <span class="font-bold text-sm">Verificação de Colunas vs. API VExpenses</span>
+        <div class="flex-1"></div>
+        <div id="verify-table-label" class="text-blue-200 text-xs"></div>
+        <button id="verify-run-btn" onclick="runVerify()" class="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg bg-white text-blue-700 hover:bg-blue-50 font-medium transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          Executar verificação
+        </button>
+        <button onclick="toggleVerifyPanel()" class="ml-2 text-blue-200 hover:text-white text-lg leading-none">✕</button>
+      </div>
+
+      <!-- Legend -->
+      <div class="bg-blue-50 border-b px-5 py-2 flex items-center gap-6 text-xs text-slate-600 flex-shrink-0">
+        <span class="font-semibold text-slate-700">Legenda:</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span><strong>Verde</strong> — API retornou e bate com a planilha</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span><strong>Vermelho</strong> — API retornou mas diverge</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span><strong>Amarelo</strong> — dado não disponível na API</span>
+        <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-slate-300 inline-block"></span><strong>Cinza</strong> — não verificado ainda</span>
+      </div>
+
+      <!-- No checks notice -->
+      <div id="verify-no-checks" class="hidden flex-1 flex items-center justify-center text-slate-400 flex-col gap-2">
+        <svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm">Nenhuma verificação definida para esta tabela.</p>
+        <p class="text-xs">Selecione a aba <strong>Planilha1</strong> para verificar colunas.</p>
+      </div>
+
+      <!-- Results area -->
+      <div id="verify-results" class="flex-1 overflow-y-auto p-5">
+        <div id="verify-idle" class="flex flex-col items-center justify-center h-64 text-slate-400 gap-2">
+          <svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm font-medium">Clique em "Executar verificação" para consultar a API</p>
+          <p class="text-xs text-center max-w-xs">O sistema irá comparar cada coluna da planilha com os dados retornados pela API VExpenses</p>
+        </div>
+        <div id="verify-loading" class="hidden flex flex-col items-center justify-center h-64 text-blue-500 gap-3">
+          <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <p class="text-sm">Consultando a API VExpenses... (pode levar alguns segundos)</p>
+        </div>
+        <div id="verify-grid" class="hidden grid gap-3"></div>
+      </div>
+    </div>
+
+    <!-- Table area -->
+    <div class="flex-1 overflow-hidden flex flex-col">
+      <div id="loading" class="flex-1 flex items-center justify-center hidden">
+        <div class="flex flex-col items-center gap-3 text-slate-400">
+          <svg class="w-8 h-8 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          <span class="text-sm">Carregando dados...</span>
+        </div>
+      </div>
+
+      <div id="empty-state" class="flex-1 flex items-center justify-center">
+        <div class="text-center text-slate-400">
+          <svg class="w-16 h-16 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+          </svg>
+          <p class="font-medium">Selecione uma aba para visualizar</p>
+        </div>
+      </div>
+
+      <div id="table-area" class="hidden flex-1 flex flex-col overflow-hidden">
+        <div class="table-wrap flex-1">
+          <table class="w-full text-xs border-collapse" id="data-table">
+            <thead id="table-head"></thead>
+            <tbody id="table-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="bg-white border-t px-5 py-2.5 flex items-center justify-between flex-shrink-0 shadow-sm">
+          <div id="pagination-info" class="text-xs text-slate-500"></div>
+          <div class="flex items-center gap-1">
+            <button onclick="goPage(1)" id="btn-first" class="px-2 py-1 rounded border text-xs hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">«</button>
+            <button onclick="goPage(state.page - 1)" id="btn-prev" class="px-2 py-1 rounded border text-xs hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">‹</button>
+            <span id="page-display" class="px-3 py-1 text-xs font-medium text-slate-700"></span>
+            <button onclick="goPage(state.page + 1)" id="btn-next" class="px-2 py-1 rounded border text-xs hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">›</button>
+            <button onclick="goPage(state.totalPages)" id="btn-last" class="px-2 py-1 rounded border text-xs hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed">»</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+// ---- State ----
+const state = {
+  files: [],
+  selectedFile: null,
+  selectedSheet: null,
+  page: 1,
+  totalPages: 1,
+  total: 0,
+  pageSize: 100,
+  search: '',
+  data: [],
+  loading: false,
+}
+
+let searchTimeout = null
+
+// ---- Init ----
+async function init() {
+  try {
+    const res = await fetch('/api/sheets')
+    if (!res.ok) throw new Error('HTTP ' + res.status)
+    state.files = await res.json()
+    renderSidebar()
+    document.getElementById('db-status').innerHTML = `
+      <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+      <span class="text-emerald-600 font-medium">Conectado</span>`
+    if (state.files.length > 0) {
+      selectFile(state.files[0].file_name)
+    }
+  } catch (e) {
+    document.getElementById('db-status').innerHTML = `
+      <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+      <span class="text-red-600">Erro: ${e.message}</span>`
+    document.getElementById('sheet-list').innerHTML = `<p class="text-xs text-red-500 p-2">Falha ao conectar com a API.</p>`
+  }
+}
+
+// ---- Sidebar ----
+function renderSidebar() {
+  const tabs = document.getElementById('file-tabs')
+  tabs.innerHTML = state.files.map((f, i) => `
+    <button onclick="selectFile('${escHtml(f.file_name)}')" data-file="${escHtml(f.file_name)}"
+      class="file-tab flex-1 text-xs py-2 px-1 border-b-2 transition-colors font-medium truncate
+      ${i === 0 ? 'border-emerald-500 text-emerald-700 bg-white' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100'}">
+      ${escHtml(shortFileName(f.file_name))}
+    </button>
+  `).join('')
+}
+
+function renderSheets() {
+  const fg = state.files.find(f => f.file_name === state.selectedFile)
+  if (!fg) return
+
+  // Count occurrences of each sheet_name to detect duplicates
+  const nameCounts = {}
+  fg.sheets.forEach(s => { nameCounts[s.sheet_name] = (nameCounts[s.sheet_name] || 0) + 1 })
+  const nameIdx = {}
+
+  const list = document.getElementById('sheet-list')
+  list.innerHTML = fg.sheets.map(s => {
+    const fCount = s.columns.filter(c => c.is_formula).length
+    const active = state.selectedSheet && state.selectedSheet.table_name === s.table_name
+    // Add suffix for duplicate sheet names
+    nameIdx[s.sheet_name] = (nameIdx[s.sheet_name] || 0) + 1
+    const suffix = nameCounts[s.sheet_name] > 1 ? ` <span class="text-slate-400 font-mono text-[10px]">#${nameIdx[s.sheet_name]}</span>` : ''
+    return `
+      <button onclick="selectSheet('${escHtml(s.table_name)}')"
+        class="w-full text-left px-3 py-2 rounded-lg mb-1 text-xs transition-colors group
+        ${active ? 'bg-blue-50 text-blue-700 border border-blue-200 font-medium' : 'hover:bg-slate-50 text-slate-700'}">
+        <div class="font-medium truncate flex items-center gap-1">${escHtml(s.sheet_name)}${suffix}</div>
+        <div class="flex items-center gap-2 mt-0.5 text-slate-400 ${active ? 'text-blue-400' : ''}">
+          <span>${(s.total_rows||0).toLocaleString('pt-BR')} linhas</span>
+          <span>·</span>
+          <span>${s.columns.length} colunas</span>
+          ${fCount > 0 ? `<span class="text-orange-500">· ${fCount}⚡</span>` : ''}
+        </div>
+      </button>`
+  }).join('')
+}
+
+function selectFile(fname) {
+  state.selectedFile = fname
+  // Update tab styles
+  document.querySelectorAll('.file-tab').forEach(b => {
+    const active = b.dataset.file === fname
+    b.className = b.className.replace(/(border-emerald-500 text-emerald-700 bg-white|border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100)/g, '')
+    b.className += active ? ' border-emerald-500 text-emerald-700 bg-white' : ' border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+  })
+  const fg = state.files.find(f => f.file_name === fname)
+  renderSheets()
+  if (fg && fg.sheets.length > 0) selectSheet(fg.sheets[0].table_name)
+}
+
+function selectSheet(tableName) {
+  const fg = state.files.find(f => f.file_name === state.selectedFile)
+  if (!fg) return
+  const sheet = fg.sheets.find(s => s.table_name === tableName)
+  if (!sheet) return
+  state.selectedSheet = sheet
+  state.page = 1
+  state.search = ''
+  document.getElementById('search-input').value = ''
+  renderSheets()
+  loadData()
+  // Update verify context when sheet changes
+  if (verifyOpen) updateVerifyContext()
+}
+
+// ---- Data ----
+async function loadData() {
+  if (!state.selectedSheet) return
+  state.loading = true
+  showLoading(true)
+
+  const params = new URLSearchParams({
+    page: state.page,
+    page_size: state.pageSize,
+  })
+  if (state.search) params.set('search', state.search)
+
+  try {
+    const res = await fetch(`/api/sheets/${state.selectedSheet.table_name}/data?${params}`)
+    if (!res.ok) throw new Error('HTTP ' + res.status)
+    const d = await res.json()
+    state.data = d.rows
+    state.total = d.total
+    state.totalPages = d.total_pages
+    renderTable()
+    renderPagination()
+    updateHeader()
+    updateFormularBar()
+  } catch (e) {
+    showError('Erro ao carregar dados: ' + e.message)
+  } finally {
+    state.loading = false
+    showLoading(false)
+  }
+}
+
+// ---- Render Table ----
+function renderTable() {
+  const sheet = state.selectedSheet
+  if (!sheet || !state.data) return
+
+  const cols = sheet.columns
+  const offset = (state.page - 1) * state.pageSize
+
+  // Header
+  const thead = document.getElementById('table-head')
+  thead.innerHTML = `<tr>
+    <th class="col-num bg-slate-100 border-b border-r text-slate-400 font-mono text-center px-2 py-2 w-10 text-xs">#</th>
+    ${cols.map(col => `
+      <th data-col-id="${col.id}"
+        class="border-b border-r px-3 py-2 text-left font-semibold whitespace-nowrap cursor-help select-none text-xs
+        ${col.is_formula ? 'bg-orange-100 text-orange-800' : 'bg-slate-100 text-slate-700'}"
+        onmouseenter="showTooltip(event, ${col.id})"
+        onmouseleave="hideTooltip()">
+        <div class="flex items-center gap-1">
+          ${col.is_formula
+            ? '<span class="text-orange-500 flex-shrink-0" title="Fórmula Excel">⚡</span>'
+            : '<span class="text-emerald-500 flex-shrink-0" title="Dado/API">✓</span>'}
+          <span class="truncate max-w-40">${escHtml(col.column_name)}</span>
+          <span class="text-slate-400 font-mono font-normal">(${col.column_letter})</span>
+        </div>
+      </th>`).join('')}
+  </tr>`
+
+  // Body
+  const tbody = document.getElementById('table-body')
+  if (state.data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${cols.length + 1}" class="text-center text-slate-400 py-16 text-sm">
+      Nenhum registro encontrado${state.search ? ` para "${escHtml(state.search)}"` : ''}
+    </td></tr>`
+    return
+  }
+
+  tbody.innerHTML = state.data.map((row, i) => `
+    <tr class="hover:bg-blue-50/40 transition-colors ${i % 2 === 0 ? '' : 'bg-slate-50/40'}">
+      <td class="col-num bg-slate-50 border-b border-r text-slate-400 font-mono text-center px-2 py-1.5 text-xs">${offset + i + 1}</td>
+      ${cols.map(col => {
+        const val = row[col.table_column_name]
+        const display = formatVal(val)
+        const isEmpty = display === ''
+        return `<td class="border-b border-r px-3 py-1.5 ${col.is_formula ? 'bg-orange-50/40' : ''} ${isEmpty ? 'text-slate-300' : 'text-slate-800'}"
+          title="${display.length > 60 ? escHtml(display) : ''}">
+          <div class="cell-value">${isEmpty ? '<span class="text-slate-300">—</span>' : escHtml(display)}</div>
+        </td>`
+      }).join('')}
+    </tr>`).join('')
+
+  document.getElementById('table-area').classList.remove('hidden')
+  document.getElementById('table-area').classList.add('flex')
+  document.getElementById('empty-state').classList.add('hidden')
+}
+
+// ---- Pagination ----
+function renderPagination() {
+  const start = (state.page - 1) * state.pageSize + 1
+  const end = Math.min(state.page * state.pageSize, state.total)
+  document.getElementById('pagination-info').textContent =
+    `Mostrando ${start.toLocaleString('pt-BR')}–${end.toLocaleString('pt-BR')} de ${state.total.toLocaleString('pt-BR')} registros`
+  document.getElementById('page-display').textContent = `Pág. ${state.page} / ${state.totalPages}`
+  document.getElementById('btn-first').disabled = state.page <= 1
+  document.getElementById('btn-prev').disabled = state.page <= 1
+  document.getElementById('btn-next').disabled = state.page >= state.totalPages
+  document.getElementById('btn-last').disabled = state.page >= state.totalPages
+}
+
+function goPage(p) {
+  p = Math.max(1, Math.min(state.totalPages, p))
+  if (p === state.page) return
+  state.page = p
+  loadData()
+}
+
+// ---- Header / Info ----
+function updateHeader() {
+  const s = state.selectedSheet
+  if (!s) return
+  document.getElementById('sheet-title').textContent = s.sheet_name
+  document.getElementById('sheet-subtitle').textContent =
+    `${shortFileName(s.file_name)} · ${s.total_rows.toLocaleString('pt-BR')} linhas · ` +
+    `cabeçalho linha ${s.header_row} · dados a partir linha ${s.data_start_row}`
+}
+
+function updateFormularBar() {
+  const s = state.selectedSheet
+  if (!s) return
+  const fCols = s.columns.filter(c => c.is_formula)
+  const bar = document.getElementById('formula-bar')
+  if (fCols.length === 0) { bar.classList.add('hidden'); return }
+  bar.classList.remove('hidden')
+  document.getElementById('formula-names').textContent =
+    fCols.map(c => `${c.column_name} (${c.column_letter})`).join(', ')
+}
+
+function toggleInfo() {
+  const panel = document.getElementById('info-panel')
+  const s = state.selectedSheet
+  if (!s) return
+  if (!panel.classList.contains('hidden')) {
+    panel.classList.add('hidden'); return
+  }
+  const fCols = s.columns.filter(c => c.is_formula)
+  const dCols = s.columns.filter(c => !c.is_formula)
+  document.getElementById('info-content').innerHTML = `
+    <div class="grid grid-cols-4 gap-4 mb-2">
+      <div><span class="text-amber-600 font-semibold">Cabeçalho:</span> linha ${s.header_row}</div>
+      <div><span class="text-amber-600 font-semibold">Dados:</span> a partir linha ${s.data_start_row}</div>
+      <div><span class="text-amber-600 font-semibold">Total:</span> ${(s.total_rows||0).toLocaleString('pt-BR')} linhas</div>
+      <div><span class="text-amber-600 font-semibold">Colunas:</span> ${s.columns.length}</div>
+    </div>
+    ${s.pre_header_notes ? `<div class="mb-2 p-2 bg-amber-100 rounded text-amber-800">
+      <span class="font-semibold">Conteúdo pré-cabeçalho:</span>
+      <pre class="mt-1 text-xs whitespace-pre-wrap">${escHtml(s.pre_header_notes)}</pre>
+    </div>` : ''}
+    <div class="flex gap-6 flex-wrap">
+      <div>
+        <span class="text-emerald-700 font-semibold">✓ Dados/API (${dCols.length}):</span>
+        <span class="ml-1 text-slate-600">${dCols.map(c => c.column_name).join(', ')}</span>
+      </div>
+      ${fCols.length > 0 ? `<div>
+        <span class="text-orange-700 font-semibold">⚡ Fórmulas Excel (${fCols.length}):</span>
+        <span class="ml-1 text-slate-600">${fCols.map(c => `${c.column_name}${c.formula_sample ? ': ' + c.formula_sample.slice(0,50) : ''}`).join(' | ')}</span>
+      </div>` : ''}
+    </div>`
+  panel.classList.remove('hidden')
+}
+
+// ---- Tooltip ----
+function showTooltip(e, colId) {
+  const s = state.selectedSheet
+  if (!s) return
+  const col = s.columns.find(c => c.id === colId)
+  if (!col) return
+  const tip = document.getElementById('tooltip')
+  tip.innerHTML = `
+    <div class="font-semibold text-sm mb-1.5">${escHtml(col.column_name)}</div>
+    <div class="space-y-1 text-gray-300">
+      <div><span class="text-gray-500">Coluna Excel:</span> <span class="font-mono text-yellow-300">${col.column_letter}</span></div>
+      <div><span class="text-gray-500">Campo DB:</span> <code class="bg-gray-800 px-1 rounded text-blue-300">${col.table_column_name}</code></div>
+      <div><span class="text-gray-500">Tipo:</span> ${col.is_formula
+        ? '<span class="text-orange-400 font-medium">⚡ Fórmula Excel (calculada, não vem da API)</span>'
+        : '<span class="text-emerald-400 font-medium">✓ Dado direto / fonte API</span>'}</div>
+      ${col.formula_sample ? `<div><span class="text-gray-500">Fórmula:</span><br/><code class="text-yellow-200 text-xs">${escHtml(col.formula_sample.slice(0,120))}</code></div>` : ''}
+      ${col.notes ? `<div><span class="text-gray-500">Nota:</span> ${escHtml(col.notes)}</div>` : ''}
+    </div>`
+  const rect = e.target.getBoundingClientRect()
+  const left = Math.min(rect.left, window.innerWidth - 360)
+  tip.style.left = left + 'px'
+  tip.style.top = (rect.bottom + 6) + 'px'
+  tip.classList.remove('hidden')
+}
+
+function hideTooltip() {
+  document.getElementById('tooltip').classList.add('hidden')
+}
+
+// ---- Search ----
+document.getElementById('search-input').addEventListener('input', e => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    state.search = e.target.value.trim()
+    state.page = 1
+    loadData()
+  }, 450)
+})
+
+// ---- CSV Export ----
+function exportCSV() {
+  const s = state.selectedSheet
+  if (!s || !state.data.length) return
+  const cols = s.columns
+  const header = cols.map(c => `"${c.column_name.replace(/"/g, '""')}"`).join(',')
+  const rows = state.data.map(row =>
+    cols.map(c => {
+      const v = row[c.table_column_name]
+      if (v === null || v === undefined) return ''
+      return `"${String(v).replace(/"/g, '""')}"`
+    }).join(',')
+  )
+  const csv = '\uFEFF' + [header, ...rows].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = `${s.table_name}_p${state.page}.csv`
+  a.click()
+}
+
+// ---- Utils ----
+function formatVal(v) {
+  if (v === null || v === undefined) return ''
+  const s = String(v).trim()
+  if (s === '') return ''
+  // Try to parse as number (stored as TEXT in SQLite)
+  if (/^-?\d+(\.\d+)?$/.test(s)) {
+    const n = parseFloat(s)
+    if (!isNaN(n)) {
+      if (Number.isInteger(n)) return n.toLocaleString('pt-BR')
+      // Round to 2 decimal places to avoid float precision issues
+      const rounded = Math.round(n * 100) / 100
+      return rounded.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }
+  }
+  return s
+}
+
+function escHtml(s) {
+  if (!s) return ''
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')
+}
+
+function shortFileName(name) {
+  const map = {
+    'CARGA 1 QZ MAIO 26 VEXPENSES EQS.xlsx': 'CARGA QZ',
+    'CONTROLE - VEXPENSES - MAIO - 2026 (1).xlsb': 'CONTROLE',
+  }
+  return map[name] || name.split('.')[0].slice(0, 20)
+}
+
+function showLoading(on) {
+  document.getElementById('loading').classList.toggle('hidden', !on)
+  if (on) {
+    document.getElementById('table-area').classList.add('hidden')
+    document.getElementById('table-area').classList.remove('flex')
+  }
+}
+
+function showError(msg) {
+  document.getElementById('empty-state').classList.remove('hidden')
+  document.getElementById('empty-state').innerHTML = `
+    <div class="text-center text-red-400">
+      <svg class="w-10 h-10 mx-auto mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      <p class="font-medium text-sm">${escHtml(msg)}</p>
+    </div>`
+}
+
+// ---- Verification Panel ----
+let verifyOpen = false
+let verifyTableName = null
+let tablesWithChecks = []
+
+async function loadVerifyTables() {
+  try {
+    const r = await fetch('/api/verify/tables')
+    const d = await r.json()
+    tablesWithChecks = d.tables || []
+  } catch (e) {
+    tablesWithChecks = []
+  }
+}
+
+function toggleVerifyPanel() {
+  verifyOpen = !verifyOpen
+  const panel = document.getElementById('verify-panel')
+  const btn = document.getElementById('verify-tab-btn')
+
+  if (verifyOpen) {
+    panel.classList.remove('hidden')
+    btn.classList.add('bg-blue-700', 'text-white', 'border-blue-700')
+    btn.classList.remove('text-blue-700', 'border-blue-300')
+    updateVerifyContext()
+  } else {
+    panel.classList.add('hidden')
+    btn.classList.remove('bg-blue-700', 'text-white', 'border-blue-700')
+    btn.classList.add('text-blue-700', 'border-blue-300')
+  }
+}
+
+function updateVerifyContext() {
+  if (!state.selectedSheet) return
+  verifyTableName = state.selectedSheet.table_name
+  const label = document.getElementById('verify-table-label')
+  label.textContent = `Tabela: ${state.selectedSheet.sheet_name} (${state.selectedSheet.table_name})`
+
+  const hasChecks = tablesWithChecks.includes(verifyTableName)
+  document.getElementById('verify-no-checks').classList.toggle('hidden', hasChecks)
+  document.getElementById('verify-results').classList.toggle('hidden', !hasChecks)
+  document.getElementById('verify-run-btn').disabled = !hasChecks
+
+  // Load cached results if available
+  if (hasChecks) {
+    fetch(`/api/verify/${verifyTableName}/cached`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.status === 'cached' && d.results.length > 0) renderVerifyResults(d.results)
+      })
+      .catch(() => {})
+  }
+}
+
+async function runVerify() {
+  if (!verifyTableName) return
+  const btn = document.getElementById('verify-run-btn')
+  btn.disabled = true
+  btn.textContent = 'Verificando...'
+  document.getElementById('verify-idle').classList.add('hidden')
+  document.getElementById('verify-loading').classList.remove('hidden')
+  document.getElementById('verify-grid').classList.add('hidden')
+
+  try {
+    const r = await fetch(`/api/verify/${verifyTableName}/run`, { method: 'POST' })
+    if (!r.ok) throw new Error('HTTP ' + r.status)
+    const d = await r.json()
+    renderVerifyResults(d.results)
+  } catch (e) {
+    document.getElementById('verify-loading').classList.add('hidden')
+    document.getElementById('verify-idle').classList.remove('hidden')
+    document.getElementById('verify-idle').innerHTML = `<p class="text-red-500 text-sm">Erro: ${escHtml(e.message)}</p>`
+  } finally {
+    btn.disabled = false
+    btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Executar verificação`
+  }
+}
+
+const STATUS_CONFIG = {
+  green:  { bg: 'bg-emerald-50', border: 'border-emerald-200', dot: 'bg-emerald-500', label: 'Verificado ✓', text: 'text-emerald-800' },
+  red:    { bg: 'bg-red-50',     border: 'border-red-200',     dot: 'bg-red-500',     label: 'Divergência ✗', text: 'text-red-800' },
+  yellow: { bg: 'bg-amber-50',   border: 'border-amber-200',   dot: 'bg-amber-400',   label: 'Não disponível', text: 'text-amber-800' },
+  error:  { bg: 'bg-slate-50',   border: 'border-slate-200',   dot: 'bg-slate-400',   label: 'Erro',          text: 'text-slate-700' },
+}
+
+function renderVerifyResults(results) {
+  document.getElementById('verify-loading').classList.add('hidden')
+  document.getElementById('verify-idle').classList.add('hidden')
+  const grid = document.getElementById('verify-grid')
+  grid.classList.remove('hidden')
+
+  // Summary counts
+  const counts = { green: 0, red: 0, yellow: 0, error: 0 }
+  results.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1 })
+
+  grid.innerHTML = `
+    <!-- Summary bar -->
+    <div class="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border mb-2 flex-wrap">
+      <span class="font-semibold text-slate-700 text-sm">Resumo:</span>
+      ${counts.green  ? `<span class="flex items-center gap-1.5 text-sm"><span class="w-3 h-3 rounded-full bg-emerald-500"></span><strong>${counts.green}</strong> verificados</span>` : ''}
+      ${counts.red    ? `<span class="flex items-center gap-1.5 text-sm"><span class="w-3 h-3 rounded-full bg-red-500"></span><strong>${counts.red}</strong> divergentes</span>` : ''}
+      ${counts.yellow ? `<span class="flex items-center gap-1.5 text-sm"><span class="w-3 h-3 rounded-full bg-amber-400"></span><strong>${counts.yellow}</strong> não disponíveis na API</span>` : ''}
+      ${counts.error  ? `<span class="flex items-center gap-1.5 text-sm"><span class="w-3 h-3 rounded-full bg-slate-400"></span><strong>${counts.error}</strong> com erro</span>` : ''}
+    </div>
+    <!-- Per-column cards -->
+    ${results.map(r => {
+      const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.error
+      const stats = r.stats || {}
+      return `
+        <div class="rounded-xl border ${cfg.border} ${cfg.bg} p-4">
+          <div class="flex items-start gap-3">
+            <span class="w-3 h-3 rounded-full ${cfg.dot} mt-1 flex-shrink-0"></span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <span class="font-bold text-sm ${cfg.text}">${escHtml(r.display)}</span>
+                <span class="text-xs font-mono text-slate-400">${escHtml(r.column)}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full border ${cfg.border} ${cfg.text} font-medium">${cfg.label}</span>
+              </div>
+              <p class="text-xs text-slate-600 mb-1">${escHtml(r.description)}</p>
+              <p class="text-xs ${cfg.text} font-medium">${escHtml(r.note)}</p>
+              ${stats.total ? `
+                <div class="flex gap-4 mt-2 text-xs text-slate-500">
+                  ${stats.matched    ? `<span class="text-emerald-700">✓ ${stats.matched} batem</span>` : ''}
+                  ${stats.mismatched ? `<span class="text-red-700">✗ ${stats.mismatched} divergem</span>` : ''}
+                  ${stats.not_found  ? `<span class="text-slate-500">${stats.not_found} não encontrados na API</span>` : ''}
+                  <span>de ${stats.total} total</span>
+                </div>` : ''}
+              ${r.mismatches && r.mismatches.length ? `
+                <div class="mt-2 text-xs">
+                  <div class="font-medium text-red-700 mb-1">Exemplos de divergência:</div>
+                  ${r.mismatches.map(m => `
+                    <div class="font-mono bg-white/60 rounded px-2 py-1 mb-1 border border-red-100 flex gap-3 flex-wrap">
+                      <span class="text-slate-500">CPF: ${escHtml(m.key)}</span>
+                      <span class="text-red-700">Planilha: "${escHtml(m.db_value)}"</span>
+                      <span class="text-blue-700">API: "${escHtml(m.api_value)}"</span>
+                    </div>`).join('')}
+                </div>` : ''}
+            </div>
+          </div>
+        </div>`
+    }).join('')}
+  `
+}
+
+// ---- Start ----
+init()
+loadVerifyTables()
+</script>
+</body>
+</html>

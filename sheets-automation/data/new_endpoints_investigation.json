@@ -1,0 +1,100 @@
+[
+  {
+    "endpoint": "/financials",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/financial-summaries",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/balances",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/cards",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/corporate-cards",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/card-balances",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/wallets",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/wallet-balances",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/team-members/financials",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/team-members/balances",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/team-members/cards",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/reports/financials",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/reports/balances",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/reports/summaries",
+    "status": "validation_error",
+    "message": "Invalid data"
+  },
+  {
+    "endpoint": "/payments",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/payments/balances",
+    "status": "not_found"
+  },
+  {
+    "endpoint": "/payment-methods",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/reimbursements",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/reimbursements/balances",
+    "status": "not_found"
+  },
+  {
+    "endpoint": "/transactions",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/transactions/balances",
+    "status": "not_found"
+  },
+  {
+    "endpoint": "/advances",
+    "status": "method_not_allowed"
+  },
+  {
+    "endpoint": "/advances/balances",
+    "status": "not_found"
+  }
+]

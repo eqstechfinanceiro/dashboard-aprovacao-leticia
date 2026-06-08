@@ -1,0 +1,391 @@
+{
+  "estatisticas": {
+    "total_usuarios": 100,
+    "total_comparado": 54,
+    "exatos": 0,
+    "diferentes": 54,
+    "sem_dados_api": 22,
+    "sem_valor_planilha": 24,
+    "taxa_sucesso": 0.0
+  },
+  "detalhes": [
+    {
+      "nome": "RAFAEL AMORIM VELLO",
+      "planilha": 291.6600000002072,
+      "api": 225.10183500000002,
+      "diferenca_percentual": 22.820463896372456,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ANDRE ARANHA MEISTER",
+      "planilha": 18329.5,
+      "api": 782.46,
+      "diferenca_percentual": 95.73114378460951,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "planilha": 1614.4399999999296,
+      "api": 442.26,
+      "diferenca_percentual": 72.60598102128174,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "planilha": 226.65000000002144,
+      "api": 25.515,
+      "diferenca_percentual": 88.74255459960398,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "planilha": 3693.100000000008,
+      "api": 50.0094,
+      "diferenca_percentual": 98.64586932387425,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JOSE CARLOS BATISTA",
+      "planilha": 1674.2699999999822,
+      "api": 425.0799,
+      "diferenca_percentual": 74.61103047895475,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "LUCAS MARTINS MACAN",
+      "planilha": 1784.5300000000184,
+      "api": 635.3235000000001,
+      "diferenca_percentual": 64.3982729346106,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "planilha": 3099.9500000000035,
+      "api": 91.5138,
+      "diferenca_percentual": 97.04789432087614,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "planilha": 7169.960000000001,
+      "api": 425.25,
+      "diferenca_percentual": 94.06900456906315,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "planilha": 3904.239999999989,
+      "api": 42.525,
+      "diferenca_percentual": 98.91079954101181,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "planilha": 5903.249999999942,
+      "api": 711.78345,
+      "diferenca_percentual": 87.94251556346069,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "planilha": 2658.659999999996,
+      "api": 278.53875,
+      "diferenca_percentual": 89.52334070546814,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "planilha": 3076.0199999999286,
+      "api": 235.24830000000003,
+      "diferenca_percentual": 92.35218561647825,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "planilha": 1167.3399999999674,
+      "api": 594.4739850000001,
+      "diferenca_percentual": 49.074478301093365,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "planilha": 3430.109999999989,
+      "api": 1793.0666250000002,
+      "diferenca_percentual": 47.72568153790969,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "planilha": 7077.319999999992,
+      "api": 212.625,
+      "diferenca_percentual": 96.99568480724342,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ENZIO CARVALHO DA MOTA",
+      "planilha": 2472.899999999964,
+      "api": 183.11265000000003,
+      "diferenca_percentual": 92.59522625257783,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "planilha": 798.7799999999988,
+      "api": 425.25,
+      "diferenca_percentual": 46.762562908435285,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "planilha": 3591.9099999999203,
+      "api": 775.2392550000001,
+      "diferenca_percentual": 78.41707462046607,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "TERCILA DA SILVA LOPES",
+      "planilha": 4162.209999999999,
+      "api": 425.25,
+      "diferenca_percentual": 89.78307197378315,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "planilha": 3920.169999999999,
+      "api": 340.2,
+      "diferenca_percentual": 91.32180492172533,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "CAIO FRANCESCONI RIBEIRO",
+      "planilha": 6499.380000000004,
+      "api": 306.18,
+      "diferenca_percentual": 95.2890891131154,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "MICHAEL RODRIGUES SANTOS",
+      "planilha": 1798.5599999999467,
+      "api": 85.05,
+      "diferenca_percentual": 95.27121697357872,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FERNANDO RODRIGUES DUARTE",
+      "planilha": 553.3900000000067,
+      "api": 425.25,
+      "diferenca_percentual": 23.15545998301472,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "CARLOS RENATO PACHECO DA SILVA",
+      "planilha": 3205.39,
+      "api": 425.25,
+      "diferenca_percentual": 86.73328362539348,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "EVERTON CAMARGO DE LOURETO",
+      "planilha": 1624.3099999999272,
+      "api": 760.3384950000001,
+      "diferenca_percentual": 53.190062549634355,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JAFER DA FONTOURA AHMAD",
+      "planilha": 1709.0099999999882,
+      "api": 520.718625,
+      "diferenca_percentual": 69.53097846121418,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "RODRIGO VANZETTA",
+      "planilha": 52.87000000000262,
+      "api": 183.3678,
+      "diferenca_percentual": 246.82769056173805,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FELIPE MORAES COSTA DE BRITTO",
+      "planilha": 3194.4799999999937,
+      "api": 637.875,
+      "diferenca_percentual": 80.0319613833863,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "CARLOS EDUARDO SCATAMBULO",
+      "planilha": 2565.959999999965,
+      "api": 425.25,
+      "diferenca_percentual": 83.42725529626316,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "BEATRIZ SILVA DE SIQUEIRA",
+      "planilha": 1288.0200000000164,
+      "api": 425.25,
+      "diferenca_percentual": 66.98420831974701,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "planilha": 1979.1099999999897,
+      "api": 170.1,
+      "diferenca_percentual": 91.40522760230606,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "DHIEGO RIBEIRO DINIZ",
+      "planilha": 1667.4599999999882,
+      "api": 165.33720000000002,
+      "diferenca_percentual": 90.08448778381484,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "planilha": 1419.309999999999,
+      "api": 425.25,
+      "diferenca_percentual": 70.03825802678764,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "planilha": 1710.2899999999845,
+      "api": 279.96759000000003,
+      "diferenca_percentual": 83.6304024463686,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "GUILHERME MOTTA RIBEIRO SILVA",
+      "planilha": 1609.119999999995,
+      "api": 148.8375,
+      "diferenca_percentual": 90.75037908919157,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "LEANDRO SOUSA",
+      "planilha": 337.0799999999995,
+      "api": 357.21000000000004,
+      "diferenca_percentual": 5.9718761124957265,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "MATHEUS FERNANDES GUIMARAES",
+      "planilha": 62.88999999995576,
+      "api": 417.586995,
+      "diferenca_percentual": 563.9958578475015,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "RODRIGO SANTOS DA SILVA",
+      "planilha": 2359.710000000005,
+      "api": 760.347,
+      "diferenca_percentual": 67.77794729013318,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "THIAGO PEREIRA DE LIMA",
+      "planilha": 2167.7700000000013,
+      "api": 568.134,
+      "diferenca_percentual": 73.79177680288961,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JONAS CAVALCANTI DE OLIVEIRA",
+      "planilha": 1110.8300000000015,
+      "api": 722.9250000000001,
+      "diferenca_percentual": 34.92028483206259,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "JAIME ALVES DE ABREU SILVA",
+      "planilha": 2081.470000000003,
+      "api": 445.4919,
+      "diferenca_percentual": 78.59724617698072,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ADMILSON DOS SANTOS GALAN",
+      "planilha": 581.8399999999808,
+      "api": 85.05,
+      "diferenca_percentual": 85.38257940327189,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ADSON ARAUJO DA SILVA",
+      "planilha": 246.23999999999432,
+      "api": 344.4525,
+      "diferenca_percentual": 39.884868421055856,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "planilha": 883.2100000000046,
+      "api": 561.33,
+      "diferenca_percentual": 36.444333737163625,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ERICSON PINHEIRO DOS SANTOS",
+      "planilha": 814.9100000000005,
+      "api": 632.772,
+      "diferenca_percentual": 22.35068903314481,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FABIO DA CONCEICAO LIMA",
+      "planilha": 5604.9,
+      "api": 425.25,
+      "diferenca_percentual": 92.41288872236792,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "FABIO PROVESI",
+      "planilha": 1118.6200000000076,
+      "api": 80.7975,
+      "diferenca_percentual": 92.77703777869166,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "ICARO MEDEIROS SILVA",
+      "planilha": 5351.830000000001,
+      "api": 85.05,
+      "diferenca_percentual": 98.41082396114973,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "LUCAS PEREIRA GONCALVES",
+      "planilha": 1705.369999999998,
+      "api": 665.082495,
+      "diferenca_percentual": 61.00069222514757,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "planilha": 2971.1600000000017,
+      "api": 675.24597,
+      "diferenca_percentual": 77.27332186755342,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "RODRIGO ROBERTO DE SOUZA",
+      "planilha": 239.00000000000463,
+      "api": 4.2525,
+      "diferenca_percentual": 98.22071129707116,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "SARA ARAGAO DA SILVA BARBOSA",
+      "planilha": 1823.760000000002,
+      "api": 278.964,
+      "diferenca_percentual": 84.7039084090012,
+      "coluna_planilha": "SALDO FINAL"
+    },
+    {
+      "nome": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "planilha": 1010.9999999999912,
+      "api": 270.459,
+      "diferenca_percentual": 73.24836795252203,
+      "coluna_planilha": "SALDO FINAL"
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "formulas": {
+    "PAINEL": [],
+    "SALDO CARTAO": [],
+    "ADICIONAL ITAÚ": [],
+    "ADICIONAIS": [],
+    "QUINZENAS": [],
+    "SALDOS ADM EQS": [],
+    "EXTRATO": [],
+    "PAINEL PRESTAÇÕES": [],
+    "BASE PREST ": [],
+    "REEMBOLSO": [],
+    "ESTORNO - SAQUE": [],
+    "Detalhes1": [],
+    "Detalhes2": [],
+    "Detalhes3": [],
+    "AUX": []
+  },
+  "sources": {
+    "PAINEL": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "SALDO CARTAO": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "ADICIONAL ITAÚ": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "ADICIONAIS": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "QUINZENAS": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "SALDOS ADM EQS": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "EXTRATO": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "PAINEL PRESTAÇÕES": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "BASE PREST ": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "REEMBOLSO": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "ESTORNO - SAQUE": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "Detalhes1": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "Detalhes2": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "Detalhes3": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    },
+    "AUX": {
+      "api_references": [],
+      "sheet_references": [],
+      "external_references": [],
+      "calculations": []
+    }
+  }
+}

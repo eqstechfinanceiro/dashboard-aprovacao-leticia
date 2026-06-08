@@ -1,0 +1,166 @@
+{
+  "analysis_date": "2026-05-22T00:00:54.391Z",
+  "sample_size": 50,
+  "statistics": {
+    "total_users": 331,
+    "users_with_saldo_final": 50,
+    "users_with_saldo_cartao": 50,
+    "users_with_saldo_reembolsar": 14,
+    "users_with_qz1": 50,
+    "users_with_adiantamento": 0
+  },
+  "saldo_final_stats": {
+    "count": 50,
+    "min": 0,
+    "max": 18329.5,
+    "mean": 2303.9099999999935
+  },
+  "saldo_cartao_stats": {
+    "count": 50,
+    "min": 0,
+    "max": 7000,
+    "mean": 571.3452
+  },
+  "sample_users_with_saldo_final": [
+    {
+      "cpf": "01677920599",
+      "portador": "RAFAEL AMORIM VELLO",
+      "saldoFinal": 291.6600000002072,
+      "saldoCartao": 20,
+      "qz1": 16000
+    },
+    {
+      "cpf": "02027745203",
+      "portador": "ABNER ANDRADE CAVALCANTE",
+      "saldoFinal": 0,
+      "saldoCartao": 5,
+      "qz1": 9840
+    },
+    {
+      "cpf": "03032275326",
+      "portador": "ANDRE ARANHA MEISTER",
+      "saldoFinal": 18329.5,
+      "saldoCartao": 1154.94,
+      "qz1": 9000
+    },
+    {
+      "cpf": "07505987607",
+      "portador": "JAEDER RODRIGUES JUNIOR",
+      "saldoFinal": 1614.4399999999296,
+      "saldoCartao": 2,
+      "qz1": 7000
+    },
+    {
+      "cpf": "09246793790",
+      "portador": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "saldoFinal": 0,
+      "saldoCartao": 7000,
+      "qz1": 7000
+    },
+    {
+      "cpf": "62063774072",
+      "portador": "EDSON VEIGA SILVEIRA",
+      "saldoFinal": 226.65000000002146,
+      "saldoCartao": 4635.66,
+      "qz1": 6800
+    },
+    {
+      "cpf": "06576198922",
+      "portador": "LUDGERO HORACIO DE OLIVEIRA",
+      "saldoFinal": 3693.100000000008,
+      "saldoCartao": 981.69,
+      "qz1": 6500
+    },
+    {
+      "cpf": "11992259755",
+      "portador": "BRUNO OLIVEIRA DIAS",
+      "saldoFinal": 4637.600000000019,
+      "saldoCartao": 4283.83,
+      "qz1": 6200
+    },
+    {
+      "cpf": "26652452804",
+      "portador": "JOSE CARLOS BATISTA",
+      "saldoFinal": 1674.2699999999822,
+      "saldoCartao": 58,
+      "qz1": 6000
+    },
+    {
+      "cpf": "00975748998",
+      "portador": "LUCAS MARTINS MACAN",
+      "saldoFinal": 1784.5300000000184,
+      "saldoCartao": 4.06,
+      "qz1": 6000
+    },
+    {
+      "cpf": "31040091806",
+      "portador": "SAULO ARAUJO DE PAULA",
+      "saldoFinal": 3099.9500000000035,
+      "saldoCartao": 62.3,
+      "qz1": 5750
+    },
+    {
+      "cpf": "01767960107",
+      "portador": "FLAVIO FERNANDES DOS REIS LIMA",
+      "saldoFinal": 7169.960000000001,
+      "saldoCartao": 284.08,
+      "qz1": 5700
+    },
+    {
+      "cpf": "99114160030",
+      "portador": "WALTER DE CAMPOS NUNES NETO",
+      "saldoFinal": 0,
+      "saldoCartao": 317.49,
+      "qz1": 5600
+    },
+    {
+      "cpf": "05766838760",
+      "portador": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "saldoFinal": 3904.2399999999893,
+      "saldoCartao": 695.1,
+      "qz1": 5000
+    },
+    {
+      "cpf": "16306431730",
+      "portador": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "saldoFinal": 0,
+      "saldoCartao": 5,
+      "qz1": 5000
+    },
+    {
+      "cpf": "07690263623",
+      "portador": "JOELSON FERREIRA DOS SANTOS",
+      "saldoFinal": 5903.249999999942,
+      "saldoCartao": 57.18,
+      "qz1": 5000
+    },
+    {
+      "cpf": "72756284220",
+      "portador": "MARCO AURELIO DE ANDRADE MORAES",
+      "saldoFinal": 2658.659999999996,
+      "saldoCartao": 5,
+      "qz1": 5000
+    },
+    {
+      "cpf": "12237490619",
+      "portador": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "saldoFinal": 3076.0199999999286,
+      "saldoCartao": 20.13,
+      "qz1": 5000
+    },
+    {
+      "cpf": "78021324953",
+      "portador": "SANDRO BARRETO DE SOUZA",
+      "saldoFinal": 1167.3399999999674,
+      "saldoCartao": 9,
+      "qz1": 4240
+    },
+    {
+      "cpf": "12547938790",
+      "portador": "CHARLES NEVES MATTIUZZI",
+      "saldoFinal": 3430.109999999989,
+      "saldoCartao": 19.73,
+      "qz1": 4200
+    }
+  ]
+}

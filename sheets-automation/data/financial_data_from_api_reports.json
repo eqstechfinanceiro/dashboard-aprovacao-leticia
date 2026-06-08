@@ -1,0 +1,4290 @@
+[
+  {
+    "report_id": 10121889,
+    "user_id": 895944,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141872,
+    "user_id": 895945,
+    "description": "MARÇO 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10029928,
+    "user_id": 895946,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10249316,
+    "user_id": 895946,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10249325,
+    "user_id": 895946,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10104255,
+    "user_id": 895947,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10071324,
+    "user_id": 895949,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10071570,
+    "user_id": 895949,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048514,
+    "user_id": 895950,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10103521,
+    "user_id": 895950,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094662,
+    "user_id": 895951,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10279225,
+    "user_id": 895955,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10056297,
+    "user_id": 895956,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10056298,
+    "user_id": 895956,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10109831,
+    "user_id": 895957,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10042632,
+    "user_id": 895961,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10047561,
+    "user_id": 895963,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10072504,
+    "user_id": 895963,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090035,
+    "user_id": 895964,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10095869,
+    "user_id": 895967,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10194271,
+    "user_id": 895967,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081153,
+    "user_id": 895968,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048313,
+    "user_id": 895970,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048607,
+    "user_id": 895970,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10153975,
+    "user_id": 895970,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10167239,
+    "user_id": 895972,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10283267,
+    "user_id": 895972,
+    "description": " CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10093673,
+    "user_id": 895974,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094622,
+    "user_id": 895974,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10064461,
+    "user_id": 895977,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10146825,
+    "user_id": 895977,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10158265,
+    "user_id": 895978,
+    "description": "CAIXA0 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10078260,
+    "user_id": 895983,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10089692,
+    "user_id": 895983,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110011,
+    "user_id": 895983,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069706,
+    "user_id": 895984,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10156179,
+    "user_id": 895984,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10078304,
+    "user_id": 895986,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081808,
+    "user_id": 895988,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141531,
+    "user_id": 895988,
+    "description": "Reembolso Thiago Aguiar",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10165079,
+    "user_id": 895992,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10085078,
+    "user_id": 895993,
+    "description": " CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10273840,
+    "user_id": 895994,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10035153,
+    "user_id": 895996,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10104666,
+    "user_id": 895996,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141573,
+    "user_id": 896001,
+    "description": "FATURA 05/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10127760,
+    "user_id": 896003,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10124254,
+    "user_id": 896004,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237300,
+    "user_id": 896004,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237541,
+    "user_id": 896004,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10163177,
+    "user_id": 896006,
+    "description": "CAIXA 03/20226",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069856,
+    "user_id": 896008,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10071227,
+    "user_id": 896008,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10032103,
+    "user_id": 896009,
+    "description": "CAIXA 03/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10279107,
+    "user_id": 896009,
+    "description": "CAIXA 04/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081541,
+    "user_id": 896010,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10132825,
+    "user_id": 896011,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10064468,
+    "user_id": 896012,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10175041,
+    "user_id": 896012,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10167945,
+    "user_id": 896015,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10119957,
+    "user_id": 896018,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10143254,
+    "user_id": 896018,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141283,
+    "user_id": 896020,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10151447,
+    "user_id": 896020,
+    "description": "FATURA 04/2026 - DOLAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079195,
+    "user_id": 896023,
+    "description": "Fatura 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10095543,
+    "user_id": 896023,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10283123,
+    "user_id": 896025,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10026911,
+    "user_id": 896026,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10046326,
+    "user_id": 896027,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10139719,
+    "user_id": 896027,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10234638,
+    "user_id": 896028,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10211478,
+    "user_id": 896031,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113780,
+    "user_id": 896033,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10128540,
+    "user_id": 896035,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110127,
+    "user_id": 896036,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10107104,
+    "user_id": 896037,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10109794,
+    "user_id": 896040,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10151378,
+    "user_id": 896040,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10038367,
+    "user_id": 896044,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10088402,
+    "user_id": 896044,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079613,
+    "user_id": 896045,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10157030,
+    "user_id": 896045,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10168913,
+    "user_id": 896051,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048187,
+    "user_id": 896053,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10032841,
+    "user_id": 896054,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10077022,
+    "user_id": 896054,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10033763,
+    "user_id": 896058,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10104047,
+    "user_id": 896058,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10122735,
+    "user_id": 896058,
+    "description": "CAIXA 03/2026 ",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10127896,
+    "user_id": 896058,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10029511,
+    "user_id": 896061,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10078837,
+    "user_id": 896063,
+    "description": "Fatura 01/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079165,
+    "user_id": 896063,
+    "description": "Fatura 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079464,
+    "user_id": 896063,
+    "description": "Fatura 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081018,
+    "user_id": 896063,
+    "description": "Fatura 12/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10280508,
+    "user_id": 896064,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10280813,
+    "user_id": 896064,
+    "description": "CAIXA 07/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069683,
+    "user_id": 896066,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110286,
+    "user_id": 896066,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10067292,
+    "user_id": 896067,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10226779,
+    "user_id": 896068,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10105592,
+    "user_id": 896069,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10157666,
+    "user_id": 896070,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10070372,
+    "user_id": 896072,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10143216,
+    "user_id": 896073,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10115097,
+    "user_id": 896075,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037089,
+    "user_id": 896079,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037666,
+    "user_id": 896079,
+    "description": "FATURA 01/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037723,
+    "user_id": 896079,
+    "description": "FATURA 01/2026 DOLAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037751,
+    "user_id": 896079,
+    "description": "FATURA 03/2026 - DOLAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037775,
+    "user_id": 896079,
+    "description": "FATURA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037813,
+    "user_id": 896079,
+    "description": "FATURA 02/2026 - DOLAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10201784,
+    "user_id": 896079,
+    "description": "FATURA - 04-2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10201865,
+    "user_id": 896079,
+    "description": "FATURA - 04/2026 DOLAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10043423,
+    "user_id": 896082,
+    "description": "CAIXA ABRIL/2026 - CLARO DF",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113499,
+    "user_id": 896083,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113505,
+    "user_id": 896083,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133935,
+    "user_id": 896083,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10114186,
+    "user_id": 896084,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10240316,
+    "user_id": 896084,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10028164,
+    "user_id": 896085,
+    "description": "Caixa 04 Abril 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069269,
+    "user_id": 896090,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081097,
+    "user_id": 896090,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110476,
+    "user_id": 896092,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10153694,
+    "user_id": 896092,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10243322,
+    "user_id": 896093,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10032464,
+    "user_id": 896095,
+    "description": "FATURA 11/25",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10038989,
+    "user_id": 896095,
+    "description": "FATURA 12/25",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10038998,
+    "user_id": 896095,
+    "description": "FATURA 01/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10039008,
+    "user_id": 896095,
+    "description": "FATURA 02/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10041820,
+    "user_id": 896095,
+    "description": "FATURA 03/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068599,
+    "user_id": 896096,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068617,
+    "user_id": 896096,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10107898,
+    "user_id": 896102,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10199496,
+    "user_id": 896102,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027093,
+    "user_id": 896104,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10130591,
+    "user_id": 896106,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10083129,
+    "user_id": 896115,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10134979,
+    "user_id": 896117,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10270403,
+    "user_id": 896117,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10270411,
+    "user_id": 896117,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10271121,
+    "user_id": 896117,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094179,
+    "user_id": 896119,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079254,
+    "user_id": 896121,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10034654,
+    "user_id": 896128,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027345,
+    "user_id": 896129,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10121883,
+    "user_id": 896132,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10121965,
+    "user_id": 896132,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048096,
+    "user_id": 896133,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10220108,
+    "user_id": 896138,
+    "description": "Fatura itau 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10145791,
+    "user_id": 896140,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10145870,
+    "user_id": 896140,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10097337,
+    "user_id": 896141,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10156815,
+    "user_id": 896142,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068801,
+    "user_id": 896143,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10052652,
+    "user_id": 896144,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10052691,
+    "user_id": 896144,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10265110,
+    "user_id": 896149,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10265127,
+    "user_id": 896149,
+    "description": "CAiXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10285093,
+    "user_id": 896150,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10279402,
+    "user_id": 896154,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10102346,
+    "user_id": 896157,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10106050,
+    "user_id": 896161,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10026654,
+    "user_id": 896162,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10047929,
+    "user_id": 896163,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10049085,
+    "user_id": 896163,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10045186,
+    "user_id": 896164,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10045670,
+    "user_id": 896165,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10046264,
+    "user_id": 896165,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10208824,
+    "user_id": 896165,
+    "description": "CAIXA 11/2025 CORREÇÃO",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10218164,
+    "user_id": 896165,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10267117,
+    "user_id": 896165,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10174393,
+    "user_id": 896168,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10122041,
+    "user_id": 896171,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10184264,
+    "user_id": 896171,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065930,
+    "user_id": 896172,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10066182,
+    "user_id": 896172,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10040797,
+    "user_id": 896173,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079635,
+    "user_id": 896174,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10229055,
+    "user_id": 896177,
+    "description": " FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10229407,
+    "user_id": 896177,
+    "description": " FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079878,
+    "user_id": 896178,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079925,
+    "user_id": 896178,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065006,
+    "user_id": 896179,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10240602,
+    "user_id": 896180,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10122488,
+    "user_id": 896184,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10115419,
+    "user_id": 896185,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10115449,
+    "user_id": 896185,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10057397,
+    "user_id": 896186,
+    "description": "FATURA 01/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10057399,
+    "user_id": 896186,
+    "description": "FATURA 12/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10057401,
+    "user_id": 896186,
+    "description": "FATURA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10057408,
+    "user_id": 896186,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10124485,
+    "user_id": 896186,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10147334,
+    "user_id": 896188,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10175051,
+    "user_id": 896188,
+    "description": "FATURA 05/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10199318,
+    "user_id": 896189,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10145283,
+    "user_id": 896199,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10061275,
+    "user_id": 896203,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10197693,
+    "user_id": 896206,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10275749,
+    "user_id": 896206,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10077590,
+    "user_id": 896208,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10187080,
+    "user_id": 896211,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10211638,
+    "user_id": 896212,
+    "description": "CAIXA 02/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10092168,
+    "user_id": 896213,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10084189,
+    "user_id": 896216,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10084383,
+    "user_id": 896216,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10208105,
+    "user_id": 896217,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10067836,
+    "user_id": 896219,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10067858,
+    "user_id": 896219,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10122517,
+    "user_id": 896224,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081531,
+    "user_id": 896226,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10155661,
+    "user_id": 896226,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10126056,
+    "user_id": 896227,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10111966,
+    "user_id": 896228,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10030196,
+    "user_id": 896229,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10100594,
+    "user_id": 896229,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10100731,
+    "user_id": 896230,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10101077,
+    "user_id": 896230,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10083790,
+    "user_id": 896232,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10033126,
+    "user_id": 896236,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10251255,
+    "user_id": 896237,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10067812,
+    "user_id": 896238,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10023666,
+    "user_id": 896241,
+    "description": "FATURA ITAÚ 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10099859,
+    "user_id": 896241,
+    "description": "FATURA ITÁU 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10144055,
+    "user_id": 896241,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090350,
+    "user_id": 896242,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10146116,
+    "user_id": 896242,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10100263,
+    "user_id": 896244,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10244464,
+    "user_id": 896244,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10131936,
+    "user_id": 896245,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10256532,
+    "user_id": 896246,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113766,
+    "user_id": 896249,
+    "description": "Fatura 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10213060,
+    "user_id": 896250,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10119432,
+    "user_id": 896251,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10095390,
+    "user_id": 896253,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10076450,
+    "user_id": 896254,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10076461,
+    "user_id": 896254,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10213976,
+    "user_id": 896254,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10036770,
+    "user_id": 896255,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10199098,
+    "user_id": 896255,
+    "description": "CAIXA 3/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10088168,
+    "user_id": 896257,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10088177,
+    "user_id": 896257,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10103328,
+    "user_id": 896259,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10103334,
+    "user_id": 896259,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079666,
+    "user_id": 896262,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10041232,
+    "user_id": 896264,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10099786,
+    "user_id": 896264,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133527,
+    "user_id": 896267,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10071967,
+    "user_id": 896269,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10189102,
+    "user_id": 896269,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10114796,
+    "user_id": 896270,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10029592,
+    "user_id": 896271,
+    "description": "Relatório 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10059850,
+    "user_id": 896272,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10101283,
+    "user_id": 896275,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10126731,
+    "user_id": 896279,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10126908,
+    "user_id": 896279,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141319,
+    "user_id": 896285,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10121923,
+    "user_id": 896286,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10165872,
+    "user_id": 896287,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10083022,
+    "user_id": 896288,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10084088,
+    "user_id": 896289,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10132255,
+    "user_id": 896290,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10132262,
+    "user_id": 896290,
+    "description": "FATURA DOLAR 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133105,
+    "user_id": 896290,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133111,
+    "user_id": 896290,
+    "description": "RELATORIO DOLAR 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133340,
+    "user_id": 896290,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133349,
+    "user_id": 896290,
+    "description": "FATURA DOLAR 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10128265,
+    "user_id": 896292,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10036963,
+    "user_id": 896293,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068947,
+    "user_id": 896295,
+    "description": "CAIXA 03/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069070,
+    "user_id": 896295,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10062387,
+    "user_id": 896296,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10139774,
+    "user_id": 896296,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10042498,
+    "user_id": 896297,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10099577,
+    "user_id": 896297,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10157013,
+    "user_id": 896298,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113672,
+    "user_id": 896299,
+    "description": "CAIXA - 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068410,
+    "user_id": 896300,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10244854,
+    "user_id": 896300,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027600,
+    "user_id": 896301,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10083770,
+    "user_id": 896303,
+    "description": "04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10048614,
+    "user_id": 896304,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10117215,
+    "user_id": 896304,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10084089,
+    "user_id": 896311,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10034560,
+    "user_id": 896314,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069747,
+    "user_id": 896314,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10203186,
+    "user_id": 896314,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10203357,
+    "user_id": 896314,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10081354,
+    "user_id": 896315,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10132399,
+    "user_id": 896316,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10149641,
+    "user_id": 896319,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10149663,
+    "user_id": 896319,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10149678,
+    "user_id": 896319,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10026224,
+    "user_id": 896322,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10113720,
+    "user_id": 896324,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10283550,
+    "user_id": 896324,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10222570,
+    "user_id": 896325,
+    "description": "CAIXA04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10225783,
+    "user_id": 896326,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10030125,
+    "user_id": 896329,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10127470,
+    "user_id": 896330,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10039060,
+    "user_id": 896331,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10039067,
+    "user_id": 896331,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10109911,
+    "user_id": 896332,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237896,
+    "user_id": 896332,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10046020,
+    "user_id": 896336,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10063406,
+    "user_id": 896336,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10077717,
+    "user_id": 896339,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10141197,
+    "user_id": 896339,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065741,
+    "user_id": 896340,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065760,
+    "user_id": 896340,
+    "description": "FATURA 04/2026 (Cartão Corporativo)",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10031702,
+    "user_id": 896343,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10032060,
+    "user_id": 896343,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10146921,
+    "user_id": 896344,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10252980,
+    "user_id": 896349,
+    "description": "CAIXA 03-2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10121608,
+    "user_id": 896351,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10121657,
+    "user_id": 896351,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10162955,
+    "user_id": 896351,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10107563,
+    "user_id": 896352,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10164064,
+    "user_id": 896352,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10083964,
+    "user_id": 896355,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10193541,
+    "user_id": 896355,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237041,
+    "user_id": 896358,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237045,
+    "user_id": 896358,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10237891,
+    "user_id": 896358,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10134889,
+    "user_id": 896360,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10028270,
+    "user_id": 896362,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10151121,
+    "user_id": 896362,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10056422,
+    "user_id": 896363,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10104201,
+    "user_id": 896363,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090849,
+    "user_id": 896366,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10164101,
+    "user_id": 896366,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10102159,
+    "user_id": 896367,
+    "description": "FATURA 05 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065373,
+    "user_id": 896369,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10214272,
+    "user_id": 896373,
+    "description": "CAIXA 09/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10214295,
+    "user_id": 896373,
+    "description": "CAIXA 05/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065629,
+    "user_id": 896376,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10120241,
+    "user_id": 896376,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10119055,
+    "user_id": 896381,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10130464,
+    "user_id": 896381,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10031560,
+    "user_id": 896385,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10059292,
+    "user_id": 896385,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10208784,
+    "user_id": 896385,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10086920,
+    "user_id": 896387,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10065087,
+    "user_id": 896389,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10076607,
+    "user_id": 896391,
+    "description": "CAIXA 02/2026 - 2",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10076626,
+    "user_id": 896391,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10204134,
+    "user_id": 896394,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10115588,
+    "user_id": 896419,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10287113,
+    "user_id": 896423,
+    "description": "Caixa 04/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10116837,
+    "user_id": 896424,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10092781,
+    "user_id": 913936,
+    "description": "CAIXA 04.2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10253066,
+    "user_id": 913936,
+    "description": "CAIXA 04.2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10257496,
+    "user_id": 913936,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10284127,
+    "user_id": 916366,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10188338,
+    "user_id": 916374,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10114633,
+    "user_id": 916884,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10194223,
+    "user_id": 916910,
+    "description": "Prestação de conta 04/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10082761,
+    "user_id": 916912,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10070188,
+    "user_id": 916919,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10259500,
+    "user_id": 916919,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10262679,
+    "user_id": 916919,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10262900,
+    "user_id": 916919,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10264193,
+    "user_id": 916919,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10026766,
+    "user_id": 916936,
+    "description": "OS 8261240",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10050426,
+    "user_id": 916936,
+    "description": "OS 8268779",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10050434,
+    "user_id": 916936,
+    "description": "CÓPIAS DE CHAVES",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10050441,
+    "user_id": 916936,
+    "description": "TELA DE CELULAR",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10158049,
+    "user_id": 916936,
+    "description": "OS 8306539",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10158090,
+    "user_id": 916936,
+    "description": "OS 8306321",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10158111,
+    "user_id": 916936,
+    "description": "Os 8277950",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10158128,
+    "user_id": 916936,
+    "description": "OS 8277950",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10184834,
+    "user_id": 916936,
+    "description": "SITE PBRCBR1",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10184840,
+    "user_id": 916936,
+    "description": "PBCGE03",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10234240,
+    "user_id": 916936,
+    "description": "GER 2252",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10276130,
+    "user_id": 916936,
+    "description": "CGE FP",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10111014,
+    "user_id": 917049,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110675,
+    "user_id": 917052,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10063885,
+    "user_id": 917057,
+    "description": "FATURA 04/2024",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10163682,
+    "user_id": 917057,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10093833,
+    "user_id": 917058,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10229553,
+    "user_id": 917058,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10111398,
+    "user_id": 917059,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10089421,
+    "user_id": 917069,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10140049,
+    "user_id": 917078,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10129099,
+    "user_id": 917081,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090032,
+    "user_id": 917314,
+    "description": "FATURA  05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090293,
+    "user_id": 917314,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10077490,
+    "user_id": 917345,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10112314,
+    "user_id": 917353,
+    "description": "31/03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10204711,
+    "user_id": 917353,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10071214,
+    "user_id": 917363,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10093386,
+    "user_id": 917365,
+    "description": "Fatura Maio 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10192637,
+    "user_id": 917365,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079760,
+    "user_id": 918849,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10175716,
+    "user_id": 920071,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10063701,
+    "user_id": 920845,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10063366,
+    "user_id": 920862,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10285756,
+    "user_id": 920862,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10151766,
+    "user_id": 920868,
+    "description": "Caixa Abril/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10044470,
+    "user_id": 921535,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10100185,
+    "user_id": 921921,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10102941,
+    "user_id": 922275,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10098408,
+    "user_id": 922276,
+    "description": "CAIXA ABRIL 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10033949,
+    "user_id": 923842,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10185695,
+    "user_id": 923893,
+    "description": "Pedágios ",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10228434,
+    "user_id": 924050,
+    "description": "CAIXA-04-26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10129897,
+    "user_id": 927567,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10129901,
+    "user_id": 927567,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10129301,
+    "user_id": 928097,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10207441,
+    "user_id": 928097,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10285114,
+    "user_id": 928994,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10132698,
+    "user_id": 929757,
+    "description": "Fatura 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10142782,
+    "user_id": 929759,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10062484,
+    "user_id": 929761,
+    "description": "FATURA 10/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10088067,
+    "user_id": 929761,
+    "description": "FATURA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10088381,
+    "user_id": 929761,
+    "description": "FATURA 01/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10142729,
+    "user_id": 929763,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10162113,
+    "user_id": 930416,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10025674,
+    "user_id": 930440,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10025690,
+    "user_id": 930440,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10286562,
+    "user_id": 930440,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10286565,
+    "user_id": 930440,
+    "description": "FATURA 06/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10099071,
+    "user_id": 930924,
+    "description": "CAIXA 01/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10099171,
+    "user_id": 930924,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10147098,
+    "user_id": 931255,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10147482,
+    "user_id": 931255,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10095655,
+    "user_id": 940437,
+    "description": "04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090383,
+    "user_id": 944251,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10129933,
+    "user_id": 944251,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10076808,
+    "user_id": 948926,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10271000,
+    "user_id": 948926,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10215142,
+    "user_id": 950558,
+    "description": "03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10215234,
+    "user_id": 950558,
+    "description": "04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10106017,
+    "user_id": 952397,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10232029,
+    "user_id": 952397,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10146026,
+    "user_id": 954733,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10146501,
+    "user_id": 957803,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10280404,
+    "user_id": 958523,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10090471,
+    "user_id": 961342,
+    "description": "FATURA - 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10091035,
+    "user_id": 961342,
+    "description": "FATURA - 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10091048,
+    "user_id": 961342,
+    "description": "CAIXA - 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10064735,
+    "user_id": 961468,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10066594,
+    "user_id": 961468,
+    "description": "Fatura 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10072048,
+    "user_id": 961468,
+    "description": "Fatura 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10036472,
+    "user_id": 961469,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10036519,
+    "user_id": 961469,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10194236,
+    "user_id": 963612,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10210053,
+    "user_id": 963612,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10064207,
+    "user_id": 966214,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10064223,
+    "user_id": 966214,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10026021,
+    "user_id": 968562,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10220261,
+    "user_id": 970758,
+    "description": "FATURA DOLAR 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10220972,
+    "user_id": 970758,
+    "description": "FATURA REAL 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10082749,
+    "user_id": 971287,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10204359,
+    "user_id": 973950,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10257591,
+    "user_id": 973987,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10217258,
+    "user_id": 974110,
+    "description": "FATURA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10217400,
+    "user_id": 974110,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10218114,
+    "user_id": 974110,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10162532,
+    "user_id": 978440,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10216861,
+    "user_id": 978694,
+    "description": "Caixa 04-2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10263121,
+    "user_id": 979939,
+    "description": "Caixa 09/2025",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10156455,
+    "user_id": 985850,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094081,
+    "user_id": 986346,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10031966,
+    "user_id": 996627,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10283864,
+    "user_id": 996627,
+    "description": "CAIXA 04/2026 ",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10176176,
+    "user_id": 997009,
+    "description": "Compra de materiais ",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027283,
+    "user_id": 998959,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027300,
+    "user_id": 998959,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10030819,
+    "user_id": 999216,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10047880,
+    "user_id": 1001575,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10055317,
+    "user_id": 1001913,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079707,
+    "user_id": 1008337,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10225634,
+    "user_id": 1010644,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10027806,
+    "user_id": 1010647,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10059928,
+    "user_id": 1010647,
+    "description": "Fatura 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10041902,
+    "user_id": 1011271,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094995,
+    "user_id": 1017677,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10142320,
+    "user_id": 1020656,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10040903,
+    "user_id": 1023020,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10094031,
+    "user_id": 1023079,
+    "description": "CAIXA 04/26",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10029071,
+    "user_id": 1025223,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10056736,
+    "user_id": 1026019,
+    "description": "CAIXA 02/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10056756,
+    "user_id": 1026019,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10057012,
+    "user_id": 1026019,
+    "description": "CAIXA 03/2026 - SAQUE VEXPENSE",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10070039,
+    "user_id": 1026019,
+    "description": "CAIXA 02/2026 - CORREÇÃO",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10077419,
+    "user_id": 1026019,
+    "description": "CAIXA 01/2026  - CORREÇÃO",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10153604,
+    "user_id": 1026117,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10186903,
+    "user_id": 1026117,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10059817,
+    "user_id": 1033558,
+    "description": "Caixa 3/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10267944,
+    "user_id": 1033558,
+    "description": "Caixa 4/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10053706,
+    "user_id": 1033749,
+    "description": "Despesa 04/",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10063233,
+    "user_id": 1040885,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10033362,
+    "user_id": 1040939,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10250369,
+    "user_id": 1040939,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10109746,
+    "user_id": 1040950,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10086224,
+    "user_id": 1042864,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10120486,
+    "user_id": 1047085,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10188550,
+    "user_id": 1051403,
+    "description": "FATURA 05.2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10044384,
+    "user_id": 1054503,
+    "description": "04/ 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10251824,
+    "user_id": 1056326,
+    "description": "fatura 04 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10251908,
+    "user_id": 1056326,
+    "description": "fatura 05 2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069460,
+    "user_id": 1059425,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10069509,
+    "user_id": 1059425,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10032723,
+    "user_id": 1059840,
+    "description": "04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10044962,
+    "user_id": 1060225,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10037468,
+    "user_id": 1060396,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10137164,
+    "user_id": 1061896,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10142757,
+    "user_id": 1061896,
+    "description": "Fatura 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10140417,
+    "user_id": 1063495,
+    "description": "Vistoria de mutirão em Caxias do sul",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10157093,
+    "user_id": 1065237,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10068838,
+    "user_id": 1066365,
+    "description": "CAIXA 06/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10110406,
+    "user_id": 1077047,
+    "description": "FATURA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10079486,
+    "user_id": 1079003,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10175670,
+    "user_id": 1079004,
+    "description": "Caixa  04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10123003,
+    "user_id": 1079585,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10166279,
+    "user_id": 1087695,
+    "description": "CAIXA 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10046666,
+    "user_id": 1088596,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10046671,
+    "user_id": 1088596,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10140103,
+    "user_id": 1089708,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10101141,
+    "user_id": 1090880,
+    "description": "Caixa 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10103011,
+    "user_id": 1090880,
+    "description": "Caixa 03/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10250415,
+    "user_id": 1100052,
+    "description": "caixa mes 04-2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10190407,
+    "user_id": 1100082,
+    "description": "FATURA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10156407,
+    "user_id": 1106552,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10288200,
+    "user_id": 1106552,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10133579,
+    "user_id": 1106565,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10287174,
+    "user_id": 1106570,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10222371,
+    "user_id": 1106587,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10139195,
+    "user_id": 1109482,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10244100,
+    "user_id": 1109489,
+    "description": "04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10236320,
+    "user_id": 1109495,
+    "description": "Headset para reuniões",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10271752,
+    "user_id": 1109495,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10269229,
+    "user_id": 1110286,
+    "description": "Fatura 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10271532,
+    "user_id": 1117262,
+    "description": "CAIXA 04/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  },
+  {
+    "report_id": 10286780,
+    "user_id": 1117262,
+    "description": "CAIXA 05/2026",
+    "1qz": null,
+    "saldo_cartao": null,
+    "adiantamento": null
+  }
+]

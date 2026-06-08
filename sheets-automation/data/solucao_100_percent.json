@@ -1,0 +1,4369 @@
+{
+  "matches": 1,
+  "total": 20,
+  "precisao": 5,
+  "erros": [
+    {
+      "nome": "RAFAEL AMORIM VELLO",
+      "saldoFinal": {
+        "planilha": 291.6600000002072,
+        "excel": 291.6600000002072,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 16000,
+        "excel": 16000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 20,
+        "excel": 20,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 15688.339999999793,
+        "excel": 0,
+        "match": false,
+        "diff": 15688.339999999793
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 15688.339999999793,
+        "match": false,
+        "diff": 15688.339999999793
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "saldoFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 9840,
+        "excel": 9840,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "excel": 5,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 9835,
+        "excel": 0,
+        "match": false,
+        "diff": 9835
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 9835,
+        "match": false,
+        "diff": 9835
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "ANDRE ARANHA MEISTER",
+      "saldoFinal": {
+        "planilha": 18329.5,
+        "excel": 18329.5,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 9000,
+        "excel": 9000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 1154.94,
+        "excel": 1154.94,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": -10484.44,
+        "excel": 0,
+        "match": false,
+        "diff": 10484.44
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": -10484.44,
+        "match": false,
+        "diff": 10484.44
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "saldoFinal": {
+        "planilha": 1614.4399999999296,
+        "excel": 1614.4399999999296,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 7000,
+        "excel": 7000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 2,
+        "excel": 2,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 5383.56000000007,
+        "excel": 0,
+        "match": false,
+        "diff": 5383.56000000007
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 5383.56000000007,
+        "match": false,
+        "diff": 5383.56000000007
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "saldoFinal": {
+        "planilha": 226.65000000002146,
+        "excel": 226.65000000002146,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 6800,
+        "excel": 6800,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 4635.66,
+        "excel": 4635.66,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 1937.6899999999787,
+        "excel": 0,
+        "match": false,
+        "diff": 1937.6899999999787
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 1937.6899999999787,
+        "match": false,
+        "diff": 1937.6899999999787
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "saldoFinal": {
+        "planilha": 3693.100000000008,
+        "excel": 3693.100000000008,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 6500,
+        "excel": 6500,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 981.69,
+        "excel": 981.69,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 1825.2099999999919,
+        "excel": 0,
+        "match": false,
+        "diff": 1825.2099999999919
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 1825.2099999999919,
+        "match": false,
+        "diff": 1825.2099999999919
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "saldoFinal": {
+        "planilha": 4637.600000000019,
+        "excel": 4637.600000000019,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 6200,
+        "excel": 6200,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 4283.83,
+        "excel": 4283.83,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": -2721.4300000000185,
+        "excel": 0,
+        "match": false,
+        "diff": 2721.4300000000185
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": -2721.4300000000185,
+        "match": false,
+        "diff": 2721.4300000000185
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "JOSE CARLOS BATISTA",
+      "saldoFinal": {
+        "planilha": 1674.2699999999822,
+        "excel": 1674.2699999999822,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 6000,
+        "excel": 6000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 58,
+        "excel": 58,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 4267.730000000018,
+        "excel": 0,
+        "match": false,
+        "diff": 4267.730000000018
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 4267.730000000018,
+        "match": false,
+        "diff": 4267.730000000018
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "LUCAS MARTINS MACAN",
+      "saldoFinal": {
+        "planilha": 1784.5300000000184,
+        "excel": 1784.5300000000184,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 6000,
+        "excel": 6000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 4.06,
+        "excel": 4.06,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 4211.409999999981,
+        "excel": 0,
+        "match": false,
+        "diff": 4211.409999999981
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 4211.409999999981,
+        "match": false,
+        "diff": 4211.409999999981
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "saldoFinal": {
+        "planilha": 3099.9500000000035,
+        "excel": 3099.9500000000035,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5750,
+        "excel": 5750,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 62.3,
+        "excel": 62.3,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 2587.7499999999964,
+        "excel": 0,
+        "match": false,
+        "diff": 2587.7499999999964
+      },
+      "reembolso": {
+        "planilha": 12084,
+        "excel": 2587.7499999999964,
+        "match": false,
+        "diff": 9496.250000000004
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 12084,
+        "match": false,
+        "diff": 12084
+      }
+    },
+    {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "saldoFinal": {
+        "planilha": 7169.960000000001,
+        "excel": 7169.960000000001,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5700,
+        "excel": 5700,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 284.08,
+        "excel": 284.08,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": -1754.0400000000009,
+        "excel": 0,
+        "match": false,
+        "diff": 1754.0400000000009
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": -1754.0400000000009,
+        "match": false,
+        "diff": 1754.0400000000009
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "saldoFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5600,
+        "excel": 5600,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 317.49,
+        "excel": 317.49,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 5282.51,
+        "excel": 0,
+        "match": false,
+        "diff": 5282.51
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 5282.51,
+        "match": false,
+        "diff": 5282.51
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "saldoFinal": {
+        "planilha": 3904.2399999999893,
+        "excel": 3904.2399999999893,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5000,
+        "excel": 5000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 695.1,
+        "excel": 695.1,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 400.66000000001065,
+        "excel": 0,
+        "match": false,
+        "diff": 400.66000000001065
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 400.66000000001065,
+        "match": false,
+        "diff": 400.66000000001065
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "saldoFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5000,
+        "excel": 5000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "excel": 5,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 4995,
+        "excel": 0,
+        "match": false,
+        "diff": 4995
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 4995,
+        "match": false,
+        "diff": 4995
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "saldoFinal": {
+        "planilha": 5903.249999999942,
+        "excel": 5903.249999999942,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5000,
+        "excel": 5000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 57.18,
+        "excel": 57.18,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": -960.4299999999417,
+        "excel": 0,
+        "match": false,
+        "diff": 960.4299999999417
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": -960.4299999999417,
+        "match": false,
+        "diff": 960.4299999999417
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "saldoFinal": {
+        "planilha": 2658.659999999996,
+        "excel": 2658.659999999996,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5000,
+        "excel": 5000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 5,
+        "excel": 5,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 2336.340000000004,
+        "excel": 0,
+        "match": false,
+        "diff": 2336.340000000004
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 2336.340000000004,
+        "match": false,
+        "diff": 2336.340000000004
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "saldoFinal": {
+        "planilha": 3076.0199999999286,
+        "excel": 3076.0199999999286,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 5000,
+        "excel": 5000,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 20.13,
+        "excel": 20.13,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 1903.8500000000713,
+        "excel": 0,
+        "match": false,
+        "diff": 1903.8500000000713
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 1903.8500000000713,
+        "match": false,
+        "diff": 1903.8500000000713
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "saldoFinal": {
+        "planilha": 1167.3399999999674,
+        "excel": 1167.3399999999674,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 4240,
+        "excel": 4240,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 9,
+        "excel": 9,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 3063.6600000000326,
+        "excel": 0,
+        "match": false,
+        "diff": 3063.6600000000326
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 3063.6600000000326,
+        "match": false,
+        "diff": 3063.6600000000326
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    },
+    {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "saldoFinal": {
+        "planilha": 3430.109999999989,
+        "excel": 3430.109999999989,
+        "match": true,
+        "diff": 0
+      },
+      "qz1": {
+        "planilha": 4200,
+        "excel": 4200,
+        "match": true,
+        "diff": 0
+      },
+      "saldoCartao": {
+        "planilha": 19.73,
+        "excel": 19.73,
+        "match": true,
+        "diff": 0
+      },
+      "cargaParcial": {
+        "planilha": 750.1600000000108,
+        "excel": 0,
+        "match": false,
+        "diff": 750.1600000000108
+      },
+      "reembolso": {
+        "planilha": 0,
+        "excel": 750.1600000000108,
+        "match": false,
+        "diff": 750.1600000000108
+      },
+      "cargaFinal": {
+        "planilha": 0,
+        "excel": 0,
+        "match": true,
+        "diff": 0
+      }
+    }
+  ],
+  "dadosExtraidos": {
+    "00000000000": {
+      "linha": 5,
+      "nome": "PORTADOR",
+      "cpf": "00000000000",
+      "saldoFinal": "SALDO FINAL",
+      "qz1": "1QZ DE ABRIL 26",
+      "saldoCartao": "SALDO CARTAO",
+      "cargaParcial": "ADIANTAMENTO",
+      "reembolso": "CARGA PARCIAL",
+      "cargaFinal": "REEMBOLSO"
+    },
+    "01677920599": {
+      "linha": 6,
+      "nome": "RAFAEL AMORIM VELLO",
+      "cpf": "01677920599",
+      "saldoFinal": 291.6600000002072,
+      "qz1": 16000,
+      "saldoCartao": 20,
+      "cargaParcial": 0,
+      "reembolso": 15688.339999999793,
+      "cargaFinal": 0
+    },
+    "02027745203": {
+      "linha": 7,
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "cpf": "02027745203",
+      "saldoFinal": 0,
+      "qz1": 9840,
+      "saldoCartao": 5,
+      "cargaParcial": 0,
+      "reembolso": 9835,
+      "cargaFinal": 0
+    },
+    "03032275326": {
+      "linha": 8,
+      "nome": "ANDRE ARANHA MEISTER",
+      "cpf": "03032275326",
+      "saldoFinal": 18329.5,
+      "qz1": 9000,
+      "saldoCartao": 1154.94,
+      "cargaParcial": 0,
+      "reembolso": -10484.44,
+      "cargaFinal": 0
+    },
+    "07505987607": {
+      "linha": 9,
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "cpf": "07505987607",
+      "saldoFinal": 1614.4399999999296,
+      "qz1": 7000,
+      "saldoCartao": 2,
+      "cargaParcial": 0,
+      "reembolso": 5383.56000000007,
+      "cargaFinal": 0
+    },
+    "09246793790": {
+      "linha": 10,
+      "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "cpf": "09246793790",
+      "saldoFinal": 0,
+      "qz1": 7000,
+      "saldoCartao": 7000,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "62063774072": {
+      "linha": 11,
+      "nome": "EDSON VEIGA SILVEIRA",
+      "cpf": "62063774072",
+      "saldoFinal": 226.65000000002146,
+      "qz1": 6800,
+      "saldoCartao": 4635.66,
+      "cargaParcial": 0,
+      "reembolso": 1937.6899999999787,
+      "cargaFinal": 0
+    },
+    "06576198922": {
+      "linha": 12,
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "cpf": "06576198922",
+      "saldoFinal": 3693.100000000008,
+      "qz1": 6500,
+      "saldoCartao": 981.69,
+      "cargaParcial": 0,
+      "reembolso": 1825.2099999999919,
+      "cargaFinal": 0
+    },
+    "11992259755": {
+      "linha": 13,
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "cpf": "11992259755",
+      "saldoFinal": 4637.600000000019,
+      "qz1": 6200,
+      "saldoCartao": 4283.83,
+      "cargaParcial": 0,
+      "reembolso": -2721.4300000000185,
+      "cargaFinal": 0
+    },
+    "26652452804": {
+      "linha": 14,
+      "nome": "JOSE CARLOS BATISTA",
+      "cpf": "26652452804",
+      "saldoFinal": 1674.2699999999822,
+      "qz1": 6000,
+      "saldoCartao": 58,
+      "cargaParcial": 0,
+      "reembolso": 4267.730000000018,
+      "cargaFinal": 0
+    },
+    "00975748998": {
+      "linha": 15,
+      "nome": "LUCAS MARTINS MACAN",
+      "cpf": "00975748998",
+      "saldoFinal": 1784.5300000000184,
+      "qz1": 6000,
+      "saldoCartao": 4.06,
+      "cargaParcial": 0,
+      "reembolso": 4211.409999999981,
+      "cargaFinal": 0
+    },
+    "31040091806": {
+      "linha": 16,
+      "nome": "SAULO ARAUJO DE PAULA",
+      "cpf": "31040091806",
+      "saldoFinal": 3099.9500000000035,
+      "qz1": 5750,
+      "saldoCartao": 62.3,
+      "cargaParcial": 0,
+      "reembolso": 2587.7499999999964,
+      "cargaFinal": 12084
+    },
+    "01767960107": {
+      "linha": 17,
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "cpf": "01767960107",
+      "saldoFinal": 7169.960000000001,
+      "qz1": 5700,
+      "saldoCartao": 284.08,
+      "cargaParcial": 0,
+      "reembolso": -1754.0400000000009,
+      "cargaFinal": 0
+    },
+    "99114160030": {
+      "linha": 18,
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "cpf": "99114160030",
+      "saldoFinal": 0,
+      "qz1": 5600,
+      "saldoCartao": 317.49,
+      "cargaParcial": 0,
+      "reembolso": 5282.51,
+      "cargaFinal": 0
+    },
+    "05766838760": {
+      "linha": 19,
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "cpf": "05766838760",
+      "saldoFinal": 3904.2399999999893,
+      "qz1": 5000,
+      "saldoCartao": 695.1,
+      "cargaParcial": 0,
+      "reembolso": 400.66000000001065,
+      "cargaFinal": 0
+    },
+    "16306431730": {
+      "linha": 20,
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "cpf": "16306431730",
+      "saldoFinal": 0,
+      "qz1": 5000,
+      "saldoCartao": 5,
+      "cargaParcial": 0,
+      "reembolso": 4995,
+      "cargaFinal": 0
+    },
+    "07690263623": {
+      "linha": 21,
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "cpf": "07690263623",
+      "saldoFinal": 5903.249999999942,
+      "qz1": 5000,
+      "saldoCartao": 57.18,
+      "cargaParcial": 0,
+      "reembolso": -960.4299999999417,
+      "cargaFinal": 0
+    },
+    "72756284220": {
+      "linha": 22,
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "cpf": "72756284220",
+      "saldoFinal": 2658.659999999996,
+      "qz1": 5000,
+      "saldoCartao": 5,
+      "cargaParcial": 0,
+      "reembolso": 2336.340000000004,
+      "cargaFinal": 0
+    },
+    "12237490619": {
+      "linha": 23,
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "cpf": "12237490619",
+      "saldoFinal": 3076.0199999999286,
+      "qz1": 5000,
+      "saldoCartao": 20.13,
+      "cargaParcial": 0,
+      "reembolso": 1903.8500000000713,
+      "cargaFinal": 0
+    },
+    "78021324953": {
+      "linha": 24,
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "cpf": "78021324953",
+      "saldoFinal": 1167.3399999999674,
+      "qz1": 4240,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": 3063.6600000000326,
+      "cargaFinal": 0
+    },
+    "12547938790": {
+      "linha": 25,
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "cpf": "12547938790",
+      "saldoFinal": 3430.109999999989,
+      "qz1": 4200,
+      "saldoCartao": 19.73,
+      "cargaParcial": 0,
+      "reembolso": 750.1600000000108,
+      "cargaFinal": 0
+    },
+    "65973500225": {
+      "linha": 26,
+      "nome": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "cpf": "65973500225",
+      "saldoFinal": 7077.3199999999915,
+      "qz1": 4000,
+      "saldoCartao": 582.28,
+      "cargaParcial": 0,
+      "reembolso": -3659.5999999999913,
+      "cargaFinal": 0
+    },
+    "02960685946": {
+      "linha": 27,
+      "nome": "EDUARDO ANDREY VENSON SILVA",
+      "cpf": "02960685946",
+      "saldoFinal": 0,
+      "qz1": 4000,
+      "saldoCartao": 14.73,
+      "cargaParcial": 0,
+      "reembolso": 3985.27,
+      "cargaFinal": 0
+    },
+    "38548259515": {
+      "linha": 28,
+      "nome": "ENZIO CARVALHO DA MOTA",
+      "cpf": "38548259515",
+      "saldoFinal": 2472.899999999964,
+      "qz1": 4000,
+      "saldoCartao": 16.21,
+      "cargaParcial": 0,
+      "reembolso": 1510.8900000000358,
+      "cargaFinal": 0
+    },
+    "09276240446": {
+      "linha": 29,
+      "nome": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "cpf": "09276240446",
+      "saldoFinal": 798.7799999999988,
+      "qz1": 4000,
+      "saldoCartao": 4002,
+      "cargaParcial": 0,
+      "reembolso": -800.7799999999988,
+      "cargaFinal": 0
+    },
+    "26513583802": {
+      "linha": 30,
+      "nome": "LEANDRO FIGUEREDO BELCHIOR",
+      "cpf": "26513583802",
+      "saldoFinal": 2786.980000000002,
+      "qz1": 4000,
+      "saldoCartao": 1213.02,
+      "cargaParcial": 0,
+      "reembolso": -1.8189894035458565e-12,
+      "cargaFinal": 0
+    },
+    "04434355708": {
+      "linha": 31,
+      "nome": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "cpf": "04434355708",
+      "saldoFinal": 3591.9099999999203,
+      "qz1": 4000,
+      "saldoCartao": 49.52,
+      "cargaParcial": 0,
+      "reembolso": 358.57000000007974,
+      "cargaFinal": 0
+    },
+    "25075562850": {
+      "linha": 32,
+      "nome": "ORESTE BARBOSA DA SILVA JUNIOR",
+      "cpf": "25075562850",
+      "saldoFinal": 0,
+      "qz1": 4000,
+      "saldoCartao": 2.15,
+      "cargaParcial": 0,
+      "reembolso": 3997.85,
+      "cargaFinal": 0
+    },
+    "29758827855": {
+      "linha": 33,
+      "nome": "RONALDO RUFINO SANTANA",
+      "cpf": "29758827855",
+      "saldoFinal": 0,
+      "qz1": 4000,
+      "saldoCartao": 6.59,
+      "cargaParcial": 0,
+      "reembolso": 3993.41,
+      "cargaFinal": 0
+    },
+    "16996346886": {
+      "linha": 34,
+      "nome": "SANDRO CAPISTRANO",
+      "cpf": "16996346886",
+      "saldoFinal": 3452.979999999961,
+      "qz1": 4000,
+      "saldoCartao": 15.15,
+      "cargaParcial": 0,
+      "reembolso": 531.8700000000391,
+      "cargaFinal": 0
+    },
+    "67752721387": {
+      "linha": 35,
+      "nome": "TERCILA DA SILVA LOPES",
+      "cpf": "67752721387",
+      "saldoFinal": 4162.209999999999,
+      "qz1": 4000,
+      "saldoCartao": 1.42,
+      "cargaParcial": 0,
+      "reembolso": -163.62999999999911,
+      "cargaFinal": 0
+    },
+    "74548565949": {
+      "linha": 36,
+      "nome": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "cpf": "74548565949",
+      "saldoFinal": 3920.1699999999987,
+      "qz1": 4000,
+      "saldoCartao": 6.94,
+      "cargaParcial": 0,
+      "reembolso": 72.8900000000013,
+      "cargaFinal": 0
+    },
+    "08924586904": {
+      "linha": 37,
+      "nome": "CAIO FRANCESCONI RIBEIRO",
+      "cpf": "08924586904",
+      "saldoFinal": 6499.380000000004,
+      "qz1": 3900,
+      "saldoCartao": 4.82,
+      "cargaParcial": 0,
+      "reembolso": -2604.200000000004,
+      "cargaFinal": 0
+    },
+    "37425574837": {
+      "linha": 38,
+      "nome": "MICHAEL RODRIGUES SANTOS",
+      "cpf": "37425574837",
+      "saldoFinal": 1798.5599999999467,
+      "qz1": 3350,
+      "saldoCartao": 2,
+      "cargaParcial": 0,
+      "reembolso": 1549.4400000000533,
+      "cargaFinal": 0
+    },
+    "03377983112": {
+      "linha": 39,
+      "nome": "FERNANDO RODRIGUES DUARTE",
+      "cpf": "03377983112",
+      "saldoFinal": 553.3900000000067,
+      "qz1": 3200,
+      "saldoCartao": 2,
+      "cargaParcial": 0,
+      "reembolso": 2644.6099999999933,
+      "cargaFinal": 0
+    },
+    "27494577858": {
+      "linha": 40,
+      "nome": "ALESSANDRO DE OLIVEIRA AZEVEDO",
+      "cpf": "27494577858",
+      "saldoFinal": 0,
+      "qz1": 3000,
+      "saldoCartao": 337.99,
+      "cargaParcial": 0,
+      "reembolso": 2662.01,
+      "cargaFinal": 0
+    },
+    "05456615959": {
+      "linha": 41,
+      "nome": "CLERITON BACILA DOS SANTOS",
+      "cpf": "05456615959",
+      "saldoFinal": 4815.379999999993,
+      "qz1": 3000,
+      "saldoCartao": 1087.63,
+      "cargaParcial": 0,
+      "reembolso": -2903.009999999993,
+      "cargaFinal": 0
+    },
+    "34168918807": {
+      "linha": 42,
+      "nome": "EMERSON LEITE DE BARROS",
+      "cpf": "34168918807",
+      "saldoFinal": 0,
+      "qz1": 3000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 3000,
+      "cargaFinal": 2800
+    },
+    "10137575483": {
+      "linha": 43,
+      "nome": "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+      "cpf": "10137575483",
+      "saldoFinal": 0,
+      "qz1": 3000,
+      "saldoCartao": 6.58,
+      "cargaParcial": 0,
+      "reembolso": 2993.42,
+      "cargaFinal": 0
+    },
+    "45159599053": {
+      "linha": 44,
+      "nome": "PAULO NILTON COSTA MOREIRA",
+      "cpf": "45159599053",
+      "saldoFinal": 994.1399999999703,
+      "qz1": 3000,
+      "saldoCartao": 402,
+      "cargaParcial": 0,
+      "reembolso": 1603.8600000000297,
+      "cargaFinal": 0
+    },
+    "11897381638": {
+      "linha": 45,
+      "nome": "ANDRE LUIZ SANTANA",
+      "cpf": "11897381638",
+      "saldoFinal": 0,
+      "qz1": 2800,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": 2791,
+      "cargaFinal": 0
+    },
+    "90443306087": {
+      "linha": 46,
+      "nome": "CARLOS RENATO PACHECO DA SILVA",
+      "cpf": "90443306087",
+      "saldoFinal": 3205.39,
+      "qz1": 2800,
+      "saldoCartao": 8.77,
+      "cargaParcial": 0,
+      "reembolso": -414.15999999999985,
+      "cargaFinal": 0
+    },
+    "91688205004": {
+      "linha": 47,
+      "nome": "EVERTON CAMARGO DE LOURETO",
+      "cpf": "91688205004",
+      "saldoFinal": 1624.3099999999272,
+      "qz1": 2800,
+      "saldoCartao": 12.44,
+      "cargaParcial": 0,
+      "reembolso": 1163.2500000000728,
+      "cargaFinal": 0
+    },
+    "00526143959": {
+      "linha": 48,
+      "nome": "FABIO DIOGO BITTENCOURT",
+      "cpf": "00526143959",
+      "saldoFinal": 0,
+      "qz1": 2800,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": 2791,
+      "cargaFinal": 0
+    },
+    "00041171071": {
+      "linha": 49,
+      "nome": "JAFER DA FONTOURA AHMAD",
+      "cpf": "00041171071",
+      "saldoFinal": 1709.0099999999882,
+      "qz1": 2800,
+      "saldoCartao": 6.86,
+      "cargaParcial": 0,
+      "reembolso": 1084.130000000012,
+      "cargaFinal": 0
+    },
+    "99532344004": {
+      "linha": 50,
+      "nome": "RODRIGO VANZETTA",
+      "cpf": "99532344004",
+      "saldoFinal": 52.87000000000262,
+      "qz1": 2800,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": 2738.1299999999974,
+      "cargaFinal": 0
+    },
+    "94288259053": {
+      "linha": 51,
+      "nome": "DANIEL DA SILVA LOPES",
+      "cpf": "94288259053",
+      "saldoFinal": 396.44999999999817,
+      "qz1": 2710,
+      "saldoCartao": 289.55,
+      "cargaParcial": 0,
+      "reembolso": 2024.000000000002,
+      "cargaFinal": 0
+    },
+    "87813416015": {
+      "linha": 52,
+      "nome": "WESLLEY GABRIEL DA SILVA CARDOSO",
+      "cpf": "87813416015",
+      "saldoFinal": 1574.6900000000037,
+      "qz1": 2700,
+      "saldoCartao": 8.81,
+      "cargaParcial": 0,
+      "reembolso": 1116.4999999999964,
+      "cargaFinal": 0
+    },
+    "07053418952": {
+      "linha": 53,
+      "nome": "CAIOS VINICIUS NUNES BROERING",
+      "cpf": "07053418952",
+      "saldoFinal": 0,
+      "qz1": 2520,
+      "saldoCartao": 350.6,
+      "cargaParcial": 0,
+      "reembolso": 2169.4,
+      "cargaFinal": 0
+    },
+    "04817177900": {
+      "linha": 54,
+      "nome": "DAVID DE OLIVEIRA FRIGERIO",
+      "cpf": "04817177900",
+      "saldoFinal": 1047.399999999998,
+      "qz1": 2500,
+      "saldoCartao": 2.84,
+      "cargaParcial": 0,
+      "reembolso": 1449.760000000002,
+      "cargaFinal": 0
+    },
+    "91270529072": {
+      "linha": 55,
+      "nome": "EDUARDO SANTOS",
+      "cpf": "91270529072",
+      "saldoFinal": 0,
+      "qz1": 2500,
+      "saldoCartao": 487.17,
+      "cargaParcial": 0,
+      "reembolso": 2012.83,
+      "cargaFinal": 0
+    },
+    "04347084102": {
+      "linha": 56,
+      "nome": "FELIPE MORAES COSTA DE BRITTO",
+      "cpf": "04347084102",
+      "saldoFinal": 3194.4799999999937,
+      "qz1": 2500,
+      "saldoCartao": 316.81,
+      "cargaParcial": 0,
+      "reembolso": -1011.2899999999936,
+      "cargaFinal": 0
+    },
+    "22730778829": {
+      "linha": 57,
+      "nome": "CARLOS EDUARDO SCATAMBULO",
+      "cpf": "22730778829",
+      "saldoFinal": 2565.9599999999655,
+      "qz1": 2300,
+      "saldoCartao": 142.37,
+      "cargaParcial": 0,
+      "reembolso": -408.3299999999655,
+      "cargaFinal": 0
+    },
+    "35575473880": {
+      "linha": 58,
+      "nome": "BEATRIZ SILVA DE SIQUEIRA",
+      "cpf": "35575473880",
+      "saldoFinal": 1288.0200000000164,
+      "qz1": 2200,
+      "saldoCartao": 6.9,
+      "cargaParcial": 0,
+      "reembolso": 905.0799999999837,
+      "cargaFinal": 0
+    },
+    "83058133553": {
+      "linha": 59,
+      "nome": "ADSON SANTOS DA SILVA",
+      "cpf": "83058133553",
+      "saldoFinal": 1328.1200000000022,
+      "qz1": 2000,
+      "saldoCartao": 50.06,
+      "cargaParcial": 0,
+      "reembolso": 621.8199999999979,
+      "cargaFinal": 0
+    },
+    "01170402232": {
+      "linha": 60,
+      "nome": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "cpf": "01170402232",
+      "saldoFinal": 1979.1099999999897,
+      "qz1": 2000,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 14.890000000010332,
+      "cargaFinal": 0
+    },
+    "00049250256": {
+      "linha": 61,
+      "nome": "DHIEGO RIBEIRO DINIZ",
+      "cpf": "00049250256",
+      "saldoFinal": 1667.4599999999882,
+      "qz1": 2000,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": 323.5400000000118,
+      "cargaFinal": 0
+    },
+    "01755089090": {
+      "linha": 62,
+      "nome": "EVERSON ESTEVES DOS SANTOS",
+      "cpf": "01755089090",
+      "saldoFinal": 4000,
+      "qz1": 2000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -2000,
+      "cargaFinal": 0
+    },
+    "02679643909": {
+      "linha": 63,
+      "nome": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "cpf": "02679643909",
+      "saldoFinal": 1419.309999999999,
+      "qz1": 2000,
+      "saldoCartao": 619.59,
+      "cargaParcial": 0,
+      "reembolso": -38.89999999999907,
+      "cargaFinal": 0
+    },
+    "73574031491": {
+      "linha": 64,
+      "nome": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "cpf": "73574031491",
+      "saldoFinal": 1710.2899999999845,
+      "qz1": 2000,
+      "saldoCartao": 11.42,
+      "cargaParcial": 0,
+      "reembolso": 278.2900000000155,
+      "cargaFinal": 0
+    },
+    "10664298710": {
+      "linha": 65,
+      "nome": "FILIPE MENEZES KLING",
+      "cpf": "10664298710",
+      "saldoFinal": 0,
+      "qz1": 2000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 2000,
+      "cargaFinal": 0
+    },
+    "41997553813": {
+      "linha": 66,
+      "nome": "GUILHERME FERREIRA DA SILVA",
+      "cpf": "41997553813",
+      "saldoFinal": 0,
+      "qz1": 2000,
+      "saldoCartao": 36,
+      "cargaParcial": 0,
+      "reembolso": 1964,
+      "cargaFinal": 0
+    },
+    "11178519740": {
+      "linha": 67,
+      "nome": "GUILHERME MOTTA RIBEIRO SILVA",
+      "cpf": "11178519740",
+      "saldoFinal": 1609.1199999999947,
+      "qz1": 2000,
+      "saldoCartao": 37.64,
+      "cargaParcial": 0,
+      "reembolso": 353.24000000000535,
+      "cargaFinal": 0
+    },
+    "00584427905": {
+      "linha": 68,
+      "nome": "LEANDRO SOUSA",
+      "cpf": "00584427905",
+      "saldoFinal": 337.0799999999995,
+      "qz1": 2000,
+      "saldoCartao": 1800,
+      "cargaParcial": 0,
+      "reembolso": -137.07999999999947,
+      "cargaFinal": 0
+    },
+    "95073272153": {
+      "linha": 69,
+      "nome": "MARCELO GIMENEZ ARGEMON",
+      "cpf": "95073272153",
+      "saldoFinal": 0,
+      "qz1": 2000,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 1994,
+      "cargaFinal": 0
+    },
+    "01356318665": {
+      "linha": 70,
+      "nome": "MARCO AURELIO DE LIMA",
+      "cpf": "01356318665",
+      "saldoFinal": 0,
+      "qz1": 2000,
+      "saldoCartao": 12,
+      "cargaParcial": 0,
+      "reembolso": 1988,
+      "cargaFinal": 0
+    },
+    "17996820724": {
+      "linha": 71,
+      "nome": "MATHEUS FERNANDES GUIMARAES",
+      "cpf": "17996820724",
+      "saldoFinal": 62.88999999995576,
+      "qz1": 2000,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 1931.1100000000442,
+      "cargaFinal": 0
+    },
+    "05504962706": {
+      "linha": 72,
+      "nome": "RODRIGO SANTOS DA SILVA",
+      "cpf": "05504962706",
+      "saldoFinal": 2359.710000000005,
+      "qz1": 2000,
+      "saldoCartao": 65.35,
+      "cargaParcial": 0,
+      "reembolso": -425.06000000000506,
+      "cargaFinal": 0
+    },
+    "06015233265": {
+      "linha": 73,
+      "nome": "SHELDA CRISTINE LIMA TRINDADE",
+      "cpf": "06015233265",
+      "saldoFinal": 2000,
+      "qz1": 2000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "10363402950": {
+      "linha": 74,
+      "nome": "MARIA EDUARDA ARAGAO",
+      "cpf": "10363402950",
+      "saldoFinal": 0,
+      "qz1": 1840,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 1837,
+      "cargaFinal": 0
+    },
+    "27668763830": {
+      "linha": 75,
+      "nome": "RICARDO MURCIA GARCIA FILHO",
+      "cpf": "27668763830",
+      "saldoFinal": 0,
+      "qz1": 1800,
+      "saldoCartao": 2.14,
+      "cargaParcial": 0,
+      "reembolso": 1797.86,
+      "cargaFinal": 0
+    },
+    "06478105490": {
+      "linha": 76,
+      "nome": "THIAGO PEREIRA DE LIMA",
+      "cpf": "06478105490",
+      "saldoFinal": 2167.7700000000013,
+      "qz1": 1800,
+      "saldoCartao": 27.46,
+      "cargaParcial": 0,
+      "reembolso": -395.2300000000013,
+      "cargaFinal": 0
+    },
+    "01696239478": {
+      "linha": 77,
+      "nome": "JONAS CAVALCANTI DE OLIVEIRA",
+      "cpf": "01696239478",
+      "saldoFinal": 1110.8300000000017,
+      "qz1": 1750,
+      "saldoCartao": 12,
+      "cargaParcial": 0,
+      "reembolso": 627.1699999999983,
+      "cargaFinal": 0
+    },
+    "00965306186": {
+      "linha": 78,
+      "nome": "JAIME ALVES DE ABREU SILVA",
+      "cpf": "00965306186",
+      "saldoFinal": 2081.470000000003,
+      "qz1": 1700,
+      "saldoCartao": 27.99,
+      "cargaParcial": 0,
+      "reembolso": -409.460000000003,
+      "cargaFinal": 0
+    },
+    "04769973993": {
+      "linha": 79,
+      "nome": "ADMILSON DOS SANTOS GALAN",
+      "cpf": "04769973993",
+      "saldoFinal": 581.8399999999808,
+      "qz1": 1680,
+      "saldoCartao": 0.53,
+      "cargaParcial": 0,
+      "reembolso": 1097.6300000000192,
+      "cargaFinal": 0
+    },
+    "94551804304": {
+      "linha": 80,
+      "nome": "ADSON ARAUJO DA SILVA",
+      "cpf": "94551804304",
+      "saldoFinal": 246.23999999999432,
+      "qz1": 1600,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 1347.7600000000057,
+      "cargaFinal": 0
+    },
+    "69116709004": {
+      "linha": 81,
+      "nome": "DEISE SOARES DE CAMPOS",
+      "cpf": "69116709004",
+      "saldoFinal": 0,
+      "qz1": 1600,
+      "saldoCartao": 5038.04,
+      "cargaParcial": 0,
+      "reembolso": -3438.04,
+      "cargaFinal": 0
+    },
+    "37896893860": {
+      "linha": 82,
+      "nome": "EDIPO SANTOS BARRETO",
+      "cpf": "37896893860",
+      "saldoFinal": 338.64000000000306,
+      "qz1": 1600,
+      "saldoCartao": 599.04,
+      "cargaParcial": 0,
+      "reembolso": 662.319999999997,
+      "cargaFinal": 0
+    },
+    "97592439549": {
+      "linha": 83,
+      "nome": "DANIEL SANTOS DE ASSUNCAO",
+      "cpf": "97592439549",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 16,
+      "cargaParcial": 0,
+      "reembolso": 1484,
+      "cargaFinal": 0
+    },
+    "03985382638": {
+      "linha": 84,
+      "nome": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "cpf": "03985382638",
+      "saldoFinal": 883.2100000000046,
+      "qz1": 1500,
+      "saldoCartao": 29,
+      "cargaParcial": 0,
+      "reembolso": 587.7899999999954,
+      "cargaFinal": 0
+    },
+    "29157549850": {
+      "linha": 85,
+      "nome": "ERICSON PINHEIRO DOS SANTOS",
+      "cpf": "29157549850",
+      "saldoFinal": 814.9100000000005,
+      "qz1": 1500,
+      "saldoCartao": 814.49,
+      "cargaParcial": 0,
+      "reembolso": -129.40000000000055,
+      "cargaFinal": 0
+    },
+    "31275798888": {
+      "linha": 86,
+      "nome": "FABIO DA CONCEICAO LIMA",
+      "cpf": "31275798888",
+      "saldoFinal": 5604.9,
+      "qz1": 1500,
+      "saldoCartao": 7.97,
+      "cargaParcial": 0,
+      "reembolso": -4112.87,
+      "cargaFinal": 0
+    },
+    "05731312958": {
+      "linha": 87,
+      "nome": "FABIO PROVESI",
+      "cpf": "05731312958",
+      "saldoFinal": 1118.6200000000076,
+      "qz1": 1500,
+      "saldoCartao": 64.48,
+      "cargaParcial": 0,
+      "reembolso": 316.89999999999236,
+      "cargaFinal": 0
+    },
+    "01565661338": {
+      "linha": 88,
+      "nome": "ICARO MEDEIROS SILVA",
+      "cpf": "01565661338",
+      "saldoFinal": 5351.830000000001,
+      "qz1": 1500,
+      "saldoCartao": 10,
+      "cargaParcial": 0,
+      "reembolso": -3861.830000000001,
+      "cargaFinal": 0
+    },
+    "44997574600": {
+      "linha": 89,
+      "nome": "JORGE NEGRI NETO",
+      "cpf": "44997574600",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 1.22,
+      "cargaParcial": 0,
+      "reembolso": 1498.78,
+      "cargaFinal": 0
+    },
+    "27335364191": {
+      "linha": 90,
+      "nome": "JOSE EUSTAQUIO DE SOUZA",
+      "cpf": "27335364191",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 4.62,
+      "cargaParcial": 0,
+      "reembolso": 1495.38,
+      "cargaFinal": 0
+    },
+    "45120065830": {
+      "linha": 91,
+      "nome": "LARISSA SANTOS DA SILVA",
+      "cpf": "45120065830",
+      "saldoFinal": 2470.86,
+      "qz1": 1500,
+      "saldoCartao": 0.22,
+      "cargaParcial": 0,
+      "reembolso": -971.0800000000002,
+      "cargaFinal": 0
+    },
+    "11128978601": {
+      "linha": 92,
+      "nome": "LUCAS PEREIRA GONCALVES",
+      "cpf": "11128978601",
+      "saldoFinal": 1705.369999999998,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -205.36999999999807,
+      "cargaFinal": 0
+    },
+    "01730674500": {
+      "linha": 93,
+      "nome": "MARCEL DA HORA CARVALHO",
+      "cpf": "01730674500",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 2.6,
+      "cargaParcial": 0,
+      "reembolso": 1497.4,
+      "cargaFinal": 0
+    },
+    "05100355581": {
+      "linha": 94,
+      "nome": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "cpf": "05100355581",
+      "saldoFinal": 2971.1600000000017,
+      "qz1": 1500,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": -1474.1600000000017,
+      "cargaFinal": 0
+    },
+    "83978054515": {
+      "linha": 95,
+      "nome": "RAMON GOMES TEIXEIRA",
+      "cpf": "83978054515",
+      "saldoFinal": 870.0100000000023,
+      "qz1": 1500,
+      "saldoCartao": 10.26,
+      "cargaParcial": 0,
+      "reembolso": 619.7299999999977,
+      "cargaFinal": 0
+    },
+    "05664820969": {
+      "linha": 96,
+      "nome": "RODRIGO ROBERTO DE SOUZA",
+      "cpf": "05664820969",
+      "saldoFinal": 239.00000000000466,
+      "qz1": 1500,
+      "saldoCartao": 68.88,
+      "cargaParcial": 0,
+      "reembolso": 1192.1199999999953,
+      "cargaFinal": 0
+    },
+    "49637513809": {
+      "linha": 97,
+      "nome": "SARA ARAGAO DA SILVA BARBOSA",
+      "cpf": "49637513809",
+      "saldoFinal": 1823.760000000002,
+      "qz1": 1500,
+      "saldoCartao": 9,
+      "cargaParcial": 0,
+      "reembolso": -332.76000000000204,
+      "cargaFinal": 0
+    },
+    "02706762950": {
+      "linha": 98,
+      "nome": "SILMARA CHAVES",
+      "cpf": "02706762950",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 8.06,
+      "cargaParcial": 0,
+      "reembolso": 1491.94,
+      "cargaFinal": 0
+    },
+    "33927651800": {
+      "linha": 99,
+      "nome": "THIAGO LEANDRO DOS SANTOS",
+      "cpf": "33927651800",
+      "saldoFinal": 6076.589999999998,
+      "qz1": 1500,
+      "saldoCartao": 14.33,
+      "cargaParcial": 0,
+      "reembolso": -4590.919999999998,
+      "cargaFinal": 0
+    },
+    "07198282440": {
+      "linha": 100,
+      "nome": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "cpf": "07198282440",
+      "saldoFinal": 1010.9999999999911,
+      "qz1": 1500,
+      "saldoCartao": 44.76,
+      "cargaParcial": 0,
+      "reembolso": 444.2400000000089,
+      "cargaFinal": 0
+    },
+    "04352219657": {
+      "linha": 101,
+      "nome": "WELERSON PUFF RODRIGUES",
+      "cpf": "04352219657",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 1494,
+      "cargaFinal": 0
+    },
+    "42391813805": {
+      "linha": 102,
+      "nome": "GIOVANNA SIDOTI MARQUES ROLLO",
+      "cpf": "42391813805",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 1500,
+      "cargaFinal": 0
+    },
+    "34459886847": {
+      "linha": 103,
+      "nome": "RODRIGO FRANCISCO DE SOUSA",
+      "cpf": "34459886847",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "14355734803": {
+      "linha": 104,
+      "nome": "ROGERIO MACARIO PINTO",
+      "cpf": "14355734803",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "37377394803": {
+      "linha": 105,
+      "nome": "ALISON FERREIRA DA SILVA",
+      "cpf": "37377394803",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "03021570852": {
+      "linha": 106,
+      "nome": "MILTON BRASIL CAVALCANTE",
+      "cpf": "03021570852",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "45154701836": {
+      "linha": 107,
+      "nome": "KATIA RESENDE DA SILVA",
+      "cpf": "45154701836",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "34757123850": {
+      "linha": 108,
+      "nome": "FRANCO CARLOS DALLACQUA",
+      "cpf": "34757123850",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 1500,
+      "cargaFinal": 0
+    },
+    "44519188806": {
+      "linha": 109,
+      "nome": "GUILHERME MATEUS VAZ DOS SANTOS",
+      "cpf": "44519188806",
+      "saldoFinal": 0,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 1500,
+      "cargaFinal": 0
+    },
+    "37258325875": {
+      "linha": 110,
+      "nome": "JAQUELINE ONORIO DOS SANTOS ALVES",
+      "cpf": "37258325875",
+      "saldoFinal": 1500,
+      "qz1": 1500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "01553544692": {
+      "linha": 111,
+      "nome": "DIEGO JOSE DE PAULO",
+      "cpf": "01553544692",
+      "saldoFinal": 1437.9199999999983,
+      "qz1": 1400,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": -43.919999999998254,
+      "cargaFinal": 0
+    },
+    "06456801923": {
+      "linha": 112,
+      "nome": "PATRICK ANTONIEVICZ ALVES",
+      "cpf": "06456801923",
+      "saldoFinal": 94.74000000000902,
+      "qz1": 1400,
+      "saldoCartao": 151.34,
+      "cargaParcial": 0,
+      "reembolso": 1153.919999999991,
+      "cargaFinal": 0
+    },
+    "98603566020": {
+      "linha": 113,
+      "nome": "ANDRE PINHEIRO BALOTIN",
+      "cpf": "98603566020",
+      "saldoFinal": 372.76000000000204,
+      "qz1": 1200,
+      "saldoCartao": 2715.41,
+      "cargaParcial": 0,
+      "reembolso": -1888.170000000002,
+      "cargaFinal": 0
+    },
+    "09199781930": {
+      "linha": 114,
+      "nome": "HIGOR KELVYN SILVA AMORIM",
+      "cpf": "09199781930",
+      "saldoFinal": 0,
+      "qz1": 1200,
+      "saldoCartao": 504.3,
+      "cargaParcial": 0,
+      "reembolso": 695.7,
+      "cargaFinal": 0
+    },
+    "01310014264": {
+      "linha": 115,
+      "nome": "JAQUELINE LEVATI PEREIRA",
+      "cpf": "01310014264",
+      "saldoFinal": 638.4299999999973,
+      "qz1": 1200,
+      "saldoCartao": 2.2,
+      "cargaParcial": 0,
+      "reembolso": 559.3700000000026,
+      "cargaFinal": 0
+    },
+    "03445951969": {
+      "linha": 116,
+      "nome": "PAOLA CAROLINI BARBOSA",
+      "cpf": "03445951969",
+      "saldoFinal": 2472.3199999999997,
+      "qz1": 1200,
+      "saldoCartao": 8.2,
+      "cargaParcial": 0,
+      "reembolso": -1280.5199999999998,
+      "cargaFinal": 0
+    },
+    "04179369907": {
+      "linha": 117,
+      "nome": "PAULO ALEXANDRE DE AMORIM",
+      "cpf": "04179369907",
+      "saldoFinal": 137.5000000000009,
+      "qz1": 1200,
+      "saldoCartao": 177.75,
+      "cargaParcial": 0,
+      "reembolso": 884.7499999999991,
+      "cargaFinal": 0
+    },
+    "27104988807": {
+      "linha": 118,
+      "nome": "RODRIGO BOLDO",
+      "cpf": "27104988807",
+      "saldoFinal": 1469.840000000011,
+      "qz1": 1200,
+      "saldoCartao": 1.25,
+      "cargaParcial": 0,
+      "reembolso": -271.09000000001106,
+      "cargaFinal": 0
+    },
+    "01595939644": {
+      "linha": 119,
+      "nome": "ULISSES FERREIRA DE OLIVEIRA",
+      "cpf": "01595939644",
+      "saldoFinal": 2664.1399999999812,
+      "qz1": 1150,
+      "saldoCartao": 3.84,
+      "cargaParcial": 0,
+      "reembolso": -1517.9799999999811,
+      "cargaFinal": 0
+    },
+    "01932662537": {
+      "linha": 120,
+      "nome": "ADAN LEONARDO SOUZA BATISTA",
+      "cpf": "01932662537",
+      "saldoFinal": 61.89999999999998,
+      "qz1": 1000,
+      "saldoCartao": 845.1,
+      "cargaParcial": 0,
+      "reembolso": 93,
+      "cargaFinal": 0
+    },
+    "06911519624": {
+      "linha": 121,
+      "nome": "AGNO CHRISTIAN DE LIMA TELES",
+      "cpf": "06911519624",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 997,
+      "cargaFinal": 0
+    },
+    "33162718805": {
+      "linha": 148,
+      "nome": "ANDRESA INDIRA SANTANA AGGIO",
+      "cpf": "33162718805",
+      "saldoFinal": 6791.429999999998,
+      "qz1": 1000,
+      "saldoCartao": 10.42,
+      "cargaParcial": 0,
+      "reembolso": -5801.849999999998,
+      "cargaFinal": 0
+    },
+    "08326260401": {
+      "linha": 123,
+      "nome": "ANTONIO JOSE PEREIRA DA SILVA",
+      "cpf": "08326260401",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 9.18,
+      "cargaParcial": 0,
+      "reembolso": 990.82,
+      "cargaFinal": 0
+    },
+    "05144026958": {
+      "linha": 124,
+      "nome": "CLAUDEMIR GREGOSKI RODRIGUES",
+      "cpf": "05144026958",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 1000,
+      "cargaFinal": 5035
+    },
+    "09407167631": {
+      "linha": 125,
+      "nome": "DIEGO DE ALCANTARA MOTA MENDES",
+      "cpf": "09407167631",
+      "saldoFinal": 912.619999999999,
+      "qz1": 1000,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 84.38000000000102,
+      "cargaFinal": 0
+    },
+    "05765681719": {
+      "linha": 126,
+      "nome": "EDSON CALIXTO THOMAZ",
+      "cpf": "05765681719",
+      "saldoFinal": 86.62000000001034,
+      "qz1": 1000,
+      "saldoCartao": 6.52,
+      "cargaParcial": 0,
+      "reembolso": 906.8599999999897,
+      "cargaFinal": 0
+    },
+    "38880279858": {
+      "linha": 149,
+      "nome": "FABIANA CAMILA BARBOSA DE MORAES LIMA",
+      "cpf": "38880279858",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 2.81,
+      "cargaParcial": 0,
+      "reembolso": 997.19,
+      "cargaFinal": 0
+    },
+    "07021071400": {
+      "linha": 128,
+      "nome": "FRANCINILDO JACKSON DE ALMEIDA ARAUJO",
+      "cpf": "07021071400",
+      "saldoFinal": 987.79,
+      "qz1": 1000,
+      "saldoCartao": 12.21,
+      "cargaParcial": 0,
+      "reembolso": 3.552713678800501e-14,
+      "cargaFinal": 0
+    },
+    "08103183776": {
+      "linha": 129,
+      "nome": "JEFFERSON NAZARENO SILVA FREITAS",
+      "cpf": "08103183776",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 6,
+      "cargaParcial": 0,
+      "reembolso": 994,
+      "cargaFinal": 0
+    },
+    "10588522996": {
+      "linha": 130,
+      "nome": "JOAO ALEXANDRE LIMA",
+      "cpf": "10588522996",
+      "saldoFinal": 233.11999999999898,
+      "qz1": 1000,
+      "saldoCartao": 748.5,
+      "cargaParcial": 0,
+      "reembolso": 18.38000000000102,
+      "cargaFinal": 0
+    },
+    "55889913115": {
+      "linha": 131,
+      "nome": "JOSE JONAS FURLANETTO",
+      "cpf": "55889913115",
+      "saldoFinal": 607.0700000000006,
+      "qz1": 1000,
+      "saldoCartao": 43,
+      "cargaParcial": 0,
+      "reembolso": 349.9299999999994,
+      "cargaFinal": 0
+    },
+    "06323566346": {
+      "linha": 132,
+      "nome": "JOSE VICTOR ARAUJO FELIX",
+      "cpf": "06323566346",
+      "saldoFinal": 1000,
+      "qz1": 1000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "10054353670": {
+      "linha": 133,
+      "nome": "JUNIO VICENTE BARBOSA",
+      "cpf": "10054353670",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 1000,
+      "cargaFinal": 0
+    },
+    "03374811647": {
+      "linha": 134,
+      "nome": "LEONARDO MURATORI ATHAYDE",
+      "cpf": "03374811647",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 13,
+      "cargaParcial": 0,
+      "reembolso": 987,
+      "cargaFinal": 0
+    },
+    "05892698440": {
+      "linha": 135,
+      "nome": "LEONARDO ORESTES SOARES",
+      "cpf": "05892698440",
+      "saldoFinal": 1314.2900000000002,
+      "qz1": 1000,
+      "saldoCartao": 12.72,
+      "cargaParcial": 0,
+      "reembolso": -327.0100000000002,
+      "cargaFinal": 0
+    },
+    "08030478437": {
+      "linha": 136,
+      "nome": "LUAN THIAGO DA SILVA",
+      "cpf": "08030478437",
+      "saldoFinal": 3.637978807091713e-12,
+      "qz1": 1000,
+      "saldoCartao": 8.75,
+      "cargaParcial": 0,
+      "reembolso": 991.2499999999964,
+      "cargaFinal": 0
+    },
+    "10977673618": {
+      "linha": 137,
+      "nome": "LUCAS HENRIQUE ALVES DE OLIVEIRA",
+      "cpf": "10977673618",
+      "saldoFinal": 343.1000000000002,
+      "qz1": 1000,
+      "saldoCartao": 138.95,
+      "cargaParcial": 0,
+      "reembolso": 517.9499999999998,
+      "cargaFinal": 0
+    },
+    "29856268893": {
+      "linha": 138,
+      "nome": "LUIZ GUSTAVO DI GIORGIO",
+      "cpf": "29856268893",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 5.96,
+      "cargaParcial": 0,
+      "reembolso": 994.04,
+      "cargaFinal": 0
+    },
+    "05375810654": {
+      "linha": 139,
+      "nome": "MARCELO DE SOUZA DALA VEDOVA",
+      "cpf": "05375810654",
+      "saldoFinal": 48.099999999999596,
+      "qz1": 1000,
+      "saldoCartao": 105.09,
+      "cargaParcial": 0,
+      "reembolso": 846.8100000000004,
+      "cargaFinal": 0
+    },
+    "97135631900": {
+      "linha": 140,
+      "nome": "MARCOS SEGER",
+      "cpf": "97135631900",
+      "saldoFinal": 161.11999999999716,
+      "qz1": 1000,
+      "saldoCartao": 1593,
+      "cargaParcial": 0,
+      "reembolso": -754.1199999999972,
+      "cargaFinal": 0
+    },
+    "02644012473": {
+      "linha": 141,
+      "nome": "MARIO SERGIO DE MENEZES MARQUES BORGES",
+      "cpf": "02644012473",
+      "saldoFinal": 983.41,
+      "qz1": 1000,
+      "saldoCartao": 9.59,
+      "cargaParcial": 0,
+      "reembolso": 7.000000000000032,
+      "cargaFinal": 0
+    },
+    "01304856674": {
+      "linha": 142,
+      "nome": "MATEUS DE CARVALHO BERTOL",
+      "cpf": "01304856674",
+      "saldoFinal": 736.1300000000001,
+      "qz1": 1000,
+      "saldoCartao": 502.54,
+      "cargaParcial": 0,
+      "reembolso": -238.67000000000013,
+      "cargaFinal": 0
+    },
+    "68746458204": {
+      "linha": 143,
+      "nome": "MOISES DOS SANTOS CABRAL",
+      "cpf": "68746458204",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 139.62,
+      "cargaParcial": 0,
+      "reembolso": 860.38,
+      "cargaFinal": 0
+    },
+    "10521167957": {
+      "linha": 144,
+      "nome": "MURILO DE ALMEIDA",
+      "cpf": "10521167957",
+      "saldoFinal": 368.20000000000005,
+      "qz1": 1000,
+      "saldoCartao": 631.8,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "00539580040": {
+      "linha": 145,
+      "nome": "RICARDO ZORZETTO",
+      "cpf": "00539580040",
+      "saldoFinal": 74.36999999999318,
+      "qz1": 1000,
+      "saldoCartao": 740.65,
+      "cargaParcial": 0,
+      "reembolso": 184.98000000000684,
+      "cargaFinal": 0
+    },
+    "14084321613": {
+      "linha": 152,
+      "nome": "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA",
+      "cpf": "14084321613",
+      "saldoFinal": 48.820000000004654,
+      "qz1": 1000,
+      "saldoCartao": 27.81,
+      "cargaParcial": 0,
+      "reembolso": 923.3699999999953,
+      "cargaFinal": 0
+    },
+    "12609931670": {
+      "linha": 147,
+      "nome": "TULIO VELOSO HONORATO",
+      "cpf": "12609931670",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 997,
+      "cargaFinal": 0
+    },
+    "00799913510": {
+      "linha": 150,
+      "nome": "GLEIDE CONCEICAO NASCIMENTO ALVES",
+      "cpf": "00799913510",
+      "saldoFinal": 146.08999999999975,
+      "qz1": 1000,
+      "saldoCartao": 61.42,
+      "cargaParcial": 0,
+      "reembolso": 792.4900000000004,
+      "cargaFinal": 0
+    },
+    "17074849707": {
+      "linha": 151,
+      "nome": "TANDARA MARIA DO VALES PEREIRA ALVES",
+      "cpf": "17074849707",
+      "saldoFinal": 0,
+      "qz1": 1000,
+      "saldoCartao": 1241.49,
+      "cargaParcial": 0,
+      "reembolso": -241.49,
+      "cargaFinal": 0
+    },
+    "10433881844": {
+      "linha": 153,
+      "nome": "CLAUDINEI AMARAL",
+      "cpf": "10433881844",
+      "saldoFinal": 0,
+      "qz1": 900,
+      "saldoCartao": 311.19,
+      "cargaParcial": 0,
+      "reembolso": 588.81,
+      "cargaFinal": 0
+    },
+    "03031202902": {
+      "linha": 154,
+      "nome": "HUGO DELLA JUSTINA",
+      "cpf": "03031202902",
+      "saldoFinal": 2.150000000000946,
+      "qz1": 900,
+      "saldoCartao": 1.06,
+      "cargaParcial": 0,
+      "reembolso": 896.789999999999,
+      "cargaFinal": 0
+    },
+    "67324398049": {
+      "linha": 155,
+      "nome": "ADILSON MELLO DE CAMARGO",
+      "cpf": "67324398049",
+      "saldoFinal": 1370.7300000000005,
+      "qz1": 800,
+      "saldoCartao": 43,
+      "cargaParcial": 0,
+      "reembolso": -613.7300000000005,
+      "cargaFinal": 0
+    },
+    "07722232469": {
+      "linha": 156,
+      "nome": "ALAN RODRIGO SILVA ANDRADE",
+      "cpf": "07722232469",
+      "saldoFinal": 636.689999999999,
+      "qz1": 800,
+      "saldoCartao": 32.39,
+      "cargaParcial": 0,
+      "reembolso": 130.92000000000098,
+      "cargaFinal": 0
+    },
+    "04836584990": {
+      "linha": 157,
+      "nome": "ANTONIO MARCOS CAMARGO",
+      "cpf": "04836584990",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 2.27,
+      "cargaParcial": 0,
+      "reembolso": 797.73,
+      "cargaFinal": 0
+    },
+    "12877857603": {
+      "linha": 158,
+      "nome": "ARTHUR GOMES DE PAULO",
+      "cpf": "12877857603",
+      "saldoFinal": 743.3800000000014,
+      "qz1": 800,
+      "saldoCartao": 2.6,
+      "cargaParcial": 0,
+      "reembolso": 54.01999999999864,
+      "cargaFinal": 0
+    },
+    "13459423625": {
+      "linha": 159,
+      "nome": "BRUNA LAIS DOS SANTOS PESSOA",
+      "cpf": "13459423625",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 713.4,
+      "cargaParcial": 0,
+      "reembolso": 86.60000000000002,
+      "cargaFinal": 0
+    },
+    "09867858816": {
+      "linha": 160,
+      "nome": "CARLOS ROBERTO DE CARVALHO PERES",
+      "cpf": "09867858816",
+      "saldoFinal": 577.550000000001,
+      "qz1": 800,
+      "saldoCartao": 8.83,
+      "cargaParcial": 0,
+      "reembolso": 213.619999999999,
+      "cargaFinal": 0
+    },
+    "75609444004": {
+      "linha": 161,
+      "nome": "CLAUDEMIR MOREIRA",
+      "cpf": "75609444004",
+      "saldoFinal": 250,
+      "qz1": 800,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 550,
+      "cargaFinal": 0
+    },
+    "05864921947": {
+      "linha": 162,
+      "nome": "CLEBERSON APARECIDO BORGES DOS SANTOS",
+      "cpf": "05864921947",
+      "saldoFinal": 183.74000000001988,
+      "qz1": 800,
+      "saldoCartao": 2.42,
+      "cargaParcial": 0,
+      "reembolso": 613.8399999999801,
+      "cargaFinal": 0
+    },
+    "11422891844": {
+      "linha": 163,
+      "nome": "DIVAN ALVES DE AMORIM",
+      "cpf": "11422891844",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 26.26,
+      "cargaParcial": 0,
+      "reembolso": 773.74,
+      "cargaFinal": 0
+    },
+    "08492402989": {
+      "linha": 164,
+      "nome": "DOUGLAS TIAGO DE OLIVEIRA",
+      "cpf": "08492402989",
+      "saldoFinal": 2.7284841053187847e-12,
+      "qz1": 800,
+      "saldoCartao": 668,
+      "cargaParcial": 0,
+      "reembolso": 131.99999999999727,
+      "cargaFinal": 0
+    },
+    "08784554932": {
+      "linha": 165,
+      "nome": "DOUGLAS WESLEN CARDOSO DOS SANTOS",
+      "cpf": "08784554932",
+      "saldoFinal": 999.8999999999999,
+      "qz1": 800,
+      "saldoCartao": 50.3,
+      "cargaParcial": 0,
+      "reembolso": -250.19999999999987,
+      "cargaFinal": 0
+    },
+    "00461757923": {
+      "linha": 166,
+      "nome": "ELIANDRO BRUNING",
+      "cpf": "00461757923",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 1.38,
+      "cargaParcial": 0,
+      "reembolso": 798.62,
+      "cargaFinal": 0
+    },
+    "29722576852": {
+      "linha": 167,
+      "nome": "EMERSON CHOUBI PRADO",
+      "cpf": "29722576852",
+      "saldoFinal": 166.89999999999998,
+      "qz1": 800,
+      "saldoCartao": 731.1,
+      "cargaParcial": 0,
+      "reembolso": -98,
+      "cargaFinal": 0
+    },
+    "47331178253": {
+      "linha": 168,
+      "nome": "FRANCIONE DE SOUZA LUCENA",
+      "cpf": "47331178253",
+      "saldoFinal": 133.60000000000255,
+      "qz1": 800,
+      "saldoCartao": 46.35,
+      "cargaParcial": 0,
+      "reembolso": 620.0499999999975,
+      "cargaFinal": 0
+    },
+    "10531222926": {
+      "linha": 169,
+      "nome": "GUSTAVO RODRIGUES FARIA",
+      "cpf": "10531222926",
+      "saldoFinal": 1779.65,
+      "qz1": 800,
+      "saldoCartao": 0.94,
+      "cargaParcial": 0,
+      "reembolso": -980.5900000000001,
+      "cargaFinal": 0
+    },
+    "04083479965": {
+      "linha": 170,
+      "nome": "ISAIAS DA SILVA",
+      "cpf": "04083479965",
+      "saldoFinal": 5.120000000000516,
+      "qz1": 800,
+      "saldoCartao": 79.32,
+      "cargaParcial": 0,
+      "reembolso": 715.5599999999995,
+      "cargaFinal": 0
+    },
+    "10206563957": {
+      "linha": 171,
+      "nome": "JACSSON MAYLON CASTRO CORREA",
+      "cpf": "10206563957",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 19.82,
+      "cargaParcial": 0,
+      "reembolso": 780.18,
+      "cargaFinal": 0
+    },
+    "60377348953": {
+      "linha": 172,
+      "nome": "JAIR ASSIS DA SILVA",
+      "cpf": "60377348953",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 97.31,
+      "cargaParcial": 0,
+      "reembolso": 702.69,
+      "cargaFinal": 0
+    },
+    "08935547905": {
+      "linha": 173,
+      "nome": "JEFERSON ADRIANO WERNER",
+      "cpf": "08935547905",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 15.78,
+      "cargaParcial": 0,
+      "reembolso": 784.22,
+      "cargaFinal": 0
+    },
+    "07060404902": {
+      "linha": 174,
+      "nome": "JEFERSON ZAMPRONIO DA SILVA",
+      "cpf": "07060404902",
+      "saldoFinal": 1.1652900866465643e-12,
+      "qz1": 800,
+      "saldoCartao": 33.72,
+      "cargaParcial": 0,
+      "reembolso": 766.2799999999988,
+      "cargaFinal": 0
+    },
+    "07972796955": {
+      "linha": 175,
+      "nome": "JHEFERSON DIASSIS",
+      "cpf": "07972796955",
+      "saldoFinal": 1.8189894035458565e-12,
+      "qz1": 800,
+      "saldoCartao": 7.25,
+      "cargaParcial": 0,
+      "reembolso": 792.7499999999982,
+      "cargaFinal": 0
+    },
+    "02265549967": {
+      "linha": 176,
+      "nome": "JULIO CESAR ALVES DA ROCHA",
+      "cpf": "02265549967",
+      "saldoFinal": 1250.0000000000002,
+      "qz1": 800,
+      "saldoCartao": 0.8,
+      "cargaParcial": 0,
+      "reembolso": -450.80000000000024,
+      "cargaFinal": 0
+    },
+    "36020922839": {
+      "linha": 177,
+      "nome": "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI",
+      "cpf": "36020922839",
+      "saldoFinal": 100.00000000000401,
+      "qz1": 800,
+      "saldoCartao": 108.1,
+      "cargaParcial": 0,
+      "reembolso": 591.899999999996,
+      "cargaFinal": 0
+    },
+    "08781221924": {
+      "linha": 178,
+      "nome": "LUCAS CARVALHO DE SOUZA",
+      "cpf": "08781221924",
+      "saldoFinal": 2292.820000000001,
+      "qz1": 800,
+      "saldoCartao": 5.47,
+      "cargaParcial": 0,
+      "reembolso": -1498.290000000001,
+      "cargaFinal": 0
+    },
+    "08204909977": {
+      "linha": 179,
+      "nome": "LUCAS DE PAULA SILVA",
+      "cpf": "08204909977",
+      "saldoFinal": 134.60000000000912,
+      "qz1": 800,
+      "saldoCartao": 542.4,
+      "cargaParcial": 0,
+      "reembolso": 122.9999999999909,
+      "cargaFinal": 0
+    },
+    "03898579980": {
+      "linha": 180,
+      "nome": "LUIZ FERNANDO CAVALHEIRO",
+      "cpf": "03898579980",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 432.86,
+      "cargaParcial": 0,
+      "reembolso": 367.14,
+      "cargaFinal": 0
+    },
+    "02678045129": {
+      "linha": 181,
+      "nome": "LUIZ PAULO SILVA SOUSA JUNIOR",
+      "cpf": "02678045129",
+      "saldoFinal": 713.0400000000008,
+      "qz1": 800,
+      "saldoCartao": 16.62,
+      "cargaParcial": 0,
+      "reembolso": 70.33999999999924,
+      "cargaFinal": 0
+    },
+    "29011288823": {
+      "linha": 182,
+      "nome": "MARCEL GOMES DE OLIVEIRA",
+      "cpf": "29011288823",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 797,
+      "cargaFinal": 0
+    },
+    "84219122915": {
+      "linha": 183,
+      "nome": "ODAIR CIRCO SOARES",
+      "cpf": "84219122915",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 10.05,
+      "cargaParcial": 0,
+      "reembolso": 789.95,
+      "cargaFinal": 0
+    },
+    "03067535960": {
+      "linha": 184,
+      "nome": "OSCAR DOMINGO PALARO",
+      "cpf": "03067535960",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 800,
+      "cargaFinal": 0
+    },
+    "03710085900": {
+      "linha": 185,
+      "nome": "RAFAEL NATAL LACHI",
+      "cpf": "03710085900",
+      "saldoFinal": 59.05999999999949,
+      "qz1": 800,
+      "saldoCartao": 57,
+      "cargaParcial": 0,
+      "reembolso": 683.9400000000005,
+      "cargaFinal": 0
+    },
+    "11914988671": {
+      "linha": 186,
+      "nome": "RAFAEL PORTO ALVES DA CRUZ",
+      "cpf": "11914988671",
+      "saldoFinal": 144.98000000000047,
+      "qz1": 800,
+      "saldoCartao": 39,
+      "cargaParcial": 0,
+      "reembolso": 616.0199999999995,
+      "cargaFinal": 0
+    },
+    "03288831902": {
+      "linha": 187,
+      "nome": "RAUL ADRIANO DOS SANTOS",
+      "cpf": "03288831902",
+      "saldoFinal": 1546.140000000002,
+      "qz1": 800,
+      "saldoCartao": 39.91,
+      "cargaParcial": 0,
+      "reembolso": -786.0500000000019,
+      "cargaFinal": 0
+    },
+    "97162485634": {
+      "linha": 188,
+      "nome": "RENATO PARREIRAS",
+      "cpf": "97162485634",
+      "saldoFinal": 648.840000000004,
+      "qz1": 800,
+      "saldoCartao": 43.51,
+      "cargaParcial": 0,
+      "reembolso": 107.649999999996,
+      "cargaFinal": 0
+    },
+    "03059202940": {
+      "linha": 189,
+      "nome": "RODRIGO FRANCISCO CORREA",
+      "cpf": "03059202940",
+      "saldoFinal": 473.19999999999436,
+      "qz1": 800,
+      "saldoCartao": 564.5,
+      "cargaParcial": 0,
+      "reembolso": -237.69999999999436,
+      "cargaFinal": 0
+    },
+    "89591640030": {
+      "linha": 190,
+      "nome": "ROGERIO GOMES DE OLIVEIRA",
+      "cpf": "89591640030",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 797,
+      "cargaFinal": 0
+    },
+    "02710155940": {
+      "linha": 191,
+      "nome": "SIDNEI MACHADO",
+      "cpf": "02710155940",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 16.01,
+      "cargaParcial": 0,
+      "reembolso": 783.99,
+      "cargaFinal": 0
+    },
+    "30941372880": {
+      "linha": 192,
+      "nome": "THALITA MANCILIO DIAS GONDIM",
+      "cpf": "30941372880",
+      "saldoFinal": 298.31000000000097,
+      "qz1": 800,
+      "saldoCartao": 340.86,
+      "cargaParcial": 0,
+      "reembolso": 160.82999999999902,
+      "cargaFinal": 0
+    },
+    "04661413199": {
+      "linha": 193,
+      "nome": "TIAGO DE JESUS ARAUJO",
+      "cpf": "04661413199",
+      "saldoFinal": 160.5000000000005,
+      "qz1": 800,
+      "saldoCartao": 390.71,
+      "cargaParcial": 0,
+      "reembolso": 248.78999999999957,
+      "cargaFinal": 0
+    },
+    "00849381533": {
+      "linha": 194,
+      "nome": "TIAGO FERNANDES SANTOS DE OLIVEIRA",
+      "cpf": "00849381533",
+      "saldoFinal": 683.7299999999996,
+      "qz1": 800,
+      "saldoCartao": 39,
+      "cargaParcial": 0,
+      "reembolso": 77.27000000000044,
+      "cargaFinal": 0
+    },
+    "37695259810": {
+      "linha": 195,
+      "nome": "VANDERLEI DE SOUZA NORONHA JUNIOR",
+      "cpf": "37695259810",
+      "saldoFinal": 615.0000000000052,
+      "qz1": 800,
+      "saldoCartao": 2.05,
+      "cargaParcial": 0,
+      "reembolso": 182.94999999999476,
+      "cargaFinal": 0
+    },
+    "21262405840": {
+      "linha": 196,
+      "nome": "VANDERLEI DOS SANTOS",
+      "cpf": "21262405840",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 179.54,
+      "cargaParcial": 0,
+      "reembolso": 620.46,
+      "cargaFinal": 0
+    },
+    "09265596996": {
+      "linha": 197,
+      "nome": "VICTOR MIGUEL PALARO",
+      "cpf": "09265596996",
+      "saldoFinal": 0,
+      "qz1": 800,
+      "saldoCartao": 42.87,
+      "cargaParcial": 0,
+      "reembolso": 757.13,
+      "cargaFinal": 0
+    },
+    "04747951954": {
+      "linha": 198,
+      "nome": "WELLINGTON ARION TAVARES",
+      "cpf": "04747951954",
+      "saldoFinal": 87.8,
+      "qz1": 800,
+      "saldoCartao": 73.2,
+      "cargaParcial": 0,
+      "reembolso": 639,
+      "cargaFinal": 0
+    },
+    "91443130982": {
+      "linha": 199,
+      "nome": "WELTON GERALDO WROBLEWSKI",
+      "cpf": "91443130982",
+      "saldoFinal": 4.774847184307873e-12,
+      "qz1": 800,
+      "saldoCartao": 418.47,
+      "cargaParcial": 0,
+      "reembolso": 381.5299999999952,
+      "cargaFinal": 0
+    },
+    "06223031980": {
+      "linha": 200,
+      "nome": "ADEMARCIO DUARTE LOPES",
+      "cpf": "06223031980",
+      "saldoFinal": 238.4400000000029,
+      "qz1": 750,
+      "saldoCartao": 120.61,
+      "cargaParcial": 0,
+      "reembolso": 390.9499999999971,
+      "cargaFinal": 0
+    },
+    "12712136640": {
+      "linha": 201,
+      "nome": "CELIO GONCALVES DE OLIVEIRA JUNIOR",
+      "cpf": "12712136640",
+      "saldoFinal": 119.00000000000009,
+      "qz1": 750,
+      "saldoCartao": 164.4,
+      "cargaParcial": 0,
+      "reembolso": 466.5999999999999,
+      "cargaFinal": 0
+    },
+    "02705722955": {
+      "linha": 202,
+      "nome": "CLAUDIO RENALDI NUNES",
+      "cpf": "02705722955",
+      "saldoFinal": 0,
+      "qz1": 750,
+      "saldoCartao": 365.6,
+      "cargaParcial": 0,
+      "reembolso": 384.4,
+      "cargaFinal": 0
+    },
+    "85225720030": {
+      "linha": 203,
+      "nome": "DEBORA ARAUJO FIGUEIREDO",
+      "cpf": "85225720030",
+      "saldoFinal": 0,
+      "qz1": 750,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 747,
+      "cargaFinal": 0
+    },
+    "05289382666": {
+      "linha": 204,
+      "nome": "DELVANO AILTON DA SILVA",
+      "cpf": "05289382666",
+      "saldoFinal": 342.89999999999975,
+      "qz1": 750,
+      "saldoCartao": 407.1,
+      "cargaParcial": 0,
+      "reembolso": 2.2737367544323206e-13,
+      "cargaFinal": 0
+    },
+    "06311884607": {
+      "linha": 205,
+      "nome": "EDMAR FERREIRA CARDOSO",
+      "cpf": "06311884607",
+      "saldoFinal": 1176.8600000000022,
+      "qz1": 750,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": -429.8600000000022,
+      "cargaFinal": 0
+    },
+    "44012861549": {
+      "linha": 206,
+      "nome": "JAZEMIR DE SANTANA MARQUES",
+      "cpf": "44012861549",
+      "saldoFinal": 362.3600000000024,
+      "qz1": 750,
+      "saldoCartao": 16,
+      "cargaParcial": 0,
+      "reembolso": 371.6399999999976,
+      "cargaFinal": 0
+    },
+    "11634696611": {
+      "linha": 207,
+      "nome": "PAULO DE FREITAS PEREIRA",
+      "cpf": "11634696611",
+      "saldoFinal": 0,
+      "qz1": 750,
+      "saldoCartao": 750,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "10354623621": {
+      "linha": 208,
+      "nome": "UELITON CANDIDO",
+      "cpf": "10354623621",
+      "saldoFinal": 0,
+      "qz1": 750,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 750,
+      "cargaFinal": 0
+    },
+    "13921847621": {
+      "linha": 209,
+      "nome": "ARTHUR SANTOS DE OLIVEIRA",
+      "cpf": "13921847621",
+      "saldoFinal": 169.54000000000087,
+      "qz1": 700,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 527.4599999999991,
+      "cargaFinal": 0
+    },
+    "32060157900": {
+      "linha": 210,
+      "nome": "AURO MOREIRA PEDROSO",
+      "cpf": "32060157900",
+      "saldoFinal": 0,
+      "qz1": 700,
+      "saldoCartao": 732.38,
+      "cargaParcial": 0,
+      "reembolso": -32.379999999999995,
+      "cargaFinal": 0
+    },
+    "82341478972": {
+      "linha": 211,
+      "nome": "BRUNO EDUARDO DE SOUZA",
+      "cpf": "82341478972",
+      "saldoFinal": 873.2999999999994,
+      "qz1": 700,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -173.2999999999994,
+      "cargaFinal": 0
+    },
+    "09072032640": {
+      "linha": 212,
+      "nome": "LEANDRO DE MENEZES ASSUNCAO",
+      "cpf": "09072032640",
+      "saldoFinal": 148.9900000000007,
+      "qz1": 700,
+      "saldoCartao": 43,
+      "cargaParcial": 0,
+      "reembolso": 508.0099999999993,
+      "cargaFinal": 0
+    },
+    "03461295914": {
+      "linha": 213,
+      "nome": "LEANDRO DE QUADROS",
+      "cpf": "03461295914",
+      "saldoFinal": 0,
+      "qz1": 700,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 700,
+      "cargaFinal": 0
+    },
+    "07318362780": {
+      "linha": 214,
+      "nome": "MARCIO BOUZAS FERREIRA",
+      "cpf": "07318362780",
+      "saldoFinal": 0,
+      "qz1": 700,
+      "saldoCartao": 0.86,
+      "cargaParcial": 0,
+      "reembolso": 699.14,
+      "cargaFinal": 0
+    },
+    "05168980945": {
+      "linha": 215,
+      "nome": "PRISCILA GOTARDO PEREIRA",
+      "cpf": "05168980945",
+      "saldoFinal": 54.00000000000003,
+      "qz1": 700,
+      "saldoCartao": 138.71,
+      "cargaParcial": 0,
+      "reembolso": 507.28999999999996,
+      "cargaFinal": 0
+    },
+    "81480261068": {
+      "linha": 216,
+      "nome": "ROBERTO DOMINGUES PEREIRA",
+      "cpf": "81480261068",
+      "saldoFinal": 2598.2600000000157,
+      "qz1": 700,
+      "saldoCartao": 158.55,
+      "cargaParcial": 0,
+      "reembolso": -2056.810000000016,
+      "cargaFinal": 0
+    },
+    "07024923610": {
+      "linha": 217,
+      "nome": "RODRIGO CESAR DOS SANTOS",
+      "cpf": "07024923610",
+      "saldoFinal": 7176.039999999994,
+      "qz1": 700,
+      "saldoCartao": 58,
+      "cargaParcial": 0,
+      "reembolso": -6534.039999999994,
+      "cargaFinal": 0
+    },
+    "34596010862": {
+      "linha": 218,
+      "nome": "EDIBERTO GEORGE RELIQUIAS",
+      "cpf": "34596010862",
+      "saldoFinal": 34.30000000000041,
+      "qz1": 675,
+      "saldoCartao": 675,
+      "cargaParcial": 0,
+      "reembolso": -34.30000000000041,
+      "cargaFinal": 0
+    },
+    "89395140259": {
+      "linha": 219,
+      "nome": "RAQUEL PANTOJA SANTOS",
+      "cpf": "89395140259",
+      "saldoFinal": 0,
+      "qz1": 640,
+      "saldoCartao": 565,
+      "cargaParcial": 0,
+      "reembolso": 75,
+      "cargaFinal": 0
+    },
+    "93457235953": {
+      "linha": 220,
+      "nome": "CLAUDIO DONIZETE DA SILVA",
+      "cpf": "93457235953",
+      "saldoFinal": 499.70000000000005,
+      "qz1": 600,
+      "saldoCartao": 255.72,
+      "cargaParcial": 0,
+      "reembolso": -155.42000000000004,
+      "cargaFinal": 0
+    },
+    "39297665829": {
+      "linha": 221,
+      "nome": "FABIO HENRIQUE PECORARI CRUZ",
+      "cpf": "39297665829",
+      "saldoFinal": 600,
+      "qz1": 600,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "79794157953": {
+      "linha": 222,
+      "nome": "NORMAN CRANI PORTELLA",
+      "cpf": "79794157953",
+      "saldoFinal": 0,
+      "qz1": 600,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 600,
+      "cargaFinal": 0
+    },
+    "05337927973": {
+      "linha": 223,
+      "nome": "RAFAEL CARNIEL DA SILVA",
+      "cpf": "05337927973",
+      "saldoFinal": 100.00000000000072,
+      "qz1": 600,
+      "saldoCartao": 90.95,
+      "cargaParcial": 0,
+      "reembolso": 409.0499999999993,
+      "cargaFinal": 0
+    },
+    "10491624719": {
+      "linha": 224,
+      "nome": "TIAGO DE OLIVEIRA PAIVA",
+      "cpf": "10491624719",
+      "saldoFinal": 0,
+      "qz1": 600,
+      "saldoCartao": 36.79,
+      "cargaParcial": 0,
+      "reembolso": 563.21,
+      "cargaFinal": 0
+    },
+    "85087572634": {
+      "linha": 225,
+      "nome": "ADAUTO JOSE PEREIRA",
+      "cpf": "85087572634",
+      "saldoFinal": 232.94000000000045,
+      "qz1": 500,
+      "saldoCartao": 267.06,
+      "cargaParcial": 0,
+      "reembolso": -4.547473508864641e-13,
+      "cargaFinal": 0
+    },
+    "02474960902": {
+      "linha": 226,
+      "nome": "ALESSANDRO RODRIGO PASTRELLI",
+      "cpf": "02474960902",
+      "saldoFinal": 9841.84,
+      "qz1": 500,
+      "saldoCartao": 394.57,
+      "cargaParcial": 0,
+      "reembolso": -9736.41,
+      "cargaFinal": 0
+    },
+    "63194252020": {
+      "linha": 227,
+      "nome": "ALEXANDRE DA SILVEIRA GROSS",
+      "cpf": "63194252020",
+      "saldoFinal": 58.00000000000023,
+      "qz1": 500,
+      "saldoCartao": 464.97,
+      "cargaParcial": 0,
+      "reembolso": -22.970000000000255,
+      "cargaFinal": 0
+    },
+    "99335220000": {
+      "linha": 228,
+      "nome": "ALIRIO THOMAZ VALENTIM",
+      "cpf": "99335220000",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 500,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "09688866717": {
+      "linha": 229,
+      "nome": "ALLAN JEFFERSON BRANCO RODRIGUES",
+      "cpf": "09688866717",
+      "saldoFinal": 46.470000000000255,
+      "qz1": 500,
+      "saldoCartao": 2642.58,
+      "cargaParcial": 0,
+      "reembolso": -2189.05,
+      "cargaFinal": 0
+    },
+    "07809466690": {
+      "linha": 230,
+      "nome": "AMANDA CRISTINA DA SILVA",
+      "cpf": "07809466690",
+      "saldoFinal": 568.1400000000003,
+      "qz1": 500,
+      "saldoCartao": 5.79,
+      "cargaParcial": 0,
+      "reembolso": -73.93000000000033,
+      "cargaFinal": 0
+    },
+    "00053957040": {
+      "linha": 231,
+      "nome": "ANDERSON BICA PEREZ",
+      "cpf": "00053957040",
+      "saldoFinal": 270.2300000000005,
+      "qz1": 500,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 226.76999999999953,
+      "cargaFinal": 0
+    },
+    "07822591975": {
+      "linha": 232,
+      "nome": "ANDERSON RICARDO VIEIRA",
+      "cpf": "07822591975",
+      "saldoFinal": 159.70000000000044,
+      "qz1": 500,
+      "saldoCartao": 142.3,
+      "cargaParcial": 0,
+      "reembolso": 197.99999999999955,
+      "cargaFinal": 0
+    },
+    "99062208649": {
+      "linha": 233,
+      "nome": "CRISTIANO DA SILVA VALADARES",
+      "cpf": "99062208649",
+      "saldoFinal": 28.6,
+      "qz1": 500,
+      "saldoCartao": 0.4,
+      "cargaParcial": 0,
+      "reembolso": 471,
+      "cargaFinal": 0
+    },
+    "05769658550": {
+      "linha": 234,
+      "nome": "DIEGO DOS SANTOS DE JESUS",
+      "cpf": "05769658550",
+      "saldoFinal": 66.80999999999779,
+      "qz1": 500,
+      "saldoCartao": 49.38,
+      "cargaParcial": 0,
+      "reembolso": 383.8100000000022,
+      "cargaFinal": 0
+    },
+    "11454991631": {
+      "linha": 235,
+      "nome": "DMITRI MORAIS DA SILVA",
+      "cpf": "11454991631",
+      "saldoFinal": 474.49999999999994,
+      "qz1": 500,
+      "saldoCartao": 125.56,
+      "cargaParcial": 0,
+      "reembolso": -100.05999999999995,
+      "cargaFinal": 0
+    },
+    "38950693291": {
+      "linha": 236,
+      "nome": "GERSON PEREIRA",
+      "cpf": "38950693291",
+      "saldoFinal": 1167.3799999999999,
+      "qz1": 500,
+      "saldoCartao": 3.53,
+      "cargaParcial": 0,
+      "reembolso": -670.9099999999999,
+      "cargaFinal": 0
+    },
+    "05290622675": {
+      "linha": 237,
+      "nome": "GILMAR DUARTE LACERDA",
+      "cpf": "05290622675",
+      "saldoFinal": 500,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "15226997833": {
+      "linha": 238,
+      "nome": "GIOVANI DONNANTUONI",
+      "cpf": "15226997833",
+      "saldoFinal": 919,
+      "qz1": 500,
+      "saldoCartao": 81,
+      "cargaParcial": 0,
+      "reembolso": -500,
+      "cargaFinal": 0
+    },
+    "06439531670": {
+      "linha": 239,
+      "nome": "HELDER ARCHANJO FERREIRA",
+      "cpf": "06439531670",
+      "saldoFinal": 255.88999999999953,
+      "qz1": 500,
+      "saldoCartao": 8.11,
+      "cargaParcial": 0,
+      "reembolso": 236.00000000000045,
+      "cargaFinal": 0
+    },
+    "33832720871": {
+      "linha": 240,
+      "nome": "HIGOR LUIZ CERQUEIRA",
+      "cpf": "33832720871",
+      "saldoFinal": 2323,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -1823,
+      "cargaFinal": 0
+    },
+    "07646535630": {
+      "linha": 241,
+      "nome": "HUGO ALEXANDRE DE SOUSA",
+      "cpf": "07646535630",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 2122.23,
+      "cargaParcial": 0,
+      "reembolso": -1622.23,
+      "cargaFinal": 0
+    },
+    "12068745976": {
+      "linha": 242,
+      "nome": "IVO LUCIANO DA SILVA WAGNER JUNIOR",
+      "cpf": "12068745976",
+      "saldoFinal": 397.7999999999996,
+      "qz1": 500,
+      "saldoCartao": 442.85,
+      "cargaParcial": 0,
+      "reembolso": -340.64999999999964,
+      "cargaFinal": 0
+    },
+    "01456786288": {
+      "linha": 243,
+      "nome": "JACKSON NATAN RODRIGUES DA SILVA",
+      "cpf": "01456786288",
+      "saldoFinal": 189.9999999999991,
+      "qz1": 500,
+      "saldoCartao": 229,
+      "cargaParcial": 0,
+      "reembolso": 81.00000000000091,
+      "cargaFinal": 0
+    },
+    "03528389907": {
+      "linha": 244,
+      "nome": "JOELSON JUNIOR MARTINS DE GOES",
+      "cpf": "03528389907",
+      "saldoFinal": 428.4400000000005,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 71.55999999999949,
+      "cargaFinal": 0
+    },
+    "01063690080": {
+      "linha": 245,
+      "nome": "JORGE ANTONIO VARGAS DA SILVA",
+      "cpf": "01063690080",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 374.32,
+      "cargaParcial": 0,
+      "reembolso": 125.68,
+      "cargaFinal": 0
+    },
+    "03393455354": {
+      "linha": 246,
+      "nome": "JOSE WILKESON OLIVEIRA SILVA",
+      "cpf": "03393455354",
+      "saldoFinal": 724.7799999999997,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -224.77999999999975,
+      "cargaFinal": 0
+    },
+    "58763376091": {
+      "linha": 247,
+      "nome": "LAERCIO SOARES CANABARRO",
+      "cpf": "58763376091",
+      "saldoFinal": 1.2000000000000455,
+      "qz1": 500,
+      "saldoCartao": 402,
+      "cargaParcial": 0,
+      "reembolso": 96.79999999999995,
+      "cargaFinal": 0
+    },
+    "13126691790": {
+      "linha": 248,
+      "nome": "LEANDRO GUSMAO MUNIZ",
+      "cpf": "13126691790",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 497,
+      "cargaFinal": 0
+    },
+    "08325368730": {
+      "linha": 249,
+      "nome": "LEANDRO PINTO NUNES",
+      "cpf": "08325368730",
+      "saldoFinal": 633.7200000000021,
+      "qz1": 500,
+      "saldoCartao": 2203.05,
+      "cargaParcial": 0,
+      "reembolso": -2336.7700000000023,
+      "cargaFinal": 0
+    },
+    "69153825004": {
+      "linha": 250,
+      "nome": "MARCELO CARVALHO DA SILVA",
+      "cpf": "69153825004",
+      "saldoFinal": 500,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "02587708052": {
+      "linha": 251,
+      "nome": "MARCELO DE ANDRADE CALVETTI",
+      "cpf": "02587708052",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 0.34,
+      "cargaParcial": 0,
+      "reembolso": 499.66,
+      "cargaFinal": 0
+    },
+    "10254434894": {
+      "linha": 252,
+      "nome": "MARCELO PEREIRA LIMA",
+      "cpf": "10254434894",
+      "saldoFinal": 287.25000000000034,
+      "qz1": 500,
+      "saldoCartao": 148.58,
+      "cargaParcial": 0,
+      "reembolso": 64.16999999999965,
+      "cargaFinal": 0
+    },
+    "02524841936": {
+      "linha": 253,
+      "nome": "MARCIO DA COSTA JOAO",
+      "cpf": "02524841936",
+      "saldoFinal": 199.99999999999983,
+      "qz1": 500,
+      "saldoCartao": 382.7,
+      "cargaParcial": 0,
+      "reembolso": -82.69999999999982,
+      "cargaFinal": 0
+    },
+    "02062513941": {
+      "linha": 254,
+      "nome": "RODRIGO ROQUE",
+      "cpf": "02062513941",
+      "saldoFinal": 542.6,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -42.60000000000002,
+      "cargaFinal": 0
+    },
+    "47502843604": {
+      "linha": 255,
+      "nome": "RONALDO DE MATOS LELIS",
+      "cpf": "47502843604",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 13,
+      "cargaParcial": 0,
+      "reembolso": 487,
+      "cargaFinal": 0
+    },
+    "02988581428": {
+      "linha": 256,
+      "nome": "SANDRO QUITERIO LOPES DOS SANTOS",
+      "cpf": "02988581428",
+      "saldoFinal": 500,
+      "qz1": 500,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "11590627733": {
+      "linha": 257,
+      "nome": "THIAGO DE MEDEIROS VANZELER",
+      "cpf": "11590627733",
+      "saldoFinal": 0,
+      "qz1": 500,
+      "saldoCartao": 3,
+      "cargaParcial": 0,
+      "reembolso": 497,
+      "cargaFinal": 0
+    },
+    "03686605597": {
+      "linha": 258,
+      "nome": "UELITON SANTANA SANTOS",
+      "cpf": "03686605597",
+      "saldoFinal": 5.453415496958769e-13,
+      "qz1": 500,
+      "saldoCartao": 6.4,
+      "cargaParcial": 0,
+      "reembolso": 493.59999999999945,
+      "cargaFinal": 0
+    },
+    "94512043004": {
+      "linha": 259,
+      "nome": "WAGNER DOS SANTOS PEREIRA",
+      "cpf": "94512043004",
+      "saldoFinal": 1.0906830993917538e-12,
+      "qz1": 500,
+      "saldoCartao": 25.3,
+      "cargaParcial": 0,
+      "reembolso": 474.6999999999989,
+      "cargaFinal": 0
+    },
+    "95417400068": {
+      "linha": 260,
+      "nome": "WILLIAM SANTANA NUNES",
+      "cpf": "95417400068",
+      "saldoFinal": 1637.3600000000001,
+      "qz1": 500,
+      "saldoCartao": 379.1,
+      "cargaParcial": 0,
+      "reembolso": -1516.46,
+      "cargaFinal": 0
+    },
+    "08813588607": {
+      "linha": 261,
+      "nome": "ADRIANO FRANCISCO DE PAULA",
+      "cpf": "08813588607",
+      "saldoFinal": 480.58,
+      "qz1": 400,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -80.57999999999998,
+      "cargaFinal": 0
+    },
+    "01969938900": {
+      "linha": 262,
+      "nome": "ALTAIR BERTOL",
+      "cpf": "01969938900",
+      "saldoFinal": 173.00000000000023,
+      "qz1": 400,
+      "saldoCartao": 74.5,
+      "cargaParcial": 0,
+      "reembolso": 152.49999999999977,
+      "cargaFinal": 0
+    },
+    "12682517633": {
+      "linha": 263,
+      "nome": "ANDRE VALERIO DE PAIVA",
+      "cpf": "12682517633",
+      "saldoFinal": 388.7899999999998,
+      "qz1": 400,
+      "saldoCartao": 4.21,
+      "cargaParcial": 0,
+      "reembolso": 7.000000000000207,
+      "cargaFinal": 0
+    },
+    "20005473896": {
+      "linha": 264,
+      "nome": "CARLOS ALEXANDRE GIGI",
+      "cpf": "20005473896",
+      "saldoFinal": 322.81000000000023,
+      "qz1": 400,
+      "saldoCartao": 19.95,
+      "cargaParcial": 0,
+      "reembolso": 57.23999999999977,
+      "cargaFinal": 0
+    },
+    "06637541435": {
+      "linha": 265,
+      "nome": "DENIS FERREIRA DA SILVA",
+      "cpf": "06637541435",
+      "saldoFinal": 0,
+      "qz1": 400,
+      "saldoCartao": 244.52,
+      "cargaParcial": 0,
+      "reembolso": 155.48,
+      "cargaFinal": 0
+    },
+    "00312735057": {
+      "linha": 266,
+      "nome": "EDEVALDO DUTRA GONCALVES",
+      "cpf": "00312735057",
+      "saldoFinal": 457.39999999999645,
+      "qz1": 400,
+      "saldoCartao": 19,
+      "cargaParcial": 0,
+      "reembolso": -76.39999999999645,
+      "cargaFinal": 0
+    },
+    "03071605994": {
+      "linha": 267,
+      "nome": "ALAERTE JACINTO JUNIOR",
+      "cpf": "03071605994",
+      "saldoFinal": 360.7,
+      "qz1": 350,
+      "saldoCartao": 2.3,
+      "cargaParcial": 0,
+      "reembolso": -12.99999999999999,
+      "cargaFinal": 0
+    },
+    "71944885234": {
+      "linha": 268,
+      "nome": "JOSEANE DA SILVA SOUZA",
+      "cpf": "71944885234",
+      "saldoFinal": 160.0000000000009,
+      "qz1": 350,
+      "saldoCartao": 40,
+      "cargaParcial": 0,
+      "reembolso": 149.9999999999991,
+      "cargaFinal": 0
+    },
+    "70457883200": {
+      "linha": 269,
+      "nome": "MICHEL VINHORTE DE SOUZA",
+      "cpf": "70457883200",
+      "saldoFinal": 1808.57,
+      "qz1": 350,
+      "saldoCartao": 42.1,
+      "cargaParcial": 0,
+      "reembolso": -1500.6699999999998,
+      "cargaFinal": 0
+    },
+    "26992280600": {
+      "linha": 270,
+      "nome": "ANTONIO DE PADUA LEITE",
+      "cpf": "26992280600",
+      "saldoFinal": 172.51,
+      "qz1": 300,
+      "saldoCartao": 127.49,
+      "cargaParcial": 0,
+      "reembolso": 1.4210854715202004e-14,
+      "cargaFinal": 0
+    },
+    "04252409160": {
+      "linha": 271,
+      "nome": "BRUNO DE SOUZA PACHECO",
+      "cpf": "04252409160",
+      "saldoFinal": 300,
+      "qz1": 300,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "04614285988": {
+      "linha": 272,
+      "nome": "EDERSON LUIS BARROS DA ROSA",
+      "cpf": "04614285988",
+      "saldoFinal": 0,
+      "qz1": 300,
+      "saldoCartao": 29.1,
+      "cargaParcial": 0,
+      "reembolso": 270.9,
+      "cargaFinal": 0
+    },
+    "03066906086": {
+      "linha": 273,
+      "nome": "HEDER SILVA CAMPODONICO",
+      "cpf": "03066906086",
+      "saldoFinal": 0,
+      "qz1": 300,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 300,
+      "cargaFinal": 0
+    },
+    "09785002969": {
+      "linha": 274,
+      "nome": "VINICIUS PEIXOTO BONETTI",
+      "cpf": "09785002969",
+      "saldoFinal": 458.78000000000003,
+      "qz1": 300,
+      "saldoCartao": 24.32,
+      "cargaParcial": 0,
+      "reembolso": -183.10000000000002,
+      "cargaFinal": 0
+    },
+    "01929647638": {
+      "linha": 275,
+      "nome": "CLEITON DA SILVA MONTALVAO",
+      "cpf": "01929647638",
+      "saldoFinal": 59.99999999999949,
+      "qz1": 250,
+      "saldoCartao": 230.06,
+      "cargaParcial": 0,
+      "reembolso": -40.05999999999949,
+      "cargaFinal": 0
+    },
+    "02344854002": {
+      "linha": 276,
+      "nome": "DAVID DA SILVA PEREIRA",
+      "cpf": "02344854002",
+      "saldoFinal": 2320.4799999999996,
+      "qz1": 250,
+      "saldoCartao": 1.42,
+      "cargaParcial": 0,
+      "reembolso": -2071.8999999999996,
+      "cargaFinal": 0
+    },
+    "05492458981": {
+      "linha": 277,
+      "nome": "FABIO MARTINS BORGES",
+      "cpf": "05492458981",
+      "saldoFinal": 0,
+      "qz1": 250,
+      "saldoCartao": 173.72,
+      "cargaParcial": 0,
+      "reembolso": 76.28,
+      "cargaFinal": 0
+    },
+    "00714806501": {
+      "linha": 278,
+      "nome": "GENISSON DE PAIVA FERREIRA",
+      "cpf": "00714806501",
+      "saldoFinal": 632.670000000001,
+      "qz1": 250,
+      "saldoCartao": 44.27,
+      "cargaParcial": 0,
+      "reembolso": -426.94000000000096,
+      "cargaFinal": 0
+    },
+    "98717251087": {
+      "linha": 279,
+      "nome": "MARCIO CORREA DA SILVA",
+      "cpf": "98717251087",
+      "saldoFinal": 87.28999999999947,
+      "qz1": 250,
+      "saldoCartao": 27.55,
+      "cargaParcial": 0,
+      "reembolso": 135.16000000000054,
+      "cargaFinal": 0
+    },
+    "42694515215": {
+      "linha": 280,
+      "nome": "PEDRO DO NASCIMENTO FARO",
+      "cpf": "42694515215",
+      "saldoFinal": 0,
+      "qz1": 250,
+      "saldoCartao": 261.94,
+      "cargaParcial": 0,
+      "reembolso": -11.939999999999998,
+      "cargaFinal": 0
+    },
+    "91920795987": {
+      "linha": 281,
+      "nome": "CLAUDINEI VICENTE DE LIMA",
+      "cpf": "91920795987",
+      "saldoFinal": 0,
+      "qz1": 240,
+      "saldoCartao": 8.4,
+      "cargaParcial": 0,
+      "reembolso": 231.6,
+      "cargaFinal": 0
+    },
+    "00645883948": {
+      "linha": 282,
+      "nome": "JEAN FABIO OLIVERIO",
+      "cpf": "00645883948",
+      "saldoFinal": 458.53,
+      "qz1": 240,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -218.52999999999997,
+      "cargaFinal": 0
+    },
+    "48089869904": {
+      "linha": 283,
+      "nome": "VALDIR LEONARDO VOIGT",
+      "cpf": "48089869904",
+      "saldoFinal": 1084.4999999999995,
+      "qz1": 240,
+      "saldoCartao": 10.9,
+      "cargaParcial": 0,
+      "reembolso": -855.3999999999995,
+      "cargaFinal": 0
+    },
+    "82877904091": {
+      "linha": 284,
+      "nome": "ALEX SANDRO PEREIRA MARQUES",
+      "cpf": "82877904091",
+      "saldoFinal": 541.2000000000015,
+      "qz1": 200,
+      "saldoCartao": 61.1,
+      "cargaParcial": 0,
+      "reembolso": -402.30000000000155,
+      "cargaFinal": 0
+    },
+    "85076538553": {
+      "linha": 285,
+      "nome": "CAMILA DE OLIVEIRA VELOSO",
+      "cpf": "85076538553",
+      "saldoFinal": 30.47999999999962,
+      "qz1": 200,
+      "saldoCartao": 278.66,
+      "cargaParcial": 0,
+      "reembolso": -109.13999999999965,
+      "cargaFinal": 0
+    },
+    "01066881030": {
+      "linha": 286,
+      "nome": "DANIELA CARVALHO STAHLER",
+      "cpf": "01066881030",
+      "saldoFinal": 0,
+      "qz1": 200,
+      "saldoCartao": 150,
+      "cargaParcial": 0,
+      "reembolso": 50,
+      "cargaFinal": 0
+    },
+    "03241621030": {
+      "linha": 287,
+      "nome": "DOUGLAS BRUCK MACHADO",
+      "cpf": "03241621030",
+      "saldoFinal": 28.300000000000182,
+      "qz1": 200,
+      "saldoCartao": 350,
+      "cargaParcial": 0,
+      "reembolso": -178.30000000000018,
+      "cargaFinal": 0
+    },
+    "04370282918": {
+      "linha": 288,
+      "nome": "HUGO NUNES DA SILVA",
+      "cpf": "04370282918",
+      "saldoFinal": 157.88,
+      "qz1": 200,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 42.120000000000005,
+      "cargaFinal": 0
+    },
+    "98394282091": {
+      "linha": 289,
+      "nome": "MAURICIO JOSE CARDOSO",
+      "cpf": "98394282091",
+      "saldoFinal": 173.3,
+      "qz1": 200,
+      "saldoCartao": 10.2,
+      "cargaParcial": 0,
+      "reembolso": 16.49999999999999,
+      "cargaFinal": 0
+    },
+    "01816236098": {
+      "linha": 290,
+      "nome": "MAURICIO TRINDADE DE CAMARGO",
+      "cpf": "01816236098",
+      "saldoFinal": 197.12000000000054,
+      "qz1": 200,
+      "saldoCartao": 180.78,
+      "cargaParcial": 0,
+      "reembolso": -177.90000000000055,
+      "cargaFinal": 0
+    },
+    "02013700008": {
+      "linha": 291,
+      "nome": "WILLIAM NORONHA TEIXEIRA",
+      "cpf": "02013700008",
+      "saldoFinal": 0,
+      "qz1": 200,
+      "saldoCartao": 173,
+      "cargaParcial": 0,
+      "reembolso": 27,
+      "cargaFinal": 0
+    },
+    "00413687031": {
+      "linha": 292,
+      "nome": "WAGNER RAFAEL GERHARDT",
+      "cpf": "00413687031",
+      "saldoFinal": 184.01,
+      "qz1": 180,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -4.009999999999991,
+      "cargaFinal": 0
+    },
+    "28604876898": {
+      "linha": 293,
+      "nome": "ADIVAR ANTONIO DA SILVA JUNIOR",
+      "cpf": "28604876898",
+      "saldoFinal": 191.0299999999999,
+      "qz1": 160,
+      "saldoCartao": 37.6,
+      "cargaParcial": 0,
+      "reembolso": -68.62999999999988,
+      "cargaFinal": 0
+    },
+    "71318758130": {
+      "linha": 294,
+      "nome": "ALVARO RAMON PRIMERA CASTILLO",
+      "cpf": "71318758130",
+      "saldoFinal": 160,
+      "qz1": 160,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "04859818903": {
+      "linha": 295,
+      "nome": "DENILSO DIDONE",
+      "cpf": "04859818903",
+      "saldoFinal": 4.799999999999997,
+      "qz1": 160,
+      "saldoCartao": 35.2,
+      "cargaParcial": 0,
+      "reembolso": 119.99999999999999,
+      "cargaFinal": 0
+    },
+    "00011945265": {
+      "linha": 296,
+      "nome": "ERICO BRUNO DA SILVA MATOS",
+      "cpf": "00011945265",
+      "saldoFinal": 976.7599999999999,
+      "qz1": 160,
+      "saldoCartao": 2.34,
+      "cargaParcial": 0,
+      "reembolso": -819.0999999999999,
+      "cargaFinal": 0
+    },
+    "08418392983": {
+      "linha": 297,
+      "nome": "ROBSON DOS SANTOS GUEDES",
+      "cpf": "08418392983",
+      "saldoFinal": 39.599999999999525,
+      "qz1": 160,
+      "saldoCartao": 59.67,
+      "cargaParcial": 0,
+      "reembolso": 60.73000000000047,
+      "cargaFinal": 0
+    },
+    "02845828918": {
+      "linha": 298,
+      "nome": "RODRIGO BALESTRIN",
+      "cpf": "02845828918",
+      "saldoFinal": 0,
+      "qz1": 160,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 160,
+      "cargaFinal": 0
+    },
+    "02928835954": {
+      "linha": 299,
+      "nome": "CLAYTON DE OLIVEIRA",
+      "cpf": "02928835954",
+      "saldoFinal": 243.44999999999993,
+      "qz1": 150,
+      "saldoCartao": 6.55,
+      "cargaParcial": 0,
+      "reembolso": -99.99999999999993,
+      "cargaFinal": 0
+    },
+    "03443300952": {
+      "linha": 300,
+      "nome": "LUCIANO JOSE DA CUNHA",
+      "cpf": "03443300952",
+      "saldoFinal": 0,
+      "qz1": 150,
+      "saldoCartao": 13.8,
+      "cargaParcial": 0,
+      "reembolso": 136.2,
+      "cargaFinal": 0
+    },
+    "06837861999": {
+      "linha": 301,
+      "nome": "LUIS FELIPE RAYMUNDO GARCIA",
+      "cpf": "06837861999",
+      "saldoFinal": 88.809999999999,
+      "qz1": 150,
+      "saldoCartao": 0.79,
+      "cargaParcial": 0,
+      "reembolso": 60.40000000000101,
+      "cargaFinal": 0
+    },
+    "12890409821": {
+      "linha": 302,
+      "nome": "PAULO EDUARDO AUGUSTO DE BRITO",
+      "cpf": "12890409821",
+      "saldoFinal": 150,
+      "qz1": 150,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "82741980004": {
+      "linha": 303,
+      "nome": "CARLOS FRANCISCO GODOY",
+      "cpf": "82741980004",
+      "saldoFinal": 25.149999999999892,
+      "qz1": 125,
+      "saldoCartao": 69.85,
+      "cargaParcial": 0,
+      "reembolso": 30.000000000000114,
+      "cargaFinal": 0
+    },
+    "00046347054": {
+      "linha": 304,
+      "nome": "BEN HUR MENDES OLIVEIRA",
+      "cpf": "00046347054",
+      "saldoFinal": 662.7499999999999,
+      "qz1": 120,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -542.7499999999999,
+      "cargaFinal": 0
+    },
+    "06285125970": {
+      "linha": 305,
+      "nome": "DANILO ZANATTA LUCIANO",
+      "cpf": "06285125970",
+      "saldoFinal": 62.69999999999991,
+      "qz1": 120,
+      "saldoCartao": 47.4,
+      "cargaParcial": 0,
+      "reembolso": 9.900000000000091,
+      "cargaFinal": 0
+    },
+    "00851999077": {
+      "linha": 306,
+      "nome": "DOMINIQUE SILVA DE SOUZA",
+      "cpf": "00851999077",
+      "saldoFinal": 460.43000000000006,
+      "qz1": 120,
+      "saldoCartao": 50.16,
+      "cargaParcial": 0,
+      "reembolso": -390.59000000000003,
+      "cargaFinal": 0
+    },
+    "82871396000": {
+      "linha": 307,
+      "nome": "FLAVIO HENRIQUE ALVES ROMERO",
+      "cpf": "82871396000",
+      "saldoFinal": 881,
+      "qz1": 120,
+      "saldoCartao": 32,
+      "cargaParcial": 0,
+      "reembolso": -793,
+      "cargaFinal": 0
+    },
+    "09983432935": {
+      "linha": 308,
+      "nome": "GABRIEL HENRIQUE DALL AGNOL",
+      "cpf": "09983432935",
+      "saldoFinal": 1187.84,
+      "qz1": 120,
+      "saldoCartao": 66.3,
+      "cargaParcial": 0,
+      "reembolso": -1134.1399999999999,
+      "cargaFinal": 0
+    },
+    "10652119964": {
+      "linha": 309,
+      "nome": "LUCAS HENRIQUE CORREA DOS SANTOS",
+      "cpf": "10652119964",
+      "saldoFinal": 0,
+      "qz1": 120,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 120,
+      "cargaFinal": 0
+    },
+    "06271222994": {
+      "linha": 310,
+      "nome": "MICHEL DOS SANTOS VENANCIO",
+      "cpf": "06271222994",
+      "saldoFinal": 1.8474111129762605e-13,
+      "qz1": 120,
+      "saldoCartao": 65.04,
+      "cargaParcial": 0,
+      "reembolso": 54.95999999999981,
+      "cargaFinal": 0
+    },
+    "04885659957": {
+      "linha": 311,
+      "nome": "NEUDO SAMPIETRO",
+      "cpf": "04885659957",
+      "saldoFinal": 2118.230000000001,
+      "qz1": 120,
+      "saldoCartao": 0.41,
+      "cargaParcial": 0,
+      "reembolso": -1998.640000000001,
+      "cargaFinal": 0
+    },
+    "09353381959": {
+      "linha": 312,
+      "nome": "RICARDO DORNELES NEITZKE",
+      "cpf": "09353381959",
+      "saldoFinal": 234.94,
+      "qz1": 120,
+      "saldoCartao": 0.06,
+      "cargaParcial": 0,
+      "reembolso": -115,
+      "cargaFinal": 0
+    },
+    "05236669936": {
+      "linha": 313,
+      "nome": "ROBSON FURTADO",
+      "cpf": "05236669936",
+      "saldoFinal": 387.65000000000015,
+      "qz1": 120,
+      "saldoCartao": 13.05,
+      "cargaParcial": 0,
+      "reembolso": -280.70000000000016,
+      "cargaFinal": 0
+    },
+    "02063139342": {
+      "linha": 314,
+      "nome": "SERGIO ESTEVAM DEBIAZI",
+      "cpf": "02063139342",
+      "saldoFinal": 300.0000000000001,
+      "qz1": 120,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -180.0000000000001,
+      "cargaFinal": 0
+    },
+    "07634898910": {
+      "linha": 315,
+      "nome": "SILVIO ODELI FILHO",
+      "cpf": "07634898910",
+      "saldoFinal": 0,
+      "qz1": 120,
+      "saldoCartao": 6.22,
+      "cargaParcial": 0,
+      "reembolso": 113.78,
+      "cargaFinal": 0
+    },
+    "08609699919": {
+      "linha": 316,
+      "nome": "CLEVERSON PAULOUSKI",
+      "cpf": "08609699919",
+      "saldoFinal": 7.460698725481052e-14,
+      "qz1": 100,
+      "saldoCartao": 6.48,
+      "cargaParcial": 0,
+      "reembolso": 93.51999999999992,
+      "cargaFinal": 0
+    },
+    "03363725906": {
+      "linha": 317,
+      "nome": "CREOL APARECIDO DOS SANTOS",
+      "cpf": "03363725906",
+      "saldoFinal": 0,
+      "qz1": 100,
+      "saldoCartao": 54.84,
+      "cargaParcial": 0,
+      "reembolso": 45.16,
+      "cargaFinal": 0
+    },
+    "05597823906": {
+      "linha": 318,
+      "nome": "DIEGO GRIME DE MELO",
+      "cpf": "05597823906",
+      "saldoFinal": 96.13000000000011,
+      "qz1": 100,
+      "saldoCartao": 30.87,
+      "cargaParcial": 0,
+      "reembolso": -27.00000000000011,
+      "cargaFinal": 0
+    },
+    "03040370952": {
+      "linha": 319,
+      "nome": "EDER MEDICI",
+      "cpf": "03040370952",
+      "saldoFinal": 45,
+      "qz1": 100,
+      "saldoCartao": 25,
+      "cargaParcial": 0,
+      "reembolso": 30,
+      "cargaFinal": 0
+    },
+    "79248160387": {
+      "linha": 320,
+      "nome": "FRANCISCO VALDENIR DE SOUSA",
+      "cpf": "79248160387",
+      "saldoFinal": 84.69999999999999,
+      "qz1": 100,
+      "saldoCartao": 100,
+      "cargaParcial": 0,
+      "reembolso": -84.69999999999999,
+      "cargaFinal": 0
+    },
+    "88367550978": {
+      "linha": 321,
+      "nome": "JOAO DA SILVA VIANA",
+      "cpf": "88367550978",
+      "saldoFinal": 204.39999999999995,
+      "qz1": 100,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -104.39999999999995,
+      "cargaFinal": 0
+    },
+    "69010544915": {
+      "linha": 322,
+      "nome": "JONAS PAULO DE MATOS",
+      "cpf": "69010544915",
+      "saldoFinal": 182.6,
+      "qz1": 100,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -82.6,
+      "cargaFinal": 0
+    },
+    "78296277972": {
+      "linha": 323,
+      "nome": "JOSE DO PRADO ROSA",
+      "cpf": "78296277972",
+      "saldoFinal": 21.09,
+      "qz1": 100,
+      "saldoCartao": 11.91,
+      "cargaParcial": 0,
+      "reembolso": 67,
+      "cargaFinal": 0
+    },
+    "69808112900": {
+      "linha": 324,
+      "nome": "JOSE NILDA DA CUNHA",
+      "cpf": "69808112900",
+      "saldoFinal": 3.2000000000000455,
+      "qz1": 100,
+      "saldoCartao": 100,
+      "cargaParcial": 0,
+      "reembolso": -3.2000000000000455,
+      "cargaFinal": 0
+    },
+    "10649064941": {
+      "linha": 325,
+      "nome": "JULIANO MESSIAS MOREIRA DE LIMA",
+      "cpf": "10649064941",
+      "saldoFinal": 100,
+      "qz1": 100,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "02586212908": {
+      "linha": 326,
+      "nome": "LEANDRO APARECIDO JAQUES",
+      "cpf": "02586212908",
+      "saldoFinal": 24.999999999999943,
+      "qz1": 100,
+      "saldoCartao": 75,
+      "cargaParcial": 0,
+      "reembolso": 5.684341886080802e-14,
+      "cargaFinal": 0
+    },
+    "45211709861": {
+      "linha": 327,
+      "nome": "LUCAS HENRIQUE PINHO",
+      "cpf": "45211709861",
+      "saldoFinal": 0,
+      "qz1": 100,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 100,
+      "cargaFinal": 0
+    },
+    "11489828923": {
+      "linha": 328,
+      "nome": "LUCIANO DA SILVA DE PAULA",
+      "cpf": "11489828923",
+      "saldoFinal": 116.1,
+      "qz1": 100,
+      "saldoCartao": 38.4,
+      "cargaParcial": 0,
+      "reembolso": -54.49999999999999,
+      "cargaFinal": 0
+    },
+    "90573625972": {
+      "linha": 329,
+      "nome": "MAURO PEDRO SAUGO",
+      "cpf": "90573625972",
+      "saldoFinal": 0,
+      "qz1": 100,
+      "saldoCartao": 10,
+      "cargaParcial": 0,
+      "reembolso": 90,
+      "cargaFinal": 0
+    },
+    "91388686953": {
+      "linha": 330,
+      "nome": "PITER ROBSON DA SILVA",
+      "cpf": "91388686953",
+      "saldoFinal": 2.2648549702353193e-14,
+      "qz1": 100,
+      "saldoCartao": 1.6,
+      "cargaParcial": 0,
+      "reembolso": 98.39999999999998,
+      "cargaFinal": 0
+    },
+    "07338782962": {
+      "linha": 331,
+      "nome": "ALISSON RODRIGO RAMBO",
+      "cpf": "07338782962",
+      "saldoFinal": 0,
+      "qz1": 80,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": 80,
+      "cargaFinal": 0
+    },
+    "07105914971": {
+      "linha": 332,
+      "nome": "ARTUR JACO PAGANI DE SOUZA",
+      "cpf": "07105914971",
+      "saldoFinal": 336.4699999999998,
+      "qz1": 80,
+      "saldoCartao": 6.74,
+      "cargaParcial": 0,
+      "reembolso": -263.2099999999998,
+      "cargaFinal": 0
+    },
+    "10132301911": {
+      "linha": 333,
+      "nome": "ALLAN CRISTIAN DA CUNHA",
+      "cpf": "10132301911",
+      "saldoFinal": 2.5800000000000267,
+      "qz1": 50,
+      "saldoCartao": 47.42,
+      "cargaParcial": 0,
+      "reembolso": -2.842170943040401e-14,
+      "cargaFinal": 0
+    },
+    "55278612053": {
+      "linha": 334,
+      "nome": "JOSE NEI DOS SANTOS DUTRA",
+      "cpf": "55278612053",
+      "saldoFinal": 100,
+      "qz1": 50,
+      "saldoCartao": 0,
+      "cargaParcial": 0,
+      "reembolso": -50,
+      "cargaFinal": 0
+    },
+    "04442316929": {
+      "linha": 335,
+      "nome": "NIVALDO THIAGO DA CRUZ SANTOS",
+      "cpf": "04442316929",
+      "saldoFinal": 0,
+      "qz1": 50,
+      "saldoCartao": 50,
+      "cargaParcial": 0,
+      "reembolso": 0,
+      "cargaFinal": 0
+    },
+    "03348917956": {
+      "linha": 336,
+      "nome": "RODRIGO JOSE DE PAULA",
+      "cpf": "03348917956",
+      "saldoFinal": 0,
+      "qz1": 50,
+      "saldoCartao": 309.64,
+      "cargaParcial": 0,
+      "reembolso": -259.64,
+      "cargaFinal": 0
+    }
+  }
+}

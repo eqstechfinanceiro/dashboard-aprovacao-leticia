@@ -1,0 +1,148 @@
+{
+  "encontrado": true,
+  "estrategia": "busca_todos_membros",
+  "dados_planilha": {
+    "nome": "JONAS CAVALCANTI DE OLIVEIRA",
+    "cpf": "01696239478"
+  },
+  "dados_api": [
+    {
+      "id": 896180,
+      "integration_id": "004790",
+      "external_id": null,
+      "company_id": 1825947,
+      "role_id": null,
+      "approval_flow_id": 172535,
+      "expense_limit_policy_id": 16805,
+      "user_type": "USUARIO",
+      "name": "JONAS CAVALCANTI DE OLIVEIRA",
+      "email": "Jcavalcanti2412@gmail.com",
+      "cpf": "01696239478",
+      "phone1": null,
+      "phone2": null,
+      "birth_date": null,
+      "bank": null,
+      "agency": null,
+      "account": null,
+      "pix_key": null,
+      "confirmed": false,
+      "active": true,
+      "parameters": null,
+      "created_at": "2025-04-16 17:40:36",
+      "updated_at": "2025-06-17 09:01:40",
+      "costsCenters": {
+        "data": [
+          {
+            "id": 1861405,
+            "integration_id": "11062350001",
+            "name": "3R PETROLEUM NE",
+            "company_group_id": 1825947,
+            "on": true,
+            "approval_flow_id": null
+          },
+          {
+            "id": 1954386,
+            "integration_id": "11080480001",
+            "name": "PTB ARCON RN",
+            "company_group_id": 1825947,
+            "on": true,
+            "approval_flow_id": null
+          },
+          {
+            "id": 1954384,
+            "integration_id": "11010160001",
+            "name": "BB MOSSORO RN",
+            "company_group_id": 1825947,
+            "on": true,
+            "approval_flow_id": null
+          },
+          {
+            "id": 1861292,
+            "integration_id": "11061490001",
+            "name": "TELEFONICA NE",
+            "company_group_id": 1825947,
+            "on": true,
+            "approval_flow_id": null
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": 1861293,
+            "name": "REGIONAL NE",
+            "company_name": null,
+            "cnpj": null,
+            "address": null,
+            "neighborhood": null,
+            "city": null,
+            "state": null,
+            "zip_code": null,
+            "phone1": null,
+            "phone2": null,
+            "on": true,
+            "integration_id": null
+          }
+        ]
+      }
+    },
+    {
+      "id": 896181,
+      "integration_id": "001556",
+      "external_id": null,
+      "company_id": 1825947,
+      "role_id": null,
+      "approval_flow_id": 191237,
+      "expense_limit_policy_id": 16805,
+      "user_type": "USUARIO",
+      "name": "JONAS PAULO DE MATOS",
+      "email": "desplanchesjonas@gmail.com",
+      "cpf": "69010544915",
+      "phone1": null,
+      "phone2": null,
+      "birth_date": null,
+      "bank": null,
+      "agency": null,
+      "account": null,
+      "pix_key": null,
+      "confirmed": true,
+      "active": true,
+      "parameters": null,
+      "created_at": "2025-04-16 17:40:38",
+      "updated_at": "2025-09-02 17:19:33",
+      "costsCenters": {
+        "data": [
+          {
+            "id": 1861295,
+            "integration_id": "11040140001",
+            "name": "CLARO INFRA PR",
+            "company_group_id": 1825947,
+            "on": true,
+            "approval_flow_id": null
+          }
+        ]
+      },
+      "projects": {
+        "data": [
+          {
+            "id": 1861284,
+            "name": "REGIONAL PR",
+            "company_name": null,
+            "cnpj": null,
+            "address": null,
+            "neighborhood": null,
+            "city": null,
+            "state": null,
+            "zip_code": null,
+            "phone1": null,
+            "phone2": null,
+            "on": true,
+            "integration_id": null
+          }
+        ]
+      }
+    }
+  ],
+  "endpoint": "/v2/team-members",
+  "metodo_busca": "filtro_local_nome_cpf"
+}

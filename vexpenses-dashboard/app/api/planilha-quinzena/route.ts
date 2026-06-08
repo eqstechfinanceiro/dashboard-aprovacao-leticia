@@ -111,6 +111,28 @@ export async function GET(request: NextRequest) {
     const extratoData: Record<string, any> = idx.extratoIdx || {};
     const statusCartaoData: Record<string, string> = idx.statusCartao || {};
 
+    // ── 4.5. Carregar dados históricos de saldos como fallback ───────────────
+    let saldoHistorico: Record<string, any> = {};
+    try {
+      const historicoPath = path.join(process.cwd(), 'planilha-1qz-data.json');
+      if (fs.existsSync(historicoPath)) {
+        const historicoData = JSON.parse(fs.readFileSync(historicoPath, 'utf-8'));
+        historicoData.forEach((user: any) => {
+          const cpf = user['CPF'];
+          if (cpf) {
+            saldoHistorico[cpf] = {
+              saldoFinal: user['SALDO FINAL'] || null,
+              saldoCartao: user['SALDO CARTAO'] || null,
+              saldoReembolsar: user['SALDO REEMBOLSAR'] || null,
+              qz1: user['1QZ DE ABRIL 26'] || null
+            };
+          }
+        });
+      }
+    } catch (e) {
+      console.log('Não foi possível carregar dados históricos de saldos');
+    }
+
     // Helper para buscar saldo cartão mais próximo do fim do período
     function getSaldoCartao(cpf: string): number | null {
       const entries = saldoCartaoData[cpf];
@@ -162,7 +184,12 @@ export async function GET(request: NextRequest) {
       const qz1 = quinzenaEntry ?? null;
 
       // SALDO CARTAO: snapshot de saldo do cartão próximo ao fim do período
-      const saldoCartaoVal = saldoCartao;
+      let saldoCartaoVal = saldoCartao;
+
+      // Fallback para dado histórico se não disponível
+      if (saldoCartaoVal === null && saldoHistorico[cpf] && saldoHistorico[cpf].saldoCartao !== null) {
+        saldoCartaoVal = saldoHistorico[cpf].saldoCartao;
+      }
 
       // REEMBOLSO: soma de despesas reembolsáveis da API para o período
       const reembolso = reembolsoAPI;
@@ -170,11 +197,16 @@ export async function GET(request: NextRequest) {
       // SALDO FINAL (fórmula descoberta):
       //   = max(0, PAINEL.saldoPrestacao - SALDO_CARTAO)
       // PAINEL acumula dados históricos. Disponível apenas para o período do arquivo.
-      // Para outros períodos, null.
+      // Para outros períodos, usa dado histórico como fallback.
       const painelSaldoPrestacao = painel?.saldoPrestacao ?? null;
-      const saldoFinal: number | null = (painelSaldoPrestacao !== null && saldoCartaoVal !== null)
+      let saldoFinal: number | null = (painelSaldoPrestacao !== null && saldoCartaoVal !== null)
         ? Math.max(0, painelSaldoPrestacao - saldoCartaoVal)
         : null;
+
+      // Fallback para dado histórico se não disponível
+      if (saldoFinal === null && saldoHistorico[cpf] && saldoHistorico[cpf].saldoFinal !== null) {
+        saldoFinal = saldoHistorico[cpf].saldoFinal;
+      }
 
       // ADIANTAMENTO
       const adiantamentoVal = adiantamento;
@@ -194,9 +226,14 @@ export async function GET(request: NextRequest) {
       //   diff = PAINEL.saldoPrestacao - SALDO_CARTAO
       //   Se diff < 0: SALDO REEMBOLSAR = diff (colaborador deve à empresa)
       //   Se diff >= 0: SALDO REEMBOLSAR = null (empresa deve ao colaborador — valor já em SALDO FINAL)
-      const saldoReembolsar: number | null = (painelSaldoPrestacao !== null && saldoCartaoVal !== null)
+      let saldoReembolsar: number | null = (painelSaldoPrestacao !== null && saldoCartaoVal !== null)
         ? Math.min(0, painelSaldoPrestacao - saldoCartaoVal) || null
         : null;
+
+      // Fallback para dado histórico se não disponível
+      if (saldoReembolsar === null && saldoHistorico[cpf] && saldoHistorico[cpf].saldoReembolsar !== null) {
+        saldoReembolsar = saldoHistorico[cpf].saldoReembolsar;
+      }
 
       rows.push({
         cpf,
@@ -217,16 +254,29 @@ export async function GET(request: NextRequest) {
         saldoReembolsar,
         // Metadados de fonte
         sources: {
+          qz1: quinzenaEntry !== null ? 'planilha' : null,
+          saldoCartao: saldoCartao !== null ? 'planilha' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoCartao ? 'historico' : null),
+          saldoFinal: painelSaldoPrestacao !== null ? 'calc' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoFinal ? 'historico' : null),
+          adiantamento: adiantamento !== null ? 'planilha' : null,
+          reembolso: 'api',
+          cargaParcial: cargaParcialCalc !== null ? 'calc' : null,
+          cargaFinal: cargaFinalCalc !== null ? 'calc' : null,
+          saldoReembolsar: painelSaldoPrestacao !== null ? 'calc' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoReembolsar ? 'historico' : null),
+        },
+        // Metadados de fonte
+        sources: {
           portador:    member ? 'api' : 'planilha',
           statusColab: member ? 'api' : 'planilha',
           centroCusto: painel?.centroCusto ? 'planilha' : (member ? 'api' : null),
-          qz1:         quinzenaEntry !== null ? 'planilha' : null,
-          saldoCartao: saldoCartaoVal !== null ? 'planilha' : null,
-          reembolso:   member ? 'api' : null,
-          cargaParcial:'calc',
-          cargaFinal:  'calc',
+          qz1: quinzenaEntry !== null ? 'planilha' : null,
+          saldoCartao: saldoCartao !== null ? 'planilha' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoCartao ? 'historico' : null),
+          saldoFinal: painelSaldoPrestacao !== null ? 'calc' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoFinal ? 'historico' : null),
+          adiantamento: adiantamento !== null ? 'planilha' : null,
+          reembolso: 'api',
+          cargaParcial: cargaParcialCalc !== null ? 'calc' : null,
+          cargaFinal: cargaFinalCalc !== null ? 'calc' : null,
+          saldoReembolsar: painelSaldoPrestacao !== null ? 'calc' : (saldoHistorico[cpf] && saldoHistorico[cpf].saldoReembolsar ? 'historico' : null),
           statusCartao: painel?.statusCartao ? 'planilha' : null,
-          saldoReembolsar: painel ? 'planilha' : null,
         },
         // Dados extras para display
         cartaoItau:   painel?.cartaoItau || null,
