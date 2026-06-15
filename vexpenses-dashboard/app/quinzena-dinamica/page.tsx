@@ -1,4 +1,5 @@
 ﻿'use client';
+import { ImportQzModal } from '@/components/ImportQzModal';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   FileSpreadsheet,
+  Upload,
   RefreshCw,
   FileDown,
   AlertTriangle,
@@ -214,6 +216,7 @@ export default function QuinzenaDinamicaPage() {
 
   const [search, setSearch] = useState('');
   const [onlyWithCarga, setOnlyWithCarga] = useState(true);
+  const [importModalOpen, setImportModalOpen] = useState(false);
 
   // 1. Load available snapshots on mount
   useEffect(() => {
@@ -557,6 +560,13 @@ export default function QuinzenaDinamicaPage() {
           >
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
+          </Button>
+          <Button size="sm" variant="outline"
+            onClick={() => setImportModalOpen(true)}
+            disabled={year === null || month === null || quinzena === null}
+          >
+            <Upload className="h-4 w-4 mr-1" />
+            Importar QZ
           </Button>
           <Button size="sm" variant="outline" onClick={exportXLSX} disabled={!filteredRows.length}>
             <FileDown className="h-4 w-4 mr-1" />
@@ -927,6 +937,21 @@ export default function QuinzenaDinamicaPage() {
             </CardContent>
           </Card>
         </>
+      )}
+
+      {/* Import QZ Modal */}
+      {year !== null && month !== null && quinzena !== null && (
+        <ImportQzModal
+          open={importModalOpen}
+          onClose={() => setImportModalOpen(false)}
+          year={year}
+          month={month}
+          quinzena={quinzena}
+          onImported={() => {
+            setImportModalOpen(false);
+            loadData(year, month, quinzena);
+          }}
+        />
       )}
     </div>
   );
