@@ -74,6 +74,11 @@ interface CompleteQuinzenaData {
     reembolso: string;
     carga_final: string;
   };
+  _manual?: {
+    obs: string | null;
+    col_1qz: number | null;
+    adiantamento: number | null;
+  };
 }
 
 interface ApiResponse {
@@ -160,6 +165,8 @@ export default function QuinzenaDinamicaPage() {
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<{ userId: number; field: string } | null>(null);
+  const [editValue, setEditValue] = useState<string>('');
 
   const loadData = async () => {
     setLoading(true);
@@ -187,6 +194,33 @@ export default function QuinzenaDinamicaPage() {
   useEffect(() => {
     loadData();
   }, [year, month, quinzena]);
+
+  const saveManualField = async (userId: number, field: string, value: string) => {
+    try {
+      const response = await fetch('/api/quinzena-complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          year,
+          month,
+          quinzena,
+          field,
+          value: field === 'col_1qz' || field === 'adiantamento' ? parseFloat(value) : value
+        })
+      });
+
+      if (response.ok) {
+        setEditingField(null);
+        loadData(); // Recarregar dados
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Erro ao salvar');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    }
+  };
 
   const exportCSV = () => {
     if (!data?.data.length) return;
@@ -403,14 +437,15 @@ export default function QuinzenaDinamicaPage() {
                       <th className="text-left p-2 font-medium">Direção</th>
                       <th className="text-left p-2 font-medium">Status</th>
                       <th className="text-left p-2 font-medium">Regional</th>
-                      <th className="text-right p-2 font-medium">1QZ</th>
+                      <th className="text-right p-2 font-medium">1QZ*</th>
                       <th className="text-right p-2 font-medium">SALDO FINAL</th>
                       <th className="text-right p-2 font-medium">SALDO CARTÃO</th>
                       <th className="text-right p-2 font-medium">SALDO REEMBOLSAR</th>
-                      <th className="text-right p-2 font-medium">ADIANTAMENTO</th>
+                      <th className="text-right p-2 font-medium">ADIANTAMENTO*</th>
                       <th className="text-right p-2 font-medium">CARGA PARCIAL</th>
                       <th className="text-right p-2 font-medium">REEMBOLSO</th>
                       <th className="text-right p-2 font-medium">CARGA FINAL</th>
+                      <th className="text-center p-2 font-medium">OBS*</th>
                       <th className="text-center p-2 font-medium">Fontes</th>
                     </tr>
                   </thead>
@@ -442,14 +477,93 @@ export default function QuinzenaDinamicaPage() {
                             {user.user_info.regional}
                           </Badge>
                         </td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.quinzena_qz)}</td>
+                        <td className="text-right p-2 font-mono">
+                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'col_1qz' ? (
+                            <input
+                              type="number"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={() => saveManualField(user.user_info.user_id, 'col_1qz', editValue)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'col_1qz', editValue);
+                                if (e.key === 'Escape') setEditingField(null);
+                              }}
+                              className="w-20 text-right text-xs border rounded px-1"
+                              autoFocus
+                            />
+                          ) : (
+                            <span 
+                              onClick={() => {
+                                setEditingField({ userId: user.user_info.user_id, field: 'col_1qz' });
+                                setEditValue(user.financial_data.quinzena_qz.toString());
+                              }}
+                              className="cursor-pointer hover:bg-blue-50 px-1 rounded"
+                              title="Clique para editar"
+                            >
+                              {brl(user.financial_data.quinzena_qz)}
+                            </span>
+                          )}
+                        </td>
                         <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_final)}</td>
                         <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_cartao)}</td>
                         <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_reembolsar)}</td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.adiantamento)}</td>
+                        <td className="text-right p-2 font-mono">
+                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'adiantamento' ? (
+                            <input
+                              type="number"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={() => saveManualField(user.user_info.user_id, 'adiantamento', editValue)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'adiantamento', editValue);
+                                if (e.key === 'Escape') setEditingField(null);
+                              }}
+                              className="w-20 text-right text-xs border rounded px-1"
+                              autoFocus
+                            />
+                          ) : (
+                            <span 
+                              onClick={() => {
+                                setEditingField({ userId: user.user_info.user_id, field: 'adiantamento' });
+                                setEditValue(user.financial_data.adiantamento.toString());
+                              }}
+                              className="cursor-pointer hover:bg-blue-50 px-1 rounded"
+                              title="Clique para editar"
+                            >
+                              {brl(user.financial_data.adiantamento)}
+                            </span>
+                          )}
+                        </td>
                         <td className="text-right p-2 font-mono">{brl(user.financial_data.carga_parcial)}</td>
                         <td className="text-right p-2 font-mono">{brl(user.financial_data.reembolso)}</td>
                         <td className="text-right p-2 font-mono font-bold">{brl(user.financial_data.carga_final)}</td>
+                        <td className="text-center p-2">
+                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'obs' ? (
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              onBlur={() => saveManualField(user.user_info.user_id, 'obs', editValue)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'obs', editValue);
+                                if (e.key === 'Escape') setEditingField(null);
+                              }}
+                              className="w-32 text-xs border rounded px-1"
+                              autoFocus
+                            />
+                          ) : (
+                            <span 
+                              onClick={() => {
+                                setEditingField({ userId: user.user_info.user_id, field: 'obs' });
+                                setEditValue(user.user_info.obs || '');
+                              }}
+                              className="cursor-pointer hover:bg-blue-50 px-1 rounded truncate max-w-[100px] inline-block"
+                              title={user.user_info.obs || 'Clique para editar'}
+                            >
+                              {user.user_info.obs || '—'}
+                            </span>
+                          )}
+                        </td>
                         <td className="text-center p-2">
                           <div className="flex flex-wrap gap-1 justify-center">
                             <DataSourceBadge source={user.data_sources.quinzena_qz} />

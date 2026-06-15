@@ -168,6 +168,82 @@ def verify_tables():
     return {"tables": tables_with_checks()}
 
 
+@app.get("/api/sheets/mapping-status")
+def mapping_status():
+    """Retorna o status de mapeamento por tabela.
+
+    fully_mapped=true somente quando:
+      - nenhum check é yellow (dado não disponível na API), E
+      - não há colunas da planilha sem check definido (unchecked_cols == 0)
+
+    manual_cols: colunas sabidamente manuais (não automatizáveis via API).
+    """
+    from src.checks import REGISTRY
+
+    MANUAL_COLS: dict[str, list[str]] = {
+        "carga_1qz_planilha1": ["col_1\u00aa_qz", "adiantamento", "obs"],
+    }
+
+    conn = get_db()
+    try:
+        sheets = conn.execute("SELECT table_name, id FROM spreadsheet_info").fetchall()
+
+        col_counts: dict[str, int] = {}
+        empty_col_counts: dict[str, int] = {}
+
+        for s in sheets:
+            tn = s["table_name"]
+            all_cols = conn.execute(
+                "SELECT table_column_name FROM column_info WHERE spreadsheet_id=? ORDER BY col_order",
+                (s["id"],),
+            ).fetchall()
+            col_counts[tn] = len(all_cols)
+
+            # Conta colunas completamente vazias (NULL, '', '0', '0.0') na tabela de dados
+            empty = 0
+            try:
+                total_rows = conn.execute(f"SELECT COUNT(*) FROM [{tn}]").fetchone()[0]
+                if total_rows > 0:
+                    for row in all_cols:
+                        col = row["table_column_name"]
+                        cnt = conn.execute(
+                            f"SELECT COUNT(*) FROM [{tn}] WHERE [{col}] IS NOT NULL"
+                            f" AND TRIM(CAST([{col}] AS TEXT)) != ''"
+                            f" AND CAST([{col}] AS TEXT) != '0'"
+                            f" AND CAST([{col}] AS TEXT) != '0.0'"
+                        ).fetchone()[0]
+                        if cnt == 0:
+                            empty += 1
+            except Exception:
+                pass
+            empty_col_counts[tn] = empty
+    finally:
+        conn.close()
+
+    result = {}
+    for table_name, checks in REGISTRY.items():
+        yellow_count = sum(
+            1 for c in checks
+            if type(c).__name__ == "_YellowCheck"
+        )
+        total_plan_cols = col_counts.get(table_name, len(checks))
+        empty_cols = empty_col_counts.get(table_name, 0)
+        effective_cols = total_plan_cols - empty_cols
+        unchecked_cols = effective_cols - len(checks)
+        manual_cols = MANUAL_COLS.get(table_name, [])
+        result[table_name] = {
+            "total_checks": len(checks),
+            "total_cols": total_plan_cols,
+            "empty_cols": empty_cols,
+            "effective_cols": effective_cols,
+            "yellow_count": yellow_count,
+            "unchecked_cols": unchecked_cols,
+            "manual_cols": manual_cols,
+            "fully_mapped": yellow_count == 0 and unchecked_cols == 0,
+        }
+    return result
+
+
 @app.get("/api/verify/{table_name}/cached")
 def verify_cached(table_name: str):
     """Retorna o último resultado de verificação (sem chamar a API novamente)."""

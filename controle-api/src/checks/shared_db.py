@@ -340,6 +340,266 @@ class PaymentMethodDBCheck(ColumnCheck):
         return result
 
 
+class ReportNameDBCheck(ColumnCheck):
+    """Check report name against report_id joined with expenses (SQLite)."""
+
+    def run(self, db_conn, api) -> CheckResult:
+        import time as _time
+        start_time = _time.time()
+        table = self.table
+        cur = db_conn.execute(f'SELECT id_da_despesa, nome_do_relatório FROM "{table}" WHERE id_da_despesa IS NOT NULL')
+        rows = cur.fetchall()
+
+        if not rows:
+            return CheckResult(status="yellow", note="Nenhum dado de nome de relatório encontrado", total=0)
+
+        result = CheckResult(status="green", note="", total=len(rows))
+        for eid, db_name in rows:
+            try:
+                eid_int = int(float(eid)) if eid else None
+            except (ValueError, TypeError):
+                eid_int = None
+            if not eid_int:
+                result.not_found += 1
+                continue
+
+            cur2 = db_conn.execute('SELECT report_id FROM expenses WHERE id = ?', (eid_int,))
+            row = cur2.fetchone()
+            if row and row[0]:
+                result.matched += 1
+            else:
+                result.not_found += 1
+
+        if result.matched > 0:
+            result.status = "green"
+            result.note = f"✓ {result.matched}/{result.total} nomes de relatório com report_id na API"
+        else:
+            result.status = "yellow"
+            result.note = "report_name não armazenado diretamente no banco SQLite"
+
+        print(f"[{self.display}] Concluído em {_time.time() - start_time:.2f}s")
+        return result
+
+
+class ExpenseDateDBCheck(ColumnCheck):
+    """Check expense date against expenses.data (SQLite)."""
+
+    _MONTHS = {
+        "01": "JANEIRO", "02": "FEVEREIRO", "03": "MARÇO", "04": "ABRIL",
+        "05": "MAIO", "06": "JUNHO", "07": "JULHO", "08": "AGOSTO",
+        "09": "SETEMBRO", "10": "OUTUBRO", "11": "NOVEMBRO", "12": "DEZEMBRO",
+    }
+
+    def run(self, db_conn, api) -> CheckResult:
+        import time as _time
+        start_time = _time.time()
+        table = self.table
+        cur = db_conn.execute(f'SELECT id_da_despesa, data FROM "{table}" WHERE id_da_despesa IS NOT NULL')
+        rows = cur.fetchall()
+
+        if not rows:
+            return CheckResult(status="yellow", note="Nenhum dado de data encontrado", total=0)
+
+        result = CheckResult(status="green", note="", total=len(rows))
+        for eid, db_date in rows:
+            try:
+                eid_int = int(float(eid)) if eid else None
+            except (ValueError, TypeError):
+                eid_int = None
+            if not eid_int:
+                result.not_found += 1
+                continue
+
+            cur2 = db_conn.execute('SELECT data FROM expenses WHERE id = ?', (eid_int,))
+            row = cur2.fetchone()
+            if row and row[0]:
+                api_date = str(row[0])[:10]
+                try:
+                    parts = str(db_date).strip().split("/")
+                    db_iso = f"{parts[2]}-{parts[1]}-{parts[0]}" if len(parts) == 3 else str(db_date)
+                except Exception:
+                    db_iso = str(db_date)
+                if db_iso == api_date:
+                    result.matched += 1
+                else:
+                    result.mismatched += 1
+                    if len(result.mismatches) < 5:
+                        result.mismatches.append(Mismatch(key=str(eid), db_value=db_iso, api_value=api_date))
+            else:
+                result.not_found += 1
+
+        if result.mismatched > 0:
+            result.status = "red"
+            result.note = f"✗ {result.mismatched} divergências de {result.total} linhas. API: expenses.data"
+        elif result.matched > 0:
+            result.status = "green"
+            result.note = f"✓ {result.matched}/{result.total} datas batem com expenses.data"
+        else:
+            result.status = "yellow"
+            result.note = "Nenhuma data correspondida"
+
+        print(f"[{self.display}] Concluído em {_time.time() - start_time:.2f}s")
+        return result
+
+
+class ReimbursableDBCheck(ColumnCheck):
+    """Check reimbursable flag against expenses.reimbursable (SQLite). 0=Não, 1=Sim."""
+
+    def run(self, db_conn, api) -> CheckResult:
+        import time as _time
+        start_time = _time.time()
+        table = self.table
+        cur = db_conn.execute(f'SELECT id_da_despesa, reembolsável FROM "{table}" WHERE id_da_despesa IS NOT NULL')
+        rows = cur.fetchall()
+
+        if not rows:
+            return CheckResult(status="yellow", note="Nenhum dado de reembolsável encontrado", total=0)
+
+        result = CheckResult(status="green", note="", total=len(rows))
+        for eid, db_val in rows:
+            try:
+                eid_int = int(float(eid)) if eid else None
+            except (ValueError, TypeError):
+                eid_int = None
+            if not eid_int:
+                result.not_found += 1
+                continue
+
+            cur2 = db_conn.execute('SELECT reimbursable FROM expenses WHERE id = ?', (eid_int,))
+            row = cur2.fetchone()
+            if row is not None:
+                api_bool = bool(row[0])
+                db_norm = _normalize(str(db_val)) if db_val else ""
+                db_bool = db_norm in ("sim", "yes", "true", "1")
+                if db_bool == api_bool:
+                    result.matched += 1
+                else:
+                    result.mismatched += 1
+                    if len(result.mismatches) < 5:
+                        result.mismatches.append(Mismatch(key=str(eid), db_value=db_norm, api_value=str(api_bool)))
+            else:
+                result.not_found += 1
+
+        if result.mismatched > 0:
+            result.status = "red"
+            result.note = f"✗ {result.mismatched} divergências de {result.total} linhas. API: expenses.reimbursable"
+        elif result.matched > 0:
+            result.status = "green"
+            result.note = f"✓ {result.matched}/{result.total} reembolsável batem com expenses.reimbursable"
+        else:
+            result.status = "yellow"
+            result.note = "Nenhuma correspondência encontrada"
+
+        print(f"[{self.display}] Concluído em {_time.time() - start_time:.2f}s")
+        return result
+
+
+class CostsCenterDBCheck(ColumnCheck):
+    """Check costs center name against expenses.costs_center_name (SQLite)."""
+
+    def run(self, db_conn, api) -> CheckResult:
+        import time as _time
+        start_time = _time.time()
+        table = self.table
+        cur = db_conn.execute(f'SELECT id_da_despesa, centro_de_custos FROM "{table}" WHERE id_da_despesa IS NOT NULL')
+        rows = cur.fetchall()
+
+        if not rows:
+            return CheckResult(status="yellow", note="Nenhum dado de centro de custos encontrado", total=0)
+
+        result = CheckResult(status="green", note="", total=len(rows))
+        for eid, db_val in rows:
+            try:
+                eid_int = int(float(eid)) if eid else None
+            except (ValueError, TypeError):
+                eid_int = None
+            if not eid_int:
+                result.not_found += 1
+                continue
+
+            cur2 = db_conn.execute('SELECT costs_center_name FROM expenses WHERE id = ?', (eid_int,))
+            row = cur2.fetchone()
+            if row and row[0]:
+                if _normalize(db_val) == _normalize(row[0]):
+                    result.matched += 1
+                else:
+                    result.mismatched += 1
+                    if len(result.mismatches) < 5:
+                        result.mismatches.append(Mismatch(key=str(eid), db_value=_normalize(db_val), api_value=_normalize(row[0])))
+            else:
+                result.not_found += 1
+
+        if result.mismatched > 0:
+            result.status = "red"
+            result.note = f"✗ {result.mismatched} divergências de {result.total} linhas. API: expenses.costs_center_name"
+        elif result.matched > 0:
+            result.status = "green"
+            result.note = f"✓ {result.matched}/{result.total} centros de custo batem com expenses.costs_center_name"
+        else:
+            result.status = "yellow"
+            result.note = "Nenhuma correspondência encontrada"
+
+        print(f"[{self.display}] Concluído em {_time.time() - start_time:.2f}s")
+        return result
+
+
+class MonthDBCheck(ColumnCheck):
+    """Check month name derived from expenses.data (SQLite)."""
+
+    _MONTHS = {
+        "01": "JANEIRO", "02": "FEVEREIRO", "03": "MARÇO", "04": "ABRIL",
+        "05": "MAIO", "06": "JUNHO", "07": "JULHO", "08": "AGOSTO",
+        "09": "SETEMBRO", "10": "OUTUBRO", "11": "NOVEMBRO", "12": "DEZEMBRO",
+    }
+
+    def run(self, db_conn, api) -> CheckResult:
+        import time as _time
+        start_time = _time.time()
+        table = self.table
+        cur = db_conn.execute(f'SELECT id_da_despesa, mês FROM "{table}" WHERE id_da_despesa IS NOT NULL')
+        rows = cur.fetchall()
+
+        if not rows:
+            return CheckResult(status="yellow", note="Nenhum dado de mês encontrado", total=0)
+
+        result = CheckResult(status="green", note="", total=len(rows))
+        for eid, db_month in rows:
+            try:
+                eid_int = int(float(eid)) if eid else None
+            except (ValueError, TypeError):
+                eid_int = None
+            if not eid_int:
+                result.not_found += 1
+                continue
+
+            cur2 = db_conn.execute('SELECT data FROM expenses WHERE id = ?', (eid_int,))
+            row = cur2.fetchone()
+            if row and row[0]:
+                month_num = str(row[0])[5:7]
+                expected = self._MONTHS.get(month_num, "")
+                if _normalize(db_month) == _normalize(expected):
+                    result.matched += 1
+                else:
+                    result.mismatched += 1
+                    if len(result.mismatches) < 5:
+                        result.mismatches.append(Mismatch(key=str(eid), db_value=_normalize(db_month), api_value=_normalize(expected)))
+            else:
+                result.not_found += 1
+
+        if result.mismatched > 0:
+            result.status = "red"
+            result.note = f"✗ {result.mismatched} divergências de {result.total} linhas. Derivado de expenses.data"
+        elif result.matched > 0:
+            result.status = "green"
+            result.note = f"✓ {result.matched}/{result.total} meses batem (derivado de expenses.data)"
+        else:
+            result.status = "yellow"
+            result.note = "Nenhuma correspondência encontrada"
+
+        print(f"[{self.display}] Concluído em {_time.time() - start_time:.2f}s")
+        return result
+
+
 class CurrencyDBCheck(ColumnCheck):
     """Check currency field against expenses.original_currency_iso (SQLite)."""
 

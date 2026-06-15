@@ -12,8 +12,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 from src.checks.base import ColumnCheck, yellow
 from src.checks.shared import CpfCheck, NameCheck, ReportIdCheck, BankInfoCheck
 from src.checks.shared_db import (
-    ExpenseIdDBCheck, StatusDBCheck, ExpenseAmountDBCheck, 
-    CurrencyDBCheck, ExpenseTypeDBCheck, PaymentMethodDBCheck
+    ExpenseIdDBCheck, StatusDBCheck, ExpenseAmountDBCheck,
+    CurrencyDBCheck, ExpenseTypeDBCheck, PaymentMethodDBCheck,
+    ReportNameDBCheck, ExpenseDateDBCheck, ReimbursableDBCheck,
+    CostsCenterDBCheck, MonthDBCheck,
 )
 
 TABLE = "controle_detalhes3"
@@ -77,4 +79,38 @@ ALL_CHECKS: list[ColumnCheck] = [
         table=TABLE, column="forma_de_pagamento", display="FORMA DE PAGAMENTO",
         description="Forma de pagamento — via payment_method_name"
     ),
+
+    # Campos adicionais da despesa
+    ReportNameDBCheck(
+        table=TABLE, column="nome_do_relatório", display="NOME DO RELATÓRIO",
+        description="Nome do relatório — via expenses.report_id"
+    ),
+    ExpenseDateDBCheck(
+        table=TABLE, column="data", display="DATA",
+        description="Data da despesa — via expenses.data"
+    ),
+    ReimbursableDBCheck(
+        table=TABLE, column="reembolsável", display="REEMBOLSÁVEL",
+        description="Reembolsável — via expenses.reimbursable (0=Não, 1=Sim)"
+    ),
+    CostsCenterDBCheck(
+        table=TABLE, column="centro_de_custos", display="CENTRO DE CUSTOS",
+        description="Centro de custos — via expenses.costs_center_name"
+    ),
+    MonthDBCheck(
+        table=TABLE, column="mês", display="MÊS",
+        description="Mês derivado de expenses.data"
+    ),
+
+    # Campos sem coluna direta no banco SQLite atual
+    yellow(TABLE, "cpf_cnpj", "CPF/CNPJ", "CPF/CNPJ do estabelecimento",
+           "Não disponível como coluna direta em expenses no banco SQLite"),
+    yellow(TABLE, "descrição_da_despesa", "DESCRIÇÃO DA DESPESA", "Descrição livre da despesa",
+           "expenses.description não foi baixado neste snapshot do banco"),
+    yellow(TABLE, "anotação_da_despesa", "ANOTAÇÃO DA DESPESA", "Anotação da despesa",
+           "expenses.notes não foi baixado neste snapshot do banco"),
+    yellow(TABLE, "projeto", "PROJETO", "Projeto da despesa",
+           "expenses.costs_center_description vazio no banco; origem a confirmar"),
+    yellow(TABLE, "percentual_de_projeto", "PERCENTUAL DE PROJETO", "Percentual de rateio no projeto",
+           "Campo não disponível diretamente em expenses no banco SQLite"),
 ]
