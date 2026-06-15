@@ -1,596 +1,931 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  FileSpreadsheet, 
-  TrendingUp, 
-  Users, 
-  Download, 
-  RefreshCw, 
-  CheckCircle, 
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  FileSpreadsheet,
+  RefreshCw,
+  FileDown,
   AlertTriangle,
-  Info,
-  DollarSign,
-  Calendar,
-  Building,
-  UserCheck,
-  CreditCard
+  Database,
+  Pencil,
+  Check,
+  X,
 } from 'lucide-react';
 
-const MONTHS = [
-  { v: 1, l: 'Janeiro' }, { v: 2, l: 'Fevereiro' }, { v: 3, l: 'Março' },
-  { v: 4, l: 'Abril' },   { v: 5, l: 'Maio' },      { v: 6, l: 'Junho' },
-  { v: 7, l: 'Julho' },   { v: 8, l: 'Agosto' },    { v: 9, l: 'Setembro' },
-  { v: 10, l: 'Outubro' },{ v: 11, l: 'Novembro' }, { v: 12, l: 'Dezembro' },
-];
+// ---- Types ------------------------------------------------------------------
 
-const YEARS = [2024, 2025, 2026, 2027];
+interface Snapshot {
+  year: number;
+  month: number;
+  quinzena: number;
+  total_rows: number;
+  imported_at: string;
+}
 
-interface CompleteQuinzenaData {
-  period: {
-    year: number;
-    month: number;
-    quinzena: number;
-    start_date: string;
-    end_date: string;
-  };
-  user_info: {
-    user_id: number;
-    portador: string;
-    cpf: string | null;
-    status_colab: string;
-    centro_custo: string;
-    cod_centro_custo: string | null;
-    gestor: string | null;
-    direcao: string | null;
-    status_cartao: string | null;
-    obs: string | null;
-    regional: string;
-  };
-  financial_data: {
-    quinzena_qz: number;
-    saldo_final: number;
-    saldo_cartao: number;
-    saldo_reembolsar: number;
-    adiantamento: number;
-    carga_parcial: number;
-    reembolso: number;
-    carga_final: number;
-  };
+interface QuinzenaRow {
+  cpf: string;
+  colaborador: string;
+  situacao: string;
+  status_cartao: string;
+  regional: string;
+  centro_custo: string;
+  gestor: string;
+  diretor: string;
+  saldo_final: number;
+  saldo_cartao: number;
+  saldo_prestacao: number;
+  col_qz: number | null;
+  saldo_reembolsar: number;
+  saldo_final_carga: number;
+  saldo_cartao_carga: number;
+  col_qz_manual: number | null;
+  adiantamento: number;
+  obs: string | null;
+  carga_parcial: number;
+  reembolso: number;
+  carga_final: number;
   data_sources: {
-    portador: string;
-    cpf: string;
-    status_colab: string;
-    centro_custo: string;
-    quinzena_qz: string;
-    saldo_final: string;
-    saldo_cartao: string;
-    saldo_reembolsar: string;
-    carga_parcial: string;
-    reembolso: string;
-    carga_final: string;
-  };
-  _manual?: {
-    obs: string | null;
-    col_1qz: number | null;
-    adiantamento: number | null;
+    col_qz: 'planilha' | 'manual' | 'null';
+    saldo_final: 'neon';
+    saldo_cartao: 'neon';
+    adiantamento: 'manual' | 'default';
   };
 }
 
-interface ApiResponse {
-  generation_date: string;
+interface QuinzenaResponse {
   period: {
     year: number;
     month: number;
     quinzena: number;
     start_date: string;
     end_date: string;
+    month_name: string;
   };
   statistics: {
-    total_team_members: number;
-    total_expenses: number;
-    total_cost_centers: number;
-    processed_users: number;
-    success_rate: number;
+    total_rows: number;
+    ativos: number;
+    com_carga: number;
+    total_carga_final: number;
+    total_saldo_final: number;
+    total_col_qz: number;
+    has_neon_data: boolean;
   };
-  patterns_used: {
-    saldo_final_ratio: number;
-    saldo_cartao_ratio: number;
-    saldo_reembolsar_ratio: number;
-  };
-  data: CompleteQuinzenaData[];
+  data: QuinzenaRow[];
 }
 
-// Formatação de valores
+// ---- Constants --------------------------------------------------------------
+
+const MONTH_NAMES_SHORT = [
+  '', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez',
+];
+
+const MONTH_NAMES_FULL = [
+  '', 'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
+
+// ---- Formatters -------------------------------------------------------------
+
 function brl(v: number | null | undefined): string {
-  if (v === null || v === undefined) return '—';
+  if (v === null || v === undefined) return '-';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2 });
 }
 
-// Componente de indicador
-function MetricCard({ title, value, icon: Icon, trend, color = "blue" }: {
-  title: string;
-  value: string | number;
-  icon: any;
-  trend?: string;
-  color?: string;
+function num(v: number | null | undefined): string {
+  if (v === null || v === undefined) return '-';
+  const abs = Math.abs(v).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  return v < 0 ? `-${abs}` : abs;
+}
+
+// ---- Reusable components ----------------------------------------------------
+
+function StatCard({ label, value, sub, color = 'gray' }: {
+  label: string; value: string; sub?: string; color?: 'blue' | 'green' | 'amber' | 'purple' | 'gray';
 }) {
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-700 border-blue-200',
-    green: 'bg-green-50 text-green-700 border-green-200',
-    amber: 'bg-amber-50 text-amber-700 border-amber-200',
-    purple: 'bg-purple-50 text-purple-700 border-purple-200',
-    red: 'bg-red-50 text-red-700 border-red-200'
-  };
+  const cls = {
+    blue:   'bg-blue-50 border-blue-200 text-blue-800',
+    green:  'bg-green-50 border-green-200 text-green-800',
+    amber:  'bg-amber-50 border-amber-200 text-amber-800',
+    purple: 'bg-purple-50 border-purple-200 text-purple-800',
+    gray:   'bg-gray-50 border-gray-200 text-gray-800',
+  }[color];
 
   return (
-    <Card className={`${colorClasses[color as keyof typeof colorClasses]} border`}>
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium opacity-80">{title}</p>
-            <p className="text-2xl font-bold">{value}</p>
-            {trend && <p className="text-xs opacity-70">{trend}</p>}
-          </div>
-          <Icon className="h-8 w-8 opacity-50" />
-        </div>
-      </CardContent>
-    </Card>
+    <div className={`rounded-lg border p-3 ${cls}`}>
+      <div className="text-xs font-medium opacity-70 mb-1">{label}</div>
+      <div className="text-lg font-bold leading-none">{value}</div>
+      {sub && <div className="text-xs opacity-60 mt-1">{sub}</div>}
+    </div>
   );
 }
 
-// Badge de fonte de dados
-function DataSourceBadge({ source }: { source: string }) {
-  const colors = {
-    api: 'bg-green-100 text-green-700',
-    calculated: 'bg-blue-100 text-blue-700',
-    formula: 'bg-purple-100 text-purple-700'
+// Inline editable cell
+function EditCell({
+  value,
+  numeric = true,
+  onSave,
+  empty = '-',
+}: {
+  value: number | string | null;
+  numeric?: boolean;
+  onSave: (v: string | null) => Promise<void>;
+  empty?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const [saving, setSaving] = useState(false);
+  const ref = useRef<HTMLInputElement>(null);
+
+  const start = () => {
+    setDraft(value !== null && value !== undefined ? String(value) : '');
+    setEditing(true);
+    setTimeout(() => ref.current?.select(), 0);
   };
 
+  const cancel = () => setEditing(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await onSave(draft.trim() === '' ? null : draft.trim());
+      setEditing(false);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-0.5">
+        <input
+          ref={ref}
+          type={numeric ? 'number' : 'text'}
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel(); }}
+          className="w-24 border border-blue-400 rounded px-1.5 py-0.5 text-xs text-right focus:outline-none focus:ring-1 focus:ring-blue-400"
+        />
+        <button onClick={save} disabled={saving} className="ml-0.5 text-green-600 hover:text-green-700 p-0.5">
+          <Check className="h-3 w-3" />
+        </button>
+        <button onClick={cancel} className="text-red-500 hover:text-red-600 p-0.5">
+          <X className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  const display = numeric && value !== null && value !== undefined
+    ? num(value as number)
+    : (value ?? null);
+
   return (
-    <Badge className={`text-xs ${colors[source as keyof typeof colors] || 'bg-gray-100 text-gray-700'}`}>
-      {source}
-    </Badge>
+    <button
+      onClick={start}
+      className="group flex items-center gap-1 justify-end w-full text-right hover:bg-blue-50 rounded px-1 py-0.5 transition-colors"
+    >
+      <span className={display === null ? 'text-gray-300 italic text-xs' : ''}>
+        {display ?? empty}
+      </span>
+      <Pencil className="h-2.5 w-2.5 shrink-0 opacity-0 group-hover:opacity-40 text-blue-500" />
+    </button>
   );
 }
+
+// ---- Main page --------------------------------------------------------------
 
 export default function QuinzenaDinamicaPage() {
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(4); // Abril para validação
-  const [quinzena, setQuinzena] = useState(1);
-  const [data, setData] = useState<ApiResponse | null>(null);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [snapshotsLoading, setSnapshotsLoading] = useState(true);
+
+  const [year, setYear] = useState<number | null>(null);
+  const [month, setMonth] = useState<number | null>(null);
+  const [quinzena, setQuinzena] = useState<number | null>(null);
+
+  const [data, setData] = useState<QuinzenaResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editingField, setEditingField] = useState<{ userId: number; field: string } | null>(null);
-  const [editValue, setEditValue] = useState<string>('');
+  const [lastLoaded, setLastLoaded] = useState<string | null>(null);
 
-  const loadData = async () => {
+  const [search, setSearch] = useState('');
+  const [onlyWithCarga, setOnlyWithCarga] = useState(true);
+
+  // 1. Load available snapshots on mount
+  useEffect(() => {
+    (async () => {
+      setSnapshotsLoading(true);
+      try {
+        const res = await fetch('/api/quinzena/snapshots');
+        const json = await res.json();
+        const list: Snapshot[] = json.snapshots ?? [];
+        setSnapshots(list);
+        if (list.length > 0) {
+          const first = list[0];
+          setYear(first.year);
+          setMonth(first.month);
+          setQuinzena(first.quinzena);
+        }
+      } catch (e) {
+        console.error('Snapshots error:', e);
+      } finally {
+        setSnapshotsLoading(false);
+      }
+    })();
+  }, []);
+
+  // 2. Load data whenever period changes
+  const loadData = useCallback(async (y: number, m: number, q: number) => {
     setLoading(true);
     setError(null);
-
     try {
-      const response = await fetch(
-        `/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}`
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro ao carregar dados');
-      }
-
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+      const res = await fetch(`/api/quinzena-complete?year=${y}&month=${m}&quinzena=${q}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? 'Erro desconhecido');
+      setData(json);
+      setLastLoaded(new Date().toLocaleTimeString('pt-BR'));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, [year, month, quinzena]);
+    if (year !== null && month !== null && quinzena !== null) {
+      loadData(year, month, quinzena);
+    }
+  }, [year, month, quinzena, loadData]);
 
-  const saveManualField = async (userId: number, field: string, value: string) => {
-    try {
-      const response = await fetch('/api/quinzena-complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          year,
-          month,
-          quinzena,
-          field,
-          value: field === 'col_1qz' || field === 'adiantamento' ? parseFloat(value) : value
-        })
-      });
+  // 3. Save manual field — optimistic local update, no refetch
+  const saveField = async (cpf: string, field: string, rawValue: string | null) => {
+    if (year === null || month === null || quinzena === null) return;
+    const value = (field === 'col_1qz' || field === 'adiantamento') && rawValue !== null
+      ? parseFloat(rawValue)
+      : rawValue;
 
-      if (response.ok) {
-        setEditingField(null);
-        loadData(); // Recarregar dados
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Erro ao salvar');
+    const res = await fetch('/api/quinzena-complete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cpf, year, month, quinzena, field, value }),
+    });
+    if (!res.ok) {
+      const j = await res.json();
+      throw new Error(j.error ?? 'Erro ao salvar');
+    }
+
+    // Optimistic update
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        data: prev.data.map(row => {
+          if (row.cpf !== cpf) return row;
+          const updated = { ...row };
+          if (field === 'col_1qz') {
+            updated.col_qz_manual = rawValue === null ? null : parseFloat(rawValue);
+            updated.data_sources = {
+              ...updated.data_sources,
+              col_qz: updated.col_qz_manual !== null ? 'manual' : updated.col_qz !== null ? 'planilha' : 'null',
+            };
+          }
+          if (field === 'adiantamento') {
+            updated.adiantamento = rawValue === null ? 0 : parseFloat(rawValue);
+            updated.data_sources = {
+              ...updated.data_sources,
+              adiantamento: updated.adiantamento > 0 ? 'manual' : 'default',
+            };
+          }
+          if (field === 'obs') updated.obs = rawValue;
+
+          // Recalculate
+          const col_qz_efetivo = updated.col_qz_manual !== null
+            ? updated.col_qz_manual
+            : (updated.col_qz ?? 0);
+          updated.carga_parcial = Math.max(
+            0,
+            col_qz_efetivo - updated.saldo_final_carga - updated.saldo_cartao_carga - updated.adiantamento,
+          );
+          updated.reembolso  = Math.max(0, updated.saldo_reembolsar) * 0.5;
+          updated.carga_final = updated.carga_parcial + updated.reembolso;
+          return updated;
+        }),
+      };
+    });
+  };
+
+  // 4. Export XLSX
+  const exportXLSX = () => {
+    if (!filteredRows.length || !data) return;
+
+    // Dynamic import to avoid SSR issues
+    import('xlsx').then((XLSX) => {
+      const period = data.period;
+      const monthName = MONTH_NAMES_FULL[period.month] ?? String(period.month);
+      const title = `${monthName} ${period.year} - ${period.quinzena}a Quinzena (${period.start_date} a ${period.end_date})`;
+
+      // Column definitions: [header, key, group, width]
+      // groups: id | neon | carga | manual | calc
+      const COLS: { h: string; key: string; group: 'id'|'neon'|'carga'|'manual'|'calc'; w: number }[] = [
+        { h: 'CPF',               key: 'cpf',               group: 'id',     w: 15 },
+        { h: 'COLABORADOR',       key: 'colaborador',        group: 'id',     w: 34 },
+        { h: 'SITUACAO',          key: 'situacao',           group: 'id',     w: 10 },
+        { h: 'REGIONAL',          key: 'regional',           group: 'id',     w: 16 },
+        { h: 'CENTRO DE CUSTO',   key: 'centro_custo',       group: 'id',     w: 30 },
+        { h: 'GESTOR',            key: 'gestor',             group: 'id',     w: 28 },
+        { h: 'STATUS CARTAO',     key: 'status_cartao',      group: 'id',     w: 16 },
+        { h: 'SALDO FINAL',       key: 'saldo_final',        group: 'neon',   w: 14 },
+        { h: 'SALDO CARTAO',      key: 'saldo_cartao',       group: 'neon',   w: 14 },
+        { h: 'SALDO PRESTACAO',   key: 'saldo_prestacao',    group: 'neon',   w: 16 },
+        { h: 'SALDO REEMBOLSAR',  key: 'saldo_reembolsar',   group: 'neon',   w: 16 },
+        { h: `${period.quinzena}a QZ (planilha)`, key: 'col_qz',    group: 'carga',  w: 16 },
+        { h: `${period.quinzena}a QZ (manual)`,   key: 'col_qz_manual', group: 'manual', w: 16 },
+        { h: 'ADIANTAMENTO',      key: 'adiantamento',       group: 'manual', w: 14 },
+        { h: 'OBS',               key: 'obs',                group: 'manual', w: 24 },
+        { h: 'CARGA PARCIAL',     key: 'carga_parcial',      group: 'calc',   w: 14 },
+        { h: 'REEMBOLSO',         key: 'reembolso',          group: 'calc',   w: 14 },
+        { h: 'CARGA FINAL',       key: 'carga_final',        group: 'calc',   w: 14 },
+      ];
+
+      const numericKeys = new Set([
+        'saldo_final','saldo_cartao','saldo_prestacao','saldo_reembolsar',
+        'col_qz','col_qz_manual','adiantamento','carga_parcial','reembolso','carga_final',
+      ]);
+
+      // Row 1: merged title
+      // Row 2: group headers
+      // Row 3: column headers
+      // Row 4+: data
+      // Last row: totals
+
+      const wb = XLSX.utils.book_new();
+      const wsData: unknown[][] = [];
+
+      // Row 1 — title (will be merged across all columns)
+      wsData.push([title, ...Array(COLS.length - 1).fill(null)]);
+
+      // Row 2 — group sub-headers
+      const GROUP_LABELS: Record<string, string> = {
+        id: 'IDENTIFICACAO', neon: 'DADOS NEON', carga: 'CARGA (planilha)',
+        manual: 'CAMPOS MANUAIS', calc: 'CALCULADO',
+      };
+      wsData.push(COLS.map(c => GROUP_LABELS[c.group]));
+
+      // Row 3 — column headers
+      wsData.push(COLS.map(c => c.h));
+
+      // Rows 4+ — data
+      for (const r of filteredRows) {
+        wsData.push(COLS.map(c => {
+          const v = (r as unknown as Record<string, unknown>)[c.key];
+          if (v === null || v === undefined) return '';
+          return v;
+        }));
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+
+      // Totals row
+      const totalsRow = COLS.map(c => {
+        if (!numericKeys.has(c.key)) return c.key === 'colaborador' ? `TOTAL (${filteredRows.length})` : '';
+        return filteredRows.reduce((s, r) => s + ((r as unknown as Record<string, number | null>)[c.key] ?? 0), 0);
+      });
+      wsData.push(totalsRow);
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+      // Column widths
+      ws['!cols'] = COLS.map(c => ({ wch: c.w }));
+
+      // Freeze rows 1-3 (header area)
+      ws['!freeze'] = { xSplit: 0, ySplit: 3 };
+
+      // Merge title row across all columns
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: COLS.length - 1 } }];
+
+      // Cell styles
+      const groupFill: Record<string, string> = {
+        id:     'DBEAFE', // blue-100
+        neon:   'DCFCE7', // green-100
+        carga:  'FEF9C3', // yellow-100
+        manual: 'FEF3C7', // amber-100
+        calc:   'EDE9FE', // purple-100
+      };
+      const groupFont: Record<string, string> = {
+        id: '1E3A5F', neon: '14532D', carga: '713F12', manual: '92400E', calc: '3B0764',
+      };
+
+      const numFmt = '#,##0.00';
+
+      const totalRows = wsData.length;
+      const dataStartRow = 3; // 0-based, rows 0-2 are headers
+      const totalsRowIdx = totalRows - 1;
+
+      for (let R = 0; R < totalRows; R++) {
+        for (let C = 0; C < COLS.length; C++) {
+          const cellAddr = XLSX.utils.encode_cell({ r: R, c: C });
+          if (!ws[cellAddr]) ws[cellAddr] = { v: '', t: 's' };
+
+          const cell = ws[cellAddr];
+          const col = COLS[C];
+          const isNumeric = numericKeys.has(col.key);
+
+          // Apply number format to data and totals numeric cells
+          if (isNumeric && R >= dataStartRow) {
+            cell.t = 'n';
+            cell.z = numFmt;
+          }
+
+          // Build style
+          let fill = 'FFFFFF';
+          let bold = false;
+          let fgColor = '000000';
+          let border = true;
+          let hAlign: string | undefined = isNumeric ? 'right' : 'left';
+          let fontSize = 10;
+
+          if (R === 0) {
+            // Title row
+            fill = '1E40AF'; fgColor = 'FFFFFF'; bold = true; fontSize = 12;
+            hAlign = 'center'; border = false;
+          } else if (R === 1) {
+            // Group header row
+            fill = groupFill[col.group] ?? 'F3F4F6';
+            fgColor = groupFont[col.group] ?? '374151';
+            bold = true; hAlign = 'center'; fontSize = 9;
+          } else if (R === 2) {
+            // Column header row
+            fill = groupFill[col.group] ?? 'F3F4F6';
+            fgColor = groupFont[col.group] ?? '374151';
+            bold = true; hAlign = 'center'; fontSize = 10;
+          } else if (R === totalsRowIdx) {
+            // Totals row
+            fill = '1E40AF'; fgColor = 'FFFFFF'; bold = true;
+          } else if (R % 2 === 1) {
+            // Alternating row (odd data rows get a faint group tint)
+            fill = groupFill[col.group] ?? 'F9FAFB';
+            fill = fill + '80'; // lighter — xlsx ignores alpha, but gives visual intent
+            fill = groupFill[col.group] ? 'F8FAFF' : 'F9FAFB';
+          }
+
+          cell.s = {
+            fill:      fill !== 'FFFFFF' ? { fgColor: { rgb: fill }, patternType: 'solid' } : undefined,
+            font:      { bold, color: { rgb: fgColor }, sz: fontSize, name: 'Calibri' },
+            alignment: { horizontal: hAlign, vertical: 'center', wrapText: false },
+            border: border ? {
+              top:    { style: 'thin', color: { rgb: 'D1D5DB' } },
+              bottom: { style: 'thin', color: { rgb: 'D1D5DB' } },
+              left:   { style: 'thin', color: { rgb: 'D1D5DB' } },
+              right:  { style: 'thin', color: { rgb: 'D1D5DB' } },
+            } : undefined,
+          };
+        }
+      }
+
+      // Title row height
+      ws['!rows'] = [{ hpt: 28 }, { hpt: 18 }, { hpt: 20 }];
+
+      XLSX.utils.book_append_sheet(wb, ws, `QZ${period.quinzena} ${monthName.slice(0,3)} ${period.year}`);
+
+      const filename = `quinzena-${period.year}-${String(period.month).padStart(2,'0')}-q${period.quinzena}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    });
+  };
+
+  // ---- Derived selector data -----------------------------------------------
+
+  const availableYears = [...new Set(snapshots.map(s => s.year))].sort((a, b) => b - a);
+
+  const availableMonths = year !== null
+    ? [...new Set(snapshots.filter(s => s.year === year).map(s => s.month))].sort((a, b) => b - a)
+    : [];
+
+  const availableQzs = year !== null && month !== null
+    ? snapshots.filter(s => s.year === year && s.month === month).map(s => s.quinzena).sort()
+    : [];
+
+  const handleYearChange = (y: number) => {
+    const months = [...new Set(snapshots.filter(s => s.year === y).map(s => s.month))].sort((a, b) => b - a);
+    const newMonth = months.includes(month ?? -1) ? month! : (months[0] ?? null);
+    setYear(y);
+    setMonth(newMonth);
+    if (newMonth !== null) {
+      const qzs = snapshots.filter(s => s.year === y && s.month === newMonth).map(s => s.quinzena).sort();
+      setQuinzena(qzs.includes(quinzena ?? -1) ? quinzena! : (qzs[0] ?? null));
     }
   };
 
-  const exportCSV = () => {
-    if (!data?.data.length) return;
-
-    const headers = [
-      'USER_ID', 'PORTADOR', 'CPF', 'STATUS_COLAB', 'CENTRO_CUSTO', 'COD_CENTRO_CUSTO',
-      'GESTOR', 'DIRECAO', 'STATUS_CARTAO', 'OBS', 'REGIONAL', '1QZ', 'SALDO_FINAL',
-      'SALDO_CARTAO', 'SALDO_REEMBOLSAR', 'ADIANTAMENTO', 'CARGA_PARCIAL', 'REEMBOLSO', 'CARGA_FINAL'
-    ];
-
-    const lines = data.data.map(user => [
-      user.user_info.user_id,
-      `"${user.user_info.portador}"`,
-      `"${user.user_info.cpf || ''}"`,
-      `"${user.user_info.status_colab}"`,
-      `"${user.user_info.centro_custo}"`,
-      `"${user.user_info.cod_centro_custo || ''}"`,
-      `"${user.user_info.gestor || ''}"`,
-      `"${user.user_info.direcao || ''}"`,
-      `"${user.user_info.status_cartao || ''}"`,
-      `"${user.user_info.obs || ''}"`,
-      `"${user.user_info.regional}"`,
-      user.financial_data.quinzena_qz,
-      user.financial_data.saldo_final,
-      user.financial_data.saldo_cartao,
-      user.financial_data.saldo_reembolsar,
-      user.financial_data.adiantamento,
-      user.financial_data.carga_parcial,
-      user.financial_data.reembolso,
-      user.financial_data.carga_final
-    ].map(v => String(v)).join(','));
-
-    const csv = [headers.join(','), ...lines].join('\n');
-    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `quinzena-completa-${year}-${String(month).padStart(2, '0')}-${quinzena}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+  const handleMonthChange = (m: number) => {
+    const qzs = snapshots.filter(s => s.year === year && s.month === m).map(s => s.quinzena).sort();
+    setMonth(m);
+    setQuinzena(qzs.includes(quinzena ?? -1) ? quinzena! : (qzs[0] ?? null));
   };
 
-  const monthName = MONTHS.find(m => m.v === month)?.l || month;
+  const filteredRows = (data?.data ?? []).filter(r => {
+    if (onlyWithCarga && (r.col_qz === null || r.col_qz === 0)) return false;
+    if (!search) return true;
+    return (
+      r.colaborador.toLowerCase().includes(search.toLowerCase()) ||
+      r.cpf.includes(search) ||
+      r.centro_custo.toLowerCase().includes(search.toLowerCase())
+    );
+  });
 
+  const stats = data?.statistics;
+
+  // ---- Render --------------------------------------------------------------
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-4 pb-16">
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileSpreadsheet className="h-8 w-8" />
-            Planilha Quinzenal Dinâmica
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <FileSpreadsheet className="h-6 w-6 text-blue-600" />
+            Planilha Quinzenal Dinamica
           </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Automação 100% completa da planilha de quinzena com dados dinâmicos da API VExpenses
+          <p className="text-sm text-gray-500 mt-0.5">
+            Dados do Neon &middot; Colunas manuais editaveis inline &middot; Exportacao Excel
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            onClick={loadData}
-            disabled={loading}
-            className="flex items-center gap-2"
+          <Button size="sm" variant="outline"
+            onClick={() => year && month && quinzena && loadData(year, month, quinzena)}
+            disabled={loading || year === null}
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
-          <Button
-            onClick={exportCSV}
-            disabled={!data?.data.length}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Exportar CSV
+          <Button size="sm" variant="outline" onClick={exportXLSX} disabled={!filteredRows.length}>
+            <FileDown className="h-4 w-4 mr-1" />
+            Excel
           </Button>
         </div>
       </div>
 
-      {/* Filtros */}
+      {/* Period selector */}
       <Card>
         <CardContent className="pt-4 pb-4">
-          <div className="flex flex-wrap gap-4 items-end">
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Ano</label>
-              <select
-                value={year} onChange={e => setYear(parseInt(e.target.value))}
-                className="border rounded px-3 py-1.5 text-sm w-24"
-              >
-                {YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-              </select>
+          {snapshotsLoading ? (
+            <div className="text-sm text-gray-400 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 animate-spin" /> Carregando periodos...
             </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Mês</label>
-              <select
-                value={month} onChange={e => setMonth(parseInt(e.target.value))}
-                className="border rounded px-3 py-1.5 text-sm"
-              >
-                {MONTHS.map(m => <option key={m.v} value={m.v}>{m.l}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs text-gray-500 mb-1">Quinzena</label>
-              <div className="flex rounded border overflow-hidden">
-                {[1, 2].map(q => (
-                  <button
-                    key={q}
-                    onClick={() => setQuinzena(q)}
-                    className={`px-4 py-1.5 text-sm font-medium ${
-                      quinzena === q ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {q}ª QZ
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {data && (
-              <div className="ml-auto text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" />
-                  Período: {data.period.start_date} a {data.period.end_date}
+          ) : snapshots.length === 0 ? (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Nenhum periodo importado. Execute <code className="bg-gray-100 px-1 rounded text-xs">import_to_neon.py</code>.
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <div className="flex flex-wrap gap-5 items-end">
+
+              {/* Year */}
+              <div>
+                <div className="text-xs text-gray-500 font-medium mb-1.5">Ano</div>
+                <div className="flex gap-1">
+                  {availableYears.map(y => (
+                    <button key={y} onClick={() => handleYearChange(y)}
+                      className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${
+                        year === y ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >{y}</button>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
+
+              {/* Month */}
+              <div>
+                <div className="text-xs text-gray-500 font-medium mb-1.5">Mes</div>
+                <div className="flex gap-1 flex-wrap">
+                  {availableMonths.map(m => (
+                    <button key={m} onClick={() => handleMonthChange(m)}
+                      className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${
+                        month === m ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >{MONTH_NAMES_SHORT[m]}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quinzena — toggle claro */}
+              <div>
+                <div className="text-xs text-gray-500 font-medium mb-1.5">Quinzena</div>
+                <div className="flex rounded-lg border border-gray-300 overflow-hidden shadow-sm">
+                  {availableQzs.map(q => (
+                    <button key={q} onClick={() => setQuinzena(q)}
+                      className={`px-5 py-2 text-sm font-semibold transition-colors ${
+                        quinzena === q
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-700 hover:bg-blue-50'
+                      }`}
+                    >
+                      {q}a QZ
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="ml-auto flex flex-col items-end gap-1">
+                {loading && (
+                  <div className="flex items-center gap-1.5 text-sm text-blue-600">
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                    Carregando...
+                  </div>
+                )}
+                {!loading && data && (
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <Database className="h-3.5 w-3.5 text-green-500" />
+                    {data.period.start_date} &rarr; {data.period.end_date}
+                    <Badge className="bg-green-100 text-green-700 text-xs py-0">Neon</Badge>
+                  </div>
+                )}
+                {lastLoaded && !loading && (
+                  <div className="text-xs text-gray-400">
+                    Atualizado as {lastLoaded} &mdash; {year}/{String(month).padStart(2,'0')} QZ{quinzena}
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Alertas */}
+      {/* Error */}
       {error && (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>Erro</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
 
-      {data && (
+      {/* Loading skeleton */}
+      {loading && (
+        <div className="flex items-center justify-center py-12 text-gray-400 gap-2">
+          <RefreshCw className="h-5 w-5 animate-spin" />
+          Carregando dados...
+        </div>
+      )}
+
+      {/* Content */}
+      {!loading && data && (
         <>
-          {/* Métricas */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <MetricCard
-              title="Total Expenses"
-              value={data.statistics.total_expenses}
-              icon={TrendingUp}
-              trend="Período selecionado"
-              color="blue"
-            />
-            <MetricCard
-              title="Usuários Processados"
-              value={data.statistics.processed_users}
-              icon={Users}
-              trend={`${data.statistics.success_rate.toFixed(1)}% sucesso`}
-              color="green"
-            />
-            <MetricCard
-              title="Team Members"
-              value={data.statistics.total_team_members}
-              icon={UserCheck}
-              trend="Total na API"
-              color="amber"
-            />
-            <MetricCard
-              title="Centros de Custo"
-              value={data.statistics.total_cost_centers}
-              icon={Building}
-              trend="Mapeados"
-              color="purple"
-            />
-            <MetricCard
-              title="Taxa de Sucesso"
-              value={`${data.statistics.success_rate.toFixed(1)}%`}
-              icon={CheckCircle}
-              trend="Automação"
-              color="green"
-            />
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <StatCard label="Colaboradores" value={String(stats?.total_rows ?? 0)} sub={`${stats?.ativos ?? 0} ativos`} color="blue" />
+            <StatCard label="Com Carga" value={String(stats?.com_carga ?? 0)} sub="carga final > 0" color="green" />
+            <StatCard label="Total QZ" value={brl(stats?.total_col_qz)} color="amber" />
+            <StatCard label="Total Carga Final" value={brl(stats?.total_carga_final)} color="purple" />
+            <StatCard label="Total Saldo Final" value={brl(stats?.total_saldo_final)} color="gray" />
           </div>
 
-          {/* Informações dos Padrões */}
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertTitle>Padrões Matemáticos Utilizados</AlertTitle>
-            <AlertDescription>
-              <div className="mt-2 space-y-1 text-sm">
-                <div>• SALDO FINAL = 1QZ × {data.patterns_used.saldo_final_ratio.toFixed(4)}</div>
-                <div>• SALDO CARTÃO = 1QZ × {data.patterns_used.saldo_cartao_ratio.toFixed(4)}</div>
-                <div>• SALDO REEMBOLSAR = 1QZ × {data.patterns_used.saldo_reembolsar_ratio.toFixed(4)}</div>
-                <div>• CARGA PARCIAL = 1QZ - SALDO FINAL - SALDO CARTÃO - ADIANTAMENTO</div>
-                <div>• REEMBOLSO = SALDO REEMBOLSAR × 0.5 (taxa multiplicadora)</div>
-                <div>• CARGA FINAL = CARGA PARCIAL + REEMBOLSO</div>
-              </div>
-            </AlertDescription>
-          </Alert>
+          {!stats?.has_neon_data && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                Sem dados para este periodo. Importe a planilha de controle com
+                {' '}<code className="bg-gray-100 px-1 rounded text-xs">import_to_neon.py</code>.
+              </AlertDescription>
+            </Alert>
+          )}
 
-          {/* Tabela Completa de Resultados */}
+          {/* Search */}
+          <div className="flex items-center gap-3">
+            <input
+              type="text"
+              placeholder="Buscar por nome, CPF ou centro de custo..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="border rounded px-3 py-1.5 text-sm w-72 focus:outline-none focus:ring-2 focus:ring-blue-300"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-xs text-gray-400 hover:text-gray-600">
+                Limpar
+              </button>
+            )}
+            {/* Toggle: somente com carga */}
+            <button
+              onClick={() => setOnlyWithCarga(v => !v)}
+              className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                onlyWithCarga
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                  : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              <span className={`h-2 w-2 rounded-full ${onlyWithCarga ? 'bg-white' : 'bg-gray-400'}`} />
+              Somente usuarios com carga no mes
+            </button>
+            <span className="text-xs text-gray-400 ml-auto">
+              {filteredRows.length} / {data.data.length} registros
+            </span>
+          </div>
+
+          {/* Table */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5" />
-                Planilha Quinzenal Completa - {monthName} {year} ({quinzena}ª Quinzena)
+            <CardHeader className="py-3 px-4 border-b">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2 flex-wrap">
+                <FileSpreadsheet className="h-4 w-4 shrink-0" />
+                {MONTH_NAMES_FULL[data.period.month]} {data.period.year} &mdash; {data.period.quinzena}a Quinzena
+                <span className="font-normal text-gray-400 text-xs">
+                  ({data.period.start_date} a {data.period.end_date})
+                </span>
+                {/* Color legend */}
+                <div className="ml-auto flex gap-2 text-xs font-normal">
+                  <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">Neon</span>
+                  <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded">Manual</span>
+                  <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Calculado</span>
+                </div>
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b bg-gray-50">
-                      <th className="text-left p-2 font-medium">Usuário</th>
-                      <th className="text-left p-2 font-medium">CPF</th>
-                      <th className="text-left p-2 font-medium">Centro Custo</th>
-                      <th className="text-left p-2 font-medium">Cód</th>
-                      <th className="text-left p-2 font-medium">Gestor</th>
-                      <th className="text-left p-2 font-medium">Direção</th>
-                      <th className="text-left p-2 font-medium">Status</th>
-                      <th className="text-left p-2 font-medium">Regional</th>
-                      <th className="text-right p-2 font-medium">1QZ*</th>
-                      <th className="text-right p-2 font-medium">SALDO FINAL</th>
-                      <th className="text-right p-2 font-medium">SALDO CARTÃO</th>
-                      <th className="text-right p-2 font-medium">SALDO REEMBOLSAR</th>
-                      <th className="text-right p-2 font-medium">ADIANTAMENTO*</th>
-                      <th className="text-right p-2 font-medium">CARGA PARCIAL</th>
-                      <th className="text-right p-2 font-medium">REEMBOLSO</th>
-                      <th className="text-right p-2 font-medium">CARGA FINAL</th>
-                      <th className="text-center p-2 font-medium">OBS*</th>
-                      <th className="text-center p-2 font-medium">Fontes</th>
+                <table className="w-full text-xs border-collapse">
+                  <thead className="sticky top-0 z-10 bg-gray-50">
+                    <tr className="border-b border-gray-200 text-gray-600">
+                      {/* Identity */}
+                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Colaborador</th>
+                      <th className="text-left px-2 py-2 font-semibold">CPF</th>
+                      <th className="text-left px-2 py-2 font-semibold">Situacao</th>
+                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Regional</th>
+                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Centro de Custo</th>
+                      <th className="text-left px-2 py-2 font-semibold">Gestor</th>
+                      {/* Neon */}
+                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Final</th>
+                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Cartao</th>
+                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Prest.</th>
+                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Reemb.</th>
+                      {/* From carga spreadsheet */}
+                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">
+                        {data.period.quinzena}a QZ (plan.)
+                      </th>
+                      {/* Manual override */}
+                      <th className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">
+                        {data.period.quinzena}a QZ (man.) *
+                      </th>
+                      <th className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Adiant. *</th>
+                      {/* Calculated */}
+                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Carga Parcial</th>
+                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Reembolso</th>
+                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap font-bold">Carga Final</th>
+                      {/* Status / obs */}
+                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Status Cartao</th>
+                      <th className="text-left px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Obs *</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.data.map((user, index) => (
-                      <tr key={user.user_info.user_id} className="border-b hover:bg-gray-50">
-                        <td className="p-2">
-                          <div>
-                            <div className="font-medium">{user.user_info.portador}</div>
-                            <div className="text-xs text-gray-500">ID: {user.user_info.user_id}</div>
-                          </div>
-                        </td>
-                        <td className="p-2 font-mono text-xs">{user.user_info.cpf || '—'}</td>
-                        <td className="p-2">
-                          <div className="max-w-[150px] truncate" title={user.user_info.centro_custo}>
-                            {user.user_info.centro_custo}
-                          </div>
-                        </td>
-                        <td className="p-2 font-mono text-xs">{user.user_info.cod_centro_custo || '—'}</td>
-                        <td className="p-2 text-xs">{user.user_info.gestor || '—'}</td>
-                        <td className="p-2 text-xs">{user.user_info.direcao || '—'}</td>
-                        <td className="p-2">
-                          <Badge variant="outline" className="text-xs">
-                            {user.user_info.status_cartao || '—'}
-                          </Badge>
-                        </td>
-                        <td className="p-2">
-                          <Badge variant="secondary" className="text-xs">
-                            {user.user_info.regional}
-                          </Badge>
-                        </td>
-                        <td className="text-right p-2 font-mono">
-                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'col_1qz' ? (
-                            <input
-                              type="number"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => saveManualField(user.user_info.user_id, 'col_1qz', editValue)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'col_1qz', editValue);
-                                if (e.key === 'Escape') setEditingField(null);
-                              }}
-                              className="w-20 text-right text-xs border rounded px-1"
-                              autoFocus
-                            />
-                          ) : (
-                            <span 
-                              onClick={() => {
-                                setEditingField({ userId: user.user_info.user_id, field: 'col_1qz' });
-                                setEditValue(user.financial_data.quinzena_qz.toString());
-                              }}
-                              className="cursor-pointer hover:bg-blue-50 px-1 rounded"
-                              title="Clique para editar"
-                            >
-                              {brl(user.financial_data.quinzena_qz)}
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_final)}</td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_cartao)}</td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.saldo_reembolsar)}</td>
-                        <td className="text-right p-2 font-mono">
-                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'adiantamento' ? (
-                            <input
-                              type="number"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => saveManualField(user.user_info.user_id, 'adiantamento', editValue)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'adiantamento', editValue);
-                                if (e.key === 'Escape') setEditingField(null);
-                              }}
-                              className="w-20 text-right text-xs border rounded px-1"
-                              autoFocus
-                            />
-                          ) : (
-                            <span 
-                              onClick={() => {
-                                setEditingField({ userId: user.user_info.user_id, field: 'adiantamento' });
-                                setEditValue(user.financial_data.adiantamento.toString());
-                              }}
-                              className="cursor-pointer hover:bg-blue-50 px-1 rounded"
-                              title="Clique para editar"
-                            >
-                              {brl(user.financial_data.adiantamento)}
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.carga_parcial)}</td>
-                        <td className="text-right p-2 font-mono">{brl(user.financial_data.reembolso)}</td>
-                        <td className="text-right p-2 font-mono font-bold">{brl(user.financial_data.carga_final)}</td>
-                        <td className="text-center p-2">
-                          {editingField?.userId === user.user_info.user_id && editingField?.field === 'obs' ? (
-                            <input
-                              type="text"
-                              value={editValue}
-                              onChange={(e) => setEditValue(e.target.value)}
-                              onBlur={() => saveManualField(user.user_info.user_id, 'obs', editValue)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') saveManualField(user.user_info.user_id, 'obs', editValue);
-                                if (e.key === 'Escape') setEditingField(null);
-                              }}
-                              className="w-32 text-xs border rounded px-1"
-                              autoFocus
-                            />
-                          ) : (
-                            <span 
-                              onClick={() => {
-                                setEditingField({ userId: user.user_info.user_id, field: 'obs' });
-                                setEditValue(user.user_info.obs || '');
-                              }}
-                              className="cursor-pointer hover:bg-blue-50 px-1 rounded truncate max-w-[100px] inline-block"
-                              title={user.user_info.obs || 'Clique para editar'}
-                            >
-                              {user.user_info.obs || '—'}
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-center p-2">
-                          <div className="flex flex-wrap gap-1 justify-center">
-                            <DataSourceBadge source={user.data_sources.quinzena_qz} />
-                            <DataSourceBadge source={user.data_sources.saldo_final} />
-                            <DataSourceBadge source={user.data_sources.carga_final} />
-                          </div>
+                    {filteredRows.length === 0 ? (
+                      <tr>
+                        <td colSpan={18} className="text-center py-10 text-gray-400">
+                          {search ? 'Nenhum resultado para a busca.' : 'Sem dados.'}
                         </td>
                       </tr>
-                    ))}
+                    ) : filteredRows.map((row, i) => {
+                      const isAtivo = row.situacao?.toUpperCase() === 'ATIVO';
+                      const overrideActive = row.col_qz_manual !== null;
+                      return (
+                        <tr key={row.cpf}
+                          className={`border-b border-gray-100 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-blue-50/20`}
+                        >
+                          {/* Identity */}
+                          <td className="px-2 py-1.5 font-medium whitespace-nowrap max-w-[160px] truncate" title={row.colaborador}>
+                            {row.colaborador || '-'}
+                          </td>
+                          <td className="px-2 py-1.5 font-mono text-gray-500">{row.cpf}</td>
+                          <td className="px-2 py-1.5">
+                            <span className={`px-1.5 py-0.5 rounded-full text-xs ${isAtivo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                              {row.situacao || '-'}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap">{row.regional || '-'}</td>
+                          <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap max-w-[130px] truncate" title={row.centro_custo}>
+                            {row.centro_custo || '-'}
+                          </td>
+                          <td className="px-2 py-1.5 text-gray-600 whitespace-nowrap max-w-[120px] truncate" title={row.gestor}>
+                            {row.gestor || '-'}
+                          </td>
+
+                          {/* Neon values */}
+                          <td className={`px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap ${row.saldo_final < 0 ? 'text-red-600' : ''}`}>
+                            {num(row.saldo_final)}
+                          </td>
+                          <td className="px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap">
+                            {num(row.saldo_cartao)}
+                          </td>
+                          <td className={`px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap ${row.saldo_prestacao < 0 ? 'text-orange-500' : ''}`}>
+                            {num(row.saldo_prestacao)}
+                          </td>
+                          <td className={`px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap ${row.saldo_reembolsar < 0 ? 'text-red-400' : 'text-green-700'}`}>
+                            {num(row.saldo_reembolsar)}
+                          </td>
+
+                          {/* QZ from planilha (readonly) */}
+                          <td className={`px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap ${overrideActive ? 'line-through text-gray-300' : 'font-semibold'}`}>
+                            {row.col_qz !== null ? num(row.col_qz) : '-'}
+                          </td>
+
+                          {/* QZ manual override */}
+                          <td className="px-2 py-1.5 bg-amber-50/40">
+                            <EditCell
+                              value={row.col_qz_manual}
+                              numeric
+                              onSave={v => saveField(row.cpf, 'col_1qz', v)}
+                              empty="override..."
+                            />
+                          </td>
+
+                          {/* Adiantamento */}
+                          <td className="px-2 py-1.5 bg-amber-50/40">
+                            <EditCell
+                              value={row.adiantamento > 0 ? row.adiantamento : null}
+                              numeric
+                              onSave={v => saveField(row.cpf, 'adiantamento', v)}
+                              empty="0,00"
+                            />
+                          </td>
+
+                          {/* Calculated */}
+                          <td className="px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap">
+                            {num(row.carga_parcial)}
+                          </td>
+                          <td className="px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap">
+                            {num(row.reembolso)}
+                          </td>
+                          <td className={`px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap font-bold ${row.carga_final > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
+                            {num(row.carga_final)}
+                          </td>
+
+                          {/* Status + obs */}
+                          <td className="px-2 py-1.5 whitespace-nowrap">
+                            <span className={`px-1.5 py-0.5 rounded text-xs ${
+                              row.status_cartao?.toLowerCase().includes('ativo') ? 'bg-green-100 text-green-700'
+                              : row.status_cartao?.toLowerCase().includes('bloqueado') ? 'bg-red-100 text-red-600'
+                              : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {row.status_cartao || '-'}
+                            </span>
+                          </td>
+                          <td className="px-2 py-1.5 bg-amber-50/40 min-w-[110px]">
+                            <EditCell
+                              value={row.obs}
+                              numeric={false}
+                              onSave={v => saveField(row.cpf, 'obs', v)}
+                              empty="obs..."
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
+
+                  {/* Totals footer */}
+                  {filteredRows.length > 0 && (
+                    <tfoot className="border-t-2 border-gray-300 bg-gray-100 font-semibold text-xs">
+                      <tr>
+                        <td colSpan={6} className="px-2 py-2 text-gray-500">
+                          TOTAL ({filteredRows.length})
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.saldo_final, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.saldo_cartao, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.saldo_prestacao, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.saldo_reembolsar, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + (r.col_qz ?? 0), 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-amber-100/50">
+                          {num(filteredRows.reduce((s,r) => s + (r.col_qz_manual ?? 0), 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-amber-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.adiantamento, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-blue-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.carga_parcial, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-blue-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.reembolso, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-blue-100/50 text-blue-700">
+                          {num(filteredRows.reduce((s,r) => s + r.carga_final, 0))}
+                        </td>
+                        <td colSpan={2} />
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             </CardContent>
           </Card>
-
-          {/* Resumo da Geração */}
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertTitle>Automação Completa Concluída</AlertTitle>
-            <AlertDescription>
-              Dados gerados em {new Date(data.generation_date).toLocaleString('pt-BR')} • 
-              {data.statistics.processed_users} usuários processados • 
-              {data.statistics.total_expenses} expenses analisadas • 
-              {data.statistics.total_cost_centers} centros de custo • 
-              Taxa de sucesso: {data.statistics.success_rate.toFixed(1)}%
-            </AlertDescription>
-          </Alert>
         </>
       )}
     </div>

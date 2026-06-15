@@ -1,1 +1,0 @@
-{"request":"https:\/\/api.vexpenses.com\/v2\/roles","method":"GET","success":false,"code":405,"message":"The GET method is not supported for route v2\/roles. Supported methods: OPTIONS.","data":[]}

@@ -1,550 +1,390 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@/lib/neon';
 
-// Configuração da API VExpenses
-const API_KEY = process.env.VEXPENSES_API_KEY || "N2ntX8mUF7AvjVcyT6DZwnOQXRvYgel9pCirCGKKETO5R70HEZ8UdbQA0Nt8";
-const BASE_URL = "https://api.vexpenses.com/v2";
+export const dynamic = 'force-dynamic';
 
-// Configuração do banco Neon (comentado temporariamente para teste)
-// import { Pool } from 'pg';
-// const pool = new Pool({
-//   connectionString: process.env.NEON_DATABASE_URL,
-// });
+// ---- Types ------------------------------------------------------------------
 
-// Padrões matemáticos validados
-const SALDO_PATTERNS = {
-  saldo_final_ratio: 0.8505,
-  saldo_cartao_ratio: 0.1283,
-  saldo_reembolsar_ratio: 0.4636,
-};
+interface ControleSnapshot {
+  cpf: string;
+  colaborador: string | null;
+  situacao: string | null;
+  status_cartao: string | null;
+  regional: string | null;
+  centro_custo: string | null;
+  gestor: string | null;
+  diretor: string | null;
+  // Do Controle (informativo / exibicao)
+  saldo_prestacao: string | null;
+  saldo_cartao: string | null;
+  saldo_final: string | null;
+  // Da planilha de Carga (usados nas formulas)
+  col_qz: string | null;
+  saldo_reembolsar: string | null;
+  saldo_final_carga: string | null;   // "SALDO FINAL" col 8/9 da Carga
+  saldo_cartao_carga: string | null;  // "SALDO CARTAO" col 10/11 da Carga
+}
 
-interface TeamMember {
-  id: number;
-  name: string;
+interface ManualInput {
+  col_1qz: string | null;
+  adiantamento: string | null;
+  obs: string | null;
   cpf: string | null;
-  email?: string;
-  status?: string;
-  costs_center?: {
-    data?: {
-      id: number;
-      name: string;
-      code?: string;
-    };
-  };
-  manager?: any;
-  supervisor?: any;
 }
 
-interface Expense {
-  id: number;
-  user_id: number;
-  value: number;
-  date: string;
-  reimbursable: boolean;
-  title?: string;
-  user?: {
-    data?: {
-      id: number;
-      name: string;
-      cpf: string | null;
-    };
-  };
-  costs_center?: {
-    data?: {
-      id: number;
-      name: string;
-    };
-  };
-  payment_method?: {
-    data?: {
-      description: string;
-    };
+export interface QuinzenaRow {
+  cpf: string;
+  colaborador: string;
+  situacao: string;
+  status_cartao: string;
+  regional: string;
+  centro_custo: string;
+  gestor: string;
+  diretor: string;
+  // Do Controle (exibicao)
+  saldo_final: number;
+  saldo_cartao: number;
+  saldo_prestacao: number;
+  // Da Carga (formulas)
+  col_qz: number | null;
+  saldo_reembolsar: number;
+  saldo_final_carga: number;
+  saldo_cartao_carga: number;
+  // Manuais
+  col_qz_manual: number | null;
+  adiantamento: number;
+  obs: string | null;
+  // Calculados
+  carga_parcial: number;
+  reembolso: number;
+  carga_final: number;
+  data_sources: {
+    col_qz: 'planilha' | 'manual' | 'null';
+    saldo_final: 'neon';
+    saldo_cartao: 'neon';
+    adiantamento: 'manual' | 'default';
   };
 }
 
-interface CompleteQuinzenaData {
+export interface QuinzenaResponse {
   period: {
     year: number;
     month: number;
     quinzena: number;
     start_date: string;
     end_date: string;
+    month_name: string;
   };
-  user_info: {
-    user_id: number;
-    portador: string;
-    cpf: string | null;
-    status_colab: string;
-    centro_custo: string;
-    cod_centro_custo: string | null;
-    gestor: string | null;
-    direcao: string | null;
-    status_cartao: string | null;
-    obs: string | null;
-    regional: string;
+  statistics: {
+    total_rows: number;
+    ativos: number;
+    com_carga: number;
+    total_carga_final: number;
+    total_saldo_final: number;
+    total_col_qz: number;
+    has_neon_data: boolean;
   };
-  financial_data: {
-    quinzena_qz: number;
-    saldo_final: number;
-    saldo_cartao: number;
-    saldo_reembolsar: number;
-    adiantamento: number;
-    carga_parcial: number;
-    reembolso: number;
-    carga_final: number;
-  };
-  data_sources: {
-    portador: string;
-    cpf: string;
-    status_colab: string;
-    centro_custo: string;
-    quinzena_qz: string;
-    saldo_final: string;
-    saldo_cartao: string;
-    saldo_reembolsar: string;
-    carga_parcial: string;
-    reembolso: string;
-    carga_final: string;
-  };
+  data: QuinzenaRow[];
 }
 
-async function fetchWithAuth(url: string, params?: Record<string, string>) {
-  const urlWithParams = params ? `${url}?${new URLSearchParams(params)}` : url;
-  
-  const response = await fetch(urlWithParams, {
-    headers: {
-      "Authorization": API_KEY,
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    }
-  });
-  
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
-  }
-  
-  return response.json();
-}
+// ---- Helpers ----------------------------------------------------------------
 
-async function getTeamMembers(): Promise<TeamMember[]> {
-  try {
-    // Tentar diferentes estratégias para obter dados completos
-    const strategies = [
-      { include: "costs_center" },
-      { include: "costs_center,manager" },
-      { include: "costs_center,manager,supervisor" },
-      { include: "all" },
-      {}
-    ];
-    
-    for (const strategy of strategies) {
-      try {
-        const params = { paginate: "false", per_page: "1000", ...strategy };
-        const data = await fetchWithAuth(`${BASE_URL}/team-members`, params);
-        
-        if (data.data && data.data.length > 0) {
-          console.log(`✅ Team members obtidos com estratégia: ${JSON.stringify(strategy)}`);
-          return data.data;
-        }
-      } catch (error) {
-        console.log(`⚠️ Estratégia falhou: ${JSON.stringify(strategy)}`);
-        continue;
-      }
-    }
-    
-    throw new Error("Não foi possível obter team members");
-  } catch (error) {
-    console.error("Erro ao obter team members:", error);
-    return [];
-  }
-}
-
-async function getExpensesForPeriod(startDate: string, endDate: string): Promise<Expense[]> {
-  try {
-    // Usar paginação com limite para evitar timeout
-    const allExpenses: Expense[] = [];
-    let page = 1;
-    const per_page = 1000; // Aumentar para reduzir número de requisições
-    const max_pages = 5; // Limitar a 5 páginas para evitar timeout (máx 5000 expenses)
-    
-    while (page <= max_pages) {
-      const params = {
-        search: `date:${startDate},${endDate}`,
-        searchFields: "date:between",
-        searchJoin: "and",
-        paginate: "true",
-        page: page.toString(),
-        per_page: per_page.toString(),
-        include: "user,costs_center"
-      };
-      
-      const data = await fetchWithAuth(`${BASE_URL}/expenses`, params);
-      
-      if (data.data && data.data.length > 0) {
-        allExpenses.push(...data.data);
-        console.log(`✅ Página ${page}: ${data.data.length} expenses obtidas`);
-        
-        // Se tiver menos que o limite, é a última página
-        if (data.data.length < per_page) {
-          break;
-        }
-        
-        page++;
-      } else {
-        break;
-      }
-    }
-    
-    console.log(`✅ Total de ${allExpenses.length} expenses obtidas para o período (limitado a ${max_pages} páginas)`);
-    return allExpenses;
-    
-  } catch (error) {
-    console.error("Erro ao obter expenses:", error);
-    return [];
-  }
-}
-
-async function getCostCenters(): Promise<any[]> {
-  try {
-    const strategies = [
-      { include: "code" },
-      { include: "all" },
-      {}
-    ];
-    
-    for (const strategy of strategies) {
-      try {
-        const params = { paginate: "false", per_page: "1000", ...strategy };
-        const data = await fetchWithAuth(`${BASE_URL}/costs-centers`, params);
-        
-        if (data.data && data.data.length > 0) {
-          console.log(`✅ Cost centers obtidos com estratégia: ${JSON.stringify(strategy)}`);
-          return data.data;
-        }
-      } catch (error) {
-        continue;
-      }
-    }
-    
-    return [];
-  } catch (error) {
-    console.error("Erro ao obter cost centers:", error);
-    return [];
-  }
-}
-
-function extractRegionalFromCostCenter(costCenterName: string): string {
-  // Extrair sigla do estado do nome do centro de custo
-  const states = ['SP', 'RJ', 'MG', 'BA', 'PE', 'CE', 'RS', 'PR', 'SC', 'GO', 'MT', 'MS', 'DF', 'AM', 'PA', 'RO', 'AC', 'RR', 'AP', 'TO', 'MA', 'PI', 'RN', 'AL', 'SE', 'ES'];
-  
-  for (const state of states) {
-    if (costCenterName.toUpperCase().includes(state)) {
-      return state;
-    }
-  }
-  
-  return 'N/A';
-}
-
-function calculateFinancialData(userId: number, expenses: Expense[], manualInputs: { col_1qz: number | null, adiantamento: number | null }): any {
-  const userExpenses = expenses.filter(exp => exp.user_id === userId);
-  
-  // Calcular 1QZ - usar valor manual se disponível, senão calcular automaticamente
-  const quinzena_qz = manualInputs.col_1qz !== null ? manualInputs.col_1qz : userExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
-  
-  // Calcular reembolso
-  const reimbursableExpenses = userExpenses.filter(exp => exp.reimbursable);
-  const reembolso = reimbursableExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
-  
-  // Calcular saldos usando padrões matemáticos (baseados em 1QZ calculado automaticamente)
-  const base_qz = userExpenses.reduce((sum, exp) => sum + (exp.value || 0), 0);
-  const saldo_final = base_qz * SALDO_PATTERNS.saldo_final_ratio;
-  const saldo_cartao = base_qz * SALDO_PATTERNS.saldo_cartao_ratio;
-  const saldo_reembolsar = base_qz * SALDO_PATTERNS.saldo_reembolsar_ratio;
-  
-  // Usar adiantamento manual se disponível, senão 0
-  const adiantamento = manualInputs.adiantamento !== null ? manualInputs.adiantamento : 0;
-  
-  // Calcular campos derivados
-  let carga_parcial = quinzena_qz - saldo_final - saldo_cartao - adiantamento;
-  if (carga_parcial < 0) carga_parcial = 0;
-  
-  const reembolso_calculado = saldo_reembolsar * 0.5;
-  const carga_final = carga_parcial + reembolso_calculado;
-  
-  return {
-    quinzena_qz,
-    saldo_final,
-    saldo_cartao,
-    saldo_reembolsar,
-    adiantamento,
-    carga_parcial,
-    reembolso: reembolso,
-    carga_final
-  };
-}
+const MONTH_NAMES = [
+  '', 'Janeiro', 'Fevereiro', 'Marco', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
+];
 
 function getQuinzenaDates(year: number, month: number, quinzena: number) {
+  const mm = String(month).padStart(2, '0');
   if (quinzena === 1) {
-    return {
-      start_date: `${year}-${month.toString().padStart(2, '0')}-01`,
-      end_date: `${year}-${month.toString().padStart(2, '0')}-15`
-    };
-  } else {
-    const lastDay = new Date(year, month, 0).getDate();
-    return {
-      start_date: `${year}-${month.toString().padStart(2, '0')}-16`,
-      end_date: `${year}-${month.toString().padStart(2, '0')}-${lastDay}`
-    };
+    return { start_date: `${year}-${mm}-01`, end_date: `${year}-${mm}-15` };
   }
+  const lastDay = new Date(year, month, 0).getDate();
+  return { start_date: `${year}-${mm}-16`, end_date: `${year}-${mm}-${lastDay}` };
 }
 
-async function getManualInputs(userId: number, year: number, month: number, quinzena: number) {
-  // Temporariamente desabilitado para teste - retorna valores padrão
-  return { obs: null, col_1qz: null, adiantamento: null };
-  
-  // try {
-  //   const result = await pool.query(
-  //     'SELECT obs, col_1qz, adiantamento FROM quinzena_manual_inputs WHERE user_id = $1 AND year = $2 AND month = $3 AND quinzena = $4',
-  //     [userId, year, month, quinzena]
-  //   );
-  //   
-  //   if (result.rows.length > 0) {
-  //     return result.rows[0];
-  //   }
-  //   return { obs: null, col_1qz: null, adiantamento: null };
-  // } catch (error) {
-  //   console.error('Erro ao buscar inputs manuais:', error);
-  //   return { obs: null, col_1qz: null, adiantamento: null };
-  // }
+function toNum(v: string | null | undefined): number {
+  if (v === null || v === undefined) return 0;
+  const n = parseFloat(String(v));
+  return isNaN(n) ? 0 : n;
 }
 
-async function saveManualInput(userId: number, year: number, month: number, quinzena: number, field: string, value: any) {
-  // Temporariamente desabilitado para teste
-  return false;
-  
-  // try {
-  //   const existing = await pool.query(
-  //     'SELECT id FROM quinzena_manual_inputs WHERE user_id = $1 AND year = $2 AND month = $3 AND quinzena = $4',
-  //     [userId, year, month, quinzena]
-  //   );
-  //   
-  //   if (existing.rows.length > 0) {
-  //     await pool.query(
-  //       `UPDATE quinzena_manual_inputs SET ${field} = $1, updated_at = NOW() WHERE user_id = $2 AND year = $3 AND month = $4 AND quinzena = $5`,
-  //       [value, userId, year, month, quinzena]
-  //     );
-  //   } else {
-  //     await pool.query(
-  //       'INSERT INTO quinzena_manual_inputs (user_id, year, month, quinzena, obs, col_1qz, adiantamento) VALUES ($1, $2, $3, $4, NULL, NULL, NULL)',
-  //       [userId, year, month, quinzena]
-  //     );
-  //     await pool.query(
-  //       `UPDATE quinzena_manual_inputs SET ${field} = $1, updated_at = NOW() WHERE user_id = $2 AND year = $3 AND month = $4 AND quinzena = $5`,
-  //       [value, userId, year, month, quinzena]
-  //     );
-  //   }
-  //   return true;
-  // } catch (error) {
-  //   console.error('Erro ao salvar input manual:', error);
-  //   return false;
-  // }
+/**
+ * Formulas confirmadas por inspeção direta nas planilhas de Carga:
+ *
+ *   col_qz_efetivo  = col_qz_manual ?? col_qz_planilha ?? 0
+ *
+ *   CARGA_PARCIAL = max(0, col_qz_efetivo - saldo_final_carga - saldo_cartao_carga - adiantamento)
+ *     Onde saldo_final_carga e saldo_cartao_carga vêm da planilha de CARGA (não do Controle).
+ *     Eles representam o saldo já usado/prestado — quando positivo reduz a carga.
+ *
+ *   REEMBOLSO = max(0, saldo_reembolsar) * 0.5
+ *     O multiplicador 0.5 está na célula N4 da planilha CARGA 1QZ.
+ *     saldo_reembolsar negativo significa sem direito a reembolso.
+ *
+ *   CARGA_FINAL = CARGA_PARCIAL + REEMBOLSO
+ */
+function calcFinancials(
+  col_qz_efetivo: number,
+  saldo_final_carga: number,
+  saldo_cartao_carga: number,
+  saldo_reembolsar: number,
+  adiantamento: number,
+) {
+  const carga_parcial = Math.max(
+    0,
+    col_qz_efetivo - saldo_final_carga - saldo_cartao_carga - adiantamento,
+  );
+  const reembolso  = Math.max(0, saldo_reembolsar) * 0.5;
+  const carga_final = carga_parcial + reembolso;
+  return { carga_parcial, reembolso, carga_final };
 }
+
+// ---- GET --------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
+  if (!sql) {
+    return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
+  }
+
+  const { searchParams } = new URL(request.url);
+  const year     = parseInt(searchParams.get('year')     ?? '2026');
+  const month    = parseInt(searchParams.get('month')    ?? '5');
+  const quinzena = parseInt(searchParams.get('quinzena') ?? '1');
+
+  if (
+    isNaN(year) || isNaN(month) || isNaN(quinzena) ||
+    month < 1 || month > 12 || ![1, 2].includes(quinzena)
+  ) {
+    return NextResponse.json({ error: 'Parametros invalidos' }, { status: 400 });
+  }
+
+  const { start_date, end_date } = getQuinzenaDates(year, month, quinzena);
+
   try {
-    const { searchParams } = new URL(request.url);
-    const year = parseInt(searchParams.get('year') || '2026');
-    const month = parseInt(searchParams.get('month') || '4'); // Abril para validação
-    const quinzena = parseInt(searchParams.get('quinzena') || '1');
+    // 1. Snapshot do Neon — inclui dados do Controle e da Carga
+    const snapshotRows = await sql`
+      SELECT
+        cpf, colaborador, situacao, status_cartao,
+        regional, centro_custo, gestor, diretor,
+        saldo_prestacao::text,
+        saldo_cartao::text,
+        saldo_final::text,
+        col_qz::text,
+        saldo_reembolsar::text,
+        saldo_final_carga::text,
+        saldo_cartao_carga::text
+      FROM quinzena_controle_snapshot
+      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+      ORDER BY colaborador ASC NULLS LAST
+    `;
+    const snapshots = snapshotRows as unknown as ControleSnapshot[];
 
-    console.log(`🎯 GERANDO QUINZENA COMPLETA - ${year}/${month} Quinzena ${quinzena}`);
+    // 2. Entradas manuais para este periodo
+    const manualRows = await sql`
+      SELECT col_1qz::text, adiantamento::text, obs, cpf
+      FROM quinzena_manual_inputs
+      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+    `;
+    const manuals = manualRows as unknown as ManualInput[];
 
-    const { start_date, end_date } = getQuinzenaDates(year, month, quinzena);
-    console.log(`Período: ${start_date} a ${end_date}`);
-
-    // Desabilitar cache para este endpoint
-    const cacheControl = 'no-store, no-cache, must-revalidate, max-age=0';
-
-    // Obter dados sequencialmente para evitar sobrecarga
-    console.log('🔄 Obtendo dados da API...');
-    
-    const teamMembers = await getTeamMembers();
-    if (!teamMembers.length) {
-      return NextResponse.json({
-        error: "Não foi possível obter dados dos team members",
-        period: { year, month, quinzena, start_date, end_date }
-      }, { status: 500, headers: { 'Cache-Control': cacheControl } });
+    const manualByCpf = new Map<string, ManualInput>();
+    for (const m of manuals) {
+      if (m.cpf) manualByCpf.set(m.cpf, m);
     }
 
-    const expenses = await getExpensesForPeriod(start_date, end_date);
-    const costCenters = await getCostCenters();
+    const hasNeonData = snapshots.length > 0;
 
-    if (!teamMembers.length) {
-      return NextResponse.json({
-        error: "Não foi possível obter dados dos team members",
-        period: { year, month, quinzena, start_date, end_date }
-      }, { status: 500 });
-    }
+    // 3. Montar linhas
+    const rows: QuinzenaRow[] = snapshots.map((snap) => {
+      const manual = manualByCpf.get(snap.cpf) ?? null;
 
-    // Mapear centros de custo
-    const costCenterMap = new Map();
-    costCenters.forEach(cc => {
-      costCenterMap.set(cc.id, {
-        name: cc.name,
-        code: cc.code || cc.id
-      });
+      // Controle — exibicao
+      const saldo_final      = toNum(snap.saldo_final);
+      const saldo_cartao     = toNum(snap.saldo_cartao);
+      const saldo_prestacao  = toNum(snap.saldo_prestacao);
+
+      // Carga — formulas
+      const col_qz            = snap.col_qz !== null ? toNum(snap.col_qz) : null;
+      const saldo_reembolsar  = toNum(snap.saldo_reembolsar);
+      const saldo_final_carga = toNum(snap.saldo_final_carga);
+      const saldo_cartao_carga = toNum(snap.saldo_cartao_carga);
+
+      // Override manual
+      const col_qz_manual =
+        manual?.col_1qz !== null && manual?.col_1qz !== undefined
+          ? toNum(manual.col_1qz)
+          : null;
+
+      const adiantamento =
+        manual?.adiantamento !== null && manual?.adiantamento !== undefined
+          ? toNum(manual.adiantamento)
+          : 0;
+
+      // Valor efetivo: manual tem prioridade sobre planilha
+      const col_qz_efetivo = col_qz_manual !== null ? col_qz_manual : (col_qz ?? 0);
+
+      const { carga_parcial, reembolso, carga_final } = calcFinancials(
+        col_qz_efetivo, saldo_final_carga, saldo_cartao_carga, saldo_reembolsar, adiantamento,
+      );
+
+      return {
+        cpf: snap.cpf,
+        colaborador:       snap.colaborador ?? '',
+        situacao:          snap.situacao ?? '',
+        status_cartao:     snap.status_cartao ?? '',
+        regional:          snap.regional ?? '',
+        centro_custo:      snap.centro_custo ?? '',
+        gestor:            snap.gestor ?? '',
+        diretor:           snap.diretor ?? '',
+        saldo_final,
+        saldo_cartao,
+        saldo_prestacao,
+        col_qz,
+        saldo_reembolsar,
+        saldo_final_carga,
+        saldo_cartao_carga,
+        col_qz_manual,
+        adiantamento,
+        obs: manual?.obs ?? null,
+        carga_parcial,
+        reembolso,
+        carga_final,
+        data_sources: {
+          col_qz: col_qz_manual !== null
+            ? 'manual' as const
+            : col_qz !== null
+              ? 'planilha' as const
+              : 'null' as const,
+          saldo_final:   'neon' as const,
+          saldo_cartao:  'neon' as const,
+          adiantamento:  adiantamento > 0 ? 'manual' as const : 'default' as const,
+        },
+      };
     });
 
-    // Mapear usuários principais (baseado na investigação)
-    const userMappings: Record<number, string> = {
-      895945: 'JONAS CAVALCANTI',
-      895946: 'RODRIGO CESAR', 
-      895947: 'CAIO FRANCESCONI'
-    };
+    // 4. Estatisticas
+    const ativos            = rows.filter(r => r.situacao?.toUpperCase() === 'ATIVO').length;
+    const com_carga         = rows.filter(r => r.carga_final > 0).length;
+    const total_carga_final = rows.reduce((s, r) => s + r.carga_final, 0);
+    const total_saldo_final = rows.reduce((s, r) => s + r.saldo_final, 0);
+    const total_col_qz      = rows.reduce((s, r) => s + (r.col_qz ?? 0), 0);
 
-    const results: CompleteQuinzenaData[] = [];
-
-    // Processar cada usuário mapeado
-    for (const [userId, userName] of Object.entries(userMappings)) {
-      const userIdNum = parseInt(userId);
-      
-      // Encontrar team member
-      const teamMember = teamMembers.find(tm => tm.id === userIdNum);
-      
-      if (!teamMember) {
-        console.log(`❌ Team member não encontrado: ${userName} (${userIdNum})`);
-        continue;
-      }
-
-      // Buscar inputs manuais do banco (com fallback em caso de erro)
-      let manualInputs;
-      try {
-        manualInputs = await getManualInputs(userIdNum, year, month, quinzena);
-      } catch (error) {
-        console.error('Erro ao buscar inputs manuais, usando valores padrão:', error);
-        manualInputs = { obs: null, col_1qz: null, adiantamento: null };
-      }
-
-      // Calcular dados financeiros com inputs manuais
-      const calculatedFinancialData = calculateFinancialData(userIdNum, expenses, manualInputs);
-
-      // Extrair informações do usuário
-      const centerInfo = teamMember.costs_center?.data;
-      const centroCusto = centerInfo?.name || 'N/A';
-      const codCentroCusto = centerInfo?.code || centerInfo?.id || 'N/A';
-      const regional = extractRegionalFromCostCenter(centroCusto);
-
-      // Montar dados completos
-      const completeData: CompleteQuinzenaData = {
-        period: { year, month, quinzena, start_date, end_date },
-        user_info: {
-          user_id: userIdNum,
-          portador: teamMember.name || userName,
-          cpf: teamMember.cpf || null,
-          status_colab: teamMember.status || 'ATIVO',
-          centro_custo: centroCusto,
-          cod_centro_custo: codCentroCusto,
-          gestor: teamMember.manager?.name || null,
-          direcao: teamMember.supervisor?.name || null,
-          status_cartao: 'Cartão ativo', // Padrão
-          obs: manualInputs.obs, // Do banco
-          regional
-        },
-        financial_data: calculatedFinancialData,
-        data_sources: {
-          portador: 'api',
-          cpf: 'api',
-          status_colab: 'api',
-          centro_custo: 'api',
-          quinzena_qz: manualInputs.col_1qz !== null ? 'manual' : 'api',
-          saldo_final: 'calculated',
-          saldo_cartao: 'calculated',
-          saldo_reembolsar: 'calculated',
-          carga_parcial: 'formula',
-          reembolso: 'api',
-          carga_final: 'formula'
-        }
-      };
-
-      results.push(completeData);
-      console.log(`✅ Processado: ${userName} - 1QZ: R$ ${calculatedFinancialData.quinzena_qz.toFixed(2)}`);
-    }
-
-    // Compilar resultado final
-    const finalResult = {
-      generation_date: new Date().toISOString(),
-      period: { year, month, quinzena, start_date, end_date },
-      statistics: {
-        total_team_members: teamMembers.length,
-        total_expenses: expenses.length,
-        total_cost_centers: costCenters.length,
-        processed_users: results.length,
-        success_rate: (results.length / Object.keys(userMappings).length) * 100
+    const response: QuinzenaResponse = {
+      period: {
+        year, month, quinzena,
+        start_date, end_date,
+        month_name: MONTH_NAMES[month] ?? String(month),
       },
-      patterns_used: SALDO_PATTERNS,
-      data: results
+      statistics: {
+        total_rows: rows.length,
+        ativos,
+        com_carga,
+        total_carga_final,
+        total_saldo_final,
+        total_col_qz,
+        has_neon_data: hasNeonData,
+      },
+      data: rows,
     };
 
-    console.log(`✅ QUINZENA COMPLETA GERADA!`);
-    console.log(`📊 ${results.length} usuários processados`);
-    console.log(`💰 ${expenses.length} expenses analisadas`);
-    console.log(`🏢 ${costCenters.length} centros de custo`);
-
-    return NextResponse.json(finalResult, {
-      headers: { 
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+    return NextResponse.json(response, {
+      headers: { 'Cache-Control': 'no-store' },
     });
 
   } catch (error) {
-    console.error('Erro no endpoint de quinzena completa:', error);
-    return NextResponse.json({
-      error: 'Erro interno ao processar dados da quinzena',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { 
-      status: 500,
-      headers: { 
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    });
+    console.error('[quinzena-complete] Erro:', error);
+    return NextResponse.json(
+      { error: 'Erro ao consultar dados', detail: String(error) },
+      { status: 500 },
+    );
   }
 }
 
+// ---- POST: salvar campo manual ----------------------------------------------
+
+const ALLOWED_FIELDS = ['col_1qz', 'adiantamento', 'obs'] as const;
+type AllowedField = typeof ALLOWED_FIELDS[number];
+
 export async function POST(request: NextRequest) {
+  if (!sql) {
+    return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
+  }
+
+  let body: {
+    cpf: string;
+    year: number;
+    month: number;
+    quinzena: number;
+    field: AllowedField;
+    value: unknown;
+  };
+
   try {
-    const body = await request.json();
-    const { userId, year, month, quinzena, field, value } = body;
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: 'JSON invalido' }, { status: 400 });
+  }
 
-    if (!userId || !year || !month || !quinzena || !field) {
-      return NextResponse.json({
-        error: 'Campos obrigatórios: userId, year, month, quinzena, field'
-      }, { status: 400 });
+  const { cpf, year, month, quinzena, field, value } = body;
+
+  if (!cpf || !year || !month || !quinzena || !field) {
+    return NextResponse.json(
+      { error: 'Campos obrigatorios: cpf, year, month, quinzena, field' },
+      { status: 400 },
+    );
+  }
+
+  if (!ALLOWED_FIELDS.includes(field)) {
+    return NextResponse.json(
+      { error: `Campo invalido. Permitidos: ${ALLOWED_FIELDS.join(', ')}` },
+      { status: 400 },
+    );
+  }
+
+  if (field === 'col_1qz' || field === 'adiantamento') {
+    const n = parseFloat(String(value));
+    if (value !== null && isNaN(n)) {
+      return NextResponse.json(
+        { error: `${field} deve ser numerico ou null` },
+        { status: 400 },
+      );
     }
+  }
 
-    if (!['obs', 'col_1qz', 'adiantamento'].includes(field)) {
-      return NextResponse.json({
-        error: 'Campo inválido. Apenas: obs, col_1qz, adiantamento'
-      }, { status: 400 });
-    }
-
-    const success = await saveManualInput(userId, year, month, quinzena, field, value);
-
-    if (success) {
-      return NextResponse.json({ success: true });
+  try {
+    if (field === 'col_1qz') {
+      const numVal = value === null ? null : parseFloat(String(value));
+      await sql`
+        INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, col_1qz)
+        VALUES (${cpf}, ${year}, ${month}, ${quinzena}, ${numVal})
+        ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+        DO UPDATE SET col_1qz = EXCLUDED.col_1qz, updated_at = NOW()
+      `;
+    } else if (field === 'adiantamento') {
+      const numVal = value === null ? null : parseFloat(String(value));
+      await sql`
+        INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, adiantamento)
+        VALUES (${cpf}, ${year}, ${month}, ${quinzena}, ${numVal})
+        ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+        DO UPDATE SET adiantamento = EXCLUDED.adiantamento, updated_at = NOW()
+      `;
     } else {
-      return NextResponse.json({
-        error: 'Erro ao salvar input manual'
-      }, { status: 500 });
+      const strVal = value === null ? null : String(value);
+      await sql`
+        INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, obs)
+        VALUES (${cpf}, ${year}, ${month}, ${quinzena}, ${strVal})
+        ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+        DO UPDATE SET obs = EXCLUDED.obs, updated_at = NOW()
+      `;
     }
+
+    return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error('Erro no POST de quinzena manual:', error);
-    return NextResponse.json({
-      error: 'Erro interno ao salvar input manual',
-      details: error instanceof Error ? error.message : 'Erro desconhecido'
-    }, { status: 500 });
+    console.error('[quinzena-complete POST]:', error);
+    return NextResponse.json(
+      { error: 'Erro ao salvar', detail: String(error) },
+      { status: 500 },
+    );
   }
 }
