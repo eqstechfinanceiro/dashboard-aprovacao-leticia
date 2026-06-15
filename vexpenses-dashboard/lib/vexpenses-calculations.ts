@@ -8,6 +8,7 @@ export interface ExpenseData {
   value: number;
   date: string;
   reimbursable: boolean;
+  title?: string;
   payment_method?: {
     data?: {
       description: string;
@@ -359,8 +360,8 @@ export function calculatePlanilha1Fields(
   const quinzena1 = calculateQuinzena1(expenses, userId, year, month, dayStart, dayEnd);
   const saldoCartao = calculateSaldoCartao(expenses, userId, year, month, dayStart, dayEnd);
   const reembolso = calculateReembolso(expenses, userId, year, month, dayStart, dayEnd);
-  const saldoFinal = calculateSaldoFinal(expenses, userId, year, month, dayStart, dayEnd);
-  const saldoReembolsar = calculateSaldoReembolsar(expenses, userId, year, month, dayStart, dayEnd);
+  const saldoFinal = calculateSaldoFinal(expenses, userId, year, month);
+  const saldoReembolsar = calculateSaldoReembolsar(expenses, userId, year, month);
 
   // CARGA PARCIAL = 1QZ - SALDO FINAL - SALDO CARTAO - ADIANTAMENTO
   const cargaParcial = quinzena1 - saldoFinal - saldoCartao - adiantamentoManual;
