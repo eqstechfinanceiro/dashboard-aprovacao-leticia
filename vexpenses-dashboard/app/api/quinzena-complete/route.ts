@@ -130,6 +130,62 @@ function r2(v: number): number {
   return Math.round(v * 100) / 100;
 }
 
+/** Normalize name for matching: remove accents, uppercase, trim */
+function normalizeName(s: string | null | undefined): string {
+  if (!s) return '';
+  return s.toUpperCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // strip diacritics
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Simple similarity ratio (based on Levenshtein-like character matching) */
+function fuzzyMatchRatio(a: string, b: string): number {
+  if (a === b) return 1;
+  if (!a.length || !b.length) return 0;
+  // Use Set-based bigram similarity (fast, good enough for short names)
+  const bigrams = (s: string): Set<string> => {
+    const set = new Set<string>();
+    for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
+    return set;
+  };
+  const ba = bigrams(a), bb = bigrams(b);
+  let intersection = 0;
+  for (const bg of ba) if (bb.has(bg)) intersection++;
+  return (2 * intersection) / (ba.size + bb.size);
+}
+
+/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88) */
+function resolveCpfByName(
+  extratoName: string,
+  nomeToCpf: Map<string, string>,
+  fuzzyCache: Map<string, string>
+): string | undefined {
+  const normalized = normalizeName(extratoName);
+  // Exact match
+  const exact = nomeToCpf.get(normalized);
+  if (exact) return exact;
+  // Fuzzy cache (avoid re-computing for same name)
+  const cached = fuzzyCache.get(normalized);
+  if (cached) return cached;
+  // Fuzzy match
+  let bestCpf: string | undefined;
+  let bestRatio = 0;
+  for (const [cadName, cpf] of nomeToCpf) {
+    const ratio = fuzzyMatchRatio(normalized, cadName);
+    if (ratio > bestRatio) {
+      bestRatio = ratio;
+      bestCpf = cpf;
+    }
+  }
+  if (bestRatio >= 0.88 && bestCpf) {
+    fuzzyCache.set(normalized, bestCpf);
+    return bestCpf;
+  }
+  return undefined;
+}
+
 /**
  * Fórmulas confirmadas por inspeção direta nas planilhas de Carga (validado 100% em mai/2026):
  *
@@ -229,6 +285,8 @@ export async function GET(request: NextRequest) {
     let extratoByCpf: Map<string, { carga: number; transferencia: number; tarifa: number }> = new Map();
     let saldoCartaoByCpf: Map<string, number> = new Map();
     let cadastroBase: ControleSnapshot[] = [];
+    let somaseByCpf: Map<string, number> = new Map();
+    let somasePrevByCpf: Map<string, number> = new Map();
 
     if (!hasNeonData) {
       // Cadastro base: usar snapshot mais recente disponível (para dados cadastrais)
@@ -248,50 +306,134 @@ export async function GET(request: NextRequest) {
       `;
       cadastroBase = cadastroRows as unknown as ControleSnapshot[];
 
-      // Extrato do período: CARGA (Transferência > 0), TRANSFERÊNCIA (< 0), TARIFA (Taxa)
-      // Precisamos do UPPER(usuario) → CPF via cadastro
-      const extratoRows = await sql`
+      // Mapa nome_normalizado → cpf usando cadastro (accent-insensitive)
+      const nomeToCpf = new Map<string, string>();
+      for (const c of cadastroBase) {
+        const normalized = normalizeName(c.colaborador);
+        if (normalized) nomeToCpf.set(normalized, c.cpf);
+      }
+      const fuzzyCache = new Map<string, string>();
+
+      // Cutoff: a planilha é finalizada quando a próxima quinzena fecha
+      // 1QZ month M (closing 10/M) → cutoff = 25/M (2QZ same month closing)
+      // 2QZ month M (closing 25/M) → cutoff = 10/(M+1) (1QZ next month closing)
+      let cutoffDate: string;
+      let prevClosingDate: string;
+      if (quinzena === 1) {
+        cutoffDate = `${year}-${String(month).padStart(2, '0')}-25`;
+        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-10`;
+      } else {
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+        cutoffDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-10`;
+        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-25`;
+      }
+
+      // Extrato cumulativo: delta = cum(<=cutoff) - cum(<=prevClosing)
+      // Captura transações late-arriving dentro e após o período oficial
+      const extratoCutoffRows = await sql`
         SELECT
           UPPER(usuario) AS usuario_up,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0)::text AS carga,
-          COALESCE(ABS(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0)), 0)::text AS transferencia,
-          COALESCE(ABS(SUM(valor) FILTER(WHERE tipo = 'Taxa')), 0)::text AS tarifa
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
         FROM extrato_movimentacao
         WHERE is_snapshot = FALSE
-          AND data BETWEEN ${start_date} AND ${end_date}
+          AND data <= ${cutoffDate}
+        GROUP BY UPPER(usuario)
+      `;
+      const extratoPrevRows = await sql`
+        SELECT
+          UPPER(usuario) AS usuario_up,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${prevClosingDate}
         GROUP BY UPPER(usuario)
       `;
 
-      // Mapa nome_upper → cpf usando cadastro
-      const nomeToCpf = new Map<string, string>();
-      for (const c of cadastroBase) {
-        if (c.colaborador) nomeToCpf.set(c.colaborador.toUpperCase(), c.cpf);
-      }
-
-      for (const r of extratoRows) {
-        const cpf = nomeToCpf.get(String(r.usuario_up));
+      const cumCutoff = new Map<string, { carga: number; transf: number; tarifa: number }>();
+      for (const r of extratoCutoffRows) {
+        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
         if (cpf) {
-          extratoByCpf.set(cpf, {
-            carga:         toNum(r.carga as string),
-            transferencia: toNum(r.transferencia as string),
-            tarifa:        toNum(r.tarifa as string),
+          cumCutoff.set(cpf, {
+            carga: Number(r.carga_raw || 0),
+            transf: Number(r.transf_raw || 0),
+            tarifa: Number(r.tarifa_raw || 0),
+          });
+        }
+      }
+      const cumPrev = new Map<string, { carga: number; transf: number; tarifa: number }>();
+      for (const r of extratoPrevRows) {
+        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
+        if (cpf) {
+          cumPrev.set(cpf, {
+            carga: Number(r.carga_raw || 0),
+            transf: Number(r.transf_raw || 0),
+            tarifa: Number(r.tarifa_raw || 0),
           });
         }
       }
 
-      // Saldo do cartão: último snapshot do extrato <= fechamento
+      // delta_carga = (carga_cutoff - carga_prev) - (|transf_cutoff| - |transf_prev|) - (|tarifa_cutoff| - |tarifa_prev|)
+      for (const [cpf, cc] of cumCutoff) {
+        const cp = cumPrev.get(cpf) ?? { carga: 0, transf: 0, tarifa: 0 };
+        const deltaCarga = (cc.carga - cp.carga) - (Math.abs(cc.transf) - Math.abs(cp.transf)) - (Math.abs(cc.tarifa) - Math.abs(cp.tarifa));
+        extratoByCpf.set(cpf, {
+          carga: deltaCarga,
+          transferencia: 0,
+          tarifa: 0,
+        });
+      }
+
+      // Saldo do cartão: snapshot mais recente <= cutoff (planilha é finalizada no cutoff)
       const saldoRows = await sql`
         SELECT DISTINCT ON (UPPER(usuario))
           UPPER(usuario) AS usuario_up,
           valor::text AS saldo
         FROM extrato_movimentacao
         WHERE is_snapshot = TRUE
-          AND data <= ${fechamento}
+          AND data <= ${cutoffDate}
         ORDER BY UPPER(usuario), data DESC
       `;
       for (const r of saldoRows) {
-        const cpf = nomeToCpf.get(String(r.usuario_up));
+        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
         if (cpf) saldoCartaoByCpf.set(cpf, toNum(r.saldo as string));
+      }
+
+      // Somase (prestacao acumulada) para delta_prestacao
+      // 1QZ month M → 'YYYY-MM-1'; 2QZ month M → 'YYYY-(M+1)-2'
+      let currSomaseId: string;
+      let prevSomaseId: string;
+      if (quinzena === 2) {
+        const nextMonth = month === 12 ? 1 : month + 1;
+        const nextYear = month === 12 ? year + 1 : year;
+        currSomaseId = `${nextYear}-${String(nextMonth).padStart(2, '0')}-2`;
+        prevSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
+      } else {
+        currSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
+        const prevMonth = month === 1 ? 12 : month - 1;
+        const prevYear = month === 1 ? year - 1 : year;
+        prevSomaseId = `${prevYear}-${String(prevMonth).padStart(2, '0')}-2`;
+      }
+      const somaseRows = await sql`
+        SELECT user_cpf, total::text
+        FROM somase_snapshots
+        WHERE quinzena = ${currSomaseId}
+           OR quinzena = ${`${year}-${String(month).padStart(2, '0')}-${quinzena}`}
+      `;
+      for (const r of somaseRows) {
+        if (r.user_cpf) somaseByCpf.set(r.user_cpf, toNum(r.total as string));
+      }
+      const somasePrevRows = await sql`
+        SELECT user_cpf, total::text
+        FROM somase_snapshots
+        WHERE quinzena = ${prevSomaseId}
+      `;
+      for (const r of somasePrevRows) {
+        if (r.user_cpf) somasePrevByCpf.set(r.user_cpf, toNum(r.total as string));
       }
     }
 
@@ -311,12 +453,14 @@ export async function GET(request: NextRequest) {
       let dataSource: 'snapshot' | 'calculado';
 
       if (hasNeonData) {
-        // Dados do snapshot histórico importado (prioridade: saldo_final_carga)
+        // Dados do snapshot histórico importado
+        // PAINEL saldo_final can be negative; CARGA splits into saldo_final=max(0,sf) and saldo_reembolsar=max(-sf,0)
         dataSource = 'snapshot';
-        saldo_final_carga = snap.saldo_final_carga !== null ? toNum(snap.saldo_final_carga) : toNum(snap.saldo_final);
+        const sf_painel = toNum(snap.saldo_final);  // PAINEL value (can be negative)
+        saldo_final_carga = snap.saldo_final_carga !== null ? toNum(snap.saldo_final_carga) : Math.max(sf_painel, 0);
         saldo_cartao_carga = snap.saldo_cartao_carga !== null ? toNum(snap.saldo_cartao_carga) : toNum(snap.saldo_cartao);
-        saldo_reembolsar  = toNum(snap.saldo_reembolsar);
-        saldo_final       = saldo_final_carga;
+        saldo_reembolsar  = snap.saldo_reembolsar !== null ? toNum(snap.saldo_reembolsar) : Math.max(-sf_painel, 0);
+        saldo_final       = sf_painel;  // Use PAINEL value (allows negative, matches planilha)
         saldo_cartao      = saldo_cartao_carga;
         saldo_prestacao   = toNum(snap.saldo_prestacao);
         col_qz            = snap.col_qz !== null ? toNum(snap.col_qz) : null;
@@ -330,15 +474,21 @@ export async function GET(request: NextRequest) {
         const sp_ancora = toNum(snap.saldo_prestacao);
         // Δ do período atual
         const delta_carga = ext.carga + ext.transferencia - ext.tarifa;
-        const sp_novo = r2(sp_ancora + delta_carga);  // saldo prestação acumulado novo
+        // Δ prestação: diferença entre somase atual e anterior
+        // Missing somase = 0 (no approved expenses recorded for that quinzena)
+        const somase_atual = somaseByCpf.get(snap.cpf) ?? 0;
+        const somase_prev = somasePrevByCpf.get(snap.cpf) ?? 0;
+        const delta_prestacao = r2(somase_atual - somase_prev);
+        // sp_novo = ancora + delta_carga - delta_prestacao
+        const sp_novo = r2(sp_ancora + delta_carga - delta_prestacao);
         const sf_novo = r2(sp_novo - sc);              // saldo final = saldo_prest - saldo_cartao
 
         saldo_prestacao   = sp_novo;
         saldo_cartao      = sc;
         saldo_cartao_carga = sc;
-        saldo_final_carga = Math.max(sf_novo, 0);
-        saldo_reembolsar  = Math.max(-sf_novo, 0);
-        saldo_final       = saldo_final_carga;
+        saldo_final       = sf_novo;  // Allow negative (match planilha PAINEL)
+        saldo_final_carga = Math.max(sf_novo, 0);  // CARGA column = max(0, sf)
+        saldo_reembolsar  = Math.max(-sf_novo, 0);  // CARGA column = max(-sf, 0)
         col_qz            = null; // sem planilha, col_qz vem apenas de manuais
       }
 
