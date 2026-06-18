@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Report, CostCenter, Expense } from './api';
+import { Report, CostCenter, Expense, ApprovalFlow } from './api';
 
 // Hook para buscar centros de custo
 export function useCostCenters() {
@@ -251,6 +251,56 @@ export function useCashFlow(params?: {
       if (!response.ok) throw new Error('Failed to fetch cash flow data');
       const data = await response.json();
       return data.data as Expense[];
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutos
+    gcTime: 1 * 60 * 60 * 1000, // 1 hora
+  });
+}
+
+// Hook para buscar fluxos de aprovação
+export function useApprovalFlows() {
+  return useQuery({
+    queryKey: ['approval-flows'],
+    queryFn: async () => {
+      const response = await fetch('/api/vexpenses/approval-flows');
+      if (!response.ok) throw new Error('Failed to fetch approval flows');
+      const data = await response.json();
+      return (data.data || data) as ApprovalFlow[];
+    },
+    staleTime: 30 * 60 * 1000, // 30 minutos
+    gcTime: 6 * 60 * 60 * 1000, // 6 horas
+  });
+}
+
+export interface ApprovalTrackingReport {
+  reportId: number;
+  reportName: string;
+  status: string;
+  owner: string;
+  flowName: string;
+  regional: string;
+  costCenter: string | null;
+  value: number | null;
+  currency: string;
+  createdAt: string | null;
+  currentStep: number;
+  waitingStep: number;
+  lastAction: string;
+  lastActor: string;
+  lastInteractionDate: string | null;
+  daysSinceLastInteraction: number;
+  history: { action: string; actor: string; step: number | null; interactionDate: string | null }[];
+}
+
+// Hook para buscar relatórios ENVIADO (aguardando aprovação) com tracking de etapa
+export function usePendingApprovals() {
+  return useQuery({
+    queryKey: ['reports', 'pending-approvals'],
+    queryFn: async () => {
+      const response = await fetch('/api/vexpenses/approval-tracking');
+      if (!response.ok) throw new Error('Failed to fetch pending approvals');
+      const data = await response.json();
+      return (data.data || data) as ApprovalTrackingReport[];
     },
     staleTime: 5 * 60 * 1000, // 5 minutos
     gcTime: 1 * 60 * 60 * 1000, // 1 hora

@@ -12,13 +12,15 @@ import {
   TrendingUp,
   FileSpreadsheet,
   Calculator,
-  FileSpreadsheet as FileSpreadsheetIcon
+  FileSpreadsheet as FileSpreadsheetIcon,
+  Hourglass
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Aprovações', href: '/aprovacoes', icon: FileCheck },
+  { name: 'Pendências', href: '/pending-approvals', icon: Hourglass },
   { name: 'Despesas', href: '/despesas', icon: Receipt },
   { name: 'Analytics', href: '/analytics', icon: BarChart3 },
   { name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
