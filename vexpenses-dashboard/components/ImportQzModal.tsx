@@ -57,6 +57,11 @@ export function ImportQzModal({
     imported: number; failed: number; errors?: string[];
   } | null>(null);
 
+  // Local override for target quinzena (defaults to page selection)
+  const [targetYear, setTargetYear] = useState(year);
+  const [targetMonth, setTargetMonth] = useState(month);
+  const [targetQuinzena, setTargetQuinzena] = useState(quinzena);
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Reset when modal opens
@@ -70,8 +75,11 @@ export function ImportQzModal({
       setParseError(null);
       setImportResult(null);
       setDragging(false);
+      setTargetYear(year);
+      setTargetMonth(month);
+      setTargetQuinzena(quinzena);
     }
-  }, [open]);
+  }, [open, year, month, quinzena]);
 
   // Close on Escape
   useEffect(() => {
@@ -126,7 +134,7 @@ export function ImportQzModal({
       const res = await fetch('/api/quinzena/import-qz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, quinzena, entries }),
+        body: JSON.stringify({ year: targetYear, month: targetMonth, quinzena: targetQuinzena, entries }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Erro desconhecido');
@@ -141,8 +149,9 @@ export function ImportQzModal({
 
   if (!open) return null;
 
-  const periodLabel = `${MONTH_FULL[month]} ${year} — ${quinzena}ª Quinzena`;
+  const periodLabel = `${MONTH_FULL[targetMonth]} ${targetYear} — ${targetQuinzena}ª Quinzena`;
   const totalValue  = entries.reduce((s, e) => s + e.valor, 0);
+  const isTargetDifferent = targetYear !== year || targetMonth !== month || targetQuinzena !== quinzena;
 
   return (
     // Backdrop
@@ -154,7 +163,7 @@ export function ImportQzModal({
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <div>
+          <div className="flex-1">
             <h2 className="text-base font-semibold flex items-center gap-2">
               <FileSpreadsheet className="h-5 w-5 text-blue-600" />
               Importar valores de quinzena
@@ -167,6 +176,44 @@ export function ImportQzModal({
           >
             <X className="h-5 w-5" />
           </button>
+        </div>
+
+        {/* Quinzena selector */}
+        <div className="px-6 py-3 border-b bg-gray-50/50">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-medium text-gray-600">Importar para:</span>
+            <select
+              value={targetMonth}
+              onChange={e => setTargetMonth(Number(e.target.value))}
+              className="text-sm border rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              {MONTH_FULL.slice(1).map((m, i) => (
+                <option key={i + 1} value={i + 1}>{m}</option>
+              ))}
+            </select>
+            <select
+              value={targetYear}
+              onChange={e => setTargetYear(Number(e.target.value))}
+              className="text-sm border rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              {[2025, 2026, 2027].map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <select
+              value={targetQuinzena}
+              onChange={e => setTargetQuinzena(Number(e.target.value))}
+              className="text-sm border rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              <option value={1}>1ª Quinzena</option>
+              <option value={2}>2ª Quinzena</option>
+            </select>
+            {isTargetDifferent && (
+              <span className="text-xs text-amber-600 font-medium bg-amber-50 border border-amber-200 rounded px-2 py-0.5">
+                Diferente do período selecionado
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Body */}
@@ -300,7 +347,7 @@ export function ImportQzModal({
                 <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>
                   Colaboradores <strong>não presentes</strong> neste arquivo terão o valor de{' '}
-                  <strong>{quinzena}ª QZ zerado</strong> para {MONTH_FULL[month]} {year}.
+                  <strong>{targetQuinzena}ª QZ zerado</strong> para {MONTH_FULL[targetMonth]} {targetYear}.
                 </span>
               </div>
 
