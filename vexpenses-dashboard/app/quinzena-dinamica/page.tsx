@@ -28,6 +28,15 @@ interface Snapshot {
   imported_at: string;
 }
 
+interface Period {
+  year: number;
+  month: number;
+  quinzena: number;
+  has_snapshot: boolean;
+  snapshot_rows: number;
+  extrato_rows: number;
+}
+
 interface QuinzenaRow {
   cpf: string;
   colaborador: string;
@@ -59,6 +68,7 @@ interface QuinzenaRow {
 }
 
 interface QuinzenaResponse {
+  data_mode: 'snapshot' | 'calculado';
   period: {
     year: number;
     month: number;
@@ -203,6 +213,7 @@ function EditCell({
 
 export default function QuinzenaDinamicaPage() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
+  const [periods, setPeriods] = useState<Period[]>([]);
   const [snapshotsLoading, setSnapshotsLoading] = useState(true);
 
   const [year, setYear] = useState<number | null>(null);
@@ -218,15 +229,26 @@ export default function QuinzenaDinamicaPage() {
   const [onlyWithCarga, setOnlyWithCarga] = useState(true);
   const [importModalOpen, setImportModalOpen] = useState(false);
 
-  // 1. Load available snapshots on mount
+  // Filtros dropdown
+  const [selectedRegionals, setSelectedRegionals] = useState<Set<string>>(new Set());
+  const [selectedCentros, setSelectedCentros] = useState<Set<string>>(new Set());
+  const [regionalOpen, setRegionalOpen] = useState(false);
+  const [centroOpen, setCentroOpen] = useState(false);
+
+  // 1. Load available periods on mount (snapshots + extrato)
   useEffect(() => {
     (async () => {
       setSnapshotsLoading(true);
       try {
-        const res = await fetch('/api/quinzena/snapshots');
+        const res = await fetch('/api/quinzena/available-periods');
         const json = await res.json();
-        const list: Snapshot[] = json.snapshots ?? [];
-        setSnapshots(list);
+        const list: Period[] = json.periods ?? [];
+        setPeriods(list);
+        // Keep snapshots for legacy ImportQzModal
+        setSnapshots(list.filter(p => p.has_snapshot).map(p => ({
+          year: p.year, month: p.month, quinzena: p.quinzena,
+          total_rows: p.snapshot_rows, imported_at: '',
+        })));
         if (list.length > 0) {
           const first = list[0];
           setYear(first.year);
@@ -234,7 +256,7 @@ export default function QuinzenaDinamicaPage() {
           setQuinzena(first.quinzena);
         }
       } catch (e) {
-        console.error('Snapshots error:', e);
+        console.error('Available periods error:', e);
       } finally {
         setSnapshotsLoading(false);
       }
@@ -260,9 +282,24 @@ export default function QuinzenaDinamicaPage() {
 
   useEffect(() => {
     if (year !== null && month !== null && quinzena !== null) {
+      // Limpa filtros ao trocar de periodo
+      setSelectedRegionals(new Set());
+      setSelectedCentros(new Set());
+      setSearch('');
       loadData(year, month, quinzena);
     }
   }, [year, month, quinzena, loadData]);
+
+  // Fechar dropdowns ao clicar fora
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('[data-filter="regional"]')) setRegionalOpen(false);
+      if (!target.closest('[data-filter="centro"]')) setCentroOpen(false);
+    };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
 
   // 3. Save manual field — optimistic local update, no refetch
   const saveField = async (cpf: string, field: string, rawValue: string | null) => {
@@ -305,16 +342,26 @@ export default function QuinzenaDinamicaPage() {
           }
           if (field === 'obs') updated.obs = rawValue;
 
-          // Recalculate
+          // Recalculate (regras confirmadas: reembolso 0 na 2QZ, cadastro pendente = 0)
+          const qz = prev.period.quinzena;
           const col_qz_efetivo = updated.col_qz_manual !== null
             ? updated.col_qz_manual
             : (updated.col_qz ?? 0);
-          updated.carga_parcial = Math.max(
-            0,
-            col_qz_efetivo - updated.saldo_final_carga - updated.saldo_cartao_carga - updated.adiantamento,
-          );
-          updated.reembolso  = Math.max(0, updated.saldo_reembolsar) * 0.5;
-          updated.carga_final = updated.carga_parcial + updated.reembolso;
+          const isPendente = (updated.status_cartao ?? '').toLowerCase().includes('pendente');
+
+          if (isPendente) {
+            updated.carga_parcial = 0;
+            updated.reembolso = 0;
+            updated.carga_final = 0;
+          } else {
+            updated.carga_parcial = Math.round(
+              (col_qz_efetivo - updated.saldo_final_carga - updated.saldo_cartao_carga - updated.adiantamento) * 100,
+            ) / 100;
+            updated.reembolso = qz === 1
+              ? Math.round(Math.max(0, updated.saldo_reembolsar) * 0.5 * 100) / 100
+              : 0;
+            updated.carga_final = Math.round((Math.max(0, updated.carga_parcial) + updated.reembolso) * 100) / 100;
+          }
           return updated;
         }),
       };
@@ -499,35 +546,50 @@ export default function QuinzenaDinamicaPage() {
 
   // ---- Derived selector data -----------------------------------------------
 
-  const availableYears = [...new Set(snapshots.map(s => s.year))].sort((a, b) => b - a);
+  const availableYears = [...new Set(periods.map(p => p.year))].sort((a, b) => b - a);
 
   const availableMonths = year !== null
-    ? [...new Set(snapshots.filter(s => s.year === year).map(s => s.month))].sort((a, b) => b - a)
+    ? [...new Set(periods.filter(p => p.year === year).map(p => p.month))].sort((a, b) => b - a)
     : [];
 
   const availableQzs = year !== null && month !== null
-    ? snapshots.filter(s => s.year === year && s.month === month).map(s => s.quinzena).sort()
+    ? periods.filter(p => p.year === year && p.month === month).map(p => p.quinzena).sort()
     : [];
 
+  const currentPeriod = year !== null && month !== null && quinzena !== null
+    ? periods.find(p => p.year === year && p.month === month && p.quinzena === quinzena) ?? null
+    : null;
+
   const handleYearChange = (y: number) => {
-    const months = [...new Set(snapshots.filter(s => s.year === y).map(s => s.month))].sort((a, b) => b - a);
+    const months = [...new Set(periods.filter(p => p.year === y).map(p => p.month))].sort((a, b) => b - a);
     const newMonth = months.includes(month ?? -1) ? month! : (months[0] ?? null);
     setYear(y);
     setMonth(newMonth);
     if (newMonth !== null) {
-      const qzs = snapshots.filter(s => s.year === y && s.month === newMonth).map(s => s.quinzena).sort();
+      const qzs = periods.filter(p => p.year === y && p.month === newMonth).map(p => p.quinzena).sort();
       setQuinzena(qzs.includes(quinzena ?? -1) ? quinzena! : (qzs[0] ?? null));
     }
   };
 
   const handleMonthChange = (m: number) => {
-    const qzs = snapshots.filter(s => s.year === year && s.month === m).map(s => s.quinzena).sort();
+    const qzs = periods.filter(p => p.year === year && p.month === m).map(p => p.quinzena).sort();
     setMonth(m);
     setQuinzena(qzs.includes(quinzena ?? -1) ? quinzena! : (qzs[0] ?? null));
   };
 
+  const isCalcMode = data?.data_mode === 'calculado';
+
+  // Valores unicos para dropdowns
+  const allRegionals = [...new Set((data?.data ?? []).map(r => r.regional).filter(Boolean))].sort();
+  const allCentros   = [...new Set((data?.data ?? []).map(r => r.centro_custo).filter(Boolean))].sort();
+
   const filteredRows = (data?.data ?? []).filter(r => {
-    if (onlyWithCarga && (r.col_qz === null || r.col_qz === 0)) return false;
+    if (onlyWithCarga) {
+      const hasLoad = isCalcMode ? r.carga_final > 0 : (r.col_qz !== null && r.col_qz !== 0);
+      if (!hasLoad) return false;
+    }
+    if (selectedRegionals.size > 0 && !selectedRegionals.has(r.regional)) return false;
+    if (selectedCentros.size > 0 && !selectedCentros.has(r.centro_custo)) return false;
     if (!search) return true;
     return (
       r.colaborador.toLowerCase().includes(search.toLowerCase()) ||
@@ -582,11 +644,11 @@ export default function QuinzenaDinamicaPage() {
             <div className="text-sm text-gray-400 flex items-center gap-2">
               <RefreshCw className="h-4 w-4 animate-spin" /> Carregando periodos...
             </div>
-          ) : snapshots.length === 0 ? (
+          ) : periods.length === 0 ? (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                Nenhum periodo importado. Execute <code className="bg-gray-100 px-1 rounded text-xs">import_to_neon.py</code>.
+                Sem dados no Neon. Execute <code className="bg-gray-100 px-1 rounded text-xs">import_to_neon.py</code> ou <code className="bg-gray-100 px-1 rounded text-xs">download_extrato_neon.py</code>.
               </AlertDescription>
             </Alert>
           ) : (
@@ -610,13 +672,20 @@ export default function QuinzenaDinamicaPage() {
               <div>
                 <div className="text-xs text-gray-500 font-medium mb-1.5">Mes</div>
                 <div className="flex gap-1 flex-wrap">
-                  {availableMonths.map(m => (
-                    <button key={m} onClick={() => handleMonthChange(m)}
-                      className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${
-                        month === m ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >{MONTH_NAMES_SHORT[m]}</button>
-                  ))}
+                  {availableMonths.map(m => {
+                    const hasSnap = periods.some(p => p.year === year && p.month === m && p.has_snapshot);
+                    return (
+                      <button key={m} onClick={() => handleMonthChange(m)}
+                        className={`px-3 py-1.5 rounded text-sm font-medium border transition-colors ${
+                          month === m ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                        }`}
+                        title={hasSnap ? 'Snapshot importado' : 'Calculado via extrato'}
+                      >
+                        {MONTH_NAMES_SHORT[m]}
+                        {!hasSnap && <span className="ml-1 text-xs opacity-60">~</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -650,7 +719,10 @@ export default function QuinzenaDinamicaPage() {
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <Database className="h-3.5 w-3.5 text-green-500" />
                     {data.period.start_date} &rarr; {data.period.end_date}
-                    <Badge className="bg-green-100 text-green-700 text-xs py-0">Neon</Badge>
+                    {data.data_mode === 'snapshot'
+                      ? <Badge className="bg-green-100 text-green-700 text-xs py-0">Snapshot</Badge>
+                      : <Badge className="bg-amber-100 text-amber-700 text-xs py-0">Calculado</Badge>
+                    }
                   </div>
                 )}
                 {lastLoaded && !loading && (
@@ -693,7 +765,17 @@ export default function QuinzenaDinamicaPage() {
             <StatCard label="Total Saldo Final" value={brl(stats?.total_saldo_final)} color="gray" />
           </div>
 
-          {!stats?.has_neon_data && (
+          {data.data_mode === 'calculado' && (
+            <Alert className="border-amber-200 bg-amber-50">
+              <Database className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong>Modo calculado:</strong> Sem snapshot importado para este período.
+                Saldo final/cartão calculados via extrato + âncora da quinzena anterior.
+                Coluna <strong>QZ</strong> requer entrada manual. Os demais campos são automáticos.
+              </AlertDescription>
+            </Alert>
+          )}
+          {!stats?.has_neon_data && data.data_mode !== 'calculado' && (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
@@ -717,6 +799,105 @@ export default function QuinzenaDinamicaPage() {
                 Limpar
               </button>
             )}
+
+            {/* Filtro Regional */}
+            <div className="relative" data-filter="regional">
+              <button
+                onClick={() => setRegionalOpen(o => !o)}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  selectedRegionals.size > 0
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${selectedRegionals.size > 0 ? 'bg-white' : 'bg-gray-400'}`} />
+                Regional {selectedRegionals.size > 0 && `(${selectedRegionals.size})`}
+              </button>
+              {regionalOpen && (
+                <div className="absolute z-20 mt-1 w-64 max-h-64 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg p-2">
+                  <div className="flex justify-between items-center mb-1 pb-1 border-b">
+                    <span className="text-xs font-semibold text-gray-500">Selecionar regional</span>
+                    <button onClick={() => setRegionalOpen(false)} className="text-xs text-gray-400 hover:text-gray-600">Fechar</button>
+                  </div>
+                  {allRegionals.length === 0 ? (
+                    <div className="text-xs text-gray-400 py-2">Sem dados</div>
+                  ) : (
+                    allRegionals.map(reg => (
+                      <label key={reg} className="flex items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedRegionals.has(reg)}
+                          onChange={() => {
+                            const next = new Set(selectedRegionals);
+                            next.has(reg) ? next.delete(reg) : next.add(reg);
+                            setSelectedRegionals(next);
+                          }}
+                        />
+                        <span className="truncate">{reg}</span>
+                      </label>
+                    ))
+                  )}
+                  {selectedRegionals.size > 0 && (
+                    <button
+                      onClick={() => setSelectedRegionals(new Set())}
+                      className="mt-1 w-full text-center text-xs text-red-500 hover:text-red-700 py-1"
+                    >
+                      Limpar selecao
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Filtro Centro de Custo */}
+            <div className="relative" data-filter="centro">
+              <button
+                onClick={() => setCentroOpen(o => !o)}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  selectedCentros.size > 0
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
+                }`}
+              >
+                <span className={`h-2 w-2 rounded-full ${selectedCentros.size > 0 ? 'bg-white' : 'bg-gray-400'}`} />
+                Centro de Custo {selectedCentros.size > 0 && `(${selectedCentros.size})`}
+              </button>
+              {centroOpen && (
+                <div className="absolute z-20 mt-1 w-72 max-h-64 overflow-auto rounded-lg border border-gray-200 bg-white shadow-lg p-2">
+                  <div className="flex justify-between items-center mb-1 pb-1 border-b">
+                    <span className="text-xs font-semibold text-gray-500">Selecionar centro de custo</span>
+                    <button onClick={() => setCentroOpen(false)} className="text-xs text-gray-400 hover:text-gray-600">Fechar</button>
+                  </div>
+                  {allCentros.length === 0 ? (
+                    <div className="text-xs text-gray-400 py-2">Sem dados</div>
+                  ) : (
+                    allCentros.map(cc => (
+                      <label key={cc} className="flex items-center gap-2 px-1 py-1 text-sm hover:bg-gray-50 rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCentros.has(cc)}
+                          onChange={() => {
+                            const next = new Set(selectedCentros);
+                            next.has(cc) ? next.delete(cc) : next.add(cc);
+                            setSelectedCentros(next);
+                          }}
+                        />
+                        <span className="truncate">{cc}</span>
+                      </label>
+                    ))
+                  )}
+                  {selectedCentros.size > 0 && (
+                    <button
+                      onClick={() => setSelectedCentros(new Set())}
+                      className="mt-1 w-full text-center text-xs text-red-500 hover:text-red-700 py-1"
+                    >
+                      Limpar selecao
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Toggle: somente com carga */}
             <button
               onClick={() => setOnlyWithCarga(v => !v)}
@@ -729,6 +910,15 @@ export default function QuinzenaDinamicaPage() {
               <span className={`h-2 w-2 rounded-full ${onlyWithCarga ? 'bg-white' : 'bg-gray-400'}`} />
               Somente usuarios com carga no mes
             </button>
+            {/* Limpar todos filtros */}
+            {(selectedRegionals.size > 0 || selectedCentros.size > 0) && (
+              <button
+                onClick={() => { setSelectedRegionals(new Set()); setSelectedCentros(new Set()); }}
+                className="text-xs text-red-500 hover:text-red-700 underline"
+              >
+                Limpar filtros
+              </button>
+            )}
             <span className="text-xs text-gray-400 ml-auto">
               {filteredRows.length} / {data.data.length} registros
             </span>
@@ -911,7 +1101,7 @@ export default function QuinzenaDinamicaPage() {
                           {num(filteredRows.reduce((s,r) => s + r.saldo_reembolsar, 0))}
                         </td>
                         <td className="px-2 py-2 text-right font-mono bg-green-100/50">
-                          {num(filteredRows.reduce((s,r) => s + (r.col_qz ?? 0), 0))}
+                          {num(filteredRows.reduce((s,r) => s + (r.col_qz_manual ?? r.col_qz ?? 0), 0))}
                         </td>
                         <td className="px-2 py-2 text-right font-mono bg-amber-100/50">
                           {num(filteredRows.reduce((s,r) => s + (r.col_qz_manual ?? 0), 0))}

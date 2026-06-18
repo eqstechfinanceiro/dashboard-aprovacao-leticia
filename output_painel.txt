@@ -1,0 +1,71 @@
+================================================================================
+ANALISE ESPECIFICA DA ABA PAINEL
+================================================================================
+
+--- Lendo sem cabeçalho (primeiras 15 linhas) ---
+Linha 0: []
+Linha 1: []
+Linha 2: []
+Linha 3: []
+Linha 4: []
+Linha 5: []
+Linha 6: []
+Linha 7: []
+Linha 8: []
+Linha 9: []
+Linha 10: ['[0]EMPRESA', '[1]COLABORADOR', '[2]CPF', '[3]CHAVE ', '[4]SITUAÇÃO', '[5]STATUS DO CARTÃO', '[6]CARTÃO ITAU', '[7]TERMO', '[8]REGIONAL', '[9]CENTRO DE CUSTO']
+Linha 11: ['[0]EQS', '[1]ABNER ANDRADE CAVALCANTE', '[2]02027745203', '[3]020203', '[4]ATIVO', '[5]Cartão ativo', '[6]565737', '[7]ASSINADO', '[8]REGIONAL CO', '[9]CEF AM AC RR']
+Linha 12: ['[0]EQS', '[1]ADAN LEONARDO SOUZA BATISTA', '[2]01932662537', '[3]019537', '[4]ATIVO', '[5]Cartão ativo', '[7]ASSINADO', '[8]REGIONAL NE', '[9]TELEFONICA BA']
+Linha 13: ['[0]EQS', '[1]ADAUTO JOSE PEREIRA', '[2]85087572634', '[3]850634', '[4]ATIVO', '[5]Cartão ativo', '[6]425393', '[7]ASSINADO', '[8]REGIONAL MG', '[9]CEF FACILITIES BH']
+Linha 14: ['[0]EQS', '[1]ADEMARCIO DUARTE LOPES', '[2]06223031980', '[3]062980', '[4]ATIVO', '[5]Cartão ativo', '[7]ASSINADO', '[8]REGIONAL SC', '[9]CEF FACILITIES CURITIBA PR']
+
+>>> CABECALHO DETECTADO NA LINHA 10 (indice 10, linha Excel 11)
+    Palavras-chave encontradas: 5
+
+--- Lendo com cabeçalho na linha 11 ---
+
+Total de colunas: 27
+
+Colunas encontradas:
+   1. EMPRESA
+   2. COLABORADOR
+   3. CPF
+   4. CHAVE 
+   5. SITUAÇÃO
+   6. STATUS DO CARTÃO
+   7. CARTÃO ITAU
+   8. TERMO
+   9. REGIONAL
+  10. CENTRO DE CUSTO
+  11. GESTOR
+  12. DIRETOR
+  13. CARTÃO VEXPENSES
+  14. CARGA
+  15. TRANSFERENCIA
+  16. (-) TARIFA
+  17. (-) PRESTAÇÃO DE CONTAS
+  18. SALDO PRESTAÇÃO
+  19. (-) SALDO CARTAO
+  20. SALDO FINAL
+  21. 1ª QZ
+  22. 2ª QZ
+  23. ADICIONAIS
+  24. SITUAÇÃO COLABORADOR
+  25. CARTÃO CRED. ITAU
+  26. ITAU
+  27. ADICIONAL ITAU
+
+--- COLUNAS DE SALDO ENCONTRADAS ---
+Total: 8
+  - STATUS DO CARTÃO
+  - CARTÃO ITAU
+  - CARTÃO VEXPENSES
+  - (-) PRESTAÇÃO DE CONTAS
+  - SALDO PRESTAÇÃO
+  - (-) SALDO CARTAO
+  - SALDO FINAL
+  - CARTÃO CRED. ITAU
+
+============================================================
+ANALISE DE FORMULAS VS VALORES
+============================================================

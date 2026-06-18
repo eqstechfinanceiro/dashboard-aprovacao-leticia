@@ -1,0 +1,175 @@
+================================================================================
+ANALISE DA PLANILHA - VEXPENSES MAIO 2026
+================================================================================
+
+Arquivo: CONTROLE - VEXPENSES - MAIO - 2026 (1).xlsx
+Existe: True
+
+========================================
+1. ABAS DISPONIVEIS
+========================================
+  1. PAINEL
+  2. SALDO CARTAO
+  3. ADICIONAL ITAÚ
+  4. ADICIONAIS
+  5. QUINZENAS
+  6. SALDOS ADM EQS
+  7. EXTRATO
+  8. PAINEL PRESTAÇÕES
+  9. BASE PREST 
+  10. REEMBOLSO
+  11. ESTORNO - SAQUE
+  12. Detalhes1
+  13. Detalhes2
+  14. Detalhes3
+  15. AUX
+
+Total: 15 abas
+
+========================================
+2. CABEÇALHO POR ABA
+========================================
+
+  [ABA] PAINEL: (vazia)
+
+  [ABA] SALDO CARTAO:
+     Linha 1: []
+     Linha 2: []
+     Linha 3: ['2126044.35000001', '101543.84'] <-- CABECALHO?
+     Linha 4: ['PORTADOR', 'CPF', 'VALOR', 'DATA', 'MÊS', 'EMPRESA']
+     Linha 5: ['ABNER ANDRADE CAVALCANTE', '02027745203', '6.86', '45849', 'JULHO', 'EQS']
+
+  [ABA] ADICIONAL ITAÚ:
+     Linha 1: []
+     Linha 2: []
+     Linha 3: ['33416.1']
+     Linha 4: ['COLABORADOR', 'CPF', 'LIMITE ANTES', 'LIMITE DEPOIS', 'ADICIONADO', 'DATA']
+     Linha 5: ['EMERSON LEITE DE BARROS', '34168918807', '5000', '6000', '1000', '45860']
+
+  [ABA] ADICIONAIS:
+     Linha 1: []
+     Linha 2: ['806834.36', '811400', '795584.36', '-15815.6399999999'] <-- CABECALHO?
+     Linha 3: ['COLABORADOR', 'CPF', 'VALOR', 'DATA', 'MÊS', 'ANO'] <-- CABECALHO?
+     Linha 4: ['CLEBER RICARDO NASCIMENTO', '84743603404', '1500', '45813', 'JUNHO', '2025']
+     Linha 5: ['DANIEL SANTOS DE ASSUNCAO', '97592439549', '720', '45814', 'JUNHO', '2025']
+
+  [ABA] QUINZENAS:
+     Linha 1: []
+     Linha 2: []
+     Linha 3: ['17216218.81']
+     Linha 4: ['COLABORADOR', 'CPF', 'VALOR', 'QUINZENA', 'DATA', 'MÊS']
+     Linha 5: ['ABNER ANDRADE CAVALCANTE', '02027745203', '9840', '1ª QZ', '45819', 'JUNHO']
+
+  [ABA] SALDOS ADM EQS:
+     Linha 1: ['ANO', '2026'] <-- CABECALHO?
+     Linha 2: ['SALDOS ADM EQS', 'MÊS', 'FEVEREIRO', 'VEXPENSES'] <-- CABECALHO?
+     Linha 3: ['6825.01']
+     Linha 4: ['COLABORADOR', 'CPF', 'SITUAÇÃO', 'STATUS VEX', 'CENTRO DE CUSTO', 'GESTOR']
+     Linha 5: ['ANDRESA INDIRA SANTANA AG', '33162718805', 'ATIVO', 'ATIVO', 'ADM FILIAL SC', 'BRUNO LINHARES']
+
+  [ABA] EXTRATO:
+     Linha 1: []
+     Linha 2: []
+     Linha 3: ['CARGA', '8102.0', '7274953.41000002'] <-- CABECALHO?
+     Linha 4: ['TRANSFERÊNCIA', '2446.0', '-1056007.5']
+     Linha 5: ['TARIFA', '6929.0', '-46982.82']
+
+  [ABA] PAINEL PRESTAÇÕES:
+     Linha 1: []
+     Linha 2: []
+     Linha 3: ['Rótulos de Linha', 'Soma de Valor', 'Rótulos de Linha', 'Soma de Valor'] <-- CABECALHO?
+     Linha 4: ['[DESATIVADO] - AGUINA FER', '4653.02', 'ABNER ANDRADE CAVALCANTE', '19748.97']
+     Linha 5: ['[DESATIVADO] - ALEXANDRE ', '88', 'ADEMARCIO DUARTE LOPES', '2709.73']
+
+  [ABA] BASE PREST :
+     Linha 1: []
+     Linha 2: ['5646466.31000027']
+     Linha 3: ['ID da Despesa', 'ID do Relatório', 'Nome do relatório', 'Data', 'Nome do membro de equipe', 'Banco'] <-- CABECALHO?
+     Linha 4: ['67325069', '8032948', 'CAIXA08/2025', '30/08/2025', 'ABNER ANDRADE CAVALCANTE', '02027745203']
+     Linha 5: ['67348305', '8032948', 'CAIXA08/2025', '29/08/2025', 'ABNER ANDRADE CAVALCANTE', '02027745203']
+
+  [ABA] REEMBOLSO:
+     Linha 1: []
+     Linha 2: ['59267.9679999999']
+     Linha 3: ['COLABORADOR', 'CPF', 'VALOR', 'DATA', 'MÊS', 'CENTRO DE CUSTO'] <-- CABECALHO?
+     Linha 4: ['MELSO CEZAR DA SILVA NETO', '02079878077', '916.9', '45839', 'JULHO', 'CLARO INFRA RS']
+     Linha 5: ['MARCIO CAMPOS RIBEIRO', '17427326822', '656.87', '45863', 'JULHO', 'COMERCIAL']
+
+  [ABA] ESTORNO - SAQUE:
+     Linha 1: ['COLABORADOR', 'CPF', 'VALOR', 'DATA', 'MÊS', 'CENTRO DE CUSTO'] <-- CABECALHO?
+     Linha 2: ['VICTOR SIGOLO PINHEIRO PI', '12237490619', '720', '45978', 'NOVEMBRO', 'INSS SP'] <-- CABECALHO?
+     Linha 3: ['SILVIO VINICIUS PINHEIRO ', '51182084168', '1000', '45979', 'NOVEMBRO', 'CLARO CO'] <-- CABECALHO?
+     Linha 4: ['ABNER ANDRADE CAVALCANTE', '02027745203', '1000', '45995', 'DEZEMBRO', 'CEF AM AC RR']
+
+  [ABA] Detalhes1:
+     Linha 1: ['Detalhes do Soma de Valor']
+     Linha 2: []
+     Linha 3: ['ID da Despesa', 'ID do Relatório', 'Nome do relatório', 'Data', 'Nome do membro de equipe', 'Banco'] <-- CABECALHO?
+     Linha 4: ['75824730', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+     Linha 5: ['75839143', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+
+  [ABA] Detalhes2:
+     Linha 1: ['Detalhes do Soma de Valor']
+     Linha 2: []
+     Linha 3: ['ID da Despesa', 'ID do Relatório', 'Nome do relatório', 'Data', 'Nome do membro de equipe', 'Banco'] <-- CABECALHO?
+     Linha 4: ['75824730', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+     Linha 5: ['75839143', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+
+  [ABA] Detalhes3:
+     Linha 1: ['Detalhes do Soma de Valor']
+     Linha 2: []
+     Linha 3: ['ID da Despesa', 'ID do Relatório', 'Nome do relatório', 'Data', 'Nome do membro de equipe', 'Banco'] <-- CABECALHO?
+     Linha 4: ['75824730', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+     Linha 5: ['75839143', '9525233', 'CAIXA 02/2026', '02/02/2026', 'ISAIAS DA SILVA', '04083479965']
+
+  [ABA] AUX:
+     Linha 1: []
+     Linha 2: ['REGIONAL', 'GESTOR', 'DIRETOR', 'REGIONAL2'] <-- CABECALHO?
+     Linha 3: ['ADMINISTRATIVO', 'GUILHERME FORTKAMP', 'THIAGO NEVES', 'ADMINISTRATIVO'] <-- CABECALHO?
+     Linha 4: ['IMPLANTACAO', 'EDNEI SANTANA', 'THIAGO NEVES', 'IMPLANTACAO']
+     Linha 5: ['KEY ACCOUNT', 'ADILSON RODRIGUES ', 'ADILSON RODRIGUES ', 'KEY ACCOUNT ']
+
+============================================================
+3. ABA PAINEL - COLUNAS
+============================================================
+
+Total de colunas detectadas: 27
+Primeira coluna: Unnamed: 0
+
+Lista de colunas (indice: nome):
+--------------------------------------------------
+   1. Unnamed: 0
+   2. Unnamed: 1
+   3. Unnamed: 2
+   4. Unnamed: 3
+   5. Unnamed: 4
+   6. Unnamed: 5
+   7. Unnamed: 6
+   8. Unnamed: 7
+   9. Unnamed: 8
+  10. Unnamed: 9
+  11. Unnamed: 10
+  12. Unnamed: 11
+  13. Unnamed: 12
+  14. Unnamed: 13
+  15. Unnamed: 14
+  16. Unnamed: 15
+  17. Unnamed: 16
+  18. Unnamed: 17
+  19. Unnamed: 18
+  20. Unnamed: 19
+  21. Unnamed: 20
+  22. Unnamed: 21
+  23. Unnamed: 22
+  24. Unnamed: 23
+  25. Unnamed: 24
+  26. Unnamed: 25
+  27. Unnamed: 26
+
+============================================================
+4. ANALISE DE COLUNAS DE SALDO - FORMULAS VS VALORES
+============================================================
+
+Colunas com 'SALDO' no nome: []
+
+Carregando com openpyxl para verificar formulas...

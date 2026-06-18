@@ -1,0 +1,19 @@
+{
+  "regra_quinzena": "fechamento_dia_11_e_25",
+  "periodo_1a_qz": {
+    "start": "26(mes_ant)",
+    "end": "10",
+    "fechamento": "11"
+  },
+  "periodo_2a_qz": {
+    "start": "11",
+    "end": "25",
+    "fechamento": "25"
+  },
+  "validado_maio_2026": {
+    "1a_qz_opcao1_trans": 862,
+    "1a_qz_opcao1_saldo": 307566.97,
+    "2a_qz_opcao1_trans": 12,
+    "2a_qz_opcao1_saldo": 1493.5100000000002
+  }
+}

@@ -1,0 +1,71 @@
+﻿python : C:\Users\italo.medrado\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\lo
+cal-packages\Python313\site-packages\openpyxl\worksheet\_reader.py:313: UserWarning: Failed to load a conditional 
+formatting rule. It will be discarded. Cause: expected <class 'openpyxl.worksheet.cell_range.MultiCellRange'>
+No linha:1 caractere:110
++ ... ia\dashboard-test\controle-api"; python explore_saldo.py 2>&1 | Out-F ...
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\italo....ultiCellRange'>:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  warn(msg)
+======================================================================
+ABA: SALDO CARTAO
+======================================================================
+Shape: 7947 linhas x 14 colunas
+
+--- COLUNAS ---
+  [0] "Unnamed: 0" | dtype: str | nao-nulos: 5
+  [1] "PORTADOR" | dtype: str | nao-nulos: 7947
+  [2] "CPF" | dtype: float64 | nao-nulos: 7756
+  [3] "VALOR" | dtype: float64 | nao-nulos: 7947
+  [4] "DATA" | dtype: int64 | nao-nulos: 7947
+  [5] "M╩S" | dtype: str | nao-nulos: 7947
+  [6] "EMPRESA" | dtype: str | nao-nulos: 5173
+  [7] "Unnamed: 7" | dtype: float64 | nao-nulos: 0
+  [8] "Unnamed: 8" | dtype: float64 | nao-nulos: 0
+  [9] "PORTADOR.1" | dtype: str | nao-nulos: 606
+  [10] "CPF.1" | dtype: float64 | nao-nulos: 606
+  [11] "VALOR.1" | dtype: float64 | nao-nulos: 606
+  [12] "DATA.1" | dtype: float64 | nao-nulos: 606
+  [13] "Unnamed: 13" | dtype: float64 | nao-nulos: 595
+
+--- PRIMEIRAS 5 LINHAS ---
+  Unnamed: 0                     PORTADOR           CPF    VALOR   DATA    M╩S EMPRESA  Unnamed: 7  Unnamed: 8                   PORTADOR.1         CPF.1  VALOR.1   DATA.1  Unnamed: 13
+0        NaN     ABNER ANDRADE CAVALCANTE  2.027745e+09     6.86  45849  JULHO     EQS         NaN         NaN     Abner Andrade Cavalcante  2.027745e+09    58.00  46153.0        58.00
+1        NaN     ABNER ANDRADE CAVALCANTE  2.027745e+09  3815.86  45834  JUNHO     EQS         NaN         NaN  Adan Leonardo Souza Batista  1.932663e+09  1000.00  46153.0      1000.00
+2        NaN     ABNER ANDRADE CAVALCANTE  2.027745e+09     3.15  45833  JUNHO     EQS         NaN         NaN          Adauto Jose Pereira  8.508757e+10   248.16  46153.0       248.16
+3        NaN     ABNER ANDRADE CAVALCANTE  2.027745e+09    10.00  45819  JUNHO     EQS         NaN         NaN       Ademarcio Duarte Lopes  6.223032e+09   556.11  46153.0       556.11
+4        NaN  ADAN LEONARDO SOUZA BATISTA  1.932663e+09   710.21  45849  JULHO     EQS         NaN         NaN      Adilson Antonio Jacinto  6.084340e+10     0.21  46153.0         0.21
+
+======================================================================
+ABA: EXTRATO
+======================================================================
+Shape: 17482 linhas x 13 colunas
+
+--- COLUNAS ---
+  [0] "Unnamed: 0" | dtype: float64 | nao-nulos: 0
+  [1] "CARGA" | dtype: object | nao-nulos: 17480
+  [2] "8102" | dtype: object | nao-nulos: 17480
+  [3] "7274953.41000002" | dtype: object | nao-nulos: 17480
+  [4] "Unnamed: 4" | dtype: str | nao-nulos: 17478
+  [5] "Unnamed: 5" | dtype: str | nao-nulos: 17478
+  [6] "Unnamed: 6" | dtype: str | nao-nulos: 17478
+  [7] "Unnamed: 7" | dtype: str | nao-nulos: 17478
+  [8] "Unnamed: 8" | dtype: str | nao-nulos: 17478
+  [9] "Unnamed: 9" | dtype: str | nao-nulos: 17478
+  [10] "Unnamed: 10" | dtype: str | nao-nulos: 17478
+  [11] "Unnamed: 11" | dtype: object | nao-nulos: 17479
+  [12] "Unnamed: 12" | dtype: str | nao-nulos: 17478
+
+--- PRIMEIRAS 10 LINHAS ---
+   Unnamed: 0          CARGA  8102    7274953.41 Unnamed: 4                        Unnamed: 5        Unnamed: 6 Unnamed: 7                         Unnamed: 8 Unnamed: 9                                                     Unnamed: 10 Unnamed: 11  Unnamed: 12
+0         NaN  TRANSFER╩NCIA  2446    -1056007.5        NaN                               NaN               NaN        NaN                                NaN        NaN                                                             NaN         NaN          NaN
+1         NaN         TARIFA  6929     -46982.82        NaN                               NaN               NaN        NaN                                NaN        NaN                                                             NaN         NaN          NaN
+2         NaN            NaN   NaN           NaN        NaN                               NaN               NaN        NaN                                NaN        NaN                                                             NaN         NaN          NaN
+3         NaN            NaN   NaN           NaN        NaN                               NaN               NaN        NaN                                NaN        NaN                                                             NaN  6171963.09          NaN
+4         NaN            ANO   M╩S          Data       Hora               C¾digo de TransaþÒo  N·mero do CartÒo      Grupo                            Usußrio       Tipo                                                       DescriþÒo       Valor          CPF
+5         NaN           2025  MAIO  45803.662303   15:53:43  6735C3BD106A515BA69BB6BD7276E8A9                 -          -                Rafael Amorim Vello      CARGA           Transf. EQS > Rafael A. Vello: 2 QUINZENA - MAIO/2025     9997.87  01677920599
+6         NaN           2025  MAIO  45803.663009   15:54:44  7631A1BAC39F55580F16AEF2168782F1                 -          -  Antonio Ferreira de Mendonca Neto      CARGA     Transf. EQS > Antonio F. d. M. Neto: 2 QUINZENA - MAIO/2025     4936.73  05766838760
+7         NaN           2025  MAIO  45803.663322   15:55:11  640E2CF86621DDA98672961608610EF0                 -          -  BRUNO FERREIRA DE SOUZA RODRIGUES      CARGA  Transf. EQS > BRUNO F. D. S. RODRIGUES: 2 QUINZENA - MAIO/2025        4935  16306431730
+8         NaN           2025  MAIO  45803.663738   15:55:47  8409C9C070760EFBA94DF26AFC9E94EB                 -          -        Walter de Campos Nunes Neto      CARGA      Transf. EQS > Walter d. C. N. Neto: 2 QUINZENA - MAIO/2025        4850  99114160030
+9         NaN           2025  MAIO  45803.664942   15:57:31  37E2391A7EDB7BF1F82074F76FC658BB                 -          -            Jaeder Rodrigues Junior      CARGA          Transf. EQS > Jaeder R. Junior: 2 QUINZENA - MAIO/2025      3984.4  07505987607
