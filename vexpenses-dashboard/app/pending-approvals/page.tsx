@@ -106,7 +106,7 @@ export default function PendingApprovalsPage() {
 
   const summaryByRegional = useMemo(() => {
     const map = new Map<string, { regional: string; count: number; totalValue: number; oldestDays: number; costCenters: Set<string> }>();
-    reports.forEach((r) => {
+    filteredReports.forEach((r) => {
       const existing = map.get(r.regional) || { regional: r.regional, count: 0, totalValue: 0, oldestDays: 0, costCenters: new Set<string>() };
       existing.count++;
       existing.totalValue += r.value ?? 0;
@@ -115,11 +115,11 @@ export default function PendingApprovalsPage() {
       map.set(r.regional, existing);
     });
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
-  }, [reports]);
+  }, [filteredReports]);
 
   const summaryByActor = useMemo(() => {
     const map = new Map<string, { actor: string; count: number; regionais: Set<string>; totalValue: number; oldestDays: number }>();
-    reports.forEach((r) => {
+    filteredReports.forEach((r) => {
       if (!r.lastActor || r.lastAction !== 'Aprovado') return;
       const existing = map.get(r.lastActor) || { actor: r.lastActor, count: 0, regionais: new Set<string>(), totalValue: 0, oldestDays: 0 };
       existing.count++;
@@ -129,7 +129,7 @@ export default function PendingApprovalsPage() {
       map.set(r.lastActor, existing);
     });
     return Array.from(map.values()).sort((a, b) => b.count - a.count);
-  }, [reports]);
+  }, [filteredReports]);
 
   const approverSummary = useMemo(() => {
     const map = new Map<string, { approver: string; count: number; totalValue: number; regionais: Set<string>; oldestDays: number }>();
@@ -148,14 +148,14 @@ export default function PendingApprovalsPage() {
 
   const summaryByStep = useMemo(() => {
     const map = new Map<number, { step: number; count: number; totalValue: number }>();
-    reports.forEach((r) => {
+    filteredReports.forEach((r) => {
       const existing = map.get(r.waitingStep) || { step: r.waitingStep, count: 0, totalValue: 0 };
       existing.count++;
       existing.totalValue += r.value ?? 0;
       map.set(r.waitingStep, existing);
     });
     return Array.from(map.values()).sort((a, b) => a.step - b.step);
-  }, [reports]);
+  }, [filteredReports]);
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -309,7 +309,7 @@ export default function PendingApprovalsPage() {
     );
   }
 
-  const totalValue = reports.reduce((sum, r) => sum + (r.value ?? 0), 0);
+  const totalValue = filteredReports.reduce((sum, r) => sum + (r.value ?? 0), 0);
 
   return (
     <div className="space-y-6 p-6">
@@ -318,17 +318,17 @@ export default function PendingApprovalsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Aprovações Pendentes</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Caixas com status ENVIADO aguardando aprovação • {reports.length} pendências • {formatCurrency(totalValue)} em valor
+            Caixas com status ENVIADO aguardando aprovação • {filteredReports.length} pendências • {formatCurrency(totalValue)} em valor
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200 border-blue-200">
             <AlertCircle className="h-3 w-3 mr-1" />
-            {reports.length} caixas parados
+            {filteredReports.length} caixas parados
           </Badge>
           <button
             onClick={exportToXLSX}
-            disabled={reports.length === 0}
+            disabled={filteredReports.length === 0}
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="h-4 w-4" />
@@ -344,7 +344,7 @@ export default function PendingApprovalsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">Total Pendente</p>
-                <p className="text-3xl font-bold text-blue-600">{reports.length}</p>
+                <p className="text-3xl font-bold text-blue-600">{filteredReports.length}</p>
               </div>
               <div className="p-3 rounded-full bg-blue-50">
                 <Hourglass className="h-6 w-6 text-blue-600" />
@@ -372,7 +372,7 @@ export default function PendingApprovalsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">Regionais</p>
-                <p className="text-3xl font-bold text-purple-600">{regionals.length}</p>
+                <p className="text-3xl font-bold text-purple-600">{summaryByRegional.length}</p>
               </div>
               <div className="p-3 rounded-full bg-purple-50">
                 <Building2 className="h-6 w-6 text-purple-600" />
@@ -386,7 +386,7 @@ export default function PendingApprovalsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-500">Aprovadores com Pendência</p>
-                <p className="text-3xl font-bold text-orange-600">{summaryByActor.length}</p>
+                <p className="text-3xl font-bold text-orange-600">{approverSummary.length}</p>
               </div>
               <div className="p-3 rounded-full bg-orange-50">
                 <Users className="h-6 w-6 text-orange-600" />
@@ -401,7 +401,7 @@ export default function PendingApprovalsPage() {
               <div>
                 <p className="text-sm font-medium text-gray-500">Mais Antigo (dias)</p>
                 <p className="text-3xl font-bold text-red-600">
-                  {reports.length > 0 ? Math.max(...reports.map((r) => r.daysSinceLastInteraction)) : 0}
+                  {filteredReports.length > 0 ? Math.max(...filteredReports.map((r) => r.daysSinceLastInteraction)) : 0}
                 </p>
               </div>
               <div className="p-3 rounded-full bg-red-50">
