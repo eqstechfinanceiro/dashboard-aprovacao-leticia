@@ -296,7 +296,7 @@ export async function downloadExtrato(
 
       // Step 3: Parse XLSX
       const XLSX = await import('xlsx');
-      const workbook = XLSX.read(xlsxBuffer, { type: 'array' });
+      const workbook = XLSX.read(xlsxBuffer, { type: 'array', cellDates: true });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
       const rows: any[] = XLSX.utils.sheet_to_json(sheet, { defval: null });
@@ -334,6 +334,20 @@ export async function downloadExtrato(
             transformed[dbCol] = row[xlsxCol];
           }
         }
+        // Convert date: can be JS Date (cellDates:true) or Excel serial number or string
+        let dataValue = transformed.data;
+        if (dataValue instanceof Date) {
+          dataValue = dataValue.toISOString().slice(0, 10);
+        } else if (typeof dataValue === 'number') {
+          // Excel serial date: days since 1899-12-30
+          const date = new Date(Date.UTC(1899, 11, 30) + dataValue * 86400000);
+          dataValue = date.toISOString().slice(0, 10);
+        } else if (typeof dataValue === 'string' && /^\d+$/.test(dataValue)) {
+          // String with serial number
+          const serial = parseInt(dataValue, 10);
+          const date = new Date(Date.UTC(1899, 11, 30) + serial * 86400000);
+          dataValue = date.toISOString().slice(0, 10);
+        }
         // is_snapshot: true when tipo is null/empty (Hora == '-')
         const isSnapshot = !transformed.tipo || transformed.tipo === '' || transformed.hora === '-';
         // Parse valor: can be string "1.234,56" or number
@@ -348,7 +362,7 @@ export async function downloadExtrato(
              descricao, valor, status, id_despesa, id_relatorio, tipo_despesa,
              centro_custo, projeto, percentual_projeto, is_snapshot)
           VALUES (
-            ${transformed.data || null},
+            ${dataValue || null},
             ${transformed.hora || null},
             ${transformed.codigo_transacao || null},
             ${transformed.numero_cartao || null},
