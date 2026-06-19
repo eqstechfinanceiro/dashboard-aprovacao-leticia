@@ -34,9 +34,9 @@ HEADERS = {"Authorization": API_KEY, "Accept": "application/json"}
 MAX_RETRIES = 3
 RETRY_DELAY = 5
 REQUEST_TIMEOUT = 30
-WORKERS = 1
+WORKERS = 4
 LOG_INTERVAL = 50
-REQUEST_DELAY = 1.0  # delay entre requests por thread (~13 req/s total com 4 workers)
+REQUEST_DELAY = 0.3  # delay entre requests por thread (~13 req/s total com 4 workers)
 
 
 def _fetch_expenses(report_id: int) -> tuple:
@@ -52,10 +52,9 @@ def _fetch_expenses(report_id: int) -> tuple:
             if resp.status_code == 404:
                 return (report_id, [])
             if resp.status_code == 403:
-                print("BLOQUEADO")
                 # Possível bloqueio temporário por rate limit — espera e tenta novamente
                 if attempt < MAX_RETRIES - 1:
-                    time.sleep(120)
+                    time.sleep(30)
                     continue
                 return (report_id, [])
             resp.raise_for_status()
@@ -82,6 +81,13 @@ def get_todos_reports_sem_expenses(conn) -> list:
         )
         ORDER BY r.id
     """)
+    return [row[0] for row in cur.fetchall()]
+
+
+def get_all_report_ids(conn) -> list:
+    """Retorna IDs de TODOS os reports (para refresh completo)."""
+    cur = conn.cursor()
+    cur.execute("SELECT id FROM prestacao_reports ORDER BY id")
     return [row[0] for row in cur.fetchall()]
 
 
@@ -123,6 +129,12 @@ def format_time(seconds: float) -> str:
 
 
 def main():
+    import argparse
+    parser = argparse.ArgumentParser(description="Download expenses from VExpenses API")
+    parser.add_argument("--refresh", action="store_true",
+                        help="Re-download expenses for ALL reports (not just missing ones)")
+    args = parser.parse_args()
+
     print("=" * 80)
     print("  DOWNLOAD DE EXPENSES — TODOS OS REPORTS (4 workers)")
     print("=" * 80)
@@ -135,7 +147,11 @@ def main():
     cur.execute("SELECT COUNT(DISTINCT report_id) FROM prestacao_expenses")
     com_expenses = cur.fetchone()[0]
 
-    reports_pendentes = get_todos_reports_sem_expenses(conn_main)
+    if args.refresh:
+        reports_pendentes = get_all_report_ids(conn_main)
+        print(f"\n  [REFRESH MODE] Re-downloading ALL reports")
+    else:
+        reports_pendentes = get_todos_reports_sem_expenses(conn_main)
     total_pendentes = len(reports_pendentes)
 
     print(f"\n  Total reports no Neon:    {total_reports:,}")
