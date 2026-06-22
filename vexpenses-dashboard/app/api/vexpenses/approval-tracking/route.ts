@@ -178,25 +178,25 @@ async function fetchApprovalTracking(): Promise<ReportWithTracking[]> {
     throw new Error(`Failed to load admin page: ${pageResp.status}`);
   }
 
-  // Step 2: POST to Excel endpoint — send all cookies captured from GET
-  const now = new Date();
-  const startDate = '01/01/2025';
-  const endDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    // Step 2: POST to Excel endpoint — send all cookies captured from GET
+    const now = new Date();
+    const startDate = '01/01/2025';
+    const endDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
-  const formData = new URLSearchParams();
-  formData.append('_token', csrfToken);
-  formData.append('status[]', 'ENVIADO');
-  formData.append('startDate', startDate);
-  formData.append('endDate', endDate);
+    const formData = new URLSearchParams();
+    formData.append('_token', csrfToken);
+    formData.append('status[]', 'ENVIADO');
+    formData.append('startDate', startDate);
+    formData.append('endDate', endDate);
 
-  const excelResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao/excel`, {
-    method: 'POST',
-    headers: {
-      ...BROWSER_HEADERS,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': sessionCookies,
-    },
-    body: formData.toString(),
+    const excelResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao/excel`, {
+      method: 'POST',
+      headers: {
+        ...BROWSER_HEADERS,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cookie': sessionCookies,
+      },
+      body: formData.toString(),
     redirect: 'manual',
     signal: AbortSignal.timeout(120000),
   });

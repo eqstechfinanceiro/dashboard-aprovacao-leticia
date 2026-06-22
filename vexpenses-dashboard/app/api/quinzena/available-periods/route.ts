@@ -48,6 +48,7 @@ export async function GET() {
         quinzena,
         COUNT(*) AS snapshot_rows
       FROM quinzena_controle_snapshot
+      WHERE import_source IS NULL OR import_source != 'api'
       GROUP BY year, month, quinzena
       ORDER BY year DESC, month DESC, quinzena DESC
     `;

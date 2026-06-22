@@ -261,6 +261,7 @@ export async function GET(request: NextRequest) {
         saldo_cartao_carga::text
       FROM quinzena_controle_snapshot
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+        AND (import_source IS NULL OR import_source != 'api')
       ORDER BY colaborador ASC NULLS LAST
     `;
     const snapshots = snapshotRows as unknown as ControleSnapshot[];
@@ -302,6 +303,7 @@ export async function GET(request: NextRequest) {
           saldo_final_carga::text,
           saldo_cartao_carga::text
         FROM quinzena_controle_snapshot
+        WHERE (import_source IS NULL OR import_source != 'api')
         ORDER BY cpf, year DESC, month DESC, quinzena DESC
       `;
       cadastroBase = cadastroRows as unknown as ControleSnapshot[];
