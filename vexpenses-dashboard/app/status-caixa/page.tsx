@@ -24,7 +24,8 @@ import {
   Eye,
   BarChart3,
   Users,
-  Check
+  Check,
+  X
 } from 'lucide-react';
 import { useStatusCaixa, useCostCenters, useTeamMembers, useExpenses } from '@/lib/hooks';
 import { Report } from '@/lib/api';
@@ -54,6 +55,7 @@ export default function StatusCaixa() {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
   const [userSearchTerm, setUserSearchTerm] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showUserDropdownInline, setShowUserDropdownInline] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -970,6 +972,105 @@ export default function StatusCaixa() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Filtro inline de usuários antes das tabelas */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="relative w-72" data-filter="user-inline">
+          <div
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer min-h-[38px] flex items-center justify-between bg-white"
+            onClick={() => setShowUserDropdownInline(!showUserDropdownInline)}
+          >
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-gray-400 shrink-0" />
+              <span className="text-sm text-gray-600 truncate">
+                {selectedUserIds.size === 0
+                  ? 'Todos os usuários'
+                  : `${selectedUserIds.size} selecionado(s)`}
+              </span>
+              {selectedUserIds.size > 0 && (
+                <Badge className="bg-blue-500 text-white text-xs">{selectedUserIds.size}</Badge>
+              )}
+            </div>
+            <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform shrink-0 ${showUserDropdownInline ? 'rotate-180' : ''}`} />
+          </div>
+          {showUserDropdownInline && (
+            <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-hidden flex flex-col">
+              <div className="p-2 border-b border-gray-100 sticky top-0 bg-white">
+                <div className="relative">
+                  <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    placeholder="Buscar usuário..."
+                    value={userSearchTerm}
+                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                    className="pl-8 h-8 text-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <button
+                    className="text-xs text-blue-600 hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedUserIds(new Set(teamMembers.map(m => m.id)));
+                    }}
+                  >
+                    Selecionar todos
+                  </button>
+                  <button
+                    className="text-xs text-gray-500 hover:underline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedUserIds(new Set());
+                    }}
+                  >
+                    Limpar
+                  </button>
+                </div>
+              </div>
+              <div className="overflow-y-auto flex-1">
+                {teamMembers
+                  .filter(m => m.name?.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                  .map(member => {
+                    const isSelected = selectedUserIds.has(member.id);
+                    return (
+                      <div
+                        key={member.id}
+                        className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedUserIds(prev => {
+                            const next = new Set(prev);
+                            if (next.has(member.id)) {
+                              next.delete(member.id);
+                            } else {
+                              next.add(member.id);
+                            }
+                            return next;
+                          });
+                        }}
+                      >
+                        <div className={`flex items-center justify-center h-4 w-4 rounded border ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'}`}>
+                          {isSelected && <Check className="h-3 w-3 text-white" />}
+                        </div>
+                        <span className="text-gray-700 truncate">{member.name}</span>
+                      </div>
+                    );
+                  })
+                }
+                {teamMembers.filter(m => m.name?.toLowerCase().includes(userSearchTerm.toLowerCase())).length === 0 && (
+                  <p className="text-center text-gray-400 text-sm py-4">Nenhum usuário encontrado</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+        {(selectedUserIds.size > 0 || statusFilter !== 'all' || searchTerm || costCenterFilter !== 'all' || cardFilter !== 'all' || yearFilter !== 'all' || regionalFilter !== 'all' || activeCard) && (
+          <Button variant="ghost" size="sm" onClick={resetFilters} className="text-gray-500">
+            <X className="h-4 w-4 mr-1" />
+            Limpar filtros
+          </Button>
+        )}
+      </div>
 
       {/* Tabela Detalhada de Colaboradores */}
       <Card>
