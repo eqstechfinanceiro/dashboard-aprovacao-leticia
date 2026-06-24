@@ -585,8 +585,8 @@ export default function QuinzenaDinamicaPage() {
 
   const filteredRows = (data?.data ?? []).filter(r => {
     if (onlyWithCarga) {
-      const hasLoad = isCalcMode ? r.carga_final > 0 : (r.col_qz !== null && r.col_qz !== 0);
-      if (!hasLoad) return false;
+      const col_qz_efetivo = r.col_qz_manual !== null ? r.col_qz_manual : (r.col_qz ?? 0);
+      if (col_qz_efetivo <= 0) return false;
     }
     if (selectedRegionals.size > 0 && !selectedRegionals.has(r.regional)) return false;
     if (selectedCentros.size > 0 && !selectedCentros.has(r.centro_custo)) return false;

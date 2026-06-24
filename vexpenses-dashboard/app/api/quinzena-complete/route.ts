@@ -191,8 +191,8 @@ function resolveCpfByName(
  *
  *   col_qz_efetivo  = col_qz_manual ?? col_qz_planilha ?? 0
  *
- *   CARGA_PARCIAL = col_qz_efetivo - saldo_final - saldo_cartao - adiantamento
- *     (se negativo → 0, exceto cadastro pendente que força 0)
+ *   CARGA_PARCIAL = col_qz_efetivo - saldo_final_carga - saldo_cartao_carga - adiantamento
+ *     (saldo_final_carga = max(0, saldo_final); se negativo → 0, exceto cadastro pendente que força 0)
  *
  *   REEMBOLSO = max(0, saldo_reembolsar) * 0.5   ← SOMENTE na 1ª QZ
  *               0                                 ← sempre na 2ª QZ
@@ -509,8 +509,8 @@ export async function GET(request: NextRequest) {
 
       const { carga_parcial, reembolso, carga_final } = calcFinancials(
         col_qz_efetivo,
-        saldo_final,
-        saldo_cartao,
+        saldo_final_carga,
+        saldo_cartao_carga,
         saldo_reembolsar,
         adiantamento,
         quinzena,
@@ -528,7 +528,7 @@ export async function GET(request: NextRequest) {
         diretor:           snap.diretor ?? '',
         saldo_final,
         saldo_cartao,
-        saldo_prestacao,
+        saldo_prestacao: Math.max(0, saldo_prestacao),
         col_qz,
         saldo_reembolsar,
         saldo_final_carga,

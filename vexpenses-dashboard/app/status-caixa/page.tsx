@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import * as XLSX from 'xlsx';
 import {
   Wallet,
   Search,
@@ -22,7 +23,8 @@ import {
   DollarSign,
   Eye,
   BarChart3,
-  Users
+  Users,
+  Check
 } from 'lucide-react';
 import { useStatusCaixa, useCostCenters, useTeamMembers, useExpenses } from '@/lib/hooks';
 import { Report } from '@/lib/api';
@@ -49,13 +51,16 @@ export default function StatusCaixa() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'ABERTO' | 'ENVIADO' | 'APROVADO' | 'REPROVADO' | 'REABERTO' | 'CONFERIDO'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('month');
   const [costCenterFilter, setCostCenterFilter] = useState('all');
-  const [userFilter, setUserFilter] = useState('all');
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set());
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const [cardFilter, setCardFilter] = useState('all');
   const [yearFilter, setYearFilter] = useState('all');
   const [regionalFilter, setRegionalFilter] = useState('all');
+  const [activeCard, setActiveCard] = useState<string | null>(null);
 
   // Data padrão: último mês
   const today = new Date();
@@ -138,9 +143,9 @@ export default function StatusCaixa() {
       });
     }
 
-    // Filtro de usuário
-    if (userFilter !== 'all') {
-      filtered = filtered.filter(r => r.user_id === parseInt(userFilter));
+    // Filtro de usuário (múltipla seleção)
+    if (selectedUserIds.size > 0) {
+      filtered = filtered.filter(r => selectedUserIds.has(r.user_id));
     }
 
     // Filtro de cartão (baseado nas despesas do relatório)
@@ -195,7 +200,7 @@ export default function StatusCaixa() {
     }
 
     return filtered;
-  }, [reports, statusFilter, searchTerm, costCenterFilter, userFilter, dateFilter, teamMembers, expenses, cardFilter, yearFilter, regionalFilter]);
+  }, [reports, statusFilter, searchTerm, costCenterFilter, selectedUserIds, dateFilter, teamMembers, expenses, cardFilter, yearFilter, regionalFilter]);
 
   // Paginação
   const totalPages = Math.ceil(filteredReports.length / itemsPerPage);
@@ -413,12 +418,92 @@ export default function StatusCaixa() {
     setStatusFilter('all');
     setDateFilter('month');
     setCostCenterFilter('all');
-    setUserFilter('all');
+    setSelectedUserIds(new Set());
+    setUserSearchTerm('');
     setCardFilter('all');
     setYearFilter('all');
     setRegionalFilter('all');
+    setActiveCard(null);
     setCurrentPage(1);
   };
+
+  const handleCardClick = (status: string) => {
+    if (activeCard === status) {
+      setActiveCard(null);
+      setStatusFilter('all');
+    } else {
+      setActiveCard(status);
+      setStatusFilter(status as any);
+    }
+    setCurrentPage(1);
+  };
+
+  const handleExport = useCallback(() => {
+    const wb = XLSX.utils.book_new();
+
+    // Sheet 1: Resumo por Status
+    const statusLabels: Record<string, string> = {
+      ABERTO: 'Aberto', ENVIADO: 'Enviado', APROVADO: 'Aprovado',
+      REPROVADO: 'Reprovado', REABERTO: 'Reaberto', CONFERIDO: 'Conferido',
+    };
+    const allStatuses = ['ABERTO', 'ENVIADO', 'APROVADO', 'REPROVADO', 'REABERTO', 'CONFERIDO'];
+    const summaryData: (string | number)[][] = [
+      ['Status', 'Quantidade', 'Valor Total'],
+      ...allStatuses.map(s => [
+        statusLabels[s] || s,
+        kpis.byStatus[s] || 0,
+        kpis.valueByStatus[s] || 0,
+      ]),
+      ['TOTAL', kpis.total, Object.values(kpis.valueByStatus).reduce((a, b) => a + b, 0)],
+    ];
+    const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+    wsSummary['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumo por Status');
+
+    // Sheet 2: Colaboradores
+    const collabData: (string | number)[][] = [
+      ['Colaborador', 'Regional', 'Quantidade', 'Valor'],
+      ...collaboratorTable.map(c => [c.name, c.regional, c.count, c.value]),
+    ];
+    const wsCollab = XLSX.utils.aoa_to_sheet(collabData);
+    wsCollab['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, wsCollab, 'Colaboradores');
+
+    // Sheet 3: Rankings por Regional
+    const regionalData: (string | number)[][] = [
+      ['Regional', 'Quantidade', 'Valor'],
+      ...regionalRankings.map(r => [r.name, r.count, r.value]),
+    ];
+    const wsRegional = XLSX.utils.aoa_to_sheet(regionalData);
+    wsRegional['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, wsRegional, 'Rankings por Regional');
+
+    // Sheet 4: Detalhamento de Relatórios
+    const reportValueMap = expenses.reduce((acc, exp) => {
+      const reportId = exp.expense_id || exp.report?.data?.id;
+      if (reportId) acc[reportId] = (acc[reportId] || 0) + (exp.value || 0);
+      return acc;
+    }, {} as Record<number, number>);
+
+    const detailData: (string | number)[][] = [
+      ['ID', 'Descrição', 'Usuário', 'Status', 'Valor', 'Data Criação', 'Data Aprovação'],
+      ...filteredReports.map(r => [
+        r.id,
+        r.description || '-',
+        r.user?.data?.name || '-',
+        statusLabels[r.status] || r.status,
+        reportValueMap[r.id] || 0,
+        formatDate(r.created_at),
+        r.approval_date ? formatDate(r.approval_date) : '-',
+      ]),
+    ];
+    const wsDetail = XLSX.utils.aoa_to_sheet(detailData);
+    wsDetail['!cols'] = [{ wch: 10 }, { wch: 30 }, { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsDetail, 'Detalhamento');
+
+    const fileName = `status-caixa-${defaultStartDate}_${defaultEndDate}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+  }, [kpis, collaboratorTable, regionalRankings, filteredReports, expenses, defaultStartDate, defaultEndDate]);
 
   if (isLoading) {
     return (
@@ -465,9 +550,10 @@ export default function StatusCaixa() {
           <Button
             variant="outline"
             className="w-full sm:w-auto"
+            onClick={handleExport}
           >
             <Download className="h-4 w-4 mr-2" />
-            Exportar
+            Exportar XLSX
           </Button>
         </div>
       </div>
@@ -527,18 +613,94 @@ export default function StatusCaixa() {
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-2 block">Usuário</label>
-                <select
-                  value={userFilter}
-                  onChange={(e) => setUserFilter(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <div className="relative">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
+                  Usuários {selectedUserIds.size > 0 && (
+                    <Badge className="ml-1 bg-blue-500 text-white text-xs">{selectedUserIds.size}</Badge>
+                  )}
+                </label>
+                <div
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer min-h-[40px] flex items-center justify-between bg-white"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
                 >
-                  <option value="all">Todos</option>
-                  {teamMembers.map(member => (
-                    <option key={member.id} value={member.id}>{member.name}</option>
-                  ))}
-                </select>
+                  <span className="text-sm text-gray-600 truncate">
+                    {selectedUserIds.size === 0
+                      ? 'Todos os usuários'
+                      : `${selectedUserIds.size} selecionado(s)`
+                    }
+                  </span>
+                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} />
+                </div>
+                {showUserDropdown && (
+                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-hidden flex flex-col">
+                    <div className="p-2 border-b border-gray-100 sticky top-0 bg-white">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <Input
+                          placeholder="Buscar usuário..."
+                          value={userSearchTerm}
+                          onChange={(e) => setUserSearchTerm(e.target.value)}
+                          className="pl-8 h-8 text-sm"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <button
+                          className="text-xs text-blue-600 hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUserIds(new Set(teamMembers.map(m => m.id)));
+                          }}
+                        >
+                          Selecionar todos
+                        </button>
+                        <button
+                          className="text-xs text-gray-500 hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedUserIds(new Set());
+                          }}
+                        >
+                          Limpar
+                        </button>
+                      </div>
+                    </div>
+                    <div className="overflow-y-auto flex-1">
+                      {teamMembers
+                        .filter(m => m.name?.toLowerCase().includes(userSearchTerm.toLowerCase()))
+                        .map(member => {
+                          const isSelected = selectedUserIds.has(member.id);
+                          return (
+                            <div
+                              key={member.id}
+                              className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedUserIds(prev => {
+                                  const next = new Set(prev);
+                                  if (next.has(member.id)) {
+                                    next.delete(member.id);
+                                  } else {
+                                    next.add(member.id);
+                                  }
+                                  return next;
+                                });
+                              }}
+                            >
+                              <div className={`flex items-center justify-center h-4 w-4 rounded border ${isSelected ? 'bg-blue-500 border-blue-500' : 'border-gray-300'}`}>
+                                {isSelected && <Check className="h-3 w-3 text-white" />}
+                              </div>
+                              <span className="text-gray-700 truncate">{member.name}</span>
+                            </div>
+                          );
+                        })
+                      }
+                      {teamMembers.filter(m => m.name?.toLowerCase().includes(userSearchTerm.toLowerCase())).length === 0 && (
+                        <p className="text-center text-gray-400 text-sm py-4">Nenhum usuário encontrado</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 mb-2 block">Cartão</label>
@@ -592,29 +754,55 @@ export default function StatusCaixa() {
       )}
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <Card
+          className={`bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${activeCard === 'all' ? 'ring-4 ring-blue-300 scale-105' : ''}`}
+          onClick={() => handleCardClick('all')}
+        >
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-4">Total</p>
             <p className="text-4xl font-bold">{kpis.total}</p>
+            <p className="text-sm text-blue-100 mt-2">{formatCurrency(Object.values(kpis.valueByStatus).reduce((a, b) => a + b, 0))}</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0">
+        <Card
+          className={`bg-gradient-to-br from-yellow-500 to-yellow-600 text-white border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${activeCard === 'ABERTO' ? 'ring-4 ring-yellow-300 scale-105' : ''}`}
+          onClick={() => handleCardClick('ABERTO')}
+        >
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-yellow-100 uppercase tracking-wide mb-4">Abertos</p>
             <p className="text-4xl font-bold">{kpis.byStatus['ABERTO'] || 0}</p>
+            <p className="text-sm text-yellow-100 mt-2">{formatCurrency(kpis.valueByStatus['ABERTO'] || 0)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-blue-400 to-blue-500 text-white border-0">
+        <Card
+          className={`bg-gradient-to-br from-blue-400 to-blue-500 text-white border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${activeCard === 'ENVIADO' ? 'ring-4 ring-blue-300 scale-105' : ''}`}
+          onClick={() => handleCardClick('ENVIADO')}
+        >
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-blue-100 uppercase tracking-wide mb-4">Enviados</p>
             <p className="text-4xl font-bold">{kpis.byStatus['ENVIADO'] || 0}</p>
+            <p className="text-sm text-blue-100 mt-2">{formatCurrency(kpis.valueByStatus['ENVIADO'] || 0)}</p>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-0">
+        <Card
+          className={`bg-gradient-to-br from-green-500 to-green-600 text-white border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${activeCard === 'APROVADO' ? 'ring-4 ring-green-300 scale-105' : ''}`}
+          onClick={() => handleCardClick('APROVADO')}
+        >
           <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
             <p className="text-sm font-medium text-green-100 uppercase tracking-wide mb-4">Aprovados</p>
             <p className="text-4xl font-bold">{kpis.byStatus['APROVADO'] || 0}</p>
+            <p className="text-sm text-green-100 mt-2">{formatCurrency(kpis.valueByStatus['APROVADO'] || 0)}</p>
+          </CardContent>
+        </Card>
+        <Card
+          className={`bg-gradient-to-br from-red-500 to-red-600 text-white border-0 cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${activeCard === 'REPROVADO' ? 'ring-4 ring-red-300 scale-105' : ''}`}
+          onClick={() => handleCardClick('REPROVADO')}
+        >
+          <CardContent className="p-6 pt-8 pb-8 flex flex-col items-center justify-center text-center min-h-[140px]">
+            <p className="text-sm font-medium text-red-100 uppercase tracking-wide mb-4">Reprovados</p>
+            <p className="text-4xl font-bold">{kpis.byStatus['REPROVADO'] || 0}</p>
+            <p className="text-sm text-red-100 mt-2">{formatCurrency(kpis.valueByStatus['REPROVADO'] || 0)}</p>
           </CardContent>
         </Card>
       </div>
@@ -789,6 +977,15 @@ export default function StatusCaixa() {
           <CardTitle className="text-lg flex items-center gap-2">
             <Users className="h-5 w-5" />
             Tabela Detalhada de Colaboradores
+            {activeCard && activeCard !== 'all' && (
+              <Badge variant="secondary" className="ml-2">
+                {activeCard === 'ABERTO' ? 'Abertos' :
+                 activeCard === 'ENVIADO' ? 'Enviados' :
+                 activeCard === 'APROVADO' ? 'Aprovados' :
+                 activeCard === 'REPROVADO' ? 'Reprovados' :
+                 activeCard === 'REABERTO' ? 'Reabertos' : activeCard}
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
