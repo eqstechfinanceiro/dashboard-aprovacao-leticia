@@ -2,18 +2,19 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  FileCheck, 
-  Receipt, 
-  BarChart3, 
-  Wallet, 
+import {
+  LayoutDashboard,
+  FileCheck,
+  Receipt,
+  BarChart3,
+  Wallet,
   Settings,
   TrendingUp,
   FileSpreadsheet,
   Calculator,
   FileSpreadsheet as FileSpreadsheetIcon,
-  Hourglass
+  Hourglass,
+  Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,7 @@ const navigation = [
   { name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
   { name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
   { name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheetIcon },
+  { name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
   { name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 
