@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Sidebar } from '@/components/sidebar'
-import { Header } from '@/components/header'
 import { Providers } from './providers'
+import { AppShell } from '@/components/app-shell'
 import { ensureCacheTable, ensurePreloadStatsTable } from '@/lib/neon'
+import { ensureUsersTable } from '@/lib/auth-db'
+import { AuthProvider } from '@/lib/auth-context'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
 if (typeof window === 'undefined') {
   ensureCacheTable()
   ensurePreloadStatsTable()
+  ensureUsersTable()
 }
 
 export default function RootLayout({
@@ -28,15 +30,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={inter.className}>
         <Providers>
-          <div className="flex h-screen bg-gray-50">
-            <Sidebar />
-            <div className="flex flex-1 flex-col overflow-hidden">
-              <Header />
-              <main className="flex-1 overflow-y-auto p-6">
-                {children}
-              </main>
-            </div>
-          </div>
+          <AuthProvider>
+            <AppShell>
+              {children}
+            </AppShell>
+          </AuthProvider>
         </Providers>
       </body>
     </html>

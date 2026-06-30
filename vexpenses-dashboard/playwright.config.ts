@@ -9,7 +9,7 @@ export default defineConfig({
   reporter: 'list',
   timeout: 120000, // 2 minutos por teste (API VExpenses pode ser lenta)
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3001',
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
   },
   projects: [

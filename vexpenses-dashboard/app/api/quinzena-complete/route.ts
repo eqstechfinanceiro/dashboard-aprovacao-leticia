@@ -320,16 +320,49 @@ export async function GET(request: NextRequest) {
       // 1QZ month M (closing 10/M) → cutoff = 25/M (2QZ same month closing)
       // 2QZ month M (closing 25/M) → cutoff = 10/(M+1) (1QZ next month closing)
       let cutoffDate: string;
-      let prevClosingDate: string;
       if (quinzena === 1) {
         cutoffDate = `${year}-${String(month).padStart(2, '0')}-25`;
-        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-10`;
       } else {
         const nextMonth = month === 12 ? 1 : month + 1;
         const nextYear = month === 12 ? year + 1 : year;
         cutoffDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-10`;
-        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-25`;
       }
+
+      // âncora: the most recent non-API snapshot period (could differ from theoretical
+      // previous quinzena if intermediate quinzenas are api-only)
+      const ancoraRow = await sql`
+        SELECT year, month, quinzena
+        FROM quinzena_controle_snapshot
+        WHERE (import_source IS NULL OR import_source != 'api')
+        ORDER BY year DESC, month DESC, quinzena DESC
+        LIMIT 1
+      `;
+      const ancora = ancoraRow[0] as { year: number; month: number; quinzena: number } | undefined;
+
+      let prevClosingDate: string;
+      let prevSomaseId: string;
+      let currSomaseId: string;
+
+      if (ancora) {
+        // Use the actual âncora's closing date and somase ID
+        const aMonth = String(ancora.month).padStart(2, '0');
+        prevClosingDate = `${ancora.year}-${aMonth}-${ancora.quinzena === 1 ? '10' : '25'}`;
+        prevSomaseId = `${ancora.year}-${aMonth}-${ancora.quinzena}`;
+      } else {
+        // Fallback: theoretical previous quinzena
+        if (quinzena === 1) {
+          const prevMonth = month === 1 ? 12 : month - 1;
+          const prevYear = month === 1 ? year - 1 : year;
+          prevClosingDate = `${prevYear}-${String(prevMonth).padStart(2, '0')}-25`;
+          prevSomaseId = `${prevYear}-${String(prevMonth).padStart(2, '0')}-2`;
+        } else {
+          prevClosingDate = `${year}-${String(month).padStart(2, '0')}-10`;
+          prevSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
+        }
+      }
+
+      // currSomaseId: current quinzena's somase ID (direct, not next month)
+      currSomaseId = `${year}-${String(month).padStart(2, '0')}-${quinzena}`;
 
       // Extrato cumulativo: delta = cum(<=cutoff) - cum(<=prevClosing)
       // Captura transações late-arriving dentro e após o período oficial
@@ -391,12 +424,14 @@ export async function GET(request: NextRequest) {
       }
 
       // Saldo do cartão: snapshot mais recente <= cutoff (planilha é finalizada no cutoff)
+      // Filter out null valor snapshots (data quality issue — some rows have valor = null)
       const saldoRows = await sql`
         SELECT DISTINCT ON (UPPER(usuario))
           UPPER(usuario) AS usuario_up,
           valor::text AS saldo
         FROM extrato_movimentacao
         WHERE is_snapshot = TRUE
+          AND valor IS NOT NULL
           AND data <= ${cutoffDate}
         ORDER BY UPPER(usuario), data DESC
       `;
@@ -406,25 +441,11 @@ export async function GET(request: NextRequest) {
       }
 
       // Somase (prestacao acumulada) para delta_prestacao
-      // 1QZ month M → 'YYYY-MM-1'; 2QZ month M → 'YYYY-(M+1)-2'
-      let currSomaseId: string;
-      let prevSomaseId: string;
-      if (quinzena === 2) {
-        const nextMonth = month === 12 ? 1 : month + 1;
-        const nextYear = month === 12 ? year + 1 : year;
-        currSomaseId = `${nextYear}-${String(nextMonth).padStart(2, '0')}-2`;
-        prevSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
-      } else {
-        currSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
-        const prevMonth = month === 1 ? 12 : month - 1;
-        const prevYear = month === 1 ? year - 1 : year;
-        prevSomaseId = `${prevYear}-${String(prevMonth).padStart(2, '0')}-2`;
-      }
+      // currSomaseId and prevSomaseId are already set above based on the actual âncora
       const somaseRows = await sql`
         SELECT user_cpf, total::text
         FROM somase_snapshots
         WHERE quinzena = ${currSomaseId}
-           OR quinzena = ${`${year}-${String(month).padStart(2, '0')}-${quinzena}`}
       `;
       for (const r of somaseRows) {
         if (r.user_cpf) somaseByCpf.set(r.user_cpf, toNum(r.total as string));

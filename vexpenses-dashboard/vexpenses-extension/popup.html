@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 360px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+    }
+    .header {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header svg { width: 28px; height: 28px; }
+    .header h1 { font-size: 16px; font-weight: 600; }
+    .content { padding: 16px; }
+    .status-card {
+      background: white;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .status-row:last-child { margin-bottom: 0; }
+    .status-label { font-size: 12px; color: #64748b; }
+    .status-value { font-size: 13px; font-weight: 500; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-synced { background: #dcfce7; color: #166534; }
+    .badge-missing { background: #fef9c3; color: #854d0e; }
+    .badge-error { background: #fee2e2; color: #991b1b; }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+    }
+    .badge-synced .badge-dot { background: #22c55e; }
+    .badge-missing .badge-dot { background: #eab308; }
+    .badge-error .badge-dot { background: #ef4444; }
+    .config-section { margin-bottom: 14px; }
+    .config-section label {
+      display: block;
+      font-size: 12px;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+    .config-section input {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .config-section input:focus { border-color: #2563eb; }
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-primary { background: #2563eb; color: white; }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary { background: #e2e8f0; color: #475569; margin-top: 8px; }
+    .btn-secondary:hover { background: #cbd5e1; }
+    .error-msg {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-top: 10px;
+      word-break: break-word;
+    }
+    .success-msg {
+      background: #dcfce7;
+      color: #166534;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    .footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 12a9 9 0 11-6.219-8.56"/>
+      <path d="M12 7v5l3 3"/>
+    </svg>
+    <h1>VExpenses Token Sync</h1>
+  </div>
+
+  <div class="content">
+    <div class="status-card" id="statusCard">
+      <div class="status-row">
+        <span class="status-label">Status</span>
+        <span id="statusBadge" class="badge badge-missing">
+          <span class="badge-dot"></span>
+          <span id="statusText">Verificando...</span>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Última sincronização</span>
+        <span class="status-value" id="lastSync">—</span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Expira em</span>
+        <span class="status-value" id="expiresAt">—</span>
+      </div>
+    </div>
+
+    <div id="errorMsg" style="display:none;"></div>
+    <div id="successMsg" style="display:none;"></div>
+
+    <div class="config-section">
+      <label for="dashboardUrl">URL do Dashboard</label>
+      <input type="url" id="dashboardUrl" placeholder="http://localhost:3000">
+    </div>
+
+    <div class="config-section">
+      <label for="extensionSecret">Secret (opcional)</label>
+      <input type="password" id="extensionSecret" placeholder="Deixe vazio se não configurado">
+    </div>
+
+    <button class="btn btn-primary" id="syncBtn">Sincronizar Agora</button>
+    <button class="btn btn-secondary" id="saveBtn">Salvar Configurações</button>
+  </div>
+
+  <div class="footer">
+    Sincroniza a cada 30 min automaticamente
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

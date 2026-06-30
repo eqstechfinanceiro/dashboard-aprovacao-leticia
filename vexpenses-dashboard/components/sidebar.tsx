@@ -11,28 +11,42 @@ import {
   Settings,
   TrendingUp,
   FileSpreadsheet,
-  Calculator,
-  FileSpreadsheet as FileSpreadsheetIcon,
   Hourglass,
   Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth-context';
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-  { name: 'Aprovações', href: '/aprovacoes', icon: FileCheck },
-  { name: 'Pendências', href: '/pending-approvals', icon: Hourglass },
-  { name: 'Despesas', href: '/despesas', icon: Receipt },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
-  { name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
-  { name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheetIcon },
-  { name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
-  { name: 'Configurações', href: '/configuracoes', icon: Settings },
+const ALL_NAVIGATION = [
+  { id: 'dashboard', name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { id: 'aprovacoes', name: 'Aprovações', href: '/aprovacoes', icon: FileCheck },
+  { id: 'pending-approvals', name: 'Pendências', href: '/pending-approvals', icon: Hourglass },
+  { id: 'despesas', name: 'Despesas', href: '/despesas', icon: Receipt },
+  { id: 'analytics', name: 'Analytics', href: '/analytics', icon: BarChart3 },
+  { id: 'status-caixa', name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
+  { id: 'gestao-caixa', name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
+  { id: 'quinzena-dinamica', name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheet },
+  { id: 'aprovacao-dinamica', name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
+  { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex h-full w-64 flex-col bg-gray-900 text-white">
+        <div className="flex h-16 items-center justify-center border-b border-gray-800">
+          <h1 className="text-xl font-bold">vExpenses</h1>
+        </div>
+      </div>
+    );
+  }
+
+  const navigation = user?.role === 'admin'
+    ? ALL_NAVIGATION
+    : ALL_NAVIGATION.filter((item) => user?.modules?.includes(item.id));
 
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900 text-white">

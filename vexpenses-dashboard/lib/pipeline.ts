@@ -103,6 +103,48 @@ export function getPreviousQuinzenaId(quinzenaId: string): string {
   }
 }
 
+/** Returns the cutoff date for a quinzena (when its snapshot is finalized).
+ *  The planilha of a quinzena is finalized when the NEXT quinzena closes.
+ *  1QZ month M → cutoff = 25/M (2QZ same month closes)
+ *  2QZ month M → cutoff = 10/(M+1) (1QZ next month closes) */
+export function getQuinzenaCutoff(quinzenaId: string): string {
+  const [yearStr, monthStr, qStr] = quinzenaId.split('-');
+  const year = parseInt(yearStr);
+  const month = parseInt(monthStr);
+  const q = parseInt(qStr);
+
+  if (q === 1) {
+    // 1QZ month M → cutoff = 25/M
+    return `${year}-${String(month).padStart(2, '0')}-25`;
+  } else {
+    // 2QZ month M → cutoff = 10/(M+1)
+    const nextMonth = month === 12 ? 1 : month + 1;
+    const nextYear = month === 12 ? year + 1 : year;
+    return `${nextYear}-${String(nextMonth).padStart(2, '0')}-10`;
+  }
+}
+
+/** Returns the date range [start, end] for a quinzena ID.
+ *  1QZ: days 1-10, 2QZ: days 11-25 */
+export function getQuinzenaDateRange(quinzenaId: string): { start: string; end: string } {
+  const [yearStr, monthStr, qStr] = quinzenaId.split('-');
+  const year = parseInt(yearStr);
+  const month = parseInt(monthStr);
+  const q = parseInt(qStr);
+
+  if (q === 1) {
+    return {
+      start: `${year}-${String(month).padStart(2, '0')}-01`,
+      end: `${year}-${String(month).padStart(2, '0')}-10`,
+    };
+  } else {
+    return {
+      start: `${year}-${String(month).padStart(2, '0')}-11`,
+      end: `${year}-${String(month).padStart(2, '0')}-25`,
+    };
+  }
+}
+
 /** Returns all pipeline runs for a given quinzena, most recent first. */
 export async function getPipelineRuns(quinzenaId: string): Promise<PipelineRun[]> {
   if (!sql) return [];
@@ -217,16 +259,18 @@ export async function isPipelineComplete(quinzenaId: string): Promise<boolean> {
 
 // ---- Pipeline steps --------------------------------------------------------
 
+import { getLaravelCookieString } from './laravel-token';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY || '';
-const LARAVEL_TOKEN = process.env.VEXPENSES_LARAVEL_TOKEN || '';
 
 /** Step 0: Download extrato from API v3 (XLSX via S3 presigned URL) */
 export async function downloadExtrato(
   onProgress?: (chunk: number, total: number) => void
 ): Promise<Record<string, unknown>> {
   if (!sql) throw new Error('Database not available');
-  if (!LARAVEL_TOKEN) throw new Error('VEXPENSES_LARAVEL_TOKEN not configured');
+  const cookieStr = await getLaravelCookieString();
+  if (!cookieStr) throw new Error('Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão.');
   const db = sql;
 
   // Determine date range: from Jan 1 of current year to today
@@ -263,7 +307,7 @@ export async function downloadExtrato(
         `${API_URL}/v3/pay/statement/excel-all?start_date=${chunkStart}&end_date=${chunkEnd}`,
         {
           headers: {
-            Cookie: `laravel_token=${LARAVEL_TOKEN}`,
+            Cookie: cookieStr,
             Accept: 'application/json',
           },
           signal: AbortSignal.timeout(90000),
@@ -326,7 +370,8 @@ export async function downloadExtrato(
       // Delete existing range
       await db`DELETE FROM extrato_movimentacao WHERE data BETWEEN ${chunkStart} AND ${chunkEnd}`;
 
-      // Insert rows
+      // Transform all rows first, then batch insert
+      const batch: any[][] = [];
       for (const row of rows) {
         const transformed: Record<string, any> = {};
         for (const [xlsxCol, dbCol] of Object.entries(colMap)) {
@@ -339,50 +384,66 @@ export async function downloadExtrato(
         if (dataValue instanceof Date) {
           dataValue = dataValue.toISOString().slice(0, 10);
         } else if (typeof dataValue === 'number') {
-          // Excel serial date: days since 1899-12-30
           const date = new Date(Date.UTC(1899, 11, 30) + dataValue * 86400000);
           dataValue = date.toISOString().slice(0, 10);
         } else if (typeof dataValue === 'string' && /^\d+$/.test(dataValue)) {
-          // String with serial number
           const serial = parseInt(dataValue, 10);
           const date = new Date(Date.UTC(1899, 11, 30) + serial * 86400000);
           dataValue = date.toISOString().slice(0, 10);
         }
-        // is_snapshot: true when tipo is null/empty (Hora == '-')
         const isSnapshot = !transformed.tipo || transformed.tipo === '' || transformed.hora === '-';
-        // Parse valor: can be string "1.234,56" or number
         let valor = transformed.valor;
         if (typeof valor === 'string') {
           valor = parseFloat(valor.replace(/\./g, '').replace(',', '.'));
         }
 
-        await db`
-          INSERT INTO extrato_movimentacao
+        batch.push([
+          dataValue || null,
+          transformed.hora || null,
+          transformed.codigo_transacao || null,
+          transformed.numero_cartao || null,
+          transformed.grupo || null,
+          transformed.usuario || null,
+          transformed.tipo || null,
+          transformed.descricao || null,
+          valor || null,
+          transformed.status || null,
+          transformed.id_despesa || null,
+          transformed.id_relatorio || null,
+          transformed.tipo_despesa || null,
+          transformed.centro_custo || null,
+          transformed.projeto || null,
+          transformed.percentual_projeto || null,
+          isSnapshot,
+        ]);
+      }
+
+      // Batch insert using multi-row VALUES in a single query
+      // neon() tagged template supports parameterized queries with many values
+      const SUB_BATCH = 100;
+      for (let j = 0; j < batch.length; j += SUB_BATCH) {
+        const sub = batch.slice(j, j + SUB_BATCH);
+        // Build VALUES clause with parameterized placeholders
+        const valueGroups: string[] = [];
+        const params: any[] = [];
+        let paramIdx = 1;
+        for (const row of sub) {
+          const placeholders: string[] = [];
+          for (const val of row) {
+            placeholders.push(`$${paramIdx++}`);
+            params.push(val);
+          }
+          valueGroups.push(`(${placeholders.join(', ')})`);
+        }
+        const query = `INSERT INTO extrato_movimentacao
             (data, hora, codigo_transacao, numero_cartao, grupo, usuario, tipo,
              descricao, valor, status, id_despesa, id_relatorio, tipo_despesa,
              centro_custo, projeto, percentual_projeto, is_snapshot)
-          VALUES (
-            ${dataValue || null},
-            ${transformed.hora || null},
-            ${transformed.codigo_transacao || null},
-            ${transformed.numero_cartao || null},
-            ${transformed.grupo || null},
-            ${transformed.usuario || null},
-            ${transformed.tipo || null},
-            ${transformed.descricao || null},
-            ${valor || null},
-            ${transformed.status || null},
-            ${transformed.id_despesa || null},
-            ${transformed.id_relatorio || null},
-            ${transformed.tipo_despesa || null},
-            ${transformed.centro_custo || null},
-            ${transformed.projeto || null},
-            ${transformed.percentual_projeto || null},
-            ${isSnapshot}
-          )
-        `;
-        totalRows++;
+           VALUES ${valueGroups.join(', ')}
+           ON CONFLICT (data, hora, codigo_transacao, is_snapshot) WHERE codigo_transacao IS NOT NULL DO NOTHING`;
+        await db.query(query, params);
       }
+      totalRows += batch.length;
 
       console.log(`[Extrato] Chunk ${i+1}/${chunks.length}: ${rows.length} rows inserted`);
     } catch (err) {
@@ -518,35 +579,40 @@ export async function refreshReports(): Promise<Record<string, unknown>> {
     page++;
   }
 
-  // Upsert into prestacao_reports
+  // Upsert into prestacao_reports — batch insert for performance
   let upserted = 0;
-  for (const r of allReports) {
-    const user = r.user?.data || {};
-    await sql`
-      INSERT INTO prestacao_reports (id, name, status, user_id, user_name, user_cpf, raw_data, total_value, created_at, updated_at)
-      VALUES (
-        ${r.id},
-        ${r.name || r.description || null},
-        ${r.status},
-        ${r.user_id || null},
-        ${user.name || null},
-        ${user.cpf || null},
-        ${JSON.stringify(r)},
-        ${r.total_value || null},
-        ${r.created_at || null},
-        ${r.updated_at || null}
-      )
+  const REPORT_BATCH = 100;
+  for (let i = 0; i < allReports.length; i += REPORT_BATCH) {
+    const sub = allReports.slice(i, i + REPORT_BATCH);
+    const valueGroups: string[] = [];
+    const params: any[] = [];
+    let pIdx = 1;
+    for (const r of sub) {
+      const user = r.user?.data || {};
+      const placeholders = Array.from({ length: 10 }, () => `$${pIdx++}`);
+      valueGroups.push(`(${placeholders.join(', ')})`);
+      params.push(
+        r.id,
+        r.name || r.description || null,
+        r.status,
+        r.user_id || null,
+        user.name || null,
+        user.cpf || null,
+        JSON.stringify(r),
+        r.total_value || null,
+        r.created_at || null,
+        r.updated_at || null
+      );
+    }
+    const query = `INSERT INTO prestacao_reports (id, name, status, user_id, user_name, user_cpf, raw_data, total_value, created_at, updated_at)
+      VALUES ${valueGroups.join(', ')}
       ON CONFLICT (id) DO UPDATE SET
-        name = EXCLUDED.name,
-        status = EXCLUDED.status,
-        user_id = EXCLUDED.user_id,
-        user_name = EXCLUDED.user_name,
-        user_cpf = EXCLUDED.user_cpf,
-        raw_data = EXCLUDED.raw_data,
-        total_value = EXCLUDED.total_value,
-        updated_at = EXCLUDED.updated_at
-    `;
-    upserted++;
+        name = EXCLUDED.name, status = EXCLUDED.status, user_id = EXCLUDED.user_id,
+        user_name = EXCLUDED.user_name, user_cpf = EXCLUDED.user_cpf,
+        raw_data = EXCLUDED.raw_data, total_value = EXCLUDED.total_value,
+        updated_at = EXCLUDED.updated_at`;
+    await sql.query(query, params);
+    upserted += sub.length;
   }
 
   return { reports_downloaded: allReports.length, upserted };
@@ -583,26 +649,22 @@ export async function downloadExpenses(
           const expenses = data.data?.expenses?.data || [];
           if (expenses.length === 0) return 0;
 
-          for (const e of expenses) {
-            await db`
-              INSERT INTO prestacao_expenses (id, report_id, value, date, description, status, raw_data)
-              VALUES (
-                ${e.id},
-                ${rid},
-                ${e.value},
-                ${e.date || null},
-                ${e.description || null},
-                ${e.status || null},
-                ${JSON.stringify(e)}
-              )
+          // Batch insert expenses for this report
+          if (expenses.length > 0) {
+            const valueGroups: string[] = [];
+            const params: any[] = [];
+            let pIdx = 1;
+            for (const e of expenses) {
+              const placeholders = Array.from({ length: 7 }, () => `$${pIdx++}`);
+              valueGroups.push(`(${placeholders.join(', ')})`);
+              params.push(e.id, rid, e.value, e.date || null, e.title || e.description || null, e.status || null, JSON.stringify(e));
+            }
+            const query = `INSERT INTO prestacao_expenses (id, report_id, value, date, description, status, raw_data)
+              VALUES ${valueGroups.join(', ')}
               ON CONFLICT (id) DO UPDATE SET
-                report_id = EXCLUDED.report_id,
-                value = EXCLUDED.value,
-                date = EXCLUDED.date,
-                description = EXCLUDED.description,
-                status = EXCLUDED.status,
-                raw_data = EXCLUDED.raw_data
-            `;
+                report_id = EXCLUDED.report_id, value = EXCLUDED.value, date = EXCLUDED.date,
+                description = EXCLUDED.description, status = EXCLUDED.status, raw_data = EXCLUDED.raw_data`;
+            await db.query(query, params);
           }
           return expenses.length;
         } catch {
@@ -633,29 +695,17 @@ export async function snapshotSomase(quinzenaId: string): Promise<Record<string,
   const prevExists = prevCheck[0]?.cnt > 0;
   const prevSnapshotted = !prevExists ? await snapshotSingleQuinzena(prevQuinzenaId) : 0;
 
+  // Also create expense_snapshots for previous quinzena if missing
+  let prevExpenseSnaps = 0;
+  if (!prevExists || !(await sql`SELECT COUNT(*) as cnt FROM prestacao_expense_snapshots WHERE quinzena = ${prevQuinzenaId}`)[0]?.cnt > 0) {
+    prevExpenseSnaps = await snapshotExpenseSnapshots(prevQuinzenaId);
+  }
+
   // Snapshot the current quinzena
   const inserted = await snapshotSingleQuinzena(quinzenaId);
 
-  // Also snapshot prestacao_expense_snapshots for current quinzena
-  await sql`DELETE FROM prestacao_expense_snapshots WHERE quinzena = ${quinzenaId}`;
-
-  const snapRows = await sql`
-    SELECT pe.id, pr.user_cpf, pe.value
-    FROM prestacao_expenses pe
-    JOIN prestacao_reports pr ON pe.report_id = pr.id
-    WHERE pr.status = 'APROVADO'
-      AND pr.user_cpf IS NOT NULL
-  `;
-
-  let snapInserted = 0;
-  for (const row of snapRows) {
-    await sql`
-      INSERT INTO prestacao_expense_snapshots (id, quinzena, value, user_cpf)
-      VALUES (${row.id}, ${quinzenaId}, ${row.value}, ${row.user_cpf})
-      ON CONFLICT (id, quinzena) DO UPDATE SET value = EXCLUDED.value, user_cpf = EXCLUDED.user_cpf
-    `;
-    snapInserted++;
-  }
+  // Snapshot prestacao_expense_snapshots for current quinzena
+  const snapInserted = await snapshotExpenseSnapshots(quinzenaId);
 
   return {
     somase_cpfs: inserted,
@@ -663,39 +713,53 @@ export async function snapshotSomase(quinzenaId: string): Promise<Record<string,
     expense_snapshots: snapInserted,
     prev_quinzena: prevQuinzenaId,
     prev_quinzena_snapshotted: prevSnapshotted > 0,
+    prev_quinzena_expense_snapshots: prevExpenseSnaps,
   };
 }
 
-/** Helper: snapshot a single quinzena's somase from current APROVADO data */
+/** Helper: snapshot a single quinzena's somase from current APROVADO data (cumulative, filtered by cutoff) */
 async function snapshotSingleQuinzena(quinzenaId: string): Promise<number> {
   if (!sql) throw new Error('Database not available');
 
-  // Compute somase by CPF from all approved reports
-  const rows = await sql`
-    SELECT pr.user_cpf, SUM(pe.value) as total
+  const cutoff = getQuinzenaCutoff(quinzenaId);
+
+  // Compute and insert somase by CPF in a single INSERT...SELECT query
+  // Cumulative: captures ALL approved expenses up to the cutoff date
+  await sql`DELETE FROM somase_snapshots WHERE quinzena = ${quinzenaId}`;
+  const insertResult = await sql`
+    INSERT INTO somase_snapshots (quinzena, user_cpf, total)
+    SELECT ${quinzenaId}, pr.user_cpf, SUM(pe.value) as total
     FROM prestacao_expenses pe
     JOIN prestacao_reports pr ON pe.report_id = pr.id
     WHERE pr.status = 'APROVADO'
       AND pr.user_cpf IS NOT NULL
+      AND (pr.updated_at IS NULL OR pr.updated_at <= ${cutoff + ' 23:59:59'})
     GROUP BY pr.user_cpf
-    ORDER BY SUM(pe.value) DESC
+    ON CONFLICT (quinzena, user_cpf) DO UPDATE SET total = EXCLUDED.total
+    RETURNING 1
   `;
+  return insertResult.length;
+}
 
-  // Delete existing snapshot for this quinzena
-  await sql`DELETE FROM somase_snapshots WHERE quinzena = ${quinzenaId}`;
+/** Helper: snapshot expense_snapshots for a single quinzena using INSERT...SELECT (cumulative, filtered by cutoff) */
+async function snapshotExpenseSnapshots(quinzenaId: string): Promise<number> {
+  if (!sql) throw new Error('Database not available');
 
-  // Insert new snapshot
-  let inserted = 0;
-  for (const row of rows) {
-    await sql`
-      INSERT INTO somase_snapshots (quinzena, user_cpf, total)
-      VALUES (${quinzenaId}, ${row.user_cpf}, ${row.total})
-      ON CONFLICT (quinzena, user_cpf) DO UPDATE SET total = EXCLUDED.total
-    `;
-    inserted++;
-  }
+  const cutoff = getQuinzenaCutoff(quinzenaId);
 
-  return inserted;
+  await sql`DELETE FROM prestacao_expense_snapshots WHERE quinzena = ${quinzenaId}`;
+  const snapResult = await sql`
+    INSERT INTO prestacao_expense_snapshots (id, quinzena, value, user_cpf)
+    SELECT pe.id, ${quinzenaId}, pe.value, pr.user_cpf
+    FROM prestacao_expenses pe
+    JOIN prestacao_reports pr ON pe.report_id = pr.id
+    WHERE pr.status = 'APROVADO'
+      AND pr.user_cpf IS NOT NULL
+      AND (pr.updated_at IS NULL OR pr.updated_at <= ${cutoff + ' 23:59:59'})
+    ON CONFLICT (id, quinzena) DO UPDATE SET value = EXCLUDED.value, user_cpf = EXCLUDED.user_cpf
+    RETURNING 1
+  `;
+  return snapResult.length;
 }
 
 /** Run the full pipeline for a quinzena */
