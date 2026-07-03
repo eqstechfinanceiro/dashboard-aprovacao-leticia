@@ -697,7 +697,7 @@ export async function snapshotSomase(quinzenaId: string): Promise<Record<string,
 
   // Also create expense_snapshots for previous quinzena if missing
   let prevExpenseSnaps = 0;
-  if (!prevExists || !(await sql`SELECT COUNT(*) as cnt FROM prestacao_expense_snapshots WHERE quinzena = ${prevQuinzenaId}`)[0]?.cnt > 0) {
+  if (!prevExists || !((await sql`SELECT COUNT(*) as cnt FROM prestacao_expense_snapshots WHERE quinzena = ${prevQuinzenaId}`)[0]?.cnt > 0)) {
     prevExpenseSnaps = await snapshotExpenseSnapshots(prevQuinzenaId);
   }
 
