@@ -1,25 +1,40 @@
 import type { GeminiExtractedData, GeminiResult } from './gemini';
 
-interface GeminiModel {
-  name: string;
+type ProviderType = 'gemini' | 'groq';
+
+interface OcrModel {
+  id: string;
+  provider: ProviderType;
   rpm: number;
   rpd: number;
   minIntervalMs: number;
 }
 
-const MODELS: GeminiModel[] = [
-  { name: 'gemini-3.1-flash-lite', rpm: 15, rpd: 500, minIntervalMs: 4200 },
-  { name: 'gemini-2.5-flash-lite', rpm: 10, rpd: 20, minIntervalMs: 6200 },
-  { name: 'gemini-2.5-flash', rpm: 5, rpd: 20, minIntervalMs: 12200 },
-  { name: 'gemini-3-flash', rpm: 5, rpd: 20, minIntervalMs: 12200 },
-  { name: 'gemini-3.5-flash', rpm: 5, rpd: 20, minIntervalMs: 12200 },
+const MODELS: OcrModel[] = [
+  { id: 'gemini-2.5-flash-lite',       provider: 'gemini', rpm: 30, rpd: 1000, minIntervalMs: 2100 },
+  { id: 'gemini-3.1-flash-lite',       provider: 'gemini', rpm: 30, rpd: 1000, minIntervalMs: 2100 },
+  { id: 'gemini-3.1-flash-lite-preview', provider: 'gemini', rpm: 30, rpd: 1000, minIntervalMs: 2100 },
+  { id: 'gemini-flash-lite-latest',    provider: 'gemini', rpm: 30, rpd: 1000, minIntervalMs: 2100 },
+  { id: 'gemini-2.5-flash',            provider: 'gemini', rpm: 10, rpd: 250,  minIntervalMs: 6200 },
+  { id: 'gemini-3-flash-preview',      provider: 'gemini', rpm: 10, rpd: 250,  minIntervalMs: 6200 },
+  { id: 'gemini-3.5-flash',            provider: 'gemini', rpm: 10, rpd: 250,  minIntervalMs: 6200 },
+  { id: 'gemini-flash-latest',         provider: 'gemini', rpm: 10, rpd: 250,  minIntervalMs: 6200 },
+  { id: 'meta-llama/llama-4-scout-17b-16e-instruct', provider: 'groq', rpm: 30, rpd: 1000, minIntervalMs: 2100 },
 ];
 
 const GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-const modelState: Record<string, { lastCallTime: number; cooldownUntil: number; requestsToday: number }> = {};
+interface ModelState {
+  lastCallTime: number;
+  cooldownUntil: number;
+  requestsToday: number;
+  lastResetDay: string;
+}
+
+const modelState: Record<string, ModelState> = {};
 for (const m of MODELS) {
-  modelState[m.name] = { lastCallTime: 0, cooldownUntil: 0, requestsToday: 0 };
+  modelState[m.id] = { lastCallTime: 0, cooldownUntil: 0, requestsToday: 0, lastResetDay: '' };
 }
 
 let currentModelIdx = 0;
@@ -61,12 +76,29 @@ function isPdf(url: string): boolean {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-function getNextAvailableModel(): { model: GeminiModel; state: typeof modelState[string] } | null {
+function getTodayKey(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function resetDailyCountersIfNeeded() {
+  const today = getTodayKey();
+  for (const model of MODELS) {
+    const state = modelState[model.id];
+    if (state.lastResetDay !== today) {
+      state.requestsToday = 0;
+      state.lastResetDay = today;
+      state.cooldownUntil = 0;
+    }
+  }
+}
+
+function getNextAvailableModel(): { model: OcrModel; state: ModelState } | null {
+  resetDailyCountersIfNeeded();
   const now = Date.now();
   for (let i = 0; i < MODELS.length; i++) {
     const idx = (currentModelIdx + i) % MODELS.length;
     const model = MODELS[idx];
-    const state = modelState[model.name];
+    const state = modelState[model.id];
     if (now >= state.cooldownUntil && state.requestsToday < model.rpd) {
       currentModelIdx = idx;
       return { model, state };
@@ -75,11 +107,11 @@ function getNextAvailableModel(): { model: GeminiModel; state: typeof modelState
   return null;
 }
 
-function markModelRateLimited(modelName: string, cooldownMs: number = 60000) {
-  const state = modelState[modelName];
+function markModelRateLimited(modelId: string, cooldownMs: number = 60000) {
+  const state = modelState[modelId];
   if (state) {
     state.cooldownUntil = Date.now() + cooldownMs;
-    console.log(`[GeminiDirect] Model ${modelName} rate-limited, cooldown ${cooldownMs / 1000}s`);
+    console.log(`[GeminiDirect] Model ${modelId} rate-limited, cooldown ${cooldownMs / 1000}s`);
   }
 }
 
@@ -125,26 +157,9 @@ export async function processReceiptGeminiDirectBase64(
   apiKey: string,
   maxRetries = 3
 ): Promise<GeminiResult> {
+  const groqApiKey = process.env.GROQ_API_KEY || '';
   try {
-    const payload = {
-      contents: [{
-        parts: [
-          { text: buildPrompt() },
-          {
-            inline_data: {
-              mime_type: mimeType,
-              data: fileBase64,
-            },
-          },
-        ],
-      }],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 2048,
-        responseMimeType: 'application/json',
-      },
-    };
-
+    const prompt = buildPrompt();
     let lastError = '';
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
@@ -160,7 +175,6 @@ export async function processReceiptGeminiDirectBase64(
       }
 
       const { model, state } = available;
-      const apiUrl = `${GEMINI_API_BASE}/${model.name}:generateContent?key=${apiKey}`;
 
       const elapsed = Date.now() - state.lastCallTime;
       if (elapsed < model.minIntervalMs) {
@@ -169,24 +183,76 @@ export async function processReceiptGeminiDirectBase64(
       }
       state.lastCallTime = Date.now();
 
-      console.log(`[GeminiDirect] Using ${model.name} (attempt ${attempt + 1}/${maxRetries})`);
+      console.log(`[GeminiDirect] Using ${model.id} (attempt ${attempt + 1}/${maxRetries})`);
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-        signal: AbortSignal.timeout(30000),
-      });
+      let response: Response;
+      let responseText: string;
+
+      if (model.provider === 'groq') {
+        if (!groqApiKey) {
+          markModelRateLimited(model.id, 3600000);
+          continue;
+        }
+        const payload = {
+          model: model.id,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mimeType};base64,${fileBase64}` } },
+            ],
+          }],
+          temperature: 0.1,
+          max_tokens: 2048,
+          response_format: { type: 'json_object' },
+        };
+        response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${groqApiKey}` },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(60000),
+        });
+      } else {
+        const payload = {
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mimeType, data: fileBase64 } },
+            ],
+          }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            responseMimeType: 'application/json',
+          },
+        };
+        const apiUrl = `${GEMINI_API_BASE}/${model.id}:generateContent?key=${apiKey}`;
+        response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000),
+        });
+      }
 
       if (response.status === 200) {
         state.requestsToday++;
         const result = await response.json();
-        const candidates = result.candidates;
-        if (!candidates || candidates.length === 0) {
-          return { success: false, error: 'Empty response from Gemini Direct' };
+
+        let text: string;
+        if (model.provider === 'groq') {
+          text = result.choices?.[0]?.message?.content || '';
+        } else {
+          const candidates = result.candidates;
+          if (!candidates || candidates.length === 0) {
+            return { success: false, error: 'Empty response from model' };
+          }
+          text = candidates[0].content.parts[0].text;
         }
 
-        const text = candidates[0].content.parts[0].text;
+        if (!text) {
+          return { success: false, error: 'Empty text in response' };
+        }
 
         let extracted: GeminiExtractedData;
         try {
@@ -210,31 +276,38 @@ export async function processReceiptGeminiDirectBase64(
 
       if (response.status === 429) {
         const errorText = await response.text().catch(() => '');
-        console.log(`[GeminiDirect] ${model.name} got 429 (RPD limit), switching model...`);
-        markModelRateLimited(model.name, 3600000); // 1h cooldown for RPD limit
-        state.requestsToday = model.rpd; // Mark as exhausted
-        lastError = `429 on ${model.name}`;
+        const isRpdExhausted = errorText.toLowerCase().includes('quota') || errorText.toLowerCase().includes('daily');
+        if (isRpdExhausted) {
+          console.log(`[GeminiDirect] ${model.id} got 429 (RPD exhausted), marking as exhausted for today`);
+          state.requestsToday = model.rpd;
+          markModelRateLimited(model.id, 3600000);
+        } else {
+          const cooldownMs = Math.min(Math.pow(2, attempt) * 5000, 30000);
+          console.log(`[GeminiDirect] ${model.id} got 429 (RPM limit), cooldown ${cooldownMs / 1000}s`);
+          markModelRateLimited(model.id, cooldownMs);
+        }
+        lastError = `429 on ${model.id}`;
         continue;
       }
 
       if (response.status === 503) {
-        console.log(`[GeminiDirect] ${model.name} got 503, short cooldown...`);
-        markModelRateLimited(model.name, 30000); // 30s cooldown for 503
-        lastError = `503 on ${model.name}`;
+        console.log(`[GeminiDirect] ${model.id} got 503, short cooldown...`);
+        markModelRateLimited(model.id, 30000);
+        lastError = `503 on ${model.id}`;
         continue;
       }
 
-      const errorText = await response.text();
-      lastError = `API error ${response.status} on ${model.name}: ${errorText.slice(0, 200)}`;
+      const errorText = await response.text().catch(() => '');
+      lastError = `API error ${response.status} on ${model.id}: ${errorText.slice(0, 200)}`;
       console.log(`[GeminiDirect] ${lastError}`);
-      markModelRateLimited(model.name, 60000);
+      markModelRateLimited(model.id, 60000);
     }
 
-    return { success: false, error: lastError || `All Gemini models exhausted after ${maxRetries} attempts` };
+    return { success: false, error: lastError || `All models exhausted after ${maxRetries} attempts` };
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     if (msg.includes('timeout') || msg.includes('aborted')) {
-      return { success: false, error: 'Timeout requesting Gemini Direct API' };
+      return { success: false, error: 'Timeout requesting OCR API' };
     }
     return { success: false, error: msg };
   }

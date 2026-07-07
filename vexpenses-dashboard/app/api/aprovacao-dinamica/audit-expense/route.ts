@@ -8,7 +8,6 @@ export const maxDuration = 300;
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,9 +21,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!GEMINI_API_KEY && !GROQ_API_KEY && !OPENROUTER_API_KEY) {
+    if (!GEMINI_API_KEY && !GROQ_API_KEY) {
       return NextResponse.json(
-        { error: 'No OCR API key configured (need GEMINI_API_KEY, GROQ_API_KEY or OPENROUTER_API_KEY)' },
+        { error: 'No OCR API key configured (need GEMINI_API_KEY or GROQ_API_KEY)' },
         { status: 500 }
       );
     }
@@ -64,8 +63,7 @@ export async function POST(request: NextRequest) {
       const hybridResult = await processReceiptHybrid(
         expense.receipt_url,
         GROQ_API_KEY,
-        GEMINI_API_KEY,
-        OPENROUTER_API_KEY
+        GEMINI_API_KEY
       );
 
       if (hybridResult.success && hybridResult.structured_data) {

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processReceiptGeminiDirect, isPdfUrl } from '@/lib/gemini-direct';
-import { processReceiptImageOpenRouter } from '@/lib/openrouter';
 import { auditExpense, type ExpenseAuditResult } from '@/lib/audit-rules';
 import { ensureAuditTable, saveAuditResult, getAuditResultsForReport } from '@/lib/audit-db';
 
@@ -8,7 +7,6 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
 const GEMINI_DIRECT_API_KEY = process.env.GEMINI_API_KEY || '';
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -74,20 +72,6 @@ export async function POST(request: NextRequest) {
       if (result.success && result.structured_data) {
         extractedData = result.structured_data;
         console.log(`[GeminiDirect] Expense ${expense.id} succeeded - valor: ${extractedData.valor_total}, estab: ${extractedData.estabelecimento}`);
-      } else if (OPENROUTER_API_KEY) {
-        console.log(`[GeminiDirect] All Gemini models failed, trying OpenRouter fallback...`);
-        const orResult = await processReceiptImageOpenRouter(
-          expense.receipt_url,
-          OPENROUTER_API_KEY,
-          1
-        );
-        if (orResult.success && orResult.structured_data) {
-          extractedData = orResult.structured_data;
-          provider = 'openrouter-fallback';
-          console.log(`[GeminiDirect] OpenRouter fallback succeeded for expense ${expense.id}`);
-        } else {
-          console.log(`[GeminiDirect] OpenRouter fallback also failed: ${orResult.error}`);
-        }
       } else {
         console.log(`[GeminiDirect] Expense ${expense.id} failed: ${result.error}`);
       }
