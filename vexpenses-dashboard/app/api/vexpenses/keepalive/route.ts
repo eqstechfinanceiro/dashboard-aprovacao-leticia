@@ -4,8 +4,6 @@ import { neon } from '@neondatabase/serverless';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
-const sql = neon(process.env.NEON_DATABASE_URL!);
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const cronSecret = searchParams.get('secret');
@@ -16,6 +14,8 @@ export async function GET(request: Request) {
   }
 
   try {
+    const sql = neon(process.env.NEON_DATABASE_URL!);
+
     // Load current cookies from DB
     const rows = await sql`
       SELECT laravel_token, laravel_session, xsrf_token, expires_at
