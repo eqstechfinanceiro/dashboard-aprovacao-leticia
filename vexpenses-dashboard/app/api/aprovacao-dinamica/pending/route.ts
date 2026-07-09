@@ -63,13 +63,15 @@ export async function GET(request: NextRequest) {
       console.log('[Pending] Error fetching team-members:', err);
     }
 
-    // If approver_id is provided, find which flows that user is an approver in
-    let approverFlowIds: Set<number> | null = null;
+    // If approver_id is provided, find which flows/steps that user is an approver in
+    // Map: flow_id -> Map<step_order, Set<approver_id>>
+    const flowStepApprovers = new Map<number, Map<number, Set<number>>>();
+    let hasApproverFilter = false;
     if (approverId) {
-      approverFlowIds = new Set<number>();
+      hasApproverFilter = true;
     }
     try {
-      const flowsResp = await fetch(`${API_URL}/v2/approval-flows`, {
+      const flowsResp = await fetch(`${API_URL}/v2/approval-flows?include=steps`, {
         headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
         signal: AbortSignal.timeout(30000),
       });
@@ -80,26 +82,36 @@ export async function GET(request: NextRequest) {
 
         for (const flow of flows) {
           flowNamesMap.set(flow.id, flow.description || `Flow ${flow.id}`);
-          if (approverFlowIds && approverIdNum) {
-            const steps = flow.steps || [];
-            const isApprover = steps.some((step: any) => {
-              const groups = step.groups || [];
-              return groups.some((g: any) => {
-                const approvers = g.approvers || [];
-                return approvers.includes(approverIdNum);
-              });
-            });
-            if (isApprover) {
-              approverFlowIds.add(flow.id);
+          const steps = flow.steps?.data || flow.steps || [];
+          const stepMap = new Map<number, Set<number>>();
+          for (const step of steps) {
+            const stepOrder = step.order || 1;
+            const approverSet = new Set<number>();
+            const groups = step.groups?.data || step.groups || [];
+            for (const g of groups) {
+              const approvers = g.approvers || [];
+              for (const a of approvers) {
+                approverSet.add(parseInt(a, 10));
+              }
             }
+            stepMap.set(stepOrder, approverSet);
           }
+          flowStepApprovers.set(flow.id, stepMap);
+        }
+        if (approverIdNum) {
+          const flowsWhereApprover = Array.from(flowStepApprovers.entries())
+            .filter(([, stepMap]) => {
+              for (const approverSet of stepMap.values()) {
+                if (approverSet.has(approverIdNum)) return true;
+              }
+              return false;
+            })
+            .map(([fid]) => fid);
+          console.log(`[Pending] Approver ${approverId} is approver in flows:`, flowsWhereApprover);
         }
       }
     } catch (err) {
       console.log('[Pending] Error fetching approval flows:', err);
-    }
-    if (approverFlowIds) {
-      console.log(`[Pending] Approver ${approverId} is approver in flows:`, Array.from(approverFlowIds));
     }
 
     let auditedIds: Set<number> = new Set();
@@ -123,13 +135,21 @@ export async function GET(request: NextRequest) {
         approval_flow_name: flowId ? (flowNamesMap.get(flowId) || `Flow ${flowId}`) : null,
         approval_stage_id: r.approval_stage_id || null,
         approval_date: r.approval_date || null,
-        current_step: r.approval_date ? 2 : 1, // 1 = just sent, 2+ = already approved at least once
+        current_step: r.approval_stage_id ? 2 : 1,
       };
     });
 
-    // Filter by approver's flows if requested
-    if (approverFlowIds && approverFlowIds.size > 0) {
-      result = result.filter(r => r.approval_flow_id && approverFlowIds!.has(r.approval_flow_id));
+    // Filter by approver: only show reports where the approver is in the CURRENT step
+    if (hasApproverFilter && approverId) {
+      const approverIdNum = parseInt(approverId, 10);
+      result = result.filter(r => {
+        if (!r.approval_flow_id) return false;
+        const stepMap = flowStepApprovers.get(r.approval_flow_id);
+        if (!stepMap) return false;
+        const approverSet = stepMap.get(r.current_step);
+        if (!approverSet) return false;
+        return approverSet.has(approverIdNum);
+      });
     }
 
     // Filter by step if requested

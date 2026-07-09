@@ -33,6 +33,24 @@ export async function POST(request: NextRequest) {
     const existingResults = await getAuditResultsForReport(report_id);
     const existing = existingResults.find(r => r.expense_id === expense.id);
 
+    if (existing && ['APROVADO_HUMANO', 'REPROVADO_HUMANO', 'ANALISAR_DEPOIS'].includes(existing.status)) {
+      console.log(`[Audit] Expense ${expense.id} was human-reviewed (${existing.status}), skipping re-audit`);
+      return NextResponse.json({
+        success: true,
+        data: {
+          expense_id: existing.expense_id,
+          status: existing.status,
+          rules_triggered: existing.rules_triggered,
+          extracted_data: existing.extracted_data,
+          informed_data: existing.informed_data,
+          divergences: existing.divergences,
+          summary: existing.summary,
+        } as ExpenseAuditResult,
+        cached: true,
+        humanReviewed: true,
+      });
+    }
+
     if (existing && !force && existing.extracted_data) {
       console.log(`[Audit] Expense ${expense.id} already audited, returning cached result`);
       return NextResponse.json({

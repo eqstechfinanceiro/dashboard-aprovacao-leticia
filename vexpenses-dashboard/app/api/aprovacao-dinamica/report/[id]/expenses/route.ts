@@ -17,7 +17,7 @@ export async function GET(
 
     for (let attempt = 0; attempt < 3; attempt++) {
       response = await fetch(
-        `${API_URL}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method`,
+        `${API_URL}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
         {
           headers: {
             'Authorization': API_KEY,
@@ -76,6 +76,8 @@ export async function GET(
         report_id: parseInt(reportId),
         description: report.description,
         status: report.status,
+        user_name: report.user?.data?.name || report.user?.name || '',
+        user_email: report.user?.data?.email || report.user?.email || '',
         expenses,
         total_value: totalValue,
         expense_count: expenses.length,

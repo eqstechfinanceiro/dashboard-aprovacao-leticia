@@ -19,6 +19,11 @@ import {
   ArrowRight,
   ArrowLeft,
   Space,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Undo2,
+  User,
 } from 'lucide-react';
 
 export interface ManualReviewItem {
@@ -51,7 +56,7 @@ interface ManualReviewModalProps {
   onClose: () => void;
   items: ManualReviewItem[];
   reviewerName?: string;
-  onReviewComplete: (reportId: number, expenseId: number, decision: string) => void;
+  onReviewComplete: (reportId: number, expenseId: number, decision: string, reviewerName?: string) => void;
 }
 
 type Decision = 'APROVADO_HUMANO' | 'ANALISAR_DEPOIS' | 'REPROVADO_HUMANO';
@@ -116,6 +121,11 @@ export function ManualReviewModal({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const panStart = useRef({ x: 0, y: 0 });
+  const [reviewHistory, setReviewHistory] = useState<{ index: number; decision: Decision; item: ManualReviewItem }[]>([]);
   const [expenseDetails, setExpenseDetails] = useState<{
     title: string;
     value: number;
@@ -126,6 +136,7 @@ export function ManualReviewModal({
     costs_center: string;
     report_description: string;
     user_name: string;
+    user_email: string;
   } | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const savingRef = useRef(false);
@@ -136,6 +147,8 @@ export function ManualReviewModal({
   const fetchExpenseDetails = useCallback(async (reportId: number, expenseId: number) => {
     setDetailsLoading(true);
     setExpenseDetails(null);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
     try {
       const res = await fetch(`/api/aprovacao-dinamica/report/${reportId}/expenses`);
       if (!res.ok) return;
@@ -151,7 +164,8 @@ export function ManualReviewModal({
           expense_type: expense.expense_type?.description || '',
           costs_center: expense.costs_center?.name || '',
           report_description: data.data.description || '',
-          user_name: '',
+          user_name: data.data.user_name || '',
+          user_email: data.data.user_email || '',
         });
         if (expense.receipt_url) {
           setImageLoading(true);
@@ -196,8 +210,9 @@ export function ManualReviewModal({
         console.error('Failed to save review decision');
       }
 
-      onReviewComplete(currentItem.report_id, currentItem.expense_id, decision);
+      onReviewComplete(currentItem.report_id, currentItem.expense_id, decision, reviewerName);
       setReviewedCount(prev => prev + 1);
+      setReviewHistory(prev => [...prev, { index: currentIndex, decision, item: currentItem }]);
 
       const dir = decision === 'APROVADO_HUMANO' ? 'right' : decision === 'REPROVADO_HUMANO' ? 'left' : 'down';
       setAnimationDir(dir);
@@ -208,6 +223,8 @@ export function ManualReviewModal({
         setCurrentIndex(prev => prev + 1);
         setImageUrl(null);
         setImageError(false);
+        setZoom(1);
+        setPan({ x: 0, y: 0 });
         savingRef.current = false;
         setIsSaving(false);
       }, 400);
@@ -224,8 +241,40 @@ export function ManualReviewModal({
     setImageUrl(null);
     setImageError(false);
     setExpenseDetails(null);
+    setReviewHistory([]);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
     onClose();
   }, [onClose]);
+
+  const handleUndo = useCallback(() => {
+    if (reviewHistory.length === 0 || isSaving || isAnimating) return;
+    const last = reviewHistory[reviewHistory.length - 1];
+    setReviewHistory(prev => prev.slice(0, -1));
+    setReviewedCount(prev => Math.max(0, prev - 1));
+    setCurrentIndex(last.index);
+    setImageUrl(null);
+    setImageError(false);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, [reviewHistory, isSaving, isAnimating]);
+
+  useEffect(() => {
+    if (!open || !imageUrl || imageError) return;
+    const nextItem = items[currentIndex + 1];
+    if (nextItem) {
+      fetch(`/api/aprovacao-dinamica/report/${nextItem.report_id}/expenses`)
+        .then(res => res.json())
+        .then(data => {
+          const expense = data.data?.expenses?.find((e: any) => e.id === nextItem.expense_id);
+          if (expense?.receipt_url) {
+            const img = new Image();
+            img.src = expense.receipt_url;
+          }
+        })
+        .catch(() => {});
+    }
+  }, [open, imageUrl, imageError, items, currentIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -285,6 +334,25 @@ export function ManualReviewModal({
         </div>
 
         <div className="flex items-center gap-3">
+          {!isFinished && reviewerName && reviewerName !== 'human' && (
+            <span className="flex items-center gap-1.5 text-sm text-gray-400">
+              <User className="h-4 w-4" />
+              {reviewerName}
+            </span>
+          )}
+          {!isFinished && reviewHistory.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleUndo}
+              disabled={isSaving || isAnimating}
+              className="text-gray-400 hover:text-white"
+              title={`Voltar para despesa #${reviewHistory[reviewHistory.length - 1].item.expense_id} (${DECISION_CONFIG[reviewHistory[reviewHistory.length - 1].decision].label})`}
+            >
+              <Undo2 className="h-4 w-4" />
+              Voltar
+            </Button>
+          )}
           {!isFinished && (
             <div className="flex items-center gap-3 text-xs text-gray-400">
               <span className="flex items-center gap-1">
@@ -351,8 +419,14 @@ export function ManualReviewModal({
         </div>
       ) : (
         <div className="flex flex-1 overflow-hidden">
-          {/* Left: Receipt image */}
-          <div className="flex flex-1 items-center justify-center overflow-auto bg-gray-950 p-6">
+          {/* Left: Receipt image with zoom */}
+          <div className="relative flex flex-1 items-center justify-center overflow-auto bg-gray-950 p-6"
+            onMouseDown={(e) => { if (zoom > 1) { setIsPanning(true); panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y }; } }}
+            onMouseMove={(e) => { if (isPanning && zoom > 1) { setPan({ x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }); } }}
+            onMouseUp={() => setIsPanning(false)}
+            onMouseLeave={() => setIsPanning(false)}
+            onWheel={(e) => { if (imageUrl && !imageError && !imageLoading) { e.preventDefault(); setZoom(z => Math.max(1, Math.min(4, z + (e.deltaY < 0 ? 0.25 : -0.25)))); if (zoom <= 1) setPan({ x: 0, y: 0 }); } }}
+          >
             {imageLoading && (
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
@@ -381,8 +455,42 @@ export function ManualReviewModal({
                   setImageError(true);
                   setImageLoading(false);
                 }}
-                style={{ display: imageLoading ? 'none' : 'block' }}
+                style={{
+                  display: imageLoading ? 'none' : 'block',
+                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                  cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+                  transition: isPanning ? 'none' : 'transform 0.1s',
+                }}
               />
+            )}
+
+            {/* Zoom controls */}
+            {imageUrl && !imageError && !imageLoading && (
+              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-gray-700 bg-gray-800/90 px-2 py-1 shadow-lg backdrop-blur">
+                <button
+                  onClick={() => { setZoom(z => Math.max(1, z - 0.5)); setPan({ x: 0, y: 0 }); }}
+                  disabled={zoom <= 1}
+                  className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white disabled:opacity-30"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </button>
+                <span className="min-w-[3rem] text-center text-xs text-gray-300">{Math.round(zoom * 100)}%</span>
+                <button
+                  onClick={() => { setZoom(z => Math.min(4, z + 0.5)); }}
+                  disabled={zoom >= 4}
+                  className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white disabled:opacity-30"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </button>
+                <div className="mx-1 h-4 w-px bg-gray-600" />
+                <button
+                  onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+                  disabled={zoom === 1}
+                  className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white disabled:opacity-30"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </button>
+              </div>
             )}
           </div>
 
@@ -398,6 +506,24 @@ export function ManualReviewModal({
                   Despesa #{currentItem.expense_id}
                 </Badge>
               </div>
+
+              {/* Report owner info */}
+              {expenseDetails && (expenseDetails.user_name || expenseDetails.report_description) && (
+                <div className="mb-4 flex items-center gap-2 rounded-lg border border-gray-700 bg-gray-800/50 p-3">
+                  {expenseDetails.user_name && (
+                    <span className="flex items-center gap-1.5 text-sm text-gray-300">
+                      <User className="h-4 w-4 text-gray-500" />
+                      {expenseDetails.user_name}
+                    </span>
+                  )}
+                  {expenseDetails.report_description && (
+                    <>
+                      <span className="text-gray-600">•</span>
+                      <span className="text-sm text-gray-400">{expenseDetails.report_description}</span>
+                    </>
+                  )}
+                </div>
+              )}
 
               {/* Status badge */}
               <div className="mb-4">

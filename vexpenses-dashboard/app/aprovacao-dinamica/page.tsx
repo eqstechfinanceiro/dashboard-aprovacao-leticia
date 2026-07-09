@@ -31,6 +31,14 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
+import { useAuth } from '@/lib/auth-context';
+
+interface ReportApproval {
+  approver_name: string;
+  approver_user_id: number | null;
+  observation: string | null;
+  approved_at: string;
+}
 
 interface PendingReport {
   id: number;
@@ -69,7 +77,8 @@ interface AuditRuleResult {
 
 interface ExpenseAuditResult {
   expense_id: number;
-  status: 'APROVADO_BOT' | 'PENDENTE' | 'REPROVADO';
+  status: 'APROVADO_BOT' | 'PENDENTE' | 'REPROVADO' | 'APROVADO_HUMANO' | 'REPROVADO_HUMANO' | 'ANALISAR_DEPOIS';
+  audited_by?: string | null;
   rules_triggered: AuditRuleResult[];
   extracted_data: {
     valor_total: string | null;
@@ -99,7 +108,11 @@ interface ReportAuditData {
   expenses: ExpenseAuditResult[];
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, {
+  label: string;
+  color: string;
+  icon: typeof CheckCircle;
+}> = {
   APROVADO_BOT: {
     label: 'Aprovaria',
     color: 'bg-green-100 text-green-800 border-green-200',
@@ -115,9 +128,25 @@ const STATUS_CONFIG = {
     color: 'bg-red-100 text-red-800 border-red-200',
     icon: XCircle,
   },
+  APROVADO_HUMANO: {
+    label: 'Humano Aprovou',
+    color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    icon: CheckCircle,
+  },
+  REPROVADO_HUMANO: {
+    label: 'Humano Reprovou',
+    color: 'bg-rose-100 text-rose-800 border-rose-300',
+    icon: XCircle,
+  },
+  ANALISAR_DEPOIS: {
+    label: 'Analisar Depois',
+    color: 'bg-amber-100 text-amber-800 border-amber-200',
+    icon: Clock,
+  },
 };
 
 export default function AprovacaoDinamicaPage() {
+  const { user } = useAuth();
   const [reports, setReports] = useState<PendingReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -139,6 +168,17 @@ export default function AprovacaoDinamicaPage() {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [expenseCounts, setExpenseCounts] = useState<Record<number, number>>({});
   const [loadingCounts, setLoadingCounts] = useState(false);
+  const [reportApprovals, setReportApprovals] = useState<Record<number, ReportApproval>>({});
+  const [readyOnly, setReadyOnly] = useState(false);
+  const [approvingReport, setApprovingReport] = useState<number | null>(null);
+  const [approveObservation, setApproveObservation] = useState<Record<number, string>>({});
+  const [showApproveUI, setShowApproveUI] = useState<Set<number>>(new Set());
+  const [approveError, setApproveError] = useState<Record<number, string>>({});
+  const [visibleCount, setVisibleCount] = useState(30);
+
+  useEffect(() => {
+    setVisibleCount(30);
+  }, [searchTerm, readyOnly, stepOneOnly, approverFilter]);
 
   // Keep ref in sync with auditResults
   useEffect(() => {
@@ -188,12 +228,28 @@ export default function AprovacaoDinamicaPage() {
       await loadAllSavedResults();
       // Fetch expense counts for all reports in background
       fetchExpenseCounts(data.data || []);
+      // Fetch existing approvals
+      fetchApprovals(data.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }, [loadAllSavedResults, approverFilter, stepOneOnly]);
+
+  const fetchApprovals = useCallback(async (reportList: PendingReport[]) => {
+    if (reportList.length === 0) return;
+    try {
+      const ids = reportList.map(r => r.id).join(',');
+      const res = await fetch(`/api/aprovacao-dinamica/approvals?report_ids=${ids}`);
+      if (res.ok) {
+        const data = await res.json();
+        setReportApprovals(data.data || {});
+      }
+    } catch (err) {
+      console.error('Error fetching approvals:', err);
+    }
+  }, []);
 
   const fetchExpenseCounts = useCallback(async (reportList: PendingReport[]) => {
     if (reportList.length === 0) return;
@@ -382,8 +438,21 @@ export default function AprovacaoDinamicaPage() {
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
+  const isReportReadyToApprove = useCallback((reportId: number) => {
+    const results = auditResults[reportId] || {};
+    const count = expenseCounts[reportId];
+    if (!count || count === 0) return false;
+    const auditedCount = Object.keys(results).length;
+    if (auditedCount < count) return false;
+    const allApproved = Object.values(results).every(r => r.status === 'APROVADO_BOT' || r.status === 'APROVADO_HUMANO');
+    return allApproved;
+  }, [auditResults, expenseCounts]);
+
   const filteredReports = useMemo(() => {
     let filtered = reports;
+    if (readyOnly) {
+      filtered = filtered.filter(r => isReportReadyToApprove(r.id) && !reportApprovals[r.id]);
+    }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
@@ -395,7 +464,9 @@ export default function AprovacaoDinamicaPage() {
       );
     }
     return filtered;
-  }, [reports, searchTerm]);
+  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals]);
+
+  const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
 
   const filteredExpenses = useCallback((reportId: number, expenses: ReportExpense[]): ReportExpense[] => {
     if (!searchTerm.trim()) return expenses;
@@ -412,10 +483,10 @@ export default function AprovacaoDinamicaPage() {
   }, [searchTerm]);
 
   const stats = useMemo(() => {
-    const total = reports.length;
-    const auditedReports = reports.filter(r => r.audited).length;
+    const total = filteredReports.length;
+    const auditedReports = filteredReports.filter(r => r.audited).length;
 
-    const reportIds = new Set(reports.map(r => r.id));
+    const reportIds = new Set(filteredReports.map(r => r.id));
     let approvedCount = 0;
     let pendingCount = 0;
     let rejectedCount = 0;
@@ -423,17 +494,17 @@ export default function AprovacaoDinamicaPage() {
     Object.entries(auditResults).forEach(([reportIdStr, reportResults]) => {
       if (!reportIds.has(Number(reportIdStr))) return;
       Object.values(reportResults).forEach(e => {
-        if (e.status === 'APROVADO_BOT') approvedCount++;
-        else if (e.status === 'PENDENTE') pendingCount++;
-        else if (e.status === 'REPROVADO') rejectedCount++;
+        if (e.status === 'APROVADO_BOT' || e.status === 'APROVADO_HUMANO') approvedCount++;
+        else if (e.status === 'PENDENTE' || e.status === 'ANALISAR_DEPOIS') pendingCount++;
+        else if (e.status === 'REPROVADO' || e.status === 'REPROVADO_HUMANO') rejectedCount++;
         totalAuditedExpenses++;
       });
     });
 
-    const totalExpenses = reports.reduce((sum, r) => sum + (expenseCounts[r.id] || 0), 0);
+    const totalExpenses = filteredReports.reduce((sum, r) => sum + (expenseCounts[r.id] || 0), 0);
 
     return { total, auditedReports, approvedCount, pendingCount, rejectedCount, totalExpenses, totalAuditedExpenses };
-  }, [reports, auditResults, expenseCounts]);
+  }, [filteredReports, auditResults, expenseCounts]);
 
   const formatDate = (dateStr: string) => {
     if (!dateStr) return '-';
@@ -453,6 +524,46 @@ export default function AprovacaoDinamicaPage() {
     return count;
   }, [auditResults, reports]);
 
+  const handleApproveReport = async (reportId: number) => {
+    setApprovingReport(reportId);
+    setApproveError(prev => { const n = { ...prev }; delete n[reportId]; return n; });
+    try {
+      const approverId = parseInt(approverFilter) || 891904;
+      const observation = approveObservation[reportId] || '';
+      const res = await fetch('/api/aprovacao-dinamica/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          report_id: reportId,
+          approver_id: approverId,
+          approver_name: user?.name || 'unknown',
+          observation,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const errMsg = data.error || 'Failed to approve report';
+        setApproveError(prev => ({ ...prev, [reportId]: errMsg }));
+        return;
+      }
+      setReportApprovals(prev => ({
+        ...prev,
+        [reportId]: {
+          approver_name: user?.name || 'unknown',
+          approver_user_id: approverId,
+          observation: observation || null,
+          approved_at: new Date().toISOString(),
+        },
+      }));
+      setShowApproveUI(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setApproveError(prev => ({ ...prev, [reportId]: msg }));
+    } finally {
+      setApprovingReport(null);
+    }
+  };
+
   const loadReviewQueue = async (reportId?: number) => {
     setReviewLoading(true);
     try {
@@ -471,7 +582,7 @@ export default function AprovacaoDinamicaPage() {
     }
   };
 
-  const handleReviewComplete = useCallback((reportId: number, expenseId: number, decision: string) => {
+  const handleReviewComplete = useCallback((reportId: number, expenseId: number, decision: string, reviewerName?: string) => {
     setAuditResults(prev => {
       const reportResults = prev[reportId];
       if (!reportResults) return prev;
@@ -482,11 +593,12 @@ export default function AprovacaoDinamicaPage() {
           [expenseId]: {
             ...reportResults[expenseId],
             status: decision as any,
+            audited_by: reviewerName || 'human',
             summary: decision === 'APROVADO_HUMANO'
-              ? 'Despesa aprovada por revisão humana'
+              ? `Aprovado por revisão humana (${reviewerName || 'human'})`
               : decision === 'REPROVADO_HUMANO'
-                ? 'Despesa reprovada por revisão humana'
-                : 'Despesa deixada para análise posterior',
+                ? `Reprovado por revisão humana (${reviewerName || 'human'})`
+                : `Deixado para análise posterior (${reviewerName || 'human'})`,
           },
         },
       };
@@ -499,6 +611,7 @@ export default function AprovacaoDinamicaPage() {
         open={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
         items={reviewItems}
+        reviewerName={user?.name}
         onReviewComplete={handleReviewComplete}
       />
 
@@ -603,6 +716,15 @@ export default function AprovacaoDinamicaPage() {
             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
           />
           Só etapa 1
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={readyOnly}
+            onChange={e => setReadyOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+          />
+          Prontos para aprovar
         </label>
       </div>
 
@@ -715,7 +837,7 @@ export default function AprovacaoDinamicaPage() {
 
       {/* Reports List */}
       <div className="space-y-3">
-        {filteredReports.map(report => {
+        {visibleReports.map(report => {
           const isExpanded = expandedReport === report.id;
           const expenses = reportExpenses[report.id] || [];
           const results = auditResults[report.id] || {};
@@ -724,12 +846,21 @@ export default function AprovacaoDinamicaPage() {
           const auditedCount = Object.keys(results).length;
           const hasResults = auditedCount > 0;
 
-          const approvedInReport = Object.values(results).filter(r => r.status === 'APROVADO_BOT').length;
-          const pendingInReport = Object.values(results).filter(r => r.status === 'PENDENTE').length;
-          const rejectedInReport = Object.values(results).filter(r => r.status === 'REPROVADO').length;
+          const approvedInReport = Object.values(results).filter(r => r.status === 'APROVADO_BOT' || r.status === 'APROVADO_HUMANO').length;
+          const pendingInReport = Object.values(results).filter(r => r.status === 'PENDENTE' || r.status === 'ANALISAR_DEPOIS').length;
+          const rejectedInReport = Object.values(results).filter(r => r.status === 'REPROVADO' || r.status === 'REPROVADO_HUMANO').length;
+          const isReadyToApprove = isReportReadyToApprove(report.id);
+          const reportApproval = reportApprovals[report.id];
+          const isApproved = !!reportApproval;
+
+          const cardClass = isApproved
+            ? 'overflow-hidden transition-all border-gray-300 bg-gray-50 opacity-75'
+            : isReadyToApprove
+            ? 'overflow-hidden transition-all border-green-300 bg-green-50'
+            : 'overflow-hidden';
 
           return (
-            <Card key={report.id} className="overflow-hidden">
+            <Card key={report.id} className={cardClass}>
               {/* Report Header */}
               <div
                 className="flex cursor-pointer items-center gap-3 p-4 hover:bg-gray-50"
@@ -758,14 +889,26 @@ export default function AprovacaoDinamicaPage() {
                       </Badge>
                     )}
                     {report.current_step > 1 && (
-                      <Badge className="bg-purple-100 text-purple-700 text-xs">
-                        Etapa {report.current_step}+
+                      <Badge className="bg-purple-100 text-purple-700 text-xs" title="Relatório já passou por pelo menos uma aprovação">
+                        Etapa 2+
                       </Badge>
                     )}
                     {report.audited && (
                       <Badge className="bg-blue-100 text-blue-700 text-xs">
                         <Database className="mr-1 h-3 w-3" />
                         Auditado
+                      </Badge>
+                    )}
+                    {isApproved && (
+                      <Badge className="bg-gray-200 text-gray-600 text-xs">
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                        Aprovado por {reportApproval.approver_name}
+                      </Badge>
+                    )}
+                    {isReadyToApprove && !isApproved && (
+                      <Badge className="bg-green-200 text-green-800 text-xs">
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                        Pronto para aprovar
                       </Badge>
                     )}
                     {expenseCounts[report.id] !== undefined && hasResults && auditedCount < expenseCounts[report.id] && (
@@ -801,6 +944,16 @@ export default function AprovacaoDinamicaPage() {
                         <span className="text-green-600">✓ {approvedInReport}</span>
                         <span className="text-yellow-600">⚠ {pendingInReport}</span>
                         <span className="text-red-600">✗ {rejectedInReport}</span>
+                      </span>
+                    )}
+                    {isApproved && reportApproval.observation && (
+                      <span className="text-gray-500 italic" title={reportApproval.observation}>
+                        Obs: {reportApproval.observation.length > 40 ? reportApproval.observation.slice(0, 40) + '...' : reportApproval.observation}
+                      </span>
+                    )}
+                    {isApproved && (
+                      <span className="text-gray-400">
+                        {new Date(reportApproval.approved_at).toLocaleString('pt-BR')}
                       </span>
                     )}
                   </div>
@@ -845,6 +998,81 @@ export default function AprovacaoDinamicaPage() {
                   </div>
                 )}
               </div>
+
+              {/* Approve Panel for Ready Reports */}
+              {isExpanded && isReadyToApprove && !isApproved && (
+                <div className="border-t border-green-200 bg-green-50 p-4" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="font-medium text-green-800">Todas as despesas aprovadas — pronto para aprovar no VExpenses</span>
+                  </div>
+                  {showApproveUI.has(report.id) ? (
+                    <div className="space-y-3">
+                      <textarea
+                        placeholder="Observação (opcional)..."
+                        value={approveObservation[report.id] || ''}
+                        onChange={e => setApproveObservation(prev => ({ ...prev, [report.id]: e.target.value }))}
+                        className="w-full rounded-md border border-green-300 bg-white px-3 py-2 text-sm focus:border-green-500 focus:outline-none focus:ring-1 focus:ring-green-500"
+                        rows={2}
+                      />
+                      {approveError[report.id] && (
+                        <div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700">
+                          {approveError[report.id]}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleApproveReport(report.id)}
+                          disabled={approvingReport === report.id}
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {approvingReport === report.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4" />
+                          )}
+                          Confirmar Aprovação
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowApproveUI(prev => { const n = new Set(prev); n.delete(report.id); return n; })}
+                          disabled={approvingReport === report.id}
+                        >
+                          Cancelar
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => setShowApproveUI(prev => new Set(prev).add(report.id))}
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Aprovar no VExpenses
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {/* Approved Info Panel */}
+              {isExpanded && isApproved && (
+                <div className="border-t border-gray-200 bg-gray-50 p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-gray-500" />
+                    <span className="font-medium text-gray-700">
+                      Aprovado por {reportApproval.approver_name} em {new Date(reportApproval.approved_at).toLocaleString('pt-BR')}
+                    </span>
+                  </div>
+                  {reportApproval.observation && (
+                    <p className="text-sm text-gray-600 italic">
+                      Observação: {reportApproval.observation}
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Expanded Content */}
               {isExpanded && (
@@ -915,11 +1143,14 @@ export default function AprovacaoDinamicaPage() {
 
                               {expAudit ? (
                                 <div className="flex flex-col items-end gap-1">
-                                  <div className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status].color}`}>
-                                    {React.createElement(STATUS_CONFIG[expAudit.status].icon, { className: 'h-3 w-3' })}
-                                    {STATUS_CONFIG[expAudit.status].label}
+                                  <div className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                                    {React.createElement(STATUS_CONFIG[expAudit.status]?.icon || CheckCircle, { className: 'h-3 w-3' })}
+                                    {STATUS_CONFIG[expAudit.status]?.label || expAudit.status}
                                   </div>
-                                  {!expAudit.extracted_data && !isAuditingThis && (
+                                  {expAudit.audited_by && (expAudit.status === 'APROVADO_HUMANO' || expAudit.status === 'REPROVADO_HUMANO') && (
+                                    <span className="text-xs text-gray-500">por {expAudit.audited_by}</span>
+                                  )}
+                                  {expAudit.status !== 'APROVADO_HUMANO' && expAudit.status !== 'REPROVADO_HUMANO' && expAudit.status !== 'ANALISAR_DEPOIS' && !expAudit.extracted_data && !isAuditingThis && (
                                     <Button
                                       size="sm"
                                       variant="ghost"
@@ -1039,6 +1270,18 @@ export default function AprovacaoDinamicaPage() {
           );
         })}
       </div>
+
+      {/* Load More */}
+      {visibleCount < filteredReports.length && (
+        <div className="flex justify-center py-4">
+          <Button
+            variant="outline"
+            onClick={() => setVisibleCount(c => c + 30)}
+          >
+            Carregar mais ({filteredReports.length - visibleCount} restantes)
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

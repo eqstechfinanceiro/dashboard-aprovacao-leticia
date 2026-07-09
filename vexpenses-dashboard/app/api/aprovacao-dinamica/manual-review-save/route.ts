@@ -27,12 +27,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const humanSummary = decision === 'APROVADO_HUMANO'
+      ? `Aprovado por revisão humana${reviewer_name ? ` (${reviewer_name})` : ''}${comment ? `: ${comment}` : ''}`
+      : decision === 'REPROVADO_HUMANO'
+        ? `Reprovado por revisão humana${reviewer_name ? ` (${reviewer_name})` : ''}${comment ? `: ${comment}` : ''}`
+        : `Deixado para análise posterior por revisão humana${reviewer_name ? ` (${reviewer_name})` : ''}${comment ? `: ${comment}` : ''}`;
+
     await sql`
       UPDATE expense_audit_results
       SET
         status = ${decision},
         audited_by = ${reviewer_name || 'human'},
-        audited_at = NOW()
+        audited_at = NOW(),
+        summary = ${humanSummary}
       WHERE report_id = ${report_id} AND expense_id = ${expense_id}
     `;
 
