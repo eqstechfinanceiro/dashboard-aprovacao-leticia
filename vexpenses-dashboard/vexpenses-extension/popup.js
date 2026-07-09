@@ -22,17 +22,19 @@ function updateStatusUI(data) {
   const status = data.tokenStatus || 'missing';
 
   badge.className = `badge badge-${status}`;
-  const dot = document.createElement('span');
-  dot.className = 'badge-dot';
-  badge.innerHTML = '';
-  badge.appendChild(dot);
+
+  const dot = badge.querySelector('.badge-dot');
+  if (!dot) {
+    badge.innerHTML = '<span class="badge-dot"></span><span id="statusText"></span>';
+  }
 
   const labels = {
     synced: 'Sincronizado',
     missing: 'Token ausente',
     error: 'Erro',
   };
-  text.textContent = labels[status] || status;
+  const textEl = document.getElementById('statusText');
+  if (textEl) textEl.textContent = labels[status] || status;
 
   lastSync.textContent = formatDate(data.lastSync);
   expiresAt.textContent = formatDate(data.expiresAt);
