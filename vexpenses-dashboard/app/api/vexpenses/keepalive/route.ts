@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { neon } from '@neondatabase/serverless';
+import { clearLaravelTokenCache } from '@/lib/laravel-token';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
@@ -52,6 +53,33 @@ export async function GET(request: Request) {
       signal: AbortSignal.timeout(15000),
     });
 
+    // Check if the response is a login redirect (302 to /login)
+    // If so, the session is invalid — don't save unauthenticated cookies
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location') || '';
+      if (location.includes('/login')) {
+        console.error('[KeepAlive] Session invalid — redirected to login. Token needs manual refresh.');
+        return NextResponse.json({
+          success: false,
+          status: response.status,
+          error: 'Session expired — redirected to login. Manual token refresh required via browser extension.',
+          needsManualRefresh: true,
+        }, { status: 401 });
+      }
+    }
+
+    // Only accept cookies from a successful (non-redirect) response
+    // A 302 redirect means the session is likely invalid
+    if (response.status >= 300) {
+      console.error('[KeepAlive] Unexpected redirect status', response.status, '— not updating cookies.');
+      return NextResponse.json({
+        success: false,
+        status: response.status,
+        error: `Unexpected redirect (${response.status}). Token may be invalid.`,
+        needsManualRefresh: true,
+      }, { status: 401 });
+    }
+
     // Extract Set-Cookie headers
     const setCookies = response.headers.getSetCookie?.() || [];
     
@@ -90,12 +118,14 @@ export async function GET(request: Request) {
             expires_at = ${newExpires}
         WHERE id = 1
       `;
+      clearLaravelTokenCache();
       console.log('[KeepAlive] Cookies refreshed, new expiry:', newExpires);
     } else {
       // Even if cookies didn't change in the response, update expiry
       await sql`
         UPDATE vexpenses_tokens SET expires_at = ${newExpires} WHERE id = 1
       `;
+      clearLaravelTokenCache();
       console.log('[KeepAlive] No new cookies in response, updated expiry to:', newExpires);
     }
 

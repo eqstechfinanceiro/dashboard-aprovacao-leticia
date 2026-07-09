@@ -14,9 +14,10 @@ async function getExtensionSecret() {
 
 async function extractAndSyncToken() {
   try {
-    const cookies = await chrome.cookies.getAll({ domain: 'app.vexpenses.com' });
+    const cookies = await chrome.cookies.getAll({ domain: 'vexpenses.com' });
     const laravelToken = cookies.find(c => c.name === 'laravel_token');
     const laravelSession = cookies.find(c => c.name === 'laravel_session');
+    const xsrfToken = cookies.find(c => c.name === 'XSRF-TOKEN');
 
     if (!laravelToken) {
       console.log('[VExpenses Sync] No laravel_token cookie found');
@@ -34,6 +35,7 @@ async function extractAndSyncToken() {
     const payload = {
       laravel_token: laravelToken.value,
       laravel_session: laravelSession ? laravelSession.value : null,
+      xsrf_token: xsrfToken ? xsrfToken.value : null,
       expires_at: laravelToken.expirationDate || laravelSession?.expirationDate,
     };
 

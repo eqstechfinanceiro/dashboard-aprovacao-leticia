@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
+import { clearLaravelTokenCache } from '@/lib/laravel-token';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,7 @@ async function ensureTokenTable() {
       id INT PRIMARY KEY DEFAULT 1,
       laravel_token TEXT,
       laravel_session TEXT,
+      xsrf_token TEXT,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       expires_at TIMESTAMP WITH TIME ZONE
     )
@@ -26,6 +28,7 @@ export async function POST(request: NextRequest) {
   let body: {
     laravel_token: string;
     laravel_session?: string;
+    xsrf_token?: string;
     expires_at?: number;
     secret?: string;
   };
@@ -51,14 +54,16 @@ export async function POST(request: NextRequest) {
     : new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
 
   await sql`
-    INSERT INTO vexpenses_tokens (id, laravel_token, laravel_session, updated_at, expires_at)
-    VALUES (1, ${body.laravel_token}, ${body.laravel_session || null}, NOW(), ${expiresAt})
+    INSERT INTO vexpenses_tokens (id, laravel_token, laravel_session, xsrf_token, updated_at, expires_at)
+    VALUES (1, ${body.laravel_token}, ${body.laravel_session || null}, ${body.xsrf_token || null}, NOW(), ${expiresAt})
     ON CONFLICT (id)
     DO UPDATE SET laravel_token = EXCLUDED.laravel_token,
                   laravel_session = EXCLUDED.laravel_session,
+                  xsrf_token = EXCLUDED.xsrf_token,
                   updated_at = NOW(),
                   expires_at = EXCLUDED.expires_at
   `;
+  clearLaravelTokenCache();
 
   return NextResponse.json({ ok: true, expires_at: expiresAt });
 }

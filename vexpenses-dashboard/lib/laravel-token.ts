@@ -55,6 +55,9 @@ export async function getLaravelCookieString(): Promise<string | null> {
   if (result.session) {
     cookie += `; laravel_session=${result.session}`;
   }
+  if (result.xsrf) {
+    cookie += `; XSRF-TOKEN=${result.xsrf}`;
+  }
   cookie += '; language=pt-BR';
   return cookie;
 }

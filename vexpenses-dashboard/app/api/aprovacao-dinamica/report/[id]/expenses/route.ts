@@ -13,23 +13,37 @@ export async function GET(
   try {
     const reportId = params.id;
 
-    const response = await fetch(
-      `${API_URL}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method`,
-      {
-        headers: {
-          'Authorization': API_KEY,
-          'Accept': 'application/json',
-        },
-        signal: AbortSignal.timeout(120000),
-      }
-    );
+    let response: Response | null = null;
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[Expenses] API error ${response.status}:`, errorText.slice(0, 200));
+    for (let attempt = 0; attempt < 3; attempt++) {
+      response = await fetch(
+        `${API_URL}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method`,
+        {
+          headers: {
+            'Authorization': API_KEY,
+            'Accept': 'application/json',
+          },
+          signal: AbortSignal.timeout(120000),
+        }
+      );
+
+      if (response.ok) break;
+
+      if (response.status === 403 && attempt < 2) {
+        const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
+        console.log(`[Expenses] 403 on report ${reportId}, attempt ${attempt + 1}, retrying in ${backoff}ms`);
+        await new Promise(resolve => setTimeout(resolve, backoff));
+        continue;
+      }
+      break;
+    }
+
+    if (!response || !response.ok) {
+      const errorText = response ? await response.text() : 'No response';
+      console.error(`[Expenses] API error ${response?.status}:`, errorText.slice(0, 200));
       return NextResponse.json(
-        { error: `API error ${response.status}` },
-        { status: response.status }
+        { error: `API error ${response?.status || 'timeout'}` },
+        { status: response?.status || 500 }
       );
     }
 

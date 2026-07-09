@@ -216,12 +216,12 @@ export default function AprovacaoDinamicaPage() {
     fetchPending();
   }, [fetchPending]);
 
-  // Auto-refresh every 10 seconds, but NOT while auditing
+  // Auto-refresh every 60 seconds, but NOT while auditing
   useEffect(() => {
     if (globalAuditing || auditingExpense) return;
     const interval = setInterval(() => {
       fetchPending();
-    }, 10000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [fetchPending, globalAuditing, auditingExpense]);
 
