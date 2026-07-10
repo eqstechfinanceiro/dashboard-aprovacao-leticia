@@ -170,7 +170,8 @@ export function ManualReviewModal({
         if (expense.receipt_url) {
           setImageLoading(true);
           setImageError(false);
-          setImageUrl(expense.receipt_url);
+          const proxyUrl = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`;
+          setImageUrl(proxyUrl);
         } else {
           setImageUrl(null);
         }
@@ -269,7 +270,7 @@ export function ManualReviewModal({
           const expense = data.data?.expenses?.find((e: any) => e.id === nextItem.expense_id);
           if (expense?.receipt_url) {
             const img = new Image();
-            img.src = expense.receipt_url;
+            img.src = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`;
           }
         })
         .catch(() => {});
@@ -425,7 +426,7 @@ export function ManualReviewModal({
             onMouseMove={(e) => { if (isPanning && zoom > 1) { setPan({ x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }); } }}
             onMouseUp={() => setIsPanning(false)}
             onMouseLeave={() => setIsPanning(false)}
-            onWheel={(e) => { if (imageUrl && !imageError && !imageLoading) { e.preventDefault(); setZoom(z => Math.max(1, Math.min(4, z + (e.deltaY < 0 ? 0.25 : -0.25)))); if (zoom <= 1) setPan({ x: 0, y: 0 }); } }}
+            onWheel={(e) => { if (imageUrl && !imageError && !imageLoading) { setZoom(z => Math.max(1, Math.min(4, z + (e.deltaY < 0 ? 0.25 : -0.25)))); if (zoom <= 1) setPan({ x: 0, y: 0 }); } }}
           >
             {imageLoading && (
               <div className="flex flex-col items-center gap-3">
