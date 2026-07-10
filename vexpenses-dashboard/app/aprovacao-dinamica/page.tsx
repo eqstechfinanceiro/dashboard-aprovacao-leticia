@@ -567,9 +567,13 @@ export default function AprovacaoDinamicaPage() {
   const loadReviewQueue = async (reportId?: number) => {
     setReviewLoading(true);
     try {
-      const url = reportId
-        ? `/api/aprovacao-dinamica/manual-review-queue?report_id=${reportId}`
-        : '/api/aprovacao-dinamica/manual-review-queue';
+      let url: string;
+      if (reportId) {
+        url = `/api/aprovacao-dinamica/manual-review-queue?report_id=${reportId}`;
+      } else {
+        const filteredReportIds = reports.map(r => r.id).join(',');
+        url = `/api/aprovacao-dinamica/manual-review-queue?report_ids=${filteredReportIds}`;
+      }
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to load review queue');
       const data = await res.json();

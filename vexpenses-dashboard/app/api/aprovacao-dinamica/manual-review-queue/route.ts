@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const reportId = searchParams.get('report_id');
+    const reportIdsParam = searchParams.get('report_ids');
 
     let rows: any[];
 
@@ -31,6 +32,27 @@ export async function GET(request: NextRequest) {
         WHERE ear.status IN ('PENDENTE', 'REPROVADO')
           AND ear.report_id = ${parseInt(reportId)}
         ORDER BY ear.expense_id
+      `;
+    } else if (reportIdsParam) {
+      const reportIds = reportIdsParam.split(',').map(id => parseInt(id.trim())).filter(id => !isNaN(id));
+      if (reportIds.length === 0) {
+        return NextResponse.json({ success: true, data: [], total: 0 });
+      }
+      rows = await sql`
+        SELECT
+          ear.report_id,
+          ear.expense_id,
+          ear.status,
+          ear.extracted_data::text as extracted_data,
+          ear.informed_data::text as informed_data,
+          ear.divergences::text as divergences,
+          ear.rules_triggered::text as rules_triggered,
+          ear.summary,
+          ear.audited_by
+        FROM expense_audit_results ear
+        WHERE ear.status IN ('PENDENTE', 'REPROVADO')
+          AND ear.report_id = ANY(${reportIds}::int[])
+        ORDER BY ear.report_id, ear.expense_id
       `;
     } else {
       rows = await sql`
