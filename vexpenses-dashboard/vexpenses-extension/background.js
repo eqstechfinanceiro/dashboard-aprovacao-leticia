@@ -1,10 +1,14 @@
 const VEXPENSES_DOMAIN = 'https://app.vexpenses.com';
-const DEFAULT_DASHBOARD_URL = 'http://localhost:3000';
+const DEFAULT_DASHBOARD_URL = 'https://dashboard-aprovacao-leticia-production.up.railway.app';
 const SYNC_ALARM = 'vexpenses-token-sync';
 
 async function getDashboardUrl() {
   const { dashboardUrl } = await chrome.storage.local.get('dashboardUrl');
-  return dashboardUrl || DEFAULT_DASHBOARD_URL;
+  // Migrate old localhost default to production URL
+  if (!dashboardUrl || dashboardUrl === 'http://localhost:3000') {
+    return DEFAULT_DASHBOARD_URL;
+  }
+  return dashboardUrl;
 }
 
 async function getExtensionSecret() {
@@ -50,17 +54,28 @@ async function extractAndSyncToken() {
     });
 
     if (!resp.ok) {
-      const errorText = await resp.text();
-      console.error('[VExpenses Sync] API error:', resp.status, errorText);
+      const errorText = await resp.text().catch(() => 'Unknown error');
+      console.error('[VExpenses Sync] API error:', resp.status, errorText.slice(0, 200));
       await chrome.storage.local.set({
         lastSync: null,
-        lastError: `Erro ${resp.status}: ${errorText}`,
+        lastError: `Erro ${resp.status}: ${errorText.slice(0, 200)}`,
         tokenStatus: 'error',
       });
       return;
     }
 
-    const data = await resp.json();
+    let data;
+    try {
+      data = await resp.json();
+    } catch {
+      console.error('[VExpenses Sync] Invalid JSON response');
+      await chrome.storage.local.set({
+        lastSync: null,
+        lastError: 'Resposta inválida do servidor (não é JSON)',
+        tokenStatus: 'error',
+      });
+      return;
+    }
     console.log('[VExpenses Sync] Token synced successfully');
 
     await chrome.storage.local.set({
@@ -71,9 +86,12 @@ async function extractAndSyncToken() {
     });
   } catch (err) {
     console.error('[VExpenses Sync] Error:', err);
+    const errMsg = err instanceof TypeError && err.message.includes('Failed to fetch')
+      ? 'Falha ao conectar. Verifique se a URL do dashboard está corta e o servidor está online.'
+      : String(err);
     await chrome.storage.local.set({
       lastSync: null,
-      lastError: String(err),
+      lastError: errMsg,
       tokenStatus: 'error',
     });
   }

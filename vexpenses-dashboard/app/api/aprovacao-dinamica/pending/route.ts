@@ -244,7 +244,6 @@ export async function GET(request: NextRequest) {
       if (flowsResp.ok) {
         const flowsData = await flowsResp.json();
         const flows = flowsData.data || [];
-        const approverIdNum = approverId ? parseInt(approverId, 10) : null;
 
         for (const flow of flows) {
           flowNamesMap.set(flow.id, flow.description || `Flow ${flow.id}`);
@@ -263,17 +262,6 @@ export async function GET(request: NextRequest) {
             stepMap.set(stepOrder, approverSet);
           }
           flowStepApprovers.set(flow.id, stepMap);
-        }
-        if (approverIdNum) {
-          const flowsWhereApprover = Array.from(flowStepApprovers.entries())
-            .filter(([, stepMap]) => {
-              for (const approverSet of stepMap.values()) {
-                if (approverSet.has(approverIdNum)) return true;
-              }
-              return false;
-            })
-            .map(([fid]) => fid);
-          console.log(`[Pending] Approver ${approverId} is approver in flows:`, flowsWhereApprover);
         }
       }
     } catch (err) {
@@ -308,7 +296,6 @@ export async function GET(request: NextRequest) {
     // Filter by approver: only show reports where the approver is in the CURRENT waiting step
     if (hasApproverFilter && approverId) {
       const approverIdNum = parseInt(approverId, 10);
-      const beforeCount = result.length;
       result = result.filter(r => {
         if (!r.approval_flow_id) return false;
         const stepMap = flowStepApprovers.get(r.approval_flow_id);
@@ -317,7 +304,6 @@ export async function GET(request: NextRequest) {
         if (!approverSet) return false;
         return approverSet.has(approverIdNum);
       });
-      console.log(`[Pending] Approver filter: ${beforeCount} -> ${result.length} (approverId=${approverIdNum})`);
     }
 
     // Filter by step if requested

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VExpenses Token Sync",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Sincroniza automaticamente o token Laravel do VExpenses com o dashboard",
   "permissions": ["cookies", "storage", "alarms"],
   "host_permissions": [

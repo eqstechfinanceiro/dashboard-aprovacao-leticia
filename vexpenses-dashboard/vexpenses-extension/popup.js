@@ -13,11 +13,12 @@ function formatDate(iso) {
 
 function updateStatusUI(data) {
   const badge = document.getElementById('statusBadge');
-  const text = document.getElementById('statusText');
   const lastSync = document.getElementById('lastSync');
   const expiresAt = document.getElementById('expiresAt');
   const errorMsg = document.getElementById('errorMsg');
   const successMsg = document.getElementById('successMsg');
+
+  if (!badge || !lastSync || !expiresAt || !errorMsg || !successMsg) return;
 
   const status = data.tokenStatus || 'missing';
 
@@ -60,7 +61,7 @@ function updateStatusUI(data) {
 async function loadStatus() {
   chrome.storage.local.get(['lastSync', 'lastError', 'tokenStatus', 'expiresAt', 'dashboardUrl', 'extensionSecret'], (data) => {
     updateStatusUI(data);
-    document.getElementById('dashboardUrl').value = data.dashboardUrl || 'http://localhost:3000';
+    document.getElementById('dashboardUrl').value = data.dashboardUrl || 'https://dashboard-aprovacao-leticia-production.up.railway.app';
     document.getElementById('extensionSecret').value = data.extensionSecret || '';
   });
 }
