@@ -9,6 +9,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Database not configured' }, { status: 500 });
     }
 
+    await sql`
+      CREATE TABLE IF NOT EXISTS report_approvals (
+        report_id INT PRIMARY KEY,
+        approver_name TEXT,
+        approver_user_id INT,
+        observation TEXT,
+        approved_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+      )
+    `;
+
     const { searchParams } = new URL(request.url);
     const reportIdsParam = searchParams.get('report_ids');
 

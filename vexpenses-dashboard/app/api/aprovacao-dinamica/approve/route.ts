@@ -78,15 +78,28 @@ export async function POST(request: NextRequest) {
     const data = await response.json();
 
     if (sql) {
-      await sql`
-        INSERT INTO report_approvals (report_id, approver_name, approver_user_id, observation)
-        VALUES (${report_id}, ${approver_name || 'unknown'}, ${approver_id}, ${observation || null})
-        ON CONFLICT (report_id) DO UPDATE SET
-          approver_name = EXCLUDED.approver_name,
-          approver_user_id = EXCLUDED.approver_user_id,
-          observation = EXCLUDED.observation,
-          approved_at = NOW()
-      `;
+      try {
+        await sql`
+          CREATE TABLE IF NOT EXISTS report_approvals (
+            report_id INT PRIMARY KEY,
+            approver_name TEXT,
+            approver_user_id INT,
+            observation TEXT,
+            approved_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+          )
+        `;
+        await sql`
+          INSERT INTO report_approvals (report_id, approver_name, approver_user_id, observation)
+          VALUES (${report_id}, ${approver_name || 'unknown'}, ${approver_id}, ${observation || null})
+          ON CONFLICT (report_id) DO UPDATE SET
+            approver_name = EXCLUDED.approver_name,
+            approver_user_id = EXCLUDED.approver_user_id,
+            observation = EXCLUDED.observation,
+            approved_at = NOW()
+        `;
+      } catch (dbErr) {
+        console.error('[Approve] DB error (non-fatal):', dbErr);
+      }
     }
 
     return NextResponse.json({
