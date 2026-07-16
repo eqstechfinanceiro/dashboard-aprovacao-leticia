@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 // ---- Types ------------------------------------------------------------------
 
-interface ControleSnapshot {
+interface CadastroRow {
   cpf: string;
   colaborador: string | null;
   situacao: string | null;
@@ -14,15 +14,6 @@ interface ControleSnapshot {
   centro_custo: string | null;
   gestor: string | null;
   diretor: string | null;
-  // Do Controle (informativo / exibicao)
-  saldo_prestacao: string | null;
-  saldo_cartao: string | null;
-  saldo_final: string | null;
-  // Da planilha de Carga (usados nas formulas)
-  col_qz: string | null;
-  saldo_reembolsar: string | null;
-  saldo_final_carga: string | null;   // "SALDO FINAL" col 8/9 da Carga
-  saldo_cartao_carga: string | null;  // "SALDO CARTAO" col 10/11 da Carga
 }
 
 interface ManualInput {
@@ -30,6 +21,32 @@ interface ManualInput {
   adiantamento: string | null;
   obs: string | null;
   cpf: string | null;
+}
+
+interface FrozenSnapshot {
+  cpf: string;
+  colaborador: string | null;
+  situacao: string | null;
+  status_cartao: string | null;
+  regional: string | null;
+  centro_custo: string | null;
+  gestor: string | null;
+  diretor: string | null;
+  carga: string | null;
+  transferencia: string | null;
+  tarifa: string | null;
+  prestacao: string | null;
+  saldo_prestacao: string | null;
+  saldo_cartao: string | null;
+  saldo_final: string | null;
+  saldo_reembolsar: string | null;
+  col_qz: string | null;
+  adiantamento: string | null;
+  obs: string | null;
+  carga_parcial: string | null;
+  reembolso: string | null;
+  carga_final: string | null;
+  reembolso_multiplier: string | null;
 }
 
 export interface QuinzenaRow {
@@ -41,34 +58,38 @@ export interface QuinzenaRow {
   centro_custo: string;
   gestor: string;
   diretor: string;
-  // Do Controle (exibicao)
-  saldo_final: number;
-  saldo_cartao: number;
+  // Calculated from API
+  carga: number;
+  transferencia: number;
+  tarifa: number;
+  prestacao: number;
   saldo_prestacao: number;
-  // Da Carga (formulas)
-  col_qz: number | null;
+  saldo_cartao: number;
+  saldo_final: number;
   saldo_reembolsar: number;
+  // Manual / formula
+  col_qz: number | null;
   saldo_final_carga: number;
   saldo_cartao_carga: number;
-  // Manuais
   col_qz_manual: number | null;
   adiantamento: number;
   obs: string | null;
-  // Calculados
   carga_parcial: number;
   reembolso: number;
   carga_final: number;
   data_sources: {
-    col_qz: 'planilha' | 'manual' | 'null';
-    saldo_final: 'neon';
-    saldo_cartao: 'neon';
+    col_qz: 'manual' | 'null';
     adiantamento: 'manual' | 'default';
   };
-  _data_source: 'snapshot' | 'calculado';
+  _data_source: 'frozen' | 'calculado';
+  _is_frozen: boolean;
 }
 
 export interface QuinzenaResponse {
-  data_mode: 'snapshot' | 'calculado';
+  data_mode: 'frozen' | 'calculado';
+  reembolso_multiplier: number;
+  is_frozen: boolean;
+  frozen_at: string | null;
   period: {
     year: number;
     month: number;
@@ -84,7 +105,6 @@ export interface QuinzenaResponse {
     total_carga_final: number;
     total_saldo_final: number;
     total_col_qz: number;
-    has_neon_data: boolean;
   };
   data: QuinzenaRow[];
 }
@@ -107,12 +127,20 @@ function getQuinzenaDates(year: number, month: number, quinzena: number) {
     const prevMonth = month === 1 ? 12 : month - 1;
     const prevYear  = month === 1 ? year - 1 : year;
     const pmm = String(prevMonth).padStart(2, '0');
+    // SOMASE cutoff: next quinzena's end date (when sheet is finalized)
+    const somase_cutoff = `${year}-${mm}-25`;
     return {
       start_date:    `${prevYear}-${pmm}-26`,
       end_date:      `${year}-${mm}-10`,
       fechamento:    `${year}-${mm}-10`,
+      somase_cutoff,
     };
   }
+  // QZ2: next quinzena is QZ1 of next month (ending on the 10th)
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear  = month === 12 ? year + 1 : year;
+  const nmm = String(nextMonth).padStart(2, '0');
+  const somase_cutoff = `${nextYear}-${nmm}-10`;
   return {
     start_date:  `${year}-${mm}-11`,
     end_date:    `${year}-${mm}-25`,
@@ -191,8 +219,8 @@ function resolveCpfByName(
  *
  *   col_qz_efetivo  = col_qz_manual ?? col_qz_planilha ?? 0
  *
- *   CARGA_PARCIAL = col_qz_efetivo - saldo_final - saldo_cartao - adiantamento
- *     (se negativo → 0, exceto cadastro pendente que força 0)
+ *   CARGA_PARCIAL = col_qz_efetivo - saldo_final_carga - saldo_cartao_carga - adiantamento
+ *     (saldo_final_carga = max(0, saldo_final); se negativo → 0, exceto cadastro pendente que força 0)
  *
  *   REEMBOLSO = max(0, saldo_reembolsar) * 0.5   ← SOMENTE na 1ª QZ
  *               0                                 ← sempre na 2ª QZ
@@ -211,6 +239,7 @@ function calcFinancials(
   adiantamento: number,
   quinzena: number,
   status_cartao: string,
+  reembolso_multiplier: number = 0.5,
 ): { carga_parcial: number; reembolso: number; carga_final: number } {
   const isPendente = status_cartao.toLowerCase().includes('pendente');
 
@@ -219,7 +248,7 @@ function calcFinancials(
   }
 
   const carga_parcial = r2(col_qz_efetivo - saldo_final - saldo_cartao - adiantamento);
-  const reembolso     = quinzena === 1 ? r2(Math.max(0, saldo_reembolsar) * 0.5) : 0;
+  const reembolso     = quinzena === 1 ? r2(Math.max(0, saldo_reembolsar) * reembolso_multiplier) : 0;
   const carga_final   = r2(Math.max(0, carga_parcial) + reembolso);
 
   return { carga_parcial, reembolso, carga_final };
@@ -247,250 +276,309 @@ export async function GET(request: NextRequest) {
   const { start_date, end_date, fechamento } = getQuinzenaDates(year, month, quinzena);
 
   try {
-    // 1. Snapshot do Neon — inclui dados do Controle e da Carga (histórico importado)
-    const snapshotRows = await sql`
+    // 0. Read reembolso multiplier from config table
+    const configRows = await sql`
+      SELECT reembolso_multiplier::text
+      FROM quinzena_config
+      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+    `;
+    const reembolsoMultiplier = configRows[0]
+      ? parseFloat(configRows[0].reembolso_multiplier as string)
+      : 0.5;
+
+    // 1. Check if this period is frozen
+    const frozenRows = await sql`
       SELECT
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
-        saldo_prestacao::text,
-        saldo_cartao::text,
-        saldo_final::text,
-        col_qz::text,
-        saldo_reembolsar::text,
-        saldo_final_carga::text,
-        saldo_cartao_carga::text
-      FROM quinzena_controle_snapshot
+        carga::text, transferencia::text, tarifa::text, prestacao::text,
+        saldo_prestacao::text, saldo_cartao::text, saldo_final::text,
+        saldo_reembolsar::text, col_qz::text, adiantamento::text, obs,
+        carga_parcial::text, reembolso::text, carga_final::text,
+        reembolso_multiplier::text,
+        frozen_at
+      FROM quinzena_frozen_snapshots
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
       ORDER BY colaborador ASC NULLS LAST
     `;
-    const snapshots = snapshotRows as unknown as ControleSnapshot[];
 
-    // 2. Entradas manuais para este periodo
+    const isFrozen = frozenRows.length > 0;
+    let frozenAt: string | null = null;
+
+    if (isFrozen) {
+      // Get frozen_at timestamp from first row
+      const frozenSnapshots = frozenRows as unknown as (FrozenSnapshot & { frozen_at: string })[];
+      frozenAt = frozenSnapshots[0]?.frozen_at ?? null;
+
+      // Return frozen data directly
+      const rows: QuinzenaRow[] = frozenSnapshots.map((snap) => {
+        const sf = toNum(snap.saldo_final);
+        const sc = toNum(snap.saldo_cartao);
+        const sp = toNum(snap.saldo_prestacao);
+        const sr = toNum(snap.saldo_reembolsar);
+        const col_qz = snap.col_qz !== null ? toNum(snap.col_qz) : null;
+        const adiantamento = toNum(snap.adiantamento);
+        const carga_parcial = toNum(snap.carga_parcial);
+        const reembolso = toNum(snap.reembolso);
+        const carga_final = toNum(snap.carga_final);
+
+        return {
+          cpf: snap.cpf,
+          colaborador: snap.colaborador ?? '',
+          situacao: snap.situacao ?? '',
+          status_cartao: snap.status_cartao ?? '',
+          regional: snap.regional ?? '',
+          centro_custo: snap.centro_custo ?? '',
+          gestor: snap.gestor ?? '',
+          diretor: snap.diretor ?? '',
+          carga: toNum(snap.carga),
+          transferencia: toNum(snap.transferencia),
+          tarifa: toNum(snap.tarifa),
+          prestacao: toNum(snap.prestacao),
+          saldo_prestacao: sp,
+          saldo_cartao: sc,
+          saldo_final: sf,
+          saldo_reembolsar: sr,
+          col_qz,
+          saldo_final_carga: Math.max(sf, 0),
+          saldo_cartao_carga: sc,
+          col_qz_manual: col_qz,
+          adiantamento,
+          obs: snap.obs ?? null,
+          carga_parcial,
+          reembolso,
+          carga_final,
+          data_sources: {
+            col_qz: col_qz !== null ? 'manual' as const : 'null' as const,
+            adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
+          },
+          _data_source: 'frozen' as const,
+          _is_frozen: true,
+        };
+      });
+
+      const ativos = rows.filter(r => r.situacao?.toUpperCase() === 'ATIVO').length;
+      const com_carga = rows.filter(r => r.carga_final > 0).length;
+      const total_carga_final = rows.reduce((s, r) => s + r.carga_final, 0);
+      const total_saldo_final = rows.reduce((s, r) => s + r.saldo_final, 0);
+      const total_col_qz = rows.reduce((s, r) => s + (r.col_qz_manual ?? r.col_qz ?? 0), 0);
+
+      const response: QuinzenaResponse = {
+        data_mode: 'frozen',
+        reembolso_multiplier: reembolsoMultiplier,
+        is_frozen: true,
+        frozen_at: frozenAt,
+        period: {
+          year, month, quinzena,
+          start_date, end_date,
+          month_name: MONTH_NAMES[month] ?? String(month),
+        },
+        statistics: {
+          total_rows: rows.length,
+          ativos,
+          com_carga,
+          total_carga_final,
+          total_saldo_final,
+          total_col_qz,
+        },
+        data: rows,
+      };
+
+      return NextResponse.json(response, { headers: { 'Cache-Control': 'no-store' } });
+    }
+
+    // 2. Not frozen — calculate from API data
+    // 2a. Load cadastro (metadata for all users)
+    const cadastroRows = await sql`
+      SELECT
+        cpf, colaborador, situacao, status_cartao,
+        regional, centro_custo, gestor, diretor
+      FROM quinzena_cadastro
+      ORDER BY colaborador ASC NULLS LAST
+    `;
+    const cadastroBase = cadastroRows as unknown as CadastroRow[];
+
+    // 2b. Load manual inputs
     const manualRows = await sql`
       SELECT col_1qz::text, adiantamento::text, obs, cpf
       FROM quinzena_manual_inputs
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
     `;
     const manuals = manualRows as unknown as ManualInput[];
-
     const manualByCpf = new Map<string, ManualInput>();
     for (const m of manuals) {
       if (m.cpf) manualByCpf.set(m.cpf, m);
     }
 
-    const hasNeonData = snapshots.length > 0;
+    // 2c. Build name→cpf map for extrato matching
+    const nomeToCpf = new Map<string, string>();
+    for (const c of cadastroBase) {
+      const normalized = normalizeName(c.colaborador);
+      if (normalized) nomeToCpf.set(normalized, c.cpf);
+    }
+    const fuzzyCache = new Map<string, string>();
 
-    // 3. Se não há snapshot importado, calcular via extrato + cadastro do período mais recente
-    //    Busca dados cadastrais do último snapshot disponível + extrato do período
-    let extratoByCpf: Map<string, { carga: number; transferencia: number; tarifa: number }> = new Map();
-    let saldoCartaoByCpf: Map<string, number> = new Map();
-    let cadastroBase: ControleSnapshot[] = [];
-    let somaseByCpf: Map<string, number> = new Map();
-    let somasePrevByCpf: Map<string, number> = new Map();
+    // 2d. Extrato cumulativo até end_date
+    const extratoRows = await sql`
+      SELECT
+        UPPER(usuario) AS usuario_up,
+        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
+        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
+        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
+      FROM extrato_movimentacao
+      WHERE is_snapshot = FALSE
+        AND data <= ${end_date}
+      GROUP BY UPPER(usuario)
+    `;
 
-    if (!hasNeonData) {
-      // Cadastro base: usar snapshot mais recente disponível (para dados cadastrais)
-      const cadastroRows = await sql`
-        SELECT DISTINCT ON (cpf)
-          cpf, colaborador, situacao, status_cartao,
-          regional, centro_custo, gestor, diretor,
-          saldo_prestacao::text,
-          saldo_cartao::text,
-          saldo_final::text,
-          col_qz::text,
-          saldo_reembolsar::text,
-          saldo_final_carga::text,
-          saldo_cartao_carga::text
-        FROM quinzena_controle_snapshot
-        ORDER BY cpf, year DESC, month DESC, quinzena DESC
-      `;
-      cadastroBase = cadastroRows as unknown as ControleSnapshot[];
-
-      // Mapa nome_normalizado → cpf usando cadastro (accent-insensitive)
-      const nomeToCpf = new Map<string, string>();
-      for (const c of cadastroBase) {
-        const normalized = normalizeName(c.colaborador);
-        if (normalized) nomeToCpf.set(normalized, c.cpf);
-      }
-      const fuzzyCache = new Map<string, string>();
-
-      // Cutoff: a planilha é finalizada quando a próxima quinzena fecha
-      // 1QZ month M (closing 10/M) → cutoff = 25/M (2QZ same month closing)
-      // 2QZ month M (closing 25/M) → cutoff = 10/(M+1) (1QZ next month closing)
-      let cutoffDate: string;
-      let prevClosingDate: string;
-      if (quinzena === 1) {
-        cutoffDate = `${year}-${String(month).padStart(2, '0')}-25`;
-        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-10`;
-      } else {
-        const nextMonth = month === 12 ? 1 : month + 1;
-        const nextYear = month === 12 ? year + 1 : year;
-        cutoffDate = `${nextYear}-${String(nextMonth).padStart(2, '0')}-10`;
-        prevClosingDate = `${year}-${String(month).padStart(2, '0')}-25`;
-      }
-
-      // Extrato cumulativo: delta = cum(<=cutoff) - cum(<=prevClosing)
-      // Captura transações late-arriving dentro e após o período oficial
-      const extratoCutoffRows = await sql`
-        SELECT
-          UPPER(usuario) AS usuario_up,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
-        FROM extrato_movimentacao
-        WHERE is_snapshot = FALSE
-          AND data <= ${cutoffDate}
-        GROUP BY UPPER(usuario)
-      `;
-      const extratoPrevRows = await sql`
-        SELECT
-          UPPER(usuario) AS usuario_up,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
-        FROM extrato_movimentacao
-        WHERE is_snapshot = FALSE
-          AND data <= ${prevClosingDate}
-        GROUP BY UPPER(usuario)
-      `;
-
-      const cumCutoff = new Map<string, { carga: number; transf: number; tarifa: number }>();
-      for (const r of extratoCutoffRows) {
-        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
-        if (cpf) {
-          cumCutoff.set(cpf, {
-            carga: Number(r.carga_raw || 0),
-            transf: Number(r.transf_raw || 0),
-            tarifa: Number(r.tarifa_raw || 0),
-          });
-        }
-      }
-      const cumPrev = new Map<string, { carga: number; transf: number; tarifa: number }>();
-      for (const r of extratoPrevRows) {
-        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
-        if (cpf) {
-          cumPrev.set(cpf, {
-            carga: Number(r.carga_raw || 0),
-            transf: Number(r.transf_raw || 0),
-            tarifa: Number(r.tarifa_raw || 0),
-          });
-        }
-      }
-
-      // delta_carga = (carga_cutoff - carga_prev) - (|transf_cutoff| - |transf_prev|) - (|tarifa_cutoff| - |tarifa_prev|)
-      for (const [cpf, cc] of cumCutoff) {
-        const cp = cumPrev.get(cpf) ?? { carga: 0, transf: 0, tarifa: 0 };
-        const deltaCarga = (cc.carga - cp.carga) - (Math.abs(cc.transf) - Math.abs(cp.transf)) - (Math.abs(cc.tarifa) - Math.abs(cp.tarifa));
-        extratoByCpf.set(cpf, {
-          carga: deltaCarga,
-          transferencia: 0,
-          tarifa: 0,
-        });
-      }
-
-      // Saldo do cartão: snapshot mais recente <= cutoff (planilha é finalizada no cutoff)
-      const saldoRows = await sql`
-        SELECT DISTINCT ON (UPPER(usuario))
-          UPPER(usuario) AS usuario_up,
-          valor::text AS saldo
-        FROM extrato_movimentacao
-        WHERE is_snapshot = TRUE
-          AND data <= ${cutoffDate}
-        ORDER BY UPPER(usuario), data DESC
-      `;
-      for (const r of saldoRows) {
-        const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
-        if (cpf) saldoCartaoByCpf.set(cpf, toNum(r.saldo as string));
-      }
-
-      // Somase (prestacao acumulada) para delta_prestacao
-      // 1QZ month M → 'YYYY-MM-1'; 2QZ month M → 'YYYY-(M+1)-2'
-      let currSomaseId: string;
-      let prevSomaseId: string;
-      if (quinzena === 2) {
-        const nextMonth = month === 12 ? 1 : month + 1;
-        const nextYear = month === 12 ? year + 1 : year;
-        currSomaseId = `${nextYear}-${String(nextMonth).padStart(2, '0')}-2`;
-        prevSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
-      } else {
-        currSomaseId = `${year}-${String(month).padStart(2, '0')}-1`;
-        const prevMonth = month === 1 ? 12 : month - 1;
-        const prevYear = month === 1 ? year - 1 : year;
-        prevSomaseId = `${prevYear}-${String(prevMonth).padStart(2, '0')}-2`;
-      }
-      const somaseRows = await sql`
-        SELECT user_cpf, total::text
-        FROM somase_snapshots
-        WHERE quinzena = ${currSomaseId}
-           OR quinzena = ${`${year}-${String(month).padStart(2, '0')}-${quinzena}`}
-      `;
-      for (const r of somaseRows) {
-        if (r.user_cpf) somaseByCpf.set(r.user_cpf, toNum(r.total as string));
-      }
-      const somasePrevRows = await sql`
-        SELECT user_cpf, total::text
-        FROM somase_snapshots
-        WHERE quinzena = ${prevSomaseId}
-      `;
-      for (const r of somasePrevRows) {
-        if (r.user_cpf) somasePrevByCpf.set(r.user_cpf, toNum(r.total as string));
+    // 2e. Somase (prestação de contas) from web export data
+    const somaseRows = await sql`
+      SELECT
+        r.user_cpf,
+        COALESCE(SUM(e.value), 0)::text AS total
+      FROM prestacao_reports r
+      JOIN prestacao_expenses e ON e.report_id = r.id
+      WHERE (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
+        AND r.user_cpf IS NOT NULL
+        AND r.created_at <= ${end_date}
+        AND r.name NOT ILIKE 'FATURA%'
+        AND r.name NOT ILIKE 'Cartão%'
+        AND r.name NOT ILIKE 'CARTAO%'
+      GROUP BY r.user_cpf
+    `;
+    const somaseByCpf = new Map<string, number>();
+    for (const r of somaseRows) {
+      if (r.user_cpf) {
+        somaseByCpf.set(r.user_cpf, toNum(r.total as string));
       }
     }
 
-    // 4. Montar linhas — snapshot histórico OU cálculo automático
-    const sourceSnaps = hasNeonData ? snapshots : cadastroBase;
+    // 2f. Calculate saldo prestação and saldo cartão for each CPF
+    const saldoPrestacaoByCpf = new Map<string, number>();
+    const cargaByCpf = new Map<string, number>();
+    const transfByCpf = new Map<string, number>();
+    const tarifaByCpf = new Map<string, number>();
 
-    const rows: QuinzenaRow[] = sourceSnaps.map((snap) => {
+    for (const r of extratoRows) {
+      const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
+      if (cpf) {
+        const carga = Number(r.carga_raw || 0);
+        const transf = Math.abs(Number(r.transf_raw || 0));
+        const tarifa = Math.abs(Number(r.tarifa_raw || 0));
+        const somase = somaseByCpf.get(cpf) ?? 0;
+        const sp = r2(carga - transf - tarifa - somase);
+        saldoPrestacaoByCpf.set(cpf, sp);
+        cargaByCpf.set(cpf, carga);
+        transfByCpf.set(cpf, transf);
+        tarifaByCpf.set(cpf, tarifa);
+      }
+    }
+
+    // 2g. Saldo cartão: hybrid approach (snapshot + adjustment, or computed)
+    const saldoRows = quinzena === 1
+      ? await sql`
+          WITH latest_snap AS (
+            SELECT DISTINCT ON (UPPER(usuario))
+              UPPER(usuario) AS usuario_up,
+              valor AS saldo,
+              data AS snapshot_date
+            FROM extrato_movimentacao
+            WHERE is_snapshot = TRUE
+              AND valor IS NOT NULL
+              AND data <= ${end_date}
+            ORDER BY UPPER(usuario), data DESC
+          ),
+          post_snap_txns AS (
+            SELECT UPPER(e.usuario) AS usuario_up, SUM(e.valor) AS adjustment
+            FROM extrato_movimentacao e
+            JOIN latest_snap s ON UPPER(e.usuario) = s.usuario_up
+            WHERE e.is_snapshot = FALSE
+              AND e.data > s.snapshot_date
+              AND e.data <= ${end_date}
+            GROUP BY UPPER(e.usuario)
+          ),
+          computed_balance AS (
+            SELECT UPPER(usuario) AS usuario_up, COALESCE(SUM(valor), 0) AS saldo
+            FROM extrato_movimentacao
+            WHERE is_snapshot = FALSE
+              AND data <= ${end_date}
+            GROUP BY UPPER(usuario)
+          )
+          SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
+                 COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
+                 COALESCE(c.saldo, 0) AS computed_saldo,
+                 (s.usuario_up IS NOT NULL) AS has_snapshot
+          FROM latest_snap s
+          FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
+          FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+        `
+      : await sql`
+          WITH latest_snap AS (
+            SELECT DISTINCT ON (UPPER(usuario))
+              UPPER(usuario) AS usuario_up,
+              valor AS saldo,
+              data AS snapshot_date
+            FROM extrato_movimentacao
+            WHERE is_snapshot = TRUE
+              AND valor IS NOT NULL
+              AND data < ${end_date}
+            ORDER BY UPPER(usuario), data DESC
+          ),
+          post_snap_txns AS (
+            SELECT UPPER(e.usuario) AS usuario_up, SUM(e.valor) AS adjustment
+            FROM extrato_movimentacao e
+            JOIN latest_snap s ON UPPER(e.usuario) = s.usuario_up
+            WHERE e.is_snapshot = FALSE
+              AND e.data > s.snapshot_date
+              AND e.data < ${end_date}
+            GROUP BY UPPER(e.usuario)
+          ),
+          computed_balance AS (
+            SELECT UPPER(usuario) AS usuario_up, COALESCE(SUM(valor), 0) AS saldo
+            FROM extrato_movimentacao
+            WHERE is_snapshot = FALSE
+              AND data < ${end_date}
+            GROUP BY UPPER(usuario)
+          )
+          SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
+                 COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
+                 COALESCE(c.saldo, 0) AS computed_saldo,
+                 (s.usuario_up IS NOT NULL) AS has_snapshot
+          FROM latest_snap s
+          FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
+          FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+        `;
+
+    const saldoCartaoByCpf = new Map<string, number>();
+    for (const r of saldoRows) {
+      const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
+      if (cpf) {
+        const hasSnap = r.has_snapshot;
+        const snapSaldo = toNum(r.snap_saldo as string);
+        const computedSaldo = toNum(r.computed_saldo as string);
+        saldoCartaoByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+      }
+    }
+
+    // 3. Build rows from cadastro + calculated data
+    const rows: QuinzenaRow[] = cadastroBase.map((snap) => {
       const manual = manualByCpf.get(snap.cpf) ?? null;
 
-      let saldo_final: number;
-      let saldo_cartao: number;
-      let saldo_prestacao: number;
-      let col_qz: number | null;
-      let saldo_reembolsar: number;
-      let saldo_final_carga: number;
-      let saldo_cartao_carga: number;
-      let dataSource: 'snapshot' | 'calculado';
+      const sp = saldoPrestacaoByCpf.get(snap.cpf) ?? 0;
+      const sc = saldoCartaoByCpf.get(snap.cpf) ?? 0;
+      const carga = cargaByCpf.get(snap.cpf) ?? 0;
+      const transf = transfByCpf.get(snap.cpf) ?? 0;
+      const tarifa = tarifaByCpf.get(snap.cpf) ?? 0;
+      const prestacao = somaseByCpf.get(snap.cpf) ?? 0;
 
-      if (hasNeonData) {
-        // Dados do snapshot histórico importado
-        // PAINEL saldo_final can be negative; CARGA splits into saldo_final=max(0,sf) and saldo_reembolsar=max(-sf,0)
-        dataSource = 'snapshot';
-        const sf_painel = toNum(snap.saldo_final);  // PAINEL value (can be negative)
-        saldo_final_carga = snap.saldo_final_carga !== null ? toNum(snap.saldo_final_carga) : Math.max(sf_painel, 0);
-        saldo_cartao_carga = snap.saldo_cartao_carga !== null ? toNum(snap.saldo_cartao_carga) : toNum(snap.saldo_cartao);
-        saldo_reembolsar  = snap.saldo_reembolsar !== null ? toNum(snap.saldo_reembolsar) : Math.max(-sf_painel, 0);
-        saldo_final       = sf_painel;  // Use PAINEL value (allows negative, matches planilha)
-        saldo_cartao      = saldo_cartao_carga;
-        saldo_prestacao   = toNum(snap.saldo_prestacao);
-        col_qz            = snap.col_qz !== null ? toNum(snap.col_qz) : null;
-      } else {
-        // Cálculo automático via extrato + snapshot anterior como âncora
-        dataSource = 'calculado';
-        const ext = extratoByCpf.get(snap.cpf) ?? { carga: 0, transferencia: 0, tarifa: 0 };
-        const sc  = saldoCartaoByCpf.get(snap.cpf) ?? toNum(snap.saldo_cartao);
+      const sf_novo = r2(sp - sc);
 
-        // Âncora: saldo_prestacao do último snapshot disponível
-        const sp_ancora = toNum(snap.saldo_prestacao);
-        // Δ do período atual
-        const delta_carga = ext.carga + ext.transferencia - ext.tarifa;
-        // Δ prestação: diferença entre somase atual e anterior
-        // Missing somase = 0 (no approved expenses recorded for that quinzena)
-        const somase_atual = somaseByCpf.get(snap.cpf) ?? 0;
-        const somase_prev = somasePrevByCpf.get(snap.cpf) ?? 0;
-        const delta_prestacao = r2(somase_atual - somase_prev);
-        // sp_novo = ancora + delta_carga - delta_prestacao
-        const sp_novo = r2(sp_ancora + delta_carga - delta_prestacao);
-        const sf_novo = r2(sp_novo - sc);              // saldo final = saldo_prest - saldo_cartao
-
-        saldo_prestacao   = sp_novo;
-        saldo_cartao      = sc;
-        saldo_cartao_carga = sc;
-        saldo_final       = sf_novo;  // Allow negative (match planilha PAINEL)
-        saldo_final_carga = Math.max(sf_novo, 0);  // CARGA column = max(0, sf)
-        saldo_reembolsar  = Math.max(-sf_novo, 0);  // CARGA column = max(-sf, 0)
-        col_qz            = null; // sem planilha, col_qz vem apenas de manuais
-      }
+      const saldo_final = sf_novo;
+      const saldo_cartao = sc;
+      const saldo_prestacao = sp;
+      const saldo_final_carga = Math.max(sf_novo, 0);
+      const saldo_cartao_carga = sc;
+      const saldo_reembolsar = Math.max(-sf_novo, 0);
 
       // Manuais
       const col_qz_manual =
@@ -503,16 +591,17 @@ export async function GET(request: NextRequest) {
           ? toNum(manual.adiantamento)
           : 0;
 
-      const col_qz_efetivo = col_qz_manual !== null ? col_qz_manual : (col_qz ?? 0);
+      const col_qz_efetivo = col_qz_manual !== null ? col_qz_manual : 0;
 
       const { carga_parcial, reembolso, carga_final } = calcFinancials(
         col_qz_efetivo,
-        saldo_final,
-        saldo_cartao,
+        saldo_final_carga,
+        saldo_cartao_carga,
         saldo_reembolsar,
         adiantamento,
         quinzena,
         snap.status_cartao ?? '',
+        reembolsoMultiplier,
       );
 
       return {
@@ -524,11 +613,15 @@ export async function GET(request: NextRequest) {
         centro_custo:      snap.centro_custo ?? '',
         gestor:            snap.gestor ?? '',
         diretor:           snap.diretor ?? '',
-        saldo_final,
-        saldo_cartao,
+        carga,
+        transferencia:     transf,
+        tarifa,
+        prestacao,
         saldo_prestacao,
-        col_qz,
+        saldo_cartao,
+        saldo_final,
         saldo_reembolsar,
+        col_qz:            null,
         saldo_final_carga,
         saldo_cartao_carga,
         col_qz_manual,
@@ -538,16 +631,11 @@ export async function GET(request: NextRequest) {
         reembolso,
         carga_final,
         data_sources: {
-          col_qz: col_qz_manual !== null
-            ? 'manual' as const
-            : col_qz !== null
-              ? 'planilha' as const
-              : 'null' as const,
-          saldo_final:   'neon' as const,
-          saldo_cartao:  'neon' as const,
-          adiantamento:  adiantamento > 0 ? 'manual' as const : 'default' as const,
+          col_qz: col_qz_manual !== null ? 'manual' as const : 'null' as const,
+          adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
         },
-        _data_source: dataSource,
+        _data_source: 'calculado' as const,
+        _is_frozen: false,
       };
     });
 
@@ -558,10 +646,11 @@ export async function GET(request: NextRequest) {
     const total_saldo_final = rows.reduce((s, r) => s + r.saldo_final, 0);
     const total_col_qz      = rows.reduce((s, r) => s + (r.col_qz_manual ?? r.col_qz ?? 0), 0);
 
-    const data_mode = hasNeonData ? 'snapshot' : 'calculado';
-
     const response: QuinzenaResponse = {
-      data_mode,
+      data_mode: 'calculado',
+      reembolso_multiplier: reembolsoMultiplier,
+      is_frozen: false,
+      frozen_at: null,
       period: {
         year, month, quinzena,
         start_date, end_date,
@@ -574,7 +663,6 @@ export async function GET(request: NextRequest) {
         total_carga_final,
         total_saldo_final,
         total_col_qz,
-        has_neon_data: hasNeonData,
       },
       data: rows,
     };

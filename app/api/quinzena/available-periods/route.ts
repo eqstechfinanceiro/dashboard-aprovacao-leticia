@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
+import { getQuinzenaCutoff } from '@/lib/pipeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,8 +11,10 @@ export const dynamic = 'force-dynamic';
  *   a) Tem snapshot importado em quinzena_controle_snapshot (dados históricos completos), OU
  *   b) Tem transações no extrato_movimentacao (cálculo automático via Neon)
  *
- * A resposta inclui flag `has_snapshot` para o frontend diferenciar
- * períodos com dados completos (snapshot) de períodos calculados on-the-fly.
+ * Períodos cujo cutoff ainda não foi atingido (quinzena futura) são excluídos.
+ * O cutoff de uma quinzena = data de fechamento da PRÓXIMA quinzena:
+ *   1QZ mês M → cutoff = 25/M
+ *   2QZ mês M → cutoff = 10/(M+1)
  */
 
 interface PeriodRow {
@@ -48,6 +51,7 @@ export async function GET() {
         quinzena,
         COUNT(*) AS snapshot_rows
       FROM quinzena_controle_snapshot
+      WHERE import_source IS NULL OR import_source != 'api'
       GROUP BY year, month, quinzena
       ORDER BY year DESC, month DESC, quinzena DESC
     `;
@@ -149,14 +153,24 @@ export async function GET() {
       }
     }
 
+    // Filtrar: excluir quinzenas cujo cutoff ainda não chegou
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const filtered = periods.filter(p => {
+      const qzId = `${p.year}-${String(p.month).padStart(2, '0')}-${p.quinzena}`;
+      const cutoff = getQuinzenaCutoff(qzId);
+      const cutoffDate = new Date(cutoff + 'T23:59:59');
+      return cutoffDate <= today;
+    });
+
     // Ordenar: mais recente primeiro
-    periods.sort((a, b) => {
+    filtered.sort((a, b) => {
       if (b.year !== a.year) return b.year - a.year;
       if (b.month !== a.month) return b.month - a.month;
       return b.quinzena - a.quinzena;
     });
 
-    return NextResponse.json({ periods });
+    return NextResponse.json({ periods: filtered });
   } catch (error) {
     console.error('[quinzena/available-periods]:', error);
     return NextResponse.json(

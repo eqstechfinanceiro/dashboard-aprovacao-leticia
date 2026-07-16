@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getLaravelCookieString } from '@/lib/laravel-token';
 
 export const dynamic = 'force-dynamic';
 
 const APP_URL = 'https://app.vexpenses.com';
-const LARAVEL_TOKEN = process.env.VEXPENSES_LARAVEL_TOKEN || '';
 
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
@@ -13,9 +13,6 @@ const BROWSER_HEADERS = {
   'Origin': 'https://app.vexpenses.com',
   'Referer': 'https://app.vexpenses.com/admin/relatorio-acompanhamento-aprovacao',
 };
-
-const LARAVEL_SESSION = process.env.VEXPENSES_LARAVEL_SESSION || '';
-const BROWSER_COOKIES = `laravel_token=${LARAVEL_TOKEN}; laravel_session=${LARAVEL_SESSION}; language=pt-BR`;
 
 interface ExcelRow {
   reportId: string;
@@ -107,10 +104,11 @@ function extractCookiesFromResponse(resp: Response, baseCookies: string): string
 }
 
 async function fetchApprovalTracking(): Promise<ReportWithTracking[]> {
-  if (!LARAVEL_TOKEN) throw new Error('VEXPENSES_LARAVEL_TOKEN not configured');
+  const baseCookies = await getLaravelCookieString();
+  if (!baseCookies) throw new Error('Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão.');
 
   let csrfToken: string;
-  let sessionCookies: string = BROWSER_COOKIES;
+  let sessionCookies: string = baseCookies;
 
   // Step 1: GET admin page to extract CSRF token and session cookies
   const pageResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao`, {
@@ -134,10 +132,7 @@ async function fetchApprovalTracking(): Promise<ReportWithTracking[]> {
 
     if (redirectUrl.includes('/login')) {
       throw new Error(
-        'VEXPENSES_LARAVEL_TOKEN is expired or invalid. Admin page redirected to /login. ' +
-        'Please capture a fresh laravel_token from the browser: ' +
-        'F12 > Application > Cookies > app.vexpenses.com > laravel_token, ' +
-        'then update the VEXPENSES_LARAVEL_TOKEN in vexpenses-dashboard/.env'
+        'Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão do browser.'
       );
     }
 
@@ -156,7 +151,7 @@ async function fetchApprovalTracking(): Promise<ReportWithTracking[]> {
       const isLoginRedirect = redirectUrl.includes('/login');
       throw new Error(
         isLoginRedirect
-          ? `VEXPENSES_LARAVEL_TOKEN is expired or invalid. Admin page redirected to /login. Please capture a fresh laravel_token from the browser (F12 > Application > Cookies > app.vexpenses.com > laravel_token).`
+          ? `Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão do browser.`
           : `Redirect to ${redirectUrl} returned ${retryResp.status}`
       );
     }
@@ -178,25 +173,25 @@ async function fetchApprovalTracking(): Promise<ReportWithTracking[]> {
     throw new Error(`Failed to load admin page: ${pageResp.status}`);
   }
 
-  // Step 2: POST to Excel endpoint — send all cookies captured from GET
-  const now = new Date();
-  const startDate = '01/01/2025';
-  const endDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    // Step 2: POST to Excel endpoint — send all cookies captured from GET
+    const now = new Date();
+    const startDate = '01/01/2025';
+    const endDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
 
-  const formData = new URLSearchParams();
-  formData.append('_token', csrfToken);
-  formData.append('status[]', 'ENVIADO');
-  formData.append('startDate', startDate);
-  formData.append('endDate', endDate);
+    const formData = new URLSearchParams();
+    formData.append('_token', csrfToken);
+    formData.append('status[]', 'ENVIADO');
+    formData.append('startDate', startDate);
+    formData.append('endDate', endDate);
 
-  const excelResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao/excel`, {
-    method: 'POST',
-    headers: {
-      ...BROWSER_HEADERS,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': sessionCookies,
-    },
-    body: formData.toString(),
+    const excelResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao/excel`, {
+      method: 'POST',
+      headers: {
+        ...BROWSER_HEADERS,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Cookie': sessionCookies,
+      },
+      body: formData.toString(),
     redirect: 'manual',
     signal: AbortSignal.timeout(120000),
   });

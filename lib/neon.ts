@@ -1,15 +1,55 @@
-import { neon } from '@neondatabase/serverless';
+import { Pool, QueryResult } from 'pg';
 
-// Configuração do banco de dados Neon
-const NEON_DATABASE_URL = process.env.NEON_DATABASE_URL;
+// Configuração do banco de dados (Neon PostgreSQL)
+const DATABASE_URL = process.env.NEON_DATABASE_URL;
 
 // Verificar se estamos em ambiente de build (Next.js build time)
-const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
+const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !DATABASE_URL;
 
-export const sql = NEON_DATABASE_URL ? neon(NEON_DATABASE_URL) : null;
+// Parse connection string to configure SSL properly
+function parseConnString(url: string) {
+  try {
+    const u = new URL(url);
+    return {
+      host: u.hostname,
+      port: parseInt(u.port) || 5432,
+      database: u.pathname.slice(1),
+      user: decodeURIComponent(u.username),
+      password: decodeURIComponent(u.password),
+      ssl: { rejectUnauthorized: false },
+    };
+  } catch {
+    return { connectionString: url, ssl: { rejectUnauthorized: false } };
+  }
+}
+
+let pool: Pool | null = null;
+
+if (DATABASE_URL && !isBuildTime) {
+  pool = new Pool({
+    ...parseConnString(DATABASE_URL),
+    max: 10,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  });
+}
+
+// Tagged template literal wrapper that mimics @neondatabase/serverless interface
+const sqlFn = (strings: TemplateStringsArray, ...values: any[]) => {
+  let query = strings[0];
+  for (let i = 0; i < values.length; i++) {
+    query += `$${i + 1}${strings[i + 1]}`;
+  }
+  return pool!.query(query, values).then((res: QueryResult) => res.rows);
+};
+
+// Attach .query method for raw query access (used by pipeline batch inserts)
+(sqlFn as any).query = (text: string, params?: any[]) => pool!.query(text, params);
+
+export const sql = pool ? (sqlFn as any) : null;
 
 // Flag para indicar se o banco está disponível
-export const isDatabaseAvailable = !!NEON_DATABASE_URL && !isBuildTime;
+export const isDatabaseAvailable = !!DATABASE_URL && !isBuildTime;
 
 // Flag para evitar múltiplas tentativas de criação da tabela
 let tableCreationAttempted = false;

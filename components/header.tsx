@@ -1,8 +1,21 @@
 'use client';
 
-import { Bell, Search, User } from 'lucide-react';
+import { Bell, Search, User, LogOut } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { useRouter } from 'next/navigation';
 
 export function Header() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/login');
+    router.refresh();
+  };
+
+  const roleLabel = user?.role === 'admin' ? 'Administrador' : user?.role === 'gestor' ? 'Gestor' : 'Usuário';
+
   return (
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <div className="flex items-center gap-4">
@@ -27,10 +40,20 @@ export function Header() {
             <User className="h-5 w-5 text-white" />
           </div>
           <div className="text-sm">
-            <p className="font-medium text-gray-900">Letícia</p>
-            <p className="text-xs text-gray-500">Administradora</p>
+            <p className="font-medium text-gray-900">{user?.name ?? '—'}</p>
+            <p className="text-xs text-gray-500">
+              {user?.job_title || roleLabel}
+            </p>
           </div>
         </div>
+
+        <button
+          onClick={handleLogout}
+          className="rounded-lg p-2 text-gray-600 hover:bg-gray-100"
+          title="Sair"
+        >
+          <LogOut className="h-5 w-5" />
+        </button>
       </div>
     </header>
   );

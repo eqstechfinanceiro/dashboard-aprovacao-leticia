@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { RefreshCw, CheckCircle2, XCircle, Clock, AlertCircle, Zap, Calendar } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
+import { UsersManagement } from '@/components/users-management';
 
 interface StepInfo {
   status: string;
@@ -83,6 +86,7 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function Configuracoes() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [pipelineStatus, setPipelineStatus] = useState<PipelineStatus | null>(null);
   const [running, setRunning] = useState(false);
@@ -162,6 +166,15 @@ export default function Configuracoes() {
         <p className="text-gray-600 mt-1">Configurações do sistema (Admin)</p>
       </div>
 
+      <Tabs defaultValue="pipeline">
+        <TabsList>
+          <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+          {user?.role === 'admin' && (
+            <TabsTrigger value="users">Usuários</TabsTrigger>
+          )}
+        </TabsList>
+
+        <TabsContent value="pipeline">
       {/* Pipeline Section */}
       <Card>
         <CardHeader>
@@ -308,6 +321,14 @@ export default function Configuracoes() {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+
+        {user?.role === 'admin' && (
+          <TabsContent value="users">
+            <UsersManagement />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 }

@@ -16,6 +16,8 @@ import {
   Pencil,
   Check,
   X,
+  Snowflake,
+  Unlock,
 } from 'lucide-react';
 
 // ---- Types ------------------------------------------------------------------
@@ -46,6 +48,10 @@ interface QuinzenaRow {
   centro_custo: string;
   gestor: string;
   diretor: string;
+  carga: number;
+  transferencia: number;
+  tarifa: number;
+  prestacao: number;
   saldo_final: number;
   saldo_cartao: number;
   saldo_prestacao: number;
@@ -59,16 +65,19 @@ interface QuinzenaRow {
   carga_parcial: number;
   reembolso: number;
   carga_final: number;
+  _data_source: 'frozen' | 'calculado';
+  _is_frozen: boolean;
   data_sources: {
-    col_qz: 'planilha' | 'manual' | 'null';
-    saldo_final: 'neon';
-    saldo_cartao: 'neon';
+    col_qz: 'manual' | 'null';
     adiantamento: 'manual' | 'default';
   };
 }
 
 interface QuinzenaResponse {
-  data_mode: 'snapshot' | 'calculado';
+  data_mode: 'frozen' | 'calculado';
+  reembolso_multiplier: number;
+  is_frozen: boolean;
+  frozen_at: string | null;
   period: {
     year: number;
     month: number;
@@ -84,7 +93,6 @@ interface QuinzenaResponse {
     total_carga_final: number;
     total_saldo_final: number;
     total_col_qz: number;
-    has_neon_data: boolean;
   };
   data: QuinzenaRow[];
 }
@@ -228,6 +236,7 @@ export default function QuinzenaDinamicaPage() {
   const [search, setSearch] = useState('');
   const [onlyWithCarga, setOnlyWithCarga] = useState(true);
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [freezing, setFreezing] = useState(false);
 
   // Filtros dropdown
   const [selectedRegionals, setSelectedRegionals] = useState<Set<string>>(new Set());
@@ -330,7 +339,7 @@ export default function QuinzenaDinamicaPage() {
             updated.col_qz_manual = rawValue === null ? null : parseFloat(rawValue);
             updated.data_sources = {
               ...updated.data_sources,
-              col_qz: updated.col_qz_manual !== null ? 'manual' : updated.col_qz !== null ? 'planilha' : 'null',
+              col_qz: updated.col_qz_manual !== null ? 'manual' as const : 'null' as const,
             };
           }
           if (field === 'adiantamento') {
@@ -358,7 +367,7 @@ export default function QuinzenaDinamicaPage() {
               (col_qz_efetivo - updated.saldo_final_carga - updated.saldo_cartao_carga - updated.adiantamento) * 100,
             ) / 100;
             updated.reembolso = qz === 1
-              ? Math.round(Math.max(0, updated.saldo_reembolsar) * 0.5 * 100) / 100
+              ? Math.round(Math.max(0, updated.saldo_reembolsar) * (prev.reembolso_multiplier ?? 0.5) * 100) / 100
               : 0;
             updated.carga_final = Math.round((Math.max(0, updated.carga_parcial) + updated.reembolso) * 100) / 100;
           }
@@ -578,6 +587,46 @@ export default function QuinzenaDinamicaPage() {
   };
 
   const isCalcMode = data?.data_mode === 'calculado';
+  const isFrozen = data?.is_frozen ?? false;
+
+  // Freeze/unfreeze handlers
+  const handleFreeze = async () => {
+    if (year === null || month === null || quinzena === null) return;
+    setFreezing(true);
+    try {
+      const res = await fetch('/api/quinzena-freeze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, month, quinzena }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Erro ao congelar');
+      }
+      loadData(year, month, quinzena);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao congelar');
+    } finally {
+      setFreezing(false);
+    }
+  };
+
+  const handleUnfreeze = async () => {
+    if (year === null || month === null || quinzena === null) return;
+    setFreezing(true);
+    try {
+      const res = await fetch(`/api/quinzena-freeze?year=${year}&month=${month}&quinzena=${quinzena}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Erro ao descongelar');
+      }
+      loadData(year, month, quinzena);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Erro ao descongelar');
+    } finally {
+      setFreezing(false);
+    }
+  };
 
   // Valores unicos para dropdowns
   const allRegionals = [...new Set((data?.data ?? []).map(r => r.regional).filter(Boolean))].sort();
@@ -585,8 +634,8 @@ export default function QuinzenaDinamicaPage() {
 
   const filteredRows = (data?.data ?? []).filter(r => {
     if (onlyWithCarga) {
-      const hasLoad = isCalcMode ? r.carga_final > 0 : (r.col_qz !== null && r.col_qz !== 0);
-      if (!hasLoad) return false;
+      const col_qz_efetivo = r.col_qz_manual !== null ? r.col_qz_manual : (r.col_qz ?? 0);
+      if (col_qz_efetivo <= 0) return false;
     }
     if (selectedRegionals.size > 0 && !selectedRegionals.has(r.regional)) return false;
     if (selectedCentros.size > 0 && !selectedCentros.has(r.centro_custo)) return false;
@@ -623,6 +672,17 @@ export default function QuinzenaDinamicaPage() {
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
+          {isFrozen ? (
+            <Button size="sm" variant="outline" onClick={handleUnfreeze} disabled={freezing || loading}>
+              <Unlock className="h-4 w-4 mr-1" />
+              Descongelar
+            </Button>
+          ) : (
+            <Button size="sm" variant="default" onClick={handleFreeze} disabled={freezing || loading || !data}>
+              <Snowflake className="h-4 w-4 mr-1" />
+              Congelar
+            </Button>
+          )}
           <Button size="sm" variant="outline"
             onClick={() => setImportModalOpen(true)}
             disabled={year === null || month === null || quinzena === null}
@@ -719,8 +779,8 @@ export default function QuinzenaDinamicaPage() {
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <Database className="h-3.5 w-3.5 text-green-500" />
                     {data.period.start_date} &rarr; {data.period.end_date}
-                    {data.data_mode === 'snapshot'
-                      ? <Badge className="bg-green-100 text-green-700 text-xs py-0">Snapshot</Badge>
+                    {data.data_mode === 'frozen'
+                      ? <Badge className="bg-blue-100 text-blue-700 text-xs py-0">Congelado</Badge>
                       : <Badge className="bg-amber-100 text-amber-700 text-xs py-0">Calculado</Badge>
                     }
                   </div>

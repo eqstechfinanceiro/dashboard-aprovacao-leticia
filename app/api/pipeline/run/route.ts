@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { runPipeline, getCurrentQuinzenaId } from '@/lib/pipeline';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // 5 minutes — full 5-step pipeline
+export const maxDuration = 3600; // 1 hour — full pipeline including download_expenses (~18 min for 7k HTTP requests)
 
 export async function POST(request: NextRequest) {
   try {
