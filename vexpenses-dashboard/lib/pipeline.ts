@@ -552,32 +552,22 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
   };
 }
 
-/** Step 1: Refresh all report statuses from VExpenses API */
+/** Step 1: Refresh all report statuses from VExpenses API
+ *  Uses the internal /api/vexpenses/reports endpoint which has caching
+ *  and avoids Incapsula blocking that occurs with paginate=true.
+ */
 export async function refreshReports(): Promise<Record<string, unknown>> {
   if (!sql) throw new Error('Database not available');
   if (!API_KEY) throw new Error('VEXPENSES_API_KEY not configured');
 
-  let allReports: any[] = [];
-  let page = 1;
-  const perPage = 100;
-
-  while (true) {
-    const resp = await fetch(
-      `${API_URL}/v2/reports?paginate=true&page=${page}&per_page=${perPage}&include=user`,
-      {
-        headers: { Authorization: API_KEY, Accept: 'application/json' },
-        signal: AbortSignal.timeout(60000),
-      }
-    );
-    if (!resp.ok) throw new Error(`API returned ${resp.status}`);
-    const data = await resp.json();
-    const reports = data.data || [];
-    allReports = allReports.concat(reports);
-
-    const lastPage = data.last_page || 1;
-    if (page >= lastPage) break;
-    page++;
-  }
+  const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL || 'http://localhost:3000';
+  const resp = await fetch(`${baseUrl}/api/vexpenses/reports?include=user`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(300000),
+  });
+  if (!resp.ok) throw new Error(`Internal reports API returned ${resp.status}`);
+  const data = await resp.json();
+  const allReports: any[] = data.data || [];
 
   // Upsert into prestacao_reports — batch insert for performance
   let upserted = 0;
@@ -806,7 +796,7 @@ export async function runPipeline(
       results[step] = { error: errorMsg };
       await recordStepFinish(rowId, 'failed', errorMsg);
       onProgress?.(step, `Erro: ${errorMsg}`);
-      return { success: false, results };
+      // Continue to next step instead of stopping
     }
   }
 

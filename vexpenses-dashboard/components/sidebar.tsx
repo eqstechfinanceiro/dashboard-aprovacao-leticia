@@ -12,7 +12,8 @@ import {
   TrendingUp,
   FileSpreadsheet,
   Hourglass,
-  Bot
+  Bot,
+  ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -26,6 +27,7 @@ const ALL_NAVIGATION = [
   { id: 'status-caixa', name: 'Status Caixa', href: '/status-caixa', icon: Wallet },
   { id: 'gestao-caixa', name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
   { id: 'quinzena-dinamica', name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheet },
+  { id: 'controle', name: 'Controle', href: '/controle', icon: ClipboardList },
   { id: 'aprovacao-dinamica', name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
   { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];

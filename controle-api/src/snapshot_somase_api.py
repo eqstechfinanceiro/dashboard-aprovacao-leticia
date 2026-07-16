@@ -36,10 +36,30 @@ load_dotenv(BASE / ".env")
 NEON_URL = os.getenv("NEON_DATABASE_URL")
 
 
+def get_cutoff(quinzena_id: str) -> str:
+    """
+    Retorna o cutoff da quinzena (data em que o snapshot é finalizado = próxima quinzena fecha).
+    1QZ mês M → 25/M
+    2QZ mês M → 10/(M+1)
+    """
+    year, month, q = quinzena_id.split("-")
+    year = int(year)
+    month = int(month)
+    q = int(q)
+    if q == 1:
+        return f"{year}-{month:02d}-25"
+    else:
+        next_month = month + 1 if month < 12 else 1
+        next_year = year if month < 12 else year + 1
+        return f"{next_year}-{next_month:02d}-10"
+
+
 def snapshot_somase(quinzena_id: str, dry_run: bool = False):
     """Create a somase snapshot from API data (prestacao_reports + prestacao_expenses)."""
     conn = psycopg2.connect(NEON_URL, connect_timeout=10)
     cur = conn.cursor()
+    cutoff = get_cutoff(quinzena_id)
+    cutoff_str = f"{cutoff} 23:59:59"
 
     # 1. Check freshness of prestacao data
     cur.execute("SELECT COUNT(*) FROM prestacao_reports WHERE status = 'APROVADO'")
@@ -54,16 +74,17 @@ def snapshot_somase(quinzena_id: str, dry_run: bool = False):
         conn.close()
         return
 
-    # 2. Compute somase by CPF from all approved reports
+    # 2. Compute somase by CPF from approved reports up to the cutoff
     cur.execute("""
         SELECT pr.user_cpf, SUM(pe.value) as total
         FROM prestacao_expenses pe
         JOIN prestacao_reports pr ON pe.report_id = pr.id
         WHERE pr.status = 'APROVADO'
           AND pr.user_cpf IS NOT NULL
+          AND (pr.updated_at IS NULL OR pr.updated_at <= %s)
         GROUP BY pr.user_cpf
         ORDER BY SUM(pe.value) DESC
-    """)
+    """, (cutoff_str,))
     rows = cur.fetchall()
     print(f"  CPFs with approved expenses: {len(rows)}")
     print(f"  Total somase: R$ {sum(float(r[1]) for r in rows):,.2f}")
@@ -102,7 +123,8 @@ def snapshot_somase(quinzena_id: str, dry_run: bool = False):
         JOIN prestacao_reports pr ON pe.report_id = pr.id
         WHERE pr.status = 'APROVADO'
           AND pr.user_cpf IS NOT NULL
-    """)
+          AND (pr.updated_at IS NULL OR pr.updated_at <= %s)
+    """, (cutoff_str,))
     snap_rows = [(row[0], quinzena_id, float(row[2]), row[1]) for row in cur.fetchall()]
     execute_batch(cur, """
         INSERT INTO prestacao_expense_snapshots (id, quinzena, value, user_cpf)
@@ -122,8 +144,9 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Don't write to DB, just show")
     args = parser.parse_args()
 
+    cutoff = get_cutoff(args.quinzena)
     print("=" * 60)
-    print(f"  SNAPSHOT SOMASE — {args.quinzena}")
+    print(f"  SNAPSHOT SOMASE — {args.quinzena} (cutoff {cutoff})")
     print("=" * 60)
     snapshot_somase(args.quinzena, args.dry_run)
 

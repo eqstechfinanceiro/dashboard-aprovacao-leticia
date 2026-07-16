@@ -1,0 +1,63 @@
+=== CONTROLE PAINEL (full columns) ===
+  r1: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r2: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r3: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r4: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r5: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r6: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r7: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'ANO', '2026.0', '', '', '']
+  r8: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'MÊS', 'JUNHO', '', '', '']
+  r9: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+  r10: ['', '', '', '', '', '', '', '', '', '', '', '', '', '8673602.969999999', '-1257855.36', '-56333.829999999994', '7083242.069999991', '276171.7099999977', '205148.34000000003', '71023.36999999796', '507670.0', '468590.0', '112111.29', '0.0', '', '636545.01']
+  r11: ['EMPRESA', 'COLABORADOR', 'CPF', 'CHAVE ', 'SITUAÇÃO', 'STATUS DO CARTÃO', 'CARTÃO ITAU', 'TERMO', 'REGIONAL', 'CENTRO DE CUSTO', 'GESTOR', 'DIRETOR', 'CARTÃO VEXPENSES', 'CARGA', 'TRANSFERENCIA', '(-) TARIFA', '(-) PRESTAÇÃO DE CONTAS', 'SALDO PRESTAÇÃO', '(-) SALDO CARTAO', 'SALDO FINAL', '1ª QZ', '2ª QZ', 'ADICIONAIS', 'SITUAÇÃO COLABORADOR', 'CARTÃO CRED. ITAU', 'ITAU']
+  r12: ['EQS', 'ABNER ANDRADE CAVALCANTE', '02027745203', '020203', 'ATIVO', 'Cartão ativo', '565737', 'ASSINADO', 'REGIONAL CO', 'CEF AM AC RR', 'ANGELICA SOARES', 'ROGERIO SCATAMBULO', 'SIM', '275393.66', '-61882.9', '-1554.0', '200217.11000000013', '11739.649999999849', '0.0', '11739.649999999849', '9840.0', '9840.0', '2000.0', 'PROCESSADO', 'SIM', '2000.0']
+  r13: ['EQS', 'ADAN LEONARDO SOUZA BATIS', '01932662537', '019537', 'ATIVO', 'Cartão ativo', '', 'ASSINADO', 'REGIONAL NE', 'TELEFONICA BA', 'GERSON OLIVEIRA', 'ROGERIO SCATAMBULO', 'SIM', '9920.369999999999', '-612.0', '-49.0', '9221.39', '37.97999999999956', '1.1', '36.87999999999956', '1000.0', '1000.0', '0.0', 'PROCESSADO', 'NÃO', '0.0']
+
+=== MAR 1QZ ===
+  sheet 'QUINZENA MARÇO' max_row=481 max_col=53
+    r1: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+    r2: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'VALOR NÃO FEITO', '']
+    r3: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '1591 CAIXAS REPROVADOS', 'TESOURARIA', '']
+    r4: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'CARGA FINAL ', 'CARGA FINAL  SEM CX RE', '0', '']
+    r5: ['', '', '', '', '', '', '', '', '-41012.10999999975', '89376.75999999957', '-23548.699999999928', '34335.19999999987', '332900', '6943.160000000002', '0', '236580.08000000045', '291621.64000000013', '13911.129999999988', '250491.21000000046', '250491.21000000046', '', '']
+    r6: ['', 'PORTADOR', 'CPF', 'STATUS COLAB', 'CENTRO CUSTO', 'COD CENTRO CUSTO', 'GESTOR', 'DIREÇÃO', 'SALDO REEMBOLSAR', 'SALDO PENDENTE COM CX ', 'SALDO REEMBOLSAR SEM C', 'SALDO PENDENTE SEM CX ', '1QZ DE MARÇO 26', 'SALDO CARTAO', 'ADIANTAMENTO', 'CARGA PARCIAL', 'CARGA PARCIAL SEM CX R', 'REEMBOLSO', 'CARGA FINAL COM CX REP', 'CARGA FINAL SEM CX REP', 'STATUS DO CARTAO', 'OBS ']
+    r7: ['', 'ABNER ANDRADE CAVALCAN', '02027745203', 'ATIVO', 'CEF AM AC RR', '11030290001', 'ANGELICA SOARES', 'ROGERIO SCATAMBULO', '0', '0.7199999999720603', '0', '0.7199999999429565', '9840', '5', '0', '9834.280000000028', '9834.280000000057', '0', '9834.280000000028', '9834.280000000028', 'Cartão ativo', '']
+    r8: ['', 'ADAN LEONARDO SOUZA BA', '01932662537', 'ATIVO', 'TELEFONICA BA', '11061480001', 'GERSON OLIVEIRA', 'ROGERIO SCATAMBULO', '0', '761.8999999999987', '0', '761.8999999999987', '700', '0', '0', '-61.89999999999873', '-61.89999999999873', '0', '0', '0', 'Cartão ativo', '']
+    r9: ['', 'ADAUTO JOSE PEREIRA', '85087572634', 'ATIVO', 'CEF FACILITIES BH', '11030800001', 'HUGO ALEXANDRE', 'MARCOS CARIAS', '0', '500.00000000000045', '0', '500.00000000000034', '500', '0', '0', '-4.547473508864641e-13', '-3.410605131648481e-13', '0', '0', '0', 'Cartão ativo', '']
+    r10: ['', 'MARCIO ROBERTO DA SILV', '96212993068', 'ATIVO', 'CLARO INFRA RS', '1104150001', 'BRUNO EDUARDO', 'EVERSON GAIDSTIECHI', '-107.7199999999998', '0', '0', '910.8599999999997', '0', '49.64', '0', '-49.64', '-960.4999999999997', '0', '0', '0', 'Cartão ativo', '']
+  sheet 'Planilha1' max_row=163 max_col=9
+    r1: ['', '', '', '', '', '250491.21000000046', '', '', '']
+    r2: ['PORTADOR', 'CPF', 'CENTRO CUSTO', 'COD CENTRO CUSTO', 'GESTOR', 'CARGA FINAL SEM CX REP', '', 'Rótulos de Linha', 'Soma de CARGA FINAL SE']
+    r3: ['ABNER ANDRADE CAVALCAN', '02027745203', 'CEF AM AC RR', '11030290001', 'ANGELICA SOARES', '9834.280000000028', '', '1201071', '679.68']
+    r4: ['ADILSON MELLO DE CAMAR', '67324398049', 'BB SERET RS', '11010140001', 'ALEXANDRE GROSS', '800', '', '1104150001', '5600']
+    r5: ['ADMILSON DOS SANTOS GA', '04769973993', 'CEF NORTE SC', '11030690001', 'BRUNO LINHARES', '1643.56', '', '11010060001', '224.83000000000084']
+    r6: ['ADSON ARAUJO DA SILVA', '94551804304', 'CLARO INFRA NORDESTE', '11040170001', 'FELIPE JOSE', '1600', '', '11010090001', '7.339999999999691']
+    r7: ['ADSON SANTOS DA SILVA', '83058133553', 'TELEFONICA BA', '11061480001', 'GERSON OLIVEIRA', '857.6600000000001', '', '11010110001', '1000']
+    r8: ['PRISCILA GOTARDO PEREI', '05168980945', 'ADM FILIAL SC', '1201071', 'BRUNO LINHARES', '679.68', '', '11010140001', '800']
+    r9: ['ALAN RODRIGO SILVA AND', '07722232469', 'BB ALAGOAS', '11010060001', 'GERSON OLIVEIRA', '224.83000000000084', '', '11010150001', '500']
+    r10: ['ALIRIO THOMAZ VALENTIM', '99335220000', 'NET LITORAL RS', '11061830001', 'ALEXANDRE GROSS', '500', '', '11010170001', '1506.0599999999995']
+
+=== JAN 2QZ (full cols) ===
+    r5: ['', '', '', '', '', '', '', '', '0', '152.9400000000004', '152.9400000000004', '0', '152.9400000000004', '152.9400000000004', '500', '302.12', '0', '44.9399999999996', '44.9399999999996', '0', '44.9399999999996', '44.9399999999996', '', '', '']
+    r6: ['', 'PORTADOR', 'CPF', 'STATUS COLAB', 'CENTRO CUSTO', 'COD CENTRO CUSTO', 'GESTOR', 'DIREÇÃO', 'SALDO REEMBOLSAR', 'SALDO PARCIAL PENDENTE', 'SALDO PARCIAL COM REPR', '1QZ DE JAN 26', 'SALDO PENDENTE FINAL', 'SALDO PENDENTE FINAL C', '2QZ DE JAN 26', 'SALDO CARTAO', 'ADIANTAMENTO', 'CARGA PARCIAL SEM', 'CARGA PARCIAL COM REPR', 'REEMBOLSO', 'CARGA FINAL SEM CX REP', 'CARGA FINAL COM CX REP', 'STATUS DO CARTAO', 'OBS ', '']
+    r7: ['', 'ABNER ANDRADE CAVALCAN', '2027745203', 'ATIVO', 'CEF AM AC RR', '11030290001', 'ANGELICA SOARES', 'ROGERIO SCATAMBULO', '', '34887.14999999998', '-1629.899999999965', '9837', '25050.14999999998', '0', '9840', '20', '', '-15230.14999999998', '9820', '', '0', '9820', 'Cartão ativo', '', '']
+    r8: ['', 'ADAN LEONARDO SOUZA BA', '1932662537', 'ATIVO', 'UFBA BA', '11062600001', 'GERSON OLIVEIRA', 'ROGERIO SCATAMBULO', '', '61.899999999999125', '61.899999999999125', '584.0300000000007', '0', '0', '700', '34.06', '', '665.94', '665.94', '', '665.94', '665.94', 'Cartão ativo', '', '']
+
+=== FEB 2QZ (full cols) ===
+    r5: ['', '', '', '', '', '', '', '', '-34946.96000000008', '230559.19999999987', '256740.74000000034', '144524.24999999968', '407950', '84815.14000000003', '3000', '175610.6100000003', '0', '231100.01000000024', '', '', '', '', '', '', '']
+    r6: ['', 'PORTADOR', 'CPF', 'STATUS COLAB', 'CENTRO CUSTO', 'COD CENTRO CUSTO', 'GESTOR', 'DIREÇÃO', 'SALDO REEMBOLSAR', 'SALDO PARCIAL PENDENTE', '1QZ DE FEV 26', 'SALDO PENDENTE FINAL', '2QZ DE JAN 26', 'SALDO CARTAO', 'ADIANTAMENTO', 'CARGA PARCIAL', 'REEMBOLSO', 'CARGA FINAL ', 'STATUS DO CARTAO', 'OBS ', '', '', '', '', '']
+    r7: ['', 'ARLEY HENRIQUE DE SOUZ', '01170402232', 'ATIVO', 'CEF GOIANIA CO', '11030850001', 'ANGELICA SOARES', 'ROGERIO SCATAMBULO', '-2610.970000000005', '0', '1995.8', '0', '2000', '2', '', '1998', '', '1998', 'Cartão ativo', '', '', '', '', '', '']
+    r8: ['', 'GUILHERME MOTTA RIBEIR', '11178519740', 'ATIVO', 'CEF ES', '11030820001', 'VINICIUS LOCATELLY', 'MARCOS CARIAS', '-2563.5100000000093', '0', '973.61', '0', '2000', '6', '', '1994', '', '1994', 'Cartão ativo', '', '', '', '', '', '']
+
+=== APR 1QZ ===
+    r4: ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
+    r5: ['', '', '', '', '', '', '', '', '', '-45860.7400000001', '80758.18999999973', '309575', '22850.040000000005', '0', '80', '19919', '225885.77000000028', '', '', '', '', '']
+    r6: ['', 'LANÇADOR', 'PORTADOR', 'CPF', 'STATUS COLAB', 'CENTRO CUSTO', 'COD CENTRO CUSTO', 'GESTOR', 'DIREÇÃO', 'SALDO REEMBOLSAR', 'SALDO FINAL', '1QZ DE ABRIL 26', 'SALDO CARTAO', 'ADIANTAMENTO', 'CARGA PARCIAL', 'REEMBOLSO', 'CARGA  FINAL ', 'STATUS DO CARTAO', 'OBS ', '', '', '']
+    r7: ['', 'JULIA', 'RAFAEL AMORIM VELLO', '01677920599', 'ATIVO', 'CEF NORTE OESTE BA', '', 'GERSON OLIVEIRA', 'ROGERIO SCATAMBULO', '', '291.6600000002072', '16000', '20', '', '15688.339999999793', '0', '15688.339999999793', 'Cartão ativo', '', '', '', '']
+    r8: ['', 'STEFANI', 'ABNER ANDRADE CAVALCAN', '02027745203', 'ATIVO', 'CEF AM AC RR', '', 'ANGELICA SOARES', 'ROGERIO SCATAMBULO', '-98.92000000007101', '0', '9840', '5', '', '9835', '0', '9835', 'Cartão ativo', '', '', '', '']
+
+=== MULTIPLIERS (searching row 4) ===
+  Jan 1QZ: r4c15 = 0.2
+  May 1QZ: r4c14 = 0.5
+  Jun 1QZ: r4c14 = 0.6
+  Jun 2QZ: r4c13 = 0.6

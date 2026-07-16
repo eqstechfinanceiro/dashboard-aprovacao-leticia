@@ -1,0 +1,4 @@
+Importing CONTROLE PAINEL as July 2026 QZ1 (cadastro only)...
+  Read 738 colaboradores from CONTROLE PAINEL
+  Deleted 0 existing July 2026 rows
+  ✓ Imported 738 cadastro-only rows for July 2026 QZ1

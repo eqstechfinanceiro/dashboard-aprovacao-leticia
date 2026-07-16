@@ -66,6 +66,7 @@ export const MODULES = [
   { id: 'status-caixa', label: 'Status Caixa' },
   { id: 'gestao-caixa', label: 'Gestão Caixa' },
   { id: 'quinzena-dinamica', label: 'Quinzena Dinâmica' },
+  { id: 'controle', label: 'Controle' },
   { id: 'aprovacao-dinamica', label: 'Aprovação Dinâmica' },
   { id: 'configuracoes', label: 'Configurações' },
 ] as const;
@@ -79,6 +80,7 @@ export const MODULE_HREF_MAP: Record<string, string> = {
   'status-caixa': '/status-caixa',
   'gestao-caixa': '/gestao-caixa',
   'quinzena-dinamica': '/quinzena-dinamica',
+  controle: '/controle',
   'aprovacao-dinamica': '/aprovacao-dinamica',
   configuracoes: '/configuracoes',
 };

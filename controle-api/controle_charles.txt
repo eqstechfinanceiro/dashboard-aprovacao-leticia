@@ -1,0 +1,85 @@
+=== Header row 11 ===
+  Col 0: 'EMPRESA'
+  Col 1: 'COLABORADOR'
+  Col 2: 'CPF'
+  Col 3: 'CHAVE '
+  Col 4: 'SITUAÇÃO'
+  Col 5: 'STATUS DO CARTÃO'
+  Col 6: 'CARTÃO ITAU'
+  Col 7: 'TERMO'
+  Col 8: 'REGIONAL'
+  Col 9: 'CENTRO DE CUSTO'
+  Col 10: 'GESTOR'
+  Col 11: 'DIRETOR'
+  Col 12: 'CARTÃO VEXPENSES'
+  Col 13: 'CARGA'
+  Col 14: 'TRANSFERENCIA'
+  Col 15: '(-) TARIFA'
+  Col 16: '(-) PRESTAÇÃO DE CONTAS'
+  Col 17: 'SALDO PRESTAÇÃO'
+  Col 18: '(-) SALDO CARTAO'
+  Col 19: 'SALDO FINAL'
+  Col 20: '1ª QZ'
+  Col 21: '2ª QZ'
+  Col 22: 'ADICIONAIS'
+  Col 23: 'SITUAÇÃO COLABORADOR'
+  Col 24: 'CARTÃO CRED. ITAU'
+  Col 25: 'ITAU'
+  Col 26: 'ADICIONAL ITAU'
+
+=== First data row 12 ===
+  Col 0: 'EQS'
+  Col 1: 'ABNER ANDRADE CAVALCANTE'
+  Col 2: '02027745203'
+  Col 3: '020203'
+  Col 4: 'ATIVO'
+  Col 5: 'Cartão ativo'
+  Col 6: '565737'
+  Col 7: 'ASSINADO'
+  Col 8: 'REGIONAL CO'
+  Col 9: 'CEF AM AC RR'
+  Col 10: 'ANGELICA SOARES'
+  Col 11: 'ROGERIO SCATAMBULO'
+  Col 12: 'SIM'
+  Col 13: 275393.66
+  Col 14: -61882.9
+  Col 15: -1554.0
+  Col 16: 200217.11000000013
+  Col 17: 11739.649999999849
+  Col 18: 0.0
+  Col 19: 11739.649999999849
+  Col 20: 9840.0
+  Col 21: 9840.0
+  Col 22: 2000.0
+  Col 23: 'PROCESSADO'
+  Col 24: 'SIM'
+  Col 25: 2000.0
+  Col 26: 0.0
+
+=== CHARLES NEVES (row 136) ===
+  Col 0: 'EQS'
+  Col 1: 'CHARLES NEVES MATTIUZZI'
+  Col 2: '12547938790'
+  Col 3: '125790'
+  Col 4: 'ATIVO'
+  Col 5: 'Cartão ativo'
+  Col 7: 'ASSINADO'
+  Col 8: 'REGIONAL ES'
+  Col 9: 'TELEFONICA ES'
+  Col 10: 'VINICIUS LOCATELLY'
+  Col 11: 'MARCOS CARIAS'
+  Col 12: 'SIM'
+  Col 13: 51501.840000000004
+  Col 14: -4442.53
+  Col 15: -329.0
+  Col 16: 47093.970000000016
+  Col 17: -363.66000000001077
+  Col 18: 2440.31
+  Col 19: -2803.9700000000107
+  Col 20: 4200.0
+  Col 21: 4200.0
+  Col 22: 0.0
+  Col 23: 'PROCESSADO'
+  Col 24: 'SIM'
+  Col 25: 4000.0
+  Col 26: 0.0

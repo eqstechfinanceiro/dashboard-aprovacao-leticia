@@ -102,21 +102,47 @@ def buscar_extrato_quinzena(conn, inicio: str, fim: str) -> dict:
             for r in cur.fetchall()}
 
 
-def buscar_saldo_cartao(conn, fechamento: str) -> dict:
+def buscar_extrato_acumulado(conn, fim: str) -> dict:
     """
-    Retorna dict {usuario_upper: saldo_cartao} usando o ultimo snapshot <= fechamento.
+    Retorna dict {usuario_upper: {carga, transferencia, tarifa}} acumulado até fim.
+    Usado para calcular SALDO PRESTAÇÃO direto no fechamento da quinzena.
     """
     cur = conn.cursor()
     cur.execute("""
+        SELECT
+            UPPER(usuario) AS u,
+            COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga,
+            COALESCE(ABS(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0)), 0) AS transferencia,
+            COALESCE(ABS(SUM(valor) FILTER(WHERE tipo = 'Taxa')), 0) AS tarifa
+        FROM extrato_movimentacao
+        WHERE data <= %s
+          AND is_snapshot = FALSE
+        GROUP BY UPPER(usuario)
+    """, (fim,))
+    return {r[0]: {"carga": float(r[1]), "transferencia": float(r[2]), "tarifa": float(r[3])}
+            for r in cur.fetchall()}
+
+
+def buscar_saldo_cartao(conn, fechamento: str, quinzena: int) -> dict:
+    """
+    Retorna dict {usuario_upper: saldo_cartao} usando o ultimo snapshot <= fechamento.
+    Para 2a QZ, ignora o proprio dia 25 (usa < fechamento) pois snapshots do dia
+    de fechamento ja refletem a carga da proxima quinzena.
+    """
+    cur = conn.cursor()
+    op = "<=" if quinzena == 1 else "<"
+    cur.execute(f"""
         SELECT UPPER(m.usuario), m.valor
         FROM extrato_movimentacao m
         WHERE m.is_snapshot = TRUE
+          AND m.valor IS NOT NULL
           AND m.data = (
               SELECT MAX(m2.data)
               FROM extrato_movimentacao m2
               WHERE UPPER(m2.usuario) = UPPER(m.usuario)
                 AND m2.is_snapshot = TRUE
-                AND m2.data <= %s
+                AND m2.valor IS NOT NULL
+                AND m2.data {op} %s
           )
     """, (fechamento,))
     result = {}
@@ -142,11 +168,24 @@ def buscar_controle_snapshot(conn, ano: int, mes: int, quinzena: int) -> dict:
         SELECT cpf, colaborador, situacao, status_cartao, regional,
                centro_custo, gestor, diretor,
                saldo_prestacao, saldo_cartao, saldo_final,
-               col_qz, saldo_reembolsar, saldo_final_carga, saldo_cartao_carga
+               col_qz, saldo_reembolsar, saldo_final_carga, saldo_cartao_carga,
+               import_source
         FROM quinzena_controle_snapshot
         WHERE year = %s AND month = %s AND quinzena = %s
     """, (ano, mes, quinzena))
     return {r["cpf"]: dict(r) for r in cur.fetchall()}
+
+
+def buscar_reembolso_multiplier(conn, ano: int, mes: int, quinzena: int) -> float:
+    """Retorna o multiplicador de reembolso da quinzena (default 0.5)."""
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT reembolso_multiplier
+        FROM quinzena_config
+        WHERE year = %s AND month = %s AND quinzena = %s
+    """, (ano, mes, quinzena))
+    row = cur.fetchone()
+    return float(row[0]) if row else 0.5
 
 
 # =============================================================================
@@ -158,41 +197,61 @@ def _r2(v: float) -> float:
     return float(Decimal(str(v)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
 
 
+def salvar_quinzena_snapshot(conn, ano: int, mes: int, quinzena: int, linhas: list[dict]) -> None:
+    """Atualiza quinzena_controle_snapshot com os valores calculados."""
+    cur = conn.cursor()
+    values = []
+    for l in linhas:
+        values.append((
+            l["_saldo_prestacao"],
+            l["saldo_cartao"],
+            l["_saldo_final_painel"],
+            l["saldo_reembolsar"],
+            l["saldo_cartao"],
+            l["saldo_final"],
+            l["col_qz"],
+            "calc",
+            ano, mes, quinzena, l["cpf"],
+        ))
+    psycopg2.extras.execute_batch(cur, """
+        UPDATE quinzena_controle_snapshot
+        SET saldo_prestacao = COALESCE(%s, saldo_prestacao),
+            saldo_cartao = COALESCE(%s, saldo_cartao),
+            saldo_final = COALESCE(%s, saldo_final),
+            saldo_reembolsar = COALESCE(%s, saldo_reembolsar),
+            saldo_cartao_carga = COALESCE(%s, saldo_cartao_carga),
+            saldo_final_carga = COALESCE(%s, saldo_final_carga),
+            col_qz = COALESCE(%s, col_qz),
+            import_source = COALESCE(NULLIF(import_source, ''), %s)
+        WHERE year = %s AND month = %s AND quinzena = %s AND cpf = %s
+    """, values)
+    conn.commit()
+    cur.close()
+    logger.info(f"Snapshot salvo: {len(values)} linhas")
+
+
 def calcular_quinzena(
     ano: int,
     mes: int,
     quinzena: int,
     manuais: Optional[dict] = None,
+    save: bool = False,
 ) -> list[dict]:
     """
     Calcula a Carga Quinzenal completa usando apenas dados do Neon.
 
-    Retorna lista de dicts com todos os campos, ordenada por colaborador.
-
-    Fontes:
-      - CARGA/TRANSF/TARIFA: extrato_movimentacao (periodo da quinzena)
-      - SALDO CARTAO: ultimo snapshot do extrato <= data_fechamento
-      - PRESTACAO DE CONTAS: somase_snapshots (acumulado por CPF)
-      - col_qz e dados cadastrais: quinzena_controle_snapshot
-      - saldo_prestacao da quinzena anterior: somase_snapshots anterior (para calcular SALDO FINAL)
-
-    Calculo do PAINEL (reproducao da formula Excel):
-      saldo_prestacao_atual = carga + transferencia + tarifa - prestacao_de_contas_atual
-      saldo_final           = saldo_prestacao_atual - saldo_cartao  (acumulado desde abertura do cartao)
-
-    NOTA: saldo_prestacao e saldo_final sao ACUMULADOS (toda a vida do cartao).
-    A celula PAINEL usa SUMIFS sem filtro de data (so por colaborador).
-    Logo, para reproduzir o PAINEL, precisamos dos dados historicos completos,
-    que estao em quinzena_controle_snapshot.saldo_prestacao e .saldo_final.
-
-    Para quinzenas FUTURAS (nao presentes no snapshot), usamos a formula incremental:
-      saldo_prestacao(nova) = saldo_prestacao(anterior) + delta_carga - delta_prestacao
-      saldo_final(nova)     = saldo_prestacao(nova) - saldo_cartao(nova)
+    Para quinzenas importadas de planilha, usa os valores importados.
+    Para quinzenas geradas 100% API (import_source='api'), usa a formula
+    incremental (ancora + delta) a partir da quinzena anterior.
     """
     manuais = manuais or {}
 
     inicio, fim, fechamento = get_periodo(ano, mes, quinzena)
     quinzena_id = get_quinzena_id(ano, mes, quinzena)
+    prev_ano, prev_mes, prev_qz = get_quinzena_anterior(ano, mes, quinzena)
+    prev_quinzena_id = get_quinzena_id(prev_ano, prev_mes, prev_qz)
+    prevprev_ano, prevprev_mes, prevprev_qz = get_quinzena_anterior(prev_ano, prev_mes, prev_qz)
+    prevprev_quinzena_id = get_quinzena_id(prevprev_ano, prevprev_mes, prevprev_qz)
 
     logger.info(f"Calculando {quinzena}ª QZ {mes:02d}/{ano} | periodo {inicio} -> {fim} | fech {fechamento}")
 
@@ -202,20 +261,23 @@ def calcular_quinzena(
     conn = psycopg2.connect(NEON_URL)
 
     logger.info("Buscando dados do Neon...")
-    extrato   = buscar_extrato_quinzena(conn, inicio, fim)
-    snapshots = buscar_saldo_cartao(conn, fechamento)
-    somase    = buscar_somase(conn, quinzena_id)
-    controle  = buscar_controle_snapshot(conn, ano, mes, quinzena)
-    conn.close()
+    extrato         = buscar_extrato_quinzena(conn, inicio, fim)
+    extrato_acum    = buscar_extrato_acumulado(conn, fim)
+    snapshots       = buscar_saldo_cartao(conn, fechamento, quinzena)
+    somase          = buscar_somase(conn, quinzena_id)
+    prev_somase     = buscar_somase(conn, prev_quinzena_id)
+    prevprev_somase = buscar_somase(conn, prevprev_quinzena_id)
+    controle        = buscar_controle_snapshot(conn, ano, mes, quinzena)
+    prev_controle   = buscar_controle_snapshot(conn, prev_ano, prev_mes, prev_qz)
+    reembolso_multiplier = buscar_reembolso_multiplier(conn, ano, mes, quinzena)
 
-    logger.info(f"  Extrato: {len(extrato)} usuarios | Snapshots: {len(snapshots)} | Somase: {len(somase)} CPFs | Controle: {len(controle)} CPFs")
-
-    # Construir mapa: UPPER(colaborador) -> cpf (para join com extrato)
-    nome_para_cpf = {rec["colaborador"].upper(): cpf for cpf, rec in controle.items()}
+    logger.info(f"  Extrato: {len(extrato)} usuarios | Acumulado: {len(extrato_acum)} usuarios | Snapshots: {len(snapshots)} | Somase: {len(somase)} CPFs | Controle: {len(controle)} CPFs")
+    logger.info(f"  Multiplicador reembolso: {reembolso_multiplier}")
 
     linhas = []
     sem_extrato = 0
     sem_somase = 0
+    calculados = 0
 
     for cpf, snap in controle.items():
         nome_up = snap["colaborador"].upper() if snap["colaborador"] else ""
@@ -226,58 +288,76 @@ def calcular_quinzena(
         if not extrato.get(nome_up):
             sem_extrato += 1
 
-        # --- SALDO CARTAO ---
-        # Prioridade 1: saldo_cartao_carga importado da planilha (fonte de verdade historica)
-        # Prioridade 2: snapshot do extrato v3 (usado para quinzenas futuras sem planilha)
+        # --- SALDO CARTAO (CARGA) ---
+        # Prioridade 1: valor colado na CARGA (sheet)
+        # Prioridade 2: ultimo snapshot do extrato com o cutoff correto
         if snap.get("saldo_cartao_carga") is not None:
-            saldo_cartao = float(snap["saldo_cartao_carga"])
+            saldo_cartao_carga = float(snap["saldo_cartao_carga"])
         else:
-            saldo_cartao = snapshots.get(nome_up, 0.0)
+            saldo_cartao_carga = snapshots.get(nome_up, 0.0)
 
         # --- PRESTACAO DE CONTAS: somase acumulado ---
-        prestacao = somase.get(cpf, 0.0)
+        prestacao_atual = somase.get(cpf, 0.0)
         if cpf not in somase:
             sem_somase += 1
 
-        # --- SALDO FINAL e SALDO REEMBOLSAR ---
-        # Prioridade 1: saldo_final_carga + saldo_reembolsar importados da planilha CARGA
-        #   (sao os valores que foram EFETIVAMENTE colados na CARGA — source of truth)
-        # Prioridade 2: calcular do saldo_final do PAINEL (pode divergir se CONTROLE foi
-        #   reimportado apos a geracao da CARGA)
-        # Prioridade 3: quinzena futura — calcular via extrato + somase
-        if snap.get("saldo_final_carga") is not None:
+        # --- SALDO PRESTACAO (PAINEL) ---
+        # Fórmula ancora+incremento:
+        #   saldo_prestacao_Q = saldo_prestacao_P + extrato_periodo_Q - delta_prestacao_Q
+        # onde:
+        #   saldo_prestacao_P = valor importado/PAINEL da quinzena anterior
+        #   extrato_periodo_Q = carga - transferencia - tarifa do periodo atual
+        #   delta_prestacao_Q = prestacao aprovada no periodo atual
+        #                    = somase_P - somase_Pprev
+        is_api_seed = (snap.get("import_source") == "api")
+        ext_net = _r2(ext["carga"] - ext["transferencia"] - ext["tarifa"])
+        prestacao_delta = _r2(prev_somase.get(cpf, 0.0) - prevprev_somase.get(cpf, 0.0))
+
+        prev_rec = prev_controle.get(cpf)
+        if prev_rec and prev_rec.get("saldo_prestacao") is not None:
+            saldo_prestacao_ancora = _r2(float(prev_rec["saldo_prestacao"]))
+            saldo_prestacao = _r2(saldo_prestacao_ancora + ext_net - prestacao_delta)
+        else:
+            # Fallback para a primeira quinzena com historico: usa acumulado direto
+            ext_cum = extrato_acum.get(nome_up, {"carga": 0.0, "transferencia": 0.0, "tarifa": 0.0})
+            saldo_prestacao = _r2(
+                ext_cum["carga"]
+                - ext_cum["transferencia"]
+                - ext_cum["tarifa"]
+                - somase.get(cpf, 0.0)
+            )
+        calculados += 1
+
+        # --- SALDO FINAL e SALDO REEMBOLSAR (CARGA) ---
+        # Se os valores colados na CARGA existem, usamos eles (garante match com planilha).
+        # Caso contrario, calculamos a partir do saldo_prestacao + saldo_cartao_carga.
+        if snap.get("saldo_final_carga") is not None and not is_api_seed:
             saldo_final      = _r2(float(snap["saldo_final_carga"]))
             saldo_reembolsar = _r2(float(snap.get("saldo_reembolsar") or 0.0))
-            saldo_prestacao  = float(snap.get("saldo_prestacao") or 0.0)
-        elif snap.get("saldo_final") is not None:
-            saldo_final_painel = float(snap["saldo_final"])
-            saldo_final      = _r2(max(saldo_final_painel, 0.0))
-            saldo_reembolsar = _r2(max(-saldo_final_painel, 0.0))
-            saldo_prestacao  = float(snap.get("saldo_prestacao") or 0.0)
+            saldo_final_painel = _r2(saldo_prestacao - saldo_cartao_carga)
         else:
-            # Quinzena futura: calcular a partir do extrato + somase
-            carga_acum       = ext["carga"]
-            transferencia_ac = ext["transferencia"]
-            tarifa_acum      = ext["tarifa"]
-            saldo_prestacao  = _r2(carga_acum + transferencia_ac - tarifa_acum - prestacao)
-            saldo_final_painel = _r2(saldo_prestacao - saldo_cartao)
+            saldo_final_painel = _r2(saldo_prestacao - saldo_cartao_carga)
             saldo_final      = _r2(max(saldo_final_painel, 0.0))
             saldo_reembolsar = _r2(max(-saldo_final_painel, 0.0))
 
-        # --- Entradas manuais / da planilha ---
+        # --- Entradas manuais / da planilha / copia da anterior ---
         col_qz = 0.0
         if "col_qz" in man:
             col_qz = float(man["col_qz"] or 0)
         elif snap.get("col_qz") is not None:
             col_qz = float(snap["col_qz"])
+        else:
+            prev_rec = prev_controle.get(cpf)
+            if prev_rec and prev_rec.get("col_qz") is not None:
+                col_qz = float(prev_rec["col_qz"])
 
         adiantamento = 0.0
         if "adiantamento" in man:
             adiantamento = float(man.get("adiantamento") or 0)
 
         # --- Formulas vivas da CARGA ---
-        reembolso    = _r2(saldo_reembolsar * 0.5)
-        carga_parcial = _r2(col_qz - saldo_final - saldo_cartao - adiantamento)
+        reembolso     = _r2(saldo_reembolsar * reembolso_multiplier)
+        carga_parcial = _r2(col_qz - saldo_final - saldo_cartao_carga - adiantamento)
         carga_final   = _r2(max(carga_parcial, 0.0) + reembolso)
 
         # Regra de negocio: cartao com "Cadastro pendente" nao recebe carga
@@ -302,7 +382,7 @@ def calcular_quinzena(
             "saldo_reembolsar": saldo_reembolsar,
             "saldo_final":    saldo_final,
             "col_qz":         col_qz,
-            "saldo_cartao":   saldo_cartao,
+            "saldo_cartao":   saldo_cartao_carga,
             "adiantamento":   adiantamento,
             "carga_parcial":  carga_parcial,
             "reembolso":      reembolso,
@@ -313,12 +393,19 @@ def calcular_quinzena(
             "_carga_extrato":       ext["carga"],
             "_transferencia_extrato": ext["transferencia"],
             "_tarifa_extrato":       ext["tarifa"],
-            "_prestacao_somase":     prestacao,
+            "_prestacao_somase":     prestacao_atual,
             "_saldo_prestacao":      saldo_prestacao,
+            "_saldo_cartao_carga":   saldo_cartao_carga,
+            "_saldo_final_painel":   saldo_final_painel,
         })
 
     linhas.sort(key=lambda r: r["colaborador"] or "")
-    logger.info(f"Linhas calculadas: {len(linhas)} | Sem extrato: {sem_extrato} | Sem somase: {sem_somase}")
+    logger.info(f"Linhas calculadas: {len(linhas)} | Sem extrato: {sem_extrato} | Sem somase: {sem_somase} | Calculados: {calculados}")
+
+    if save:
+        salvar_quinzena_snapshot(conn, ano, mes, quinzena, linhas)
+
+    conn.close()
     return linhas
 
 
@@ -526,6 +613,8 @@ def main() -> None:
                         help="Planilha de referencia para comparacao")
     parser.add_argument("--manuais",  type=Path, default=None,
                         help="JSON {cpf: {col_qz, adiantamento, obs}}")
+    parser.add_argument("--save", action="store_true",
+                        help="Salvar os valores calculados em quinzena_controle_snapshot")
     args = parser.parse_args()
 
     manuais: dict = {}
@@ -542,7 +631,7 @@ def main() -> None:
     print(f"  Data fechamento: {fechamento}")
     print(f"{'='*65}\n")
 
-    linhas = calcular_quinzena(args.ano, args.mes, args.quinzena, manuais)
+    linhas = calcular_quinzena(args.ano, args.mes, args.quinzena, manuais, save=args.save)
 
     print(f"\n✅ Calculadas {len(linhas)} linhas")
 

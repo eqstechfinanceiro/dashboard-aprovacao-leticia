@@ -161,17 +161,25 @@ export async function processReceiptGeminiDirectBase64(
   try {
     const prompt = buildPrompt();
     let lastError = '';
+    let actualApiCalls = 0;
+    let totalWaitMs = 0;
+    const MAX_TOTAL_WAIT_MS = 120000;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       const available = getNextAvailableModel();
       if (!available) {
         const earliestCooldown = Math.min(...Object.values(modelState).map(s => s.cooldownUntil));
         const waitMs = Math.max(0, earliestCooldown - Date.now());
-        if (waitMs > 0) {
-          logThrottled(`[GeminiDirect] All models in cooldown, waiting ${Math.ceil(waitMs / 1000)}s...`);
-          await sleep(Math.min(waitMs, 30000));
+        if (waitMs > 0 && totalWaitMs < MAX_TOTAL_WAIT_MS) {
+          const actualWait = Math.min(waitMs, 30000);
+          logThrottled(`[GeminiDirect] All models in cooldown, waiting ${Math.ceil(actualWait / 1000)}s...`);
+          await sleep(actualWait);
+          totalWaitMs += actualWait;
+          attempt--;
+          continue;
         }
-        continue;
+        lastError = `All models exhausted (waited ${Math.ceil(totalWaitMs / 1000)}s total)`;
+        break;
       }
 
       const { model, state } = available;
@@ -182,8 +190,9 @@ export async function processReceiptGeminiDirectBase64(
         await sleep(wait);
       }
       state.lastCallTime = Date.now();
+      actualApiCalls++;
 
-      console.log(`[GeminiDirect] Using ${model.id} (attempt ${attempt + 1}/${maxRetries})`);
+      console.log(`[GeminiDirect] Using ${model.id} (attempt ${attempt + 1}/${maxRetries}, api call ${actualApiCalls})`);
 
       let response: Response;
       let responseText: string;

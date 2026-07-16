@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { snapshotSomase, getCurrentQuinzenaId } from '@/lib/pipeline';
+import { snapshotSomase, getCurrentQuinzenaId, refreshReports, downloadExpenses, refreshCadastro } from '@/lib/pipeline';
 import { recordStepStart, recordStepFinish, type PipelineStep } from '@/lib/pipeline';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // 5 min — snapshot_somase with batch insert should be fast
+export const maxDuration = 300; // 5 min
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,13 +16,24 @@ export async function POST(request: NextRequest) {
     const rowId = await recordStepStart(quinzenaId, step, 'manual');
 
     let meta: Record<string, unknown> = {};
-    if (step === 'snapshot_somase') {
-      meta = await snapshotSomase(quinzenaId);
-    } else {
-      return NextResponse.json(
-        { error: `Step '${step}' not supported for individual execution` },
-        { status: 400 }
-      );
+    switch (step) {
+      case 'snapshot_somase':
+        meta = await snapshotSomase(quinzenaId);
+        break;
+      case 'refresh_reports':
+        meta = await refreshReports();
+        break;
+      case 'download_expenses':
+        meta = await downloadExpenses();
+        break;
+      case 'refresh_cadastro':
+        meta = await refreshCadastro();
+        break;
+      default:
+        return NextResponse.json(
+          { error: `Step '${step}' not supported for individual execution` },
+          { status: 400 }
+        );
     }
 
     await recordStepFinish(rowId, 'success', null, meta);

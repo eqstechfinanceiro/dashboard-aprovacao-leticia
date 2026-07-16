@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { neon } from '@neondatabase/serverless';
+import { sql } from '@/lib/neon';
 import { clearLaravelTokenCache } from '@/lib/laravel-token';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,9 @@ export async function GET(request: Request) {
   }
 
   try {
-    const sql = neon(process.env.NEON_DATABASE_URL!);
+    if (!sql) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 500 });
+    }
 
     // Load current cookies from DB
     const rows = await sql`
