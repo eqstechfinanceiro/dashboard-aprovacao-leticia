@@ -217,40 +217,46 @@ export default function ControlePage() {
     }
   };
 
-  // Export current tab to XLSX
+  // Export all tabs to XLSX
   const exportXLSX = () => {
-    if (!data || !filteredData.length) return;
-    const cols = getColumnsForTab(activeTab);
-    const tabLabel = TABS.find(t => t.id === activeTab)?.label || activeTab;
+    if (!data || !data.data.length) return;
     const periodLabel = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-QZ${selectedQuinzena}`;
 
-    const wsData: unknown[][] = [];
-    // Title row
-    wsData.push([`CONTROLE - ${tabLabel} - ${periodLabel}`, ...Array(cols.length - 1).fill(null)]);
-    // Header row
-    wsData.push(cols.map(c => c.label));
-    // Data rows
-    for (const row of filteredData) {
-      wsData.push(cols.map(c => {
-        const v = (row as unknown as Record<string, unknown>)[c.key];
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'number') return v;
-        return String(v);
-      }));
-    }
-    // Totals row
-    wsData.push(cols.map(c => {
-      if (c.totalFn) return filteredData.reduce((s, r) => s + (Number((r as unknown as Record<string, unknown>)[c.key]) || 0), 0);
-      return c.key === 'colaborador' ? `TOTAL (${filteredData.length})` : '';
-    }));
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws['!cols'] = cols.map(c => ({ wch: Math.max(c.label.length + 2, 14) }));
-    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: cols.length - 1 } }];
-
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, tabLabel.substring(0, 31));
-    XLSX.writeFile(wb, `controle_${tabLabel.toLowerCase().replace(/\s+/g, '_')}_${periodLabel}.xlsx`);
+
+    // Export each tab as a separate sheet
+    for (const tab of TABS) {
+      const cols = getColumnsForTab(tab.id);
+      const tabLabel = tab.label;
+
+      const wsData: unknown[][] = [];
+      // Title row
+      wsData.push([`CONTROLE - ${tabLabel} - ${periodLabel}`, ...Array(cols.length - 1).fill(null)]);
+      // Header row
+      wsData.push(cols.map(c => c.label));
+      // Data rows
+      for (const row of data.data) {
+        wsData.push(cols.map(c => {
+          const v = (row as unknown as Record<string, unknown>)[c.key];
+          if (v === null || v === undefined) return '';
+          if (typeof v === 'number') return v;
+          return String(v);
+        }));
+      }
+      // Totals row
+      wsData.push(cols.map(c => {
+        if (c.totalFn) return data.data.reduce((s, r) => s + (Number((r as unknown as Record<string, unknown>)[c.key]) || 0), 0);
+        return c.key === 'colaborador' ? `TOTAL (${data.data.length})` : '';
+      }));
+
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws['!cols'] = cols.map(c => ({ wch: Math.max(c.label.length + 2, 14) }));
+      ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: cols.length - 1 } }];
+
+      XLSX.utils.book_append_sheet(wb, ws, tabLabel.substring(0, 31));
+    }
+
+    XLSX.writeFile(wb, `controle_completo_${periodLabel}.xlsx`);
   };
 
   // Filter data by search
