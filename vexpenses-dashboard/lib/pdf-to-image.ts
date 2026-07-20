@@ -22,11 +22,11 @@ export async function pdfToImages(
   scale = 1.5,
   maxPages = 3
 ): Promise<PdfImage[]> {
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const pdfjs: any = await import('pdfjs-dist');
 
+  const nodeRequire: NodeRequire = (0, eval)('require');
   const standardFontDataUrl = path.join(
-    path.dirname(require.resolve('pdfjs-dist/legacy/build/pdf.mjs')),
-    '..',
+    path.dirname(nodeRequire.resolve('pdfjs-dist/build/pdf.mjs')),
     '..',
     'standard_fonts'
   );

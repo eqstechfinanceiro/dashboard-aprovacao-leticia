@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         LIMIT 50
       `;
 
-      const entries = result.map(entry => ({
+      const entries = result.map((entry: any) => ({
         key: entry.cache_key,
         dataType: entry.data_type,
         createdAt: entry.created_at,

@@ -835,7 +835,7 @@ export default function QuinzenaDinamicaPage() {
               </AlertDescription>
             </Alert>
           )}
-          {!stats?.has_neon_data && data.data_mode !== 'calculado' && (
+          {data.data_mode !== 'calculado' && data.data.length === 0 && (
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>

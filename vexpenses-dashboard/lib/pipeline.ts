@@ -207,7 +207,7 @@ export async function getLatestStepStatuses(quinzenaId: string): Promise<Pipelin
     ORDER BY step, created_at DESC
   `;
 
-  return rows.map(row => ({
+  return rows.map((row: any) => ({
     step: row.step as PipelineStep,
     status: row.status as StepStatus,
     started_at: row.started_at,
