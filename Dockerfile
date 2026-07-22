@@ -21,7 +21,8 @@ RUN apk add --no-cache cairo pango jpeg giflib pixman
 ENV NODE_ENV=production
 
 COPY --from=builder /app/vexpenses-dashboard/package*.json ./vexpenses-dashboard/
-RUN cd vexpenses-dashboard && npm ci --only=production
+COPY --from=builder /app/vexpenses-dashboard/node_modules ./vexpenses-dashboard/node_modules
+RUN cd vexpenses-dashboard && npm prune --production
 
 COPY --from=builder /app/vexpenses-dashboard/.next ./vexpenses-dashboard/.next
 
