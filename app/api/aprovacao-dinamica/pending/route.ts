@@ -200,6 +200,7 @@ export async function GET(request: NextRequest) {
           const data = await response.json();
           const reports = data.data || [];
           allReports.push(...reports);
+          console.log(`[Pending] Fetched ${reports.length} reports for status ${status}`);
         } else {
           console.log(`[Pending] Status ${response.status} for reports/status/${status}`);
         }

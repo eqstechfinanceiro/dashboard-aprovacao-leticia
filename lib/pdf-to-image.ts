@@ -1,15 +1,33 @@
-import { createCanvas, Path2D as NapiPath2D, DOMMatrix as NapiDOMMatrix } from '@napi-rs/canvas';
+import { createCanvas, DOMMatrix as CanvasDOMMatrix } from 'canvas';
 import path from 'path';
-import { createRequire } from 'module';
 
-const require = createRequire(import.meta.url);
-
-// Polyfill browser APIs required by pdfjs-dist v6 in Node.js
-if (typeof (globalThis as any).DOMMatrix === 'undefined') {
-  (globalThis as any).DOMMatrix = NapiDOMMatrix;
+// Polyfill Promise.withResolvers for Node.js < v22 (pdfjs-dist v4+ requires it)
+if (typeof (Promise as any).withResolvers === 'undefined') {
+  (Promise as any).withResolvers = function <T>() {
+    let resolve!: (value: T | PromiseLike<T>) => void;
+    let reject!: (reason?: any) => void;
+    const promise = new Promise<T>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
 }
-if (typeof (globalThis as any).Path2D === 'undefined') {
-  (globalThis as any).Path2D = NapiPath2D;
+
+// Polyfill process.getBuiltinModule for Node.js < v22 (pdfjs-dist v4+ uses it)
+if (typeof (process as any).getBuiltinModule === 'undefined') {
+  (process as any).getBuiltinModule = (name: string) => {
+    try {
+      return require(name);
+    } catch {
+      return undefined;
+    }
+  };
+}
+
+// Polyfill browser APIs required by pdfjs-dist in Node.js
+if (typeof (globalThis as any).DOMMatrix === 'undefined') {
+  (globalThis as any).DOMMatrix = CanvasDOMMatrix;
 }
 
 export interface PdfImage {
@@ -22,14 +40,11 @@ export async function pdfToImages(
   scale = 1.5,
   maxPages = 3
 ): Promise<PdfImage[]> {
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const pdfjs: any = await import('pdfjs-dist/legacy/build/pdf.mjs');
 
   const standardFontDataUrl = path.join(
-    path.dirname(require.resolve('pdfjs-dist/legacy/build/pdf.mjs')),
-    '..',
-    '..',
-    'standard_fonts'
-  );
+    process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts'
+  ) + '/';
 
   const uint8 = new Uint8Array(pdfBuffer);
   const loadingTask = pdfjs.getDocument({
@@ -50,9 +65,46 @@ export async function pdfToImages(
     ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, viewport.width, viewport.height);
     await page.render({ canvasContext: ctx as any, canvas: canvas as any, viewport }).promise;
-    const jpegBuffer = canvas.toBuffer('image/jpeg', 0.85);
+    const jpegBuffer = (canvas as any).toBuffer('image/jpeg', { quality: 0.85 });
     images.push({ base64: jpegBuffer.toString('base64'), mimeType: 'image/jpeg' });
   }
 
   return images;
+}
+
+export async function extractPdfText(
+  pdfBuffer: Buffer,
+  maxPages = 3
+): Promise<string | null> {
+  const pdfjs: any = await import('pdfjs-dist/legacy/build/pdf.mjs');
+
+  const standardFontDataUrl = path.join(
+    process.cwd(), 'node_modules', 'pdfjs-dist', 'standard_fonts'
+  ) + '/';
+
+  const uint8 = new Uint8Array(pdfBuffer);
+  const loadingTask = pdfjs.getDocument({
+    data: uint8,
+    standardFontDataUrl,
+    useSystemFonts: false,
+  });
+  const doc = await loadingTask.promise;
+
+  const pageCount = Math.min(doc.numPages, maxPages);
+  const textParts: string[] = [];
+
+  for (let i = 1; i <= pageCount; i++) {
+    const page = await doc.getPage(i);
+    const textContent = await page.getTextContent();
+    const pageText = textContent.items
+      .map((item: any) => item.str)
+      .filter((s: string) => s.trim().length > 0)
+      .join(' ');
+    if (pageText.trim()) {
+      textParts.push(pageText.trim());
+    }
+  }
+
+  const fullText = textParts.join('\n').trim();
+  return fullText.length > 20 ? fullText : null;
 }

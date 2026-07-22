@@ -24,6 +24,7 @@ import {
   RotateCcw,
   Undo2,
   User,
+  Filter,
 } from 'lucide-react';
 
 export interface ManualReviewItem {
@@ -121,6 +122,7 @@ export function ManualReviewModal({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isPdf, setIsPdf] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
@@ -139,10 +141,30 @@ export function ManualReviewModal({
     user_email: string;
   } | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>('ALL');
   const savingRef = useRef(false);
 
-  const currentItem = items[currentIndex];
-  const isFinished = currentIndex >= items.length;
+  // Compute available categories from items
+  const availableCategories = React.useMemo(() => {
+    const catMap = new Map<string, number>();
+    for (const item of items) {
+      const cat = item.extracted_data?.categoria || 'SEM_CATEGORIA';
+      catMap.set(cat, (catMap.get(cat) || 0) + 1);
+    }
+    return Array.from(catMap.entries()).sort((a, b) => b[1] - a[1]);
+  }, [items]);
+
+  // Filter items by category
+  const filteredItems = React.useMemo(() => {
+    if (categoryFilter === 'ALL') return items;
+    return items.filter(item => {
+      const cat = item.extracted_data?.categoria || 'SEM_CATEGORIA';
+      return cat === categoryFilter;
+    });
+  }, [items, categoryFilter]);
+
+  const currentItem = filteredItems[currentIndex];
+  const isFinished = currentIndex >= filteredItems.length;
 
   const fetchExpenseDetails = useCallback(async (reportId: number, expenseId: number) => {
     setDetailsLoading(true);
@@ -170,10 +192,14 @@ export function ManualReviewModal({
         if (expense.receipt_url) {
           setImageLoading(true);
           setImageError(false);
-          const proxyUrl = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`;
+          const url = expense.receipt_url;
+          const pdf = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/pdfs/');
+          setIsPdf(pdf);
+          const proxyUrl = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(url)}`;
           setImageUrl(proxyUrl);
         } else {
           setImageUrl(null);
+          setIsPdf(false);
         }
       }
     } catch (err) {
@@ -224,6 +250,7 @@ export function ManualReviewModal({
         setCurrentIndex(prev => prev + 1);
         setImageUrl(null);
         setImageError(false);
+        setIsPdf(false);
         setZoom(1);
         setPan({ x: 0, y: 0 });
         savingRef.current = false;
@@ -241,10 +268,12 @@ export function ManualReviewModal({
     setReviewedCount(0);
     setImageUrl(null);
     setImageError(false);
+    setIsPdf(false);
     setExpenseDetails(null);
     setReviewHistory([]);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setCategoryFilter('ALL');
     onClose();
   }, [onClose]);
 
@@ -256,13 +285,27 @@ export function ManualReviewModal({
     setCurrentIndex(last.index);
     setImageUrl(null);
     setImageError(false);
+    setIsPdf(false);
     setZoom(1);
     setPan({ x: 0, y: 0 });
   }, [reviewHistory, isSaving, isAnimating]);
 
+  const handleCategoryChange = useCallback((category: string) => {
+    setCategoryFilter(category);
+    setCurrentIndex(0);
+    setImageUrl(null);
+    setImageError(false);
+    setIsPdf(false);
+    setExpenseDetails(null);
+    setReviewHistory([]);
+    setReviewedCount(0);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
   useEffect(() => {
     if (!open || !imageUrl || imageError) return;
-    const nextItem = items[currentIndex + 1];
+    const nextItem = filteredItems[currentIndex + 1];
     if (nextItem) {
       fetch(`/api/aprovacao-dinamica/report/${nextItem.report_id}/expenses`)
         .then(res => res.json())
@@ -275,7 +318,7 @@ export function ManualReviewModal({
         })
         .catch(() => {});
     }
-  }, [open, imageUrl, imageError, items, currentIndex]);
+  }, [open, imageUrl, imageError, filteredItems, currentIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -305,8 +348,8 @@ export function ManualReviewModal({
 
   if (!open) return null;
 
-  const progress = items.length > 0 ? ((currentIndex) / items.length) * 100 : 0;
-  const remaining = items.length - currentIndex;
+  const progress = filteredItems.length > 0 ? ((currentIndex) / filteredItems.length) * 100 : 0;
+  const remaining = filteredItems.length - currentIndex;
 
   const animationClass = isAnimating
     ? animationDir === 'right'
@@ -325,7 +368,7 @@ export function ManualReviewModal({
             Revisão Manual
           </h2>
           <Badge variant="outline" className="border-gray-600 text-gray-300">
-            {isFinished ? `${reviewedCount} revisadas` : `${currentIndex + 1} / ${items.length}`}
+            {isFinished ? `${reviewedCount} revisadas` : `${currentIndex + 1} / ${filteredItems.length}`}
           </Badge>
           {!isFinished && (
             <span className="text-sm text-gray-400">
@@ -335,6 +378,23 @@ export function ManualReviewModal({
         </div>
 
         <div className="flex items-center gap-3">
+          {!isFinished && (
+            <div className="flex items-center gap-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <select
+                value={categoryFilter}
+                onChange={(e) => handleCategoryChange(e.target.value)}
+                className="rounded border border-gray-600 bg-gray-800 px-2 py-1 text-sm text-gray-300 focus:border-blue-500 focus:outline-none"
+              >
+                <option value="ALL">Todas ({items.length})</option>
+                {availableCategories.map(([cat, count]) => (
+                  <option key={cat} value={cat}>
+                    {cat} ({count})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           {!isFinished && reviewerName && reviewerName !== 'human' && (
             <span className="flex items-center gap-1.5 text-sm text-gray-400">
               <User className="h-4 w-4" />
@@ -446,7 +506,20 @@ export function ManualReviewModal({
                 <span className="text-sm text-gray-500">Erro ao carregar imagem</span>
               </div>
             )}
-            {imageUrl && !imageError && (
+            {imageUrl && !imageError && isPdf && (
+              <iframe
+                src={imageUrl}
+                title="Comprovante PDF"
+                className="h-full w-full rounded-lg shadow-2xl"
+                onLoad={() => setImageLoading(false)}
+                onError={() => {
+                  setImageError(true);
+                  setImageLoading(false);
+                }}
+                style={{ display: imageLoading ? 'none' : 'block' }}
+              />
+            )}
+            {imageUrl && !imageError && !isPdf && (
               <img
                 src={imageUrl}
                 alt="Comprovante"
@@ -466,7 +539,7 @@ export function ManualReviewModal({
             )}
 
             {/* Zoom controls */}
-            {imageUrl && !imageError && !imageLoading && (
+            {imageUrl && !imageError && !imageLoading && !isPdf && (
               <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-gray-700 bg-gray-800/90 px-2 py-1 shadow-lg backdrop-blur">
                 <button
                   onClick={() => { setZoom(z => Math.max(1, z - 0.5)); setPan({ x: 0, y: 0 }); }}

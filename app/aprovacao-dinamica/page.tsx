@@ -28,9 +28,11 @@ import {
   PlayCircle,
   Search,
   Eye,
+  Receipt,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
+import { PreApproveReviewModal, type PreApproveExpense } from '@/components/pre-approve-review-modal';
 import { useAuth } from '@/lib/auth-context';
 
 interface ReportApproval {
@@ -175,6 +177,7 @@ export default function AprovacaoDinamicaPage() {
   const [showApproveUI, setShowApproveUI] = useState<Set<number>>(new Set());
   const [approveError, setApproveError] = useState<Record<number, string>>({});
   const [visibleCount, setVisibleCount] = useState(30);
+  const [preApproveModal, setPreApproveModal] = useState<{ reportId: number; description: string } | null>(null);
 
   useEffect(() => {
     setVisibleCount(30);
@@ -619,6 +622,42 @@ export default function AprovacaoDinamicaPage() {
         onReviewComplete={handleReviewComplete}
       />
 
+      <PreApproveReviewModal
+        open={!!preApproveModal}
+        onClose={() => setPreApproveModal(null)}
+        reportId={preApproveModal?.reportId || 0}
+        reportDescription={preApproveModal?.description || ''}
+        userName={preApproveModal ? reports.find(r => r.id === preApproveModal.reportId)?.user?.name || null : null}
+        expenses={preApproveModal ? (reportExpenses[preApproveModal.reportId] || []).map(exp => {
+          const audit = auditResults[preApproveModal.reportId]?.[exp.id] || null;
+          return {
+            id: exp.id,
+            expense_id: exp.expense_id,
+            title: exp.title,
+            value: exp.value,
+            date: exp.date,
+            observation: exp.observation,
+            receipt_url: exp.receipt_url,
+            expense_type: exp.expense_type,
+            costs_center: exp.costs_center,
+            audit: audit ? {
+              status: audit.status,
+              extracted_data: audit.extracted_data,
+              divergences: audit.divergences,
+              rules_triggered: audit.rules_triggered,
+              summary: audit.summary,
+            } : null,
+          } as PreApproveExpense;
+        }) : []}
+        onApprove={() => {
+          if (preApproveModal) {
+            setShowApproveUI(prev => new Set(prev).add(preApproveModal.reportId));
+            setPreApproveModal(null);
+          }
+        }}
+        approving={false}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -1049,14 +1088,25 @@ export default function AprovacaoDinamicaPage() {
                       </div>
                     </div>
                   ) : (
-                    <Button
-                      size="sm"
-                      onClick={() => setShowApproveUI(prev => new Set(prev).add(report.id))}
-                      className="bg-green-600 hover:bg-green-700 text-white"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      Aprovar no VExpenses
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPreApproveModal({ reportId: report.id, description: report.description || '' })}
+                        className="border-green-300 text-green-700 hover:bg-green-100"
+                      >
+                        <Receipt className="h-4 w-4" />
+                        Revisar despesas
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowApproveUI(prev => new Set(prev).add(report.id))}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        Aprovar no VExpenses
+                      </Button>
+                    </div>
                   )}
                 </div>
               )}
@@ -1245,14 +1295,22 @@ export default function AprovacaoDinamicaPage() {
                               {/* Receipt preview */}
                               {showReceipt && expense.receipt_url && (
                                 <div className="mt-2">
-                                  <img
-                                    src={expense.receipt_url}
-                                    alt="Comprovante"
-                                    className="max-h-64 rounded-lg border border-gray-200"
-                                    onError={e => {
-                                      (e.target as HTMLImageElement).style.display = 'none';
-                                    }}
-                                  />
+                                  {expense.receipt_url.toLowerCase().endsWith('.pdf') || expense.receipt_url.toLowerCase().includes('/pdfs/') ? (
+                                    <iframe
+                                      src={`/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`}
+                                      title="Comprovante PDF"
+                                      className="h-96 w-full rounded-lg border border-gray-200"
+                                    />
+                                  ) : (
+                                    <img
+                                      src={expense.receipt_url}
+                                      alt="Comprovante"
+                                      className="max-h-64 rounded-lg border border-gray-200"
+                                      onError={e => {
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                      }}
+                                    />
+                                  )}
                                 </div>
                               )}
                             </div>
