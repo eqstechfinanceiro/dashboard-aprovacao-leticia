@@ -123,7 +123,22 @@ export async function POST(request: NextRequest) {
         console.error(`[Audit] DB save error for expense ${expense.id}:`, dbError);
       }
     } else {
-      console.log(`[Audit] Expense ${expense.id} - OCR failed (${provider}), not saving to DB (will reprocess next time)`);
+      console.log(`[Audit] Expense ${expense.id} - OCR failed (${provider}), saving as PENDENTE for manual review`);
+      try {
+        await saveAuditResult({
+          report_id,
+          expense_id: expense.id,
+          status: result.status,
+          extracted_data: null,
+          informed_data: result.informed_data,
+          divergences: result.divergences,
+          rules_triggered: result.rules_triggered,
+          summary: result.summary,
+          audited_by: 'bot',
+        });
+      } catch (dbError) {
+        console.error(`[Audit] DB save error for expense ${expense.id}:`, dbError);
+      }
     }
 
     return NextResponse.json({

@@ -322,6 +322,165 @@ export async function processReceiptGeminiDirectBase64(
   }
 }
 
+export async function processReceiptGeminiDirectText(
+  pdfText: string,
+  apiKey: string,
+  maxRetries = 3
+): Promise<GeminiResult> {
+  const groqApiKey = process.env.GROQ_API_KEY || '';
+  try {
+    const prompt = buildPrompt() + '\n\nConteúdo extraído do PDF (texto digital):\n' + pdfText;
+    let lastError = '';
+    let actualApiCalls = 0;
+    let totalWaitMs = 0;
+    const MAX_TOTAL_WAIT_MS = 120000;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const available = getNextAvailableModel();
+      if (!available) {
+        const earliestCooldown = Math.min(...Object.values(modelState).map(s => s.cooldownUntil));
+        const waitMs = Math.max(0, earliestCooldown - Date.now());
+        if (waitMs > 0 && totalWaitMs < MAX_TOTAL_WAIT_MS) {
+          const actualWait = Math.min(waitMs, 30000);
+          logThrottled(`[GeminiDirect-Text] All models in cooldown, waiting ${Math.ceil(actualWait / 1000)}s...`);
+          await sleep(actualWait);
+          totalWaitMs += actualWait;
+          attempt--;
+          continue;
+        }
+        lastError = `All models exhausted (waited ${Math.ceil(totalWaitMs / 1000)}s total)`;
+        break;
+      }
+
+      const { model, state } = available;
+
+      const elapsed = Date.now() - state.lastCallTime;
+      if (elapsed < model.minIntervalMs) {
+        const wait = model.minIntervalMs - elapsed;
+        await sleep(wait);
+      }
+      state.lastCallTime = Date.now();
+      actualApiCalls++;
+
+      console.log(`[GeminiDirect-Text] Using ${model.id} (attempt ${attempt + 1}/${maxRetries}, api call ${actualApiCalls})`);
+
+      let response: Response;
+      let responseText: string;
+
+      if (model.provider === 'groq') {
+        if (!groqApiKey) {
+          markModelRateLimited(model.id, 3600000);
+          continue;
+        }
+        const payload = {
+          model: model.id,
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.1,
+          max_tokens: 2048,
+          response_format: { type: 'json_object' },
+        };
+        response = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${groqApiKey}` },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(60000),
+        });
+      } else {
+        const payload = {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            responseMimeType: 'application/json',
+          },
+        };
+        const apiUrl = `${GEMINI_API_BASE}/${model.id}:generateContent?key=${apiKey}`;
+        response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: AbortSignal.timeout(30000),
+        });
+      }
+
+      if (response.status === 200) {
+        state.requestsToday++;
+        const result = await response.json();
+
+        let text: string;
+        if (model.provider === 'groq') {
+          text = result.choices?.[0]?.message?.content || '';
+        } else {
+          const candidates = result.candidates;
+          if (!candidates || candidates.length === 0) {
+            return { success: false, error: 'Empty response from model' };
+          }
+          text = candidates[0].content.parts[0].text;
+        }
+
+        if (!text) {
+          return { success: false, error: 'Empty text in response' };
+        }
+
+        let extracted: GeminiExtractedData;
+        try {
+          extracted = JSON.parse(text);
+        } catch {
+          const start = text.indexOf('{');
+          const end = text.lastIndexOf('}') + 1;
+          if (start >= 0 && end > start) {
+            extracted = JSON.parse(text.slice(start, end));
+          } else {
+            return { success: false, error: `Could not parse JSON: ${text.slice(0, 200)}` };
+          }
+        }
+
+        return {
+          success: true,
+          structured_data: extracted,
+          raw_response: text,
+        };
+      }
+
+      if (response.status === 429) {
+        const errorText = await response.text().catch(() => '');
+        const isRpdExhausted = errorText.toLowerCase().includes('quota') || errorText.toLowerCase().includes('daily');
+        if (isRpdExhausted) {
+          console.log(`[GeminiDirect-Text] ${model.id} got 429 (RPD exhausted), marking as exhausted for today`);
+          state.requestsToday = model.rpd;
+          markModelRateLimited(model.id, 3600000);
+        } else {
+          const cooldownMs = Math.min(Math.pow(2, attempt) * 5000, 30000);
+          console.log(`[GeminiDirect-Text] ${model.id} got 429 (RPM limit), cooldown ${cooldownMs / 1000}s`);
+          markModelRateLimited(model.id, cooldownMs);
+        }
+        lastError = `429 on ${model.id}`;
+        continue;
+      }
+
+      if (response.status === 503) {
+        console.log(`[GeminiDirect-Text] ${model.id} got 503, short cooldown...`);
+        markModelRateLimited(model.id, 30000);
+        lastError = `503 on ${model.id}`;
+        continue;
+      }
+
+      const errorText = await response.text().catch(() => '');
+      lastError = `API error ${response.status} on ${model.id}: ${errorText.slice(0, 200)}`;
+      console.log(`[GeminiDirect-Text] ${lastError}`);
+      markModelRateLimited(model.id, 60000);
+    }
+
+    return { success: false, error: lastError || `All models exhausted after ${maxRetries} attempts` };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes('timeout') || msg.includes('aborted')) {
+      return { success: false, error: 'Timeout requesting OCR API' };
+    }
+    return { success: false, error: msg };
+  }
+}
+
 export function isPdfUrl(url: string): boolean {
   return isPdf(url);
 }

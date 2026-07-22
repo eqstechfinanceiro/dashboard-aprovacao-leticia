@@ -124,7 +124,22 @@ export async function POST(request: NextRequest) {
         console.error(`[GeminiDirect] DB save error for expense ${expense.id}:`, dbError);
       }
     } else {
-      console.log(`[GeminiDirect] Expense ${expense.id} - OCR failed, not saving to DB`);
+      console.log(`[GeminiDirect] Expense ${expense.id} - OCR failed, saving as PENDENTE for manual review`);
+      try {
+        await saveAuditResult({
+          report_id,
+          expense_id: expense.id,
+          status: result.status,
+          extracted_data: null,
+          informed_data: result.informed_data,
+          divergences: result.divergences,
+          rules_triggered: result.rules_triggered,
+          summary: result.summary,
+          audited_by: provider,
+        });
+      } catch (dbError) {
+        console.error(`[GeminiDirect] DB save error for expense ${expense.id}:`, dbError);
+      }
     }
 
     return NextResponse.json({

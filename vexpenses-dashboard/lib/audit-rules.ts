@@ -43,13 +43,32 @@ const PROHIBITED_KEYWORDS = [
   'abastecimento gerador', 'abastecimento caminhao', 'abastecimento veiculo', 'abastecimento equipamento',
   'hotel', 'hospedagem', 'pousada',
   'almoco',
-  'premio', 'bonificacao', 'incentivo', 'meta', 'premiacao',
+  'premio', 'bonificacao', 'incentivo', 'premiacao',
   'agua', 'luz', 'energia', 'convenio',
   'crea',
   'brinde', 'confraternizacao', 'festa', 'evento interno',
-  'uber', '99', 'taxi', 'cabify', 'indrive',
+  'uber', 'taxi', 'cabify', 'indrive',
   'mercado livre', 'shopee', 'amazon', 'magalu', 'compra online',
 ];
+
+// Words that contain a prohibited keyword as substring but should NOT trigger a match.
+// e.g. "amazonas" contains "amazon", "bomba de gasolina" contains "gasolina",
+// "meta" is too short and matches "meta" in "metalurgico", "metadata", etc.
+const PROHIBITED_FALSE_POSITIVES: Record<string, string[]> = {
+  'amazon': ['amazonas', 'amazonense', 'amazonia'],
+  'gasolina': ['bomba de gasolina', 'bomba dagua', 'bomba d\'agua'],
+  'agua': ['bomba de agua', 'bomba dagua', 'bomba d\'agua', 'casas da agua', 'estacao de agua', 'agua branca', 'torneira de agua', 'filtro de agua', 'casa da agua', 'fossa septica agua', 'caixa dagua', 'reservatorio de agua', 'abastecimento de agua', 'tratamento de agua', 'estacao de tratamento de agua'],
+  'luz': ['luminaria', 'iluminacao', 'luz led', 'painel led', 'refletor', 'luminaria led', 'lampada', 'embutido', 'luminaria hermetica', 'projetor led', 'painel de luz'],
+  'energia': ['energia solar', 'energia eletrica', 'distribuidora de energia', 'concessionaria de energia', 'medidor de energia', 'empresa de energia'],
+  'meta': ['metalurgico', 'metalurgica', 'metalmecanica', 'metadata', 'metal', 'metalico', 'metais', 'metalmecanico', 'embarcacao metalica', 'estrutura metalica'],
+  'gnv': [],
+  '99': [],  // removed from keywords - too many false positives (prices, phone numbers)
+  'hotel': ['hotelaria', 'hoteleiro'],
+  'premio': ['premiacao', 'premiado'],
+  'crea': ['creacao', 'criativo', 'cereal', 'area', 'creche'],
+  'vinho': ['vinhaca', 'vinhedo'],
+  'tabaco': ['tabacaria'],
+};
 
 const PROHIBITED_CATEGORIES = [
   'COMBUSTIVEL',
@@ -98,18 +117,43 @@ function checkProhibitedItems(
   ].join(' ');
 
   for (const keyword of PROHIBITED_KEYWORDS) {
-    if (searchText.includes(keyword)) {
-      let confidence = 95;
-      if (['agua', 'luz', 'energia', 'convenio'].includes(keyword)) confidence = 85;
-      if (['medicamento', 'farmacia', 'drogaria'].includes(keyword)) confidence = 90;
+    // Use word-boundary regex to avoid false positives like "amazonas" matching "amazon"
+    // For multi-word keywords, escape spaces and match as a phrase
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`(^|[^a-z])${escapedKeyword}([^a-z]|$)`, 'i');
+    if (!regex.test(searchText)) continue;
 
-      results.push({
-        rule: 'ITEM_PROIBIDO',
-        reason: `Item proibido detectado: "${keyword}"`,
-        confidence,
+    // Check false positive exclusions
+    const falsePositives = PROHIBITED_FALSE_POSITIVES[keyword];
+    if (falsePositives && falsePositives.length > 0) {
+      const hasFalsePositive = falsePositives.some(fp => {
+        const fpEscaped = fp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const fpRegex = new RegExp(`(^|[^a-z])${fpEscaped}([^a-z]|$)`, 'i');
+        return fpRegex.test(searchText);
       });
-      break;
+      // If the ONLY match is inside a false positive compound word, skip
+      // We need to check if there's a match that's NOT part of a false positive
+      if (hasFalsePositive) {
+        // Remove all false positive occurrences and re-check
+        let cleanedText = searchText;
+        for (const fp of falsePositives) {
+          const fpEscaped = fp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          cleanedText = cleanedText.replace(new RegExp(fpEscaped, 'gi'), ' '.repeat(fp.length));
+        }
+        if (!regex.test(cleanedText)) continue;
+      }
     }
+
+    let confidence = 95;
+    if (['agua', 'luz', 'energia', 'convenio'].includes(keyword)) confidence = 85;
+    if (['medicamento', 'farmacia', 'drogaria'].includes(keyword)) confidence = 90;
+
+    results.push({
+      rule: 'ITEM_PROIBIDO',
+      reason: `Item proibido detectado: "${keyword}"`,
+      confidence,
+    });
+    break;
   }
 
   if (extracted?.categoria && PROHIBITED_CATEGORIES.includes(extracted.categoria.toUpperCase())) {
