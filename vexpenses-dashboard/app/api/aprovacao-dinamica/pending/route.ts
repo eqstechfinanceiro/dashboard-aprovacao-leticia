@@ -184,7 +184,7 @@ export async function GET(request: NextRequest) {
     // Fetch approval-tracking data (from admin Excel) for real waitingStep per report
     const waitingStepMap = await fetchApprovalTrackingSteps();
 
-    const allReports: any[] = [];
+    let allReports: any[] = [];
 
     for (const status of PENDING_STATUSES) {
       try {
@@ -274,10 +274,20 @@ export async function GET(request: NextRequest) {
       auditedIds = await getAuditedReportIds();
     }
 
+    // If admin Excel was fetched successfully, filter out reports no longer in ENVIADO
+    // (the v2 list endpoint returns stale data for recently-approved reports)
+    const hasExcelData = waitingStepMap.size > 0;
+    if (hasExcelData) {
+      const beforeCount = allReports.length;
+      allReports = allReports.filter((r: any) => waitingStepMap.has(r.id));
+      console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports (not in admin Excel ENVIADO list)`);
+    }
+
     // Build result with approval flow info
     let result = allReports.map((r: any) => {
       const userId = r.user_id;
       const flowId = userId ? userFlowMap.get(userId) : undefined;
+      const waitingStep = waitingStepMap.has(r.id) ? waitingStepMap.get(r.id)! : 1;
       return {
         id: r.id,
         description: r.description,
@@ -290,7 +300,7 @@ export async function GET(request: NextRequest) {
         approval_flow_name: flowId ? (flowNamesMap.get(flowId) || `Flow ${flowId}`) : null,
         approval_stage_id: r.approval_stage_id || null,
         approval_date: r.approval_date || null,
-        current_step: waitingStepMap.get(r.id) || 1,
+        current_step: waitingStep,
       };
     });
 
