@@ -43,6 +43,18 @@ export async function POST(request: NextRequest) {
     let expensesPayload: Record<string, boolean> = {};
     if (expensesResponse.ok) {
       const expensesData = await expensesResponse.json();
+      const reportStatus = expensesData.data?.status;
+      if (reportStatus && reportStatus !== 'ENVIADO') {
+        const statusMsg = reportStatus === 'APROVADO'
+          ? 'Este relatório já foi aprovado.'
+          : reportStatus === 'REPROVADO'
+            ? 'Este relatório foi reprovado.'
+            : `Este relatório não está mais com status ENVIADO (atual: ${reportStatus}).`;
+        return NextResponse.json(
+          { error: statusMsg + ' Atualize a lista de pendências.' },
+          { status: 409 }
+        );
+      }
       const expenses = expensesData.data?.expenses?.data || [];
       for (const exp of expenses) {
         expensesPayload[String(exp.id)] = true;
