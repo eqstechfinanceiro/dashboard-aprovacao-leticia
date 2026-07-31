@@ -62,7 +62,7 @@ function fuzzyMatchRatio(a: string, b: string): number {
   return (2 * intersection) / (ba.size + bb.size);
 }
 
-/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88) */
+/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88), then prefix */
 function resolveCpfByName(
   extratoName: string,
   nomeToCpf: Map<string, string>,
@@ -73,6 +73,7 @@ function resolveCpfByName(
   if (exact) return exact;
   const cached = fuzzyCache.get(normalized);
   if (cached) return cached;
+  // Fuzzy match FIRST (handles LUIZ vs LUIS, typos, etc.)
   let bestCpf: string | undefined;
   let bestRatio = 0;
   for (const [cadName, cpf] of nomeToCpf) {
@@ -85,6 +86,17 @@ function resolveCpfByName(
   if (bestRatio >= 0.88 && bestCpf) {
     fuzzyCache.set(normalized, bestCpf);
     return bestCpf;
+  }
+  // Prefix match: fallback for truncated names (15 chars, then 10)
+  if (normalized.length >= 10) {
+    const prefix15 = normalized.slice(0, 15);
+    for (const [cadName, cpf] of nomeToCpf) {
+      if (cadName.slice(0, 15) === prefix15) return cpf;
+    }
+    const prefix10 = normalized.slice(0, 10);
+    for (const [cadName, cpf] of nomeToCpf) {
+      if (cadName.slice(0, 10) === prefix10) return cpf;
+    }
   }
   return undefined;
 }
@@ -233,26 +245,46 @@ export async function GET(request: NextRequest) {
     }
 
     const extratoCutoffRows = await sql`
+      WITH deduped AS (
+        SELECT DISTINCT ON (
+          UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+        )
+          UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${cutoffDate}
+        ORDER BY UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+      )
       SELECT
-        UPPER(usuario) AS usuario_up,
+        usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
-      FROM extrato_movimentacao
-      WHERE is_snapshot = FALSE
-        AND data <= ${cutoffDate}
-      GROUP BY UPPER(usuario)
+      FROM deduped
+      GROUP BY usuario_up
     `;
     const extratoPrevRows = await sql`
+      WITH deduped AS (
+        SELECT DISTINCT ON (
+          UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+        )
+          UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${prevClosingDate}
+        ORDER BY UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+      )
       SELECT
-        UPPER(usuario) AS usuario_up,
+        usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
-      FROM extrato_movimentacao
-      WHERE is_snapshot = FALSE
-        AND data <= ${prevClosingDate}
-      GROUP BY UPPER(usuario)
+      FROM deduped
+      GROUP BY usuario_up
     `;
 
     const cumCutoff = new Map<string, { carga: number; transf: number; tarifa: number }>();

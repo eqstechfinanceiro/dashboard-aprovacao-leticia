@@ -40,6 +40,21 @@ export interface PreApproveExpense {
     rules_triggered: { rule: string; reason: string; confidence: number }[];
     summary: string;
   } | null;
+  horus?: {
+    has_possible_duplicates: boolean;
+    has_restrictive_tags: boolean;
+    duplicates: Array<{
+      id: number;
+      title: string;
+      amount: number;
+      date: string;
+      score: number;
+      fields: string[];
+      user: { name: string } | null;
+      report: { id: number; description: string; status: string } | null;
+    }>;
+    restrictive_tags: string[];
+  } | null;
 }
 
 interface PreApproveReviewModalProps {
@@ -51,6 +66,8 @@ interface PreApproveReviewModalProps {
   expenses: PreApproveExpense[];
   onApprove: () => void;
   approving: boolean;
+  hasHorusDuplicates?: boolean;
+  hasHorusRestrictiveTags?: boolean;
 }
 
 function formatCurrency(value: number) {
@@ -66,13 +83,19 @@ export function PreApproveReviewModal({
   expenses,
   onApprove,
   approving,
+  hasHorusDuplicates,
+  hasHorusRestrictiveTags,
 }: PreApproveReviewModalProps) {
   const [expandedExpense, setExpandedExpense] = useState<number | null>(null);
   const [showReceiptFor, setShowReceiptFor] = useState<number | null>(null);
+  const [horusAcknowledged, setHorusAcknowledged] = useState(false);
 
   const totalValue = useMemo(() => expenses.reduce((sum, e) => sum + e.value, 0), [expenses]);
   const withDivergences = useMemo(() => expenses.filter(e => e.audit && e.audit.divergences.length > 0).length, [expenses]);
   const withRules = useMemo(() => expenses.filter(e => e.audit && e.audit.rules_triggered.length > 0).length, [expenses]);
+  const withHorusDuplicates = useMemo(() => expenses.filter(e => e.horus?.has_possible_duplicates).length, [expenses]);
+  const withHorusTags = useMemo(() => expenses.filter(e => e.horus?.has_restrictive_tags).length, [expenses]);
+  const hasHorusIssues = (hasHorusDuplicates || withHorusDuplicates > 0) || (hasHorusRestrictiveTags || withHorusTags > 0);
 
   if (!open) return null;
 
@@ -118,6 +141,18 @@ export function PreApproveReviewModal({
               {withRules} com regras
             </span>
           )}
+          {(withHorusDuplicates > 0 || hasHorusDuplicates) && (
+            <span className="flex items-center gap-1 text-red-700">
+              <AlertTriangle className="h-4 w-4" />
+              {withHorusDuplicates || 0} com duplicata Hórus
+            </span>
+          )}
+          {(withHorusTags > 0 || hasHorusRestrictiveTags) && (
+            <span className="flex items-center gap-1 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              {withHorusTags || 0} com tag restritiva Hórus
+            </span>
+          )}
         </div>
 
         {/* Expense list */}
@@ -157,6 +192,17 @@ export function PreApproveReviewModal({
                         {audit?.divergences && audit.divergences.length > 0 && (
                           <Badge className="bg-orange-100 text-orange-700 text-xs">
                             {audit.divergences.length} divergência{audit.divergences.length !== 1 ? 's' : ''}
+                          </Badge>
+                        )}
+                        {expense.horus?.has_possible_duplicates && (
+                          <Badge className="bg-red-100 text-red-700 text-xs">
+                            <AlertTriangle className="mr-1 h-3 w-3" />
+                            Duplicata Hórus
+                          </Badge>
+                        )}
+                        {expense.horus?.has_restrictive_tags && (
+                          <Badge className="bg-orange-100 text-orange-700 text-xs">
+                            Tag restritiva Hórus
                           </Badge>
                         )}
                       </div>
@@ -259,6 +305,30 @@ export function PreApproveReviewModal({
                         <p className="mt-2 text-xs italic text-gray-500">{audit.summary}</p>
                       )}
 
+                      {/* Hórus duplicates */}
+                      {expense.horus?.has_possible_duplicates && expense.horus.duplicates.length > 0 && (
+                        <div className="mt-2 rounded border border-red-200 bg-red-50 p-2">
+                          <p className="text-xs font-medium text-red-800">Hórus — Possíveis duplicatas:</p>
+                          {expense.horus.duplicates.map((dup, i) => (
+                            <div key={i} className="mt-1 text-xs text-red-700">
+                              <strong>Score: {dup.score}%</strong> — {dup.title} — R$ {dup.amount.toFixed(2)} — {dup.date}
+                              <br />
+                              <span className="text-gray-600">Campos: {dup.fields.join(', ')}</span>
+                              {dup.user && <span className="text-gray-600"> — Usuário: {dup.user.name}</span>}
+                              {dup.report && <span className="text-gray-600"> — Report #{dup.report.id} ({dup.report.status})</span>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Hórus restrictive tags */}
+                      {expense.horus?.has_restrictive_tags && expense.horus.restrictive_tags.length > 0 && (
+                        <div className="mt-2 rounded border border-orange-200 bg-orange-50 p-2">
+                          <p className="text-xs font-medium text-orange-800">Hórus — Tags restritivas:</p>
+                          <p className="text-xs text-orange-700">{expense.horus.restrictive_tags.join(', ')}</p>
+                        </div>
+                      )}
+
                       {/* Receipt preview */}
                       {showReceipt && expense.receipt_url && (
                         <div className="mt-3">
@@ -290,6 +360,30 @@ export function PreApproveReviewModal({
 
         {/* Footer with approve button */}
         <div className="border-t border-gray-200 p-4">
+          {hasHorusIssues && !horusAcknowledged && (
+            <div className="mb-3 rounded-md border border-red-300 bg-red-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-800">
+                    Hórus detectou possíveis duplicatas ou tags restritivas neste relatório.
+                  </p>
+                  <p className="text-xs text-red-700 mt-1">
+                    Revise as despesas marcadas acima antes de aprovar.
+                  </p>
+                  <label className="mt-2 flex items-center gap-2 text-sm text-red-800">
+                    <input
+                      type="checkbox"
+                      checked={horusAcknowledged}
+                      onChange={e => setHorusAcknowledged(e.target.checked)}
+                      className="h-4 w-4 rounded border-red-400 text-red-600 focus:ring-red-500"
+                    />
+                    Confirmo que revisei as duplicatas/tags Hórus
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               Total: <strong className="text-gray-900">{formatCurrency(totalValue)}</strong> em {expenses.length} despesa{expenses.length !== 1 ? 's' : ''}
@@ -300,7 +394,7 @@ export function PreApproveReviewModal({
               </Button>
               <Button
                 onClick={onApprove}
-                disabled={approving}
+                disabled={approving || (hasHorusIssues && !horusAcknowledged)}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {approving ? (

@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
           ttlFormatted: formatTTL(ttlMinutes),
           expiresAt: expiresDate.toISOString(),
           expiresFormatted: formatExpires(expiresDate),
-          dataType: data.dataType,
+          dataType: data.dataType, 
           isStale: ageMinutes > ttlMinutes * 0.8 // Considera stale se tiver mais de 80% do TTL
         };
       } else {

@@ -161,7 +161,7 @@ def baixar_chunk(start_date: str, end_date: str, max_retries: int = 3) -> "pd.Da
             cmd = ["curl.exe", "-s", "-X", "GET", url,
                    "-H", f"Cookie: laravel_token={LARAVEL_TOKEN}",
                    "-H", "Accept: application/json"]
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
             if result.returncode != 0:
                 logger.warning(f"  curl falhou (tentativa {attempt}): {result.stderr[:100]}")
                 time.sleep(3)

@@ -40,11 +40,11 @@ function extractCookiesFromResponse(resp: Response, baseCookies: string): string
   return Array.from(cookieMap.values()).join('; ');
 }
 
-async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
+async function fetchApprovalTrackingSteps(): Promise<{ steps: Map<number, number>; rejected: Set<number>; approvedLastAction: Set<number> }> {
   const baseCookies = await getLaravelCookieString();
   if (!baseCookies) {
     console.log('[Pending] No Laravel token available, skipping approval-tracking');
-    return new Map();
+    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
   }
 
   let sessionCookies = baseCookies;
@@ -64,7 +64,7 @@ async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
     const redirectUrl = location.startsWith('http') ? location : `${APP_URL}${location}`;
     if (redirectUrl.includes('/login')) {
       console.log('[Pending] Laravel token expired (login redirect on admin page)');
-      return new Map();
+      return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
     }
     const retryResp = await fetch(redirectUrl, {
       headers: { ...BROWSER_HEADERS, 'Cookie': sessionCookies },
@@ -77,13 +77,13 @@ async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
     html = await pageResp.text();
   } else {
     console.log('[Pending] Admin page returned', pageResp.status);
-    return new Map();
+    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
   }
 
   const csrfMatch = html.match(/name=["']_token["'].*?value=["']([^"']+)["']/);
   if (!csrfMatch) {
     console.log('[Pending] Could not extract CSRF token');
-    return new Map();
+    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
   }
   const csrfToken = csrfMatch[1];
 
@@ -121,14 +121,14 @@ async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
     });
     if (!retryResp.ok) {
       console.log('[Pending] Excel endpoint (after redirect) returned', retryResp.status);
-      return new Map();
+      return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
     }
     arrayBuffer = await retryResp.arrayBuffer();
   } else if (excelResp.ok) {
     arrayBuffer = await excelResp.arrayBuffer();
   } else {
     console.log('[Pending] Excel endpoint returned', excelResp.status);
-    return new Map();
+    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
   }
 
   // Step 3: Parse Excel with SheetJS
@@ -138,7 +138,7 @@ async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
   const sheet = workbook.Sheets[sheetName];
   const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
 
-  if (rows.length < 2) return new Map();
+  if (rows.length < 2) return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
 
   // Step 4: Group by reportId, find last action, determine waitingStep
   const reportsMap = new Map<string, any[]>();
@@ -168,8 +168,20 @@ async function fetchApprovalTrackingSteps(): Promise<Map<number, number>> {
     waitingStepMap.set(parseInt(reportId, 10), waitingStep);
   }
 
-  console.log(`[Pending] Approval-tracking: ${waitingStepMap.size} reports parsed`);
-  return waitingStepMap;
+  const rejectedIds = new Set<number>();
+  const approvedLastAction = new Set<number>();
+  for (const [reportId, reportRows] of reportsMap) {
+    const lastRow = reportRows[reportRows.length - 1];
+    const action = String(lastRow[5] || '');
+    if (action === 'Reprovado' || action === 'Reprovado pelo administrador') {
+      rejectedIds.add(parseInt(reportId, 10));
+    } else if (action === 'Aprovado') {
+      approvedLastAction.add(parseInt(reportId, 10));
+    }
+  }
+
+  console.log(`[Pending] Approval-tracking: ${waitingStepMap.size} reports parsed, ${rejectedIds.size} rejected, ${approvedLastAction.size} approved-last-action`);
+  return { steps: waitingStepMap, rejected: rejectedIds, approvedLastAction };
 }
 
 export async function GET(request: NextRequest) {
@@ -182,48 +194,93 @@ export async function GET(request: NextRequest) {
     const stepFilter = searchParams.get('step'); // '1' = only step 1 (awaiting first approval)
 
     // Fetch approval-tracking data (from admin Excel) for real waitingStep per report
-    const waitingStepMap = await fetchApprovalTrackingSteps();
+    const trackingData = await fetchApprovalTrackingSteps();
+    const waitingStepMap = trackingData.steps;
+    const rejectedIds = trackingData.rejected;
 
     let allReports: any[] = [];
 
     for (const status of PENDING_STATUSES) {
       try {
-        const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user`, {
-          headers: {
-            'Authorization': API_KEY,
-            'Accept': 'application/json',
-          },
-          signal: AbortSignal.timeout(120000),
-        });
+        let page = 1;
+        while (page <= 20) {
+          const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user&per_page=100&page=${page}`, {
+            headers: {
+              'Authorization': API_KEY,
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(120000),
+          });
 
-        if (response.ok) {
-          const data = await response.json();
-          const reports = data.data || [];
-          allReports.push(...reports);
-          console.log(`[Pending] Fetched ${reports.length} reports for status ${status}`);
-        } else {
-          console.log(`[Pending] Status ${response.status} for reports/status/${status}`);
+          if (response.ok) {
+            const data = await response.json();
+            const reports = data.data || [];
+            allReports.push(...reports);
+            console.log(`[Pending] Fetched ${reports.length} reports for status ${status} (page ${page})`);
+            if (reports.length < 100) break;
+            page++;
+          } else {
+            console.log(`[Pending] Status ${response.status} for reports/status/${status}`);
+            break;
+          }
         }
       } catch (err) {
         console.log(`[Pending] Error fetching status ${status}:`, err);
       }
     }
 
-    // Build user_id → approval_flow_id mapping from team-members
+    // Fetch REPROVADO reports to identify stale ENVIADO entries
+    // (v2 /status/ENVIADO sometimes includes reports that are already rejected)
+    // APROVADO is skipped — 6974+ reports is too expensive to fetch,
+    // and the approve route already checks individual report status before approving.
+    const staleFromOtherStatuses = new Set<number>();
+    try {
+      let page = 1;
+      while (page <= 5) {
+        const response = await fetch(`${API_URL}/v2/reports/status/REPROVADO?per_page=100&page=${page}`, {
+          headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(30000),
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const reports = data.data || [];
+          for (const r of reports) {
+            staleFromOtherStatuses.add(r.id);
+          }
+          console.log(`[Pending] Fetched ${reports.length} REPROVADO reports (page ${page}) for stale check`);
+          if (reports.length < 100) break;
+          page++;
+        } else {
+          break;
+        }
+      }
+    } catch (err) {
+      console.log('[Pending] Error fetching REPROVADO for stale check:', err);
+    }
+
+    // Build user_id → approval_flow_id mapping from team-members (paginated)
     const userFlowMap = new Map<number, number>();
     const flowNamesMap = new Map<number, string>();
     try {
-      const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=500`, {
-        headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
-        signal: AbortSignal.timeout(30000),
-      });
-      if (tmResp.ok) {
-        const tmData = await tmResp.json();
-        const members = tmData.data || [];
-        for (const m of members) {
-          if (m.approval_flow_id) {
-            userFlowMap.set(m.id, m.approval_flow_id);
+      let page = 1;
+      while (page <= 20) {
+        const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=100&page=${page}`, {
+          headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(30000),
+        });
+        if (tmResp.ok) {
+          const tmData = await tmResp.json();
+          const members = tmData.data || [];
+          for (const m of members) {
+            if (m.approval_flow_id) {
+              userFlowMap.set(m.id, m.approval_flow_id);
+            }
           }
+          console.log(`[Pending] Fetched ${members.length} team-members (page ${page})`);
+          if (members.length < 100) break;
+          page++;
+        } else {
+          break;
         }
       }
     } catch (err) {
@@ -274,13 +331,22 @@ export async function GET(request: NextRequest) {
       auditedIds = await getAuditedReportIds();
     }
 
-    // If admin Excel was fetched successfully, filter out reports no longer in ENVIADO
-    // (the v2 list endpoint returns stale data for recently-approved reports)
-    const hasExcelData = waitingStepMap.size > 0;
-    if (hasExcelData) {
+    // Filter out stale reports:
+    // 1. Reports that appear in APROVADO/REPROVADO v2 lists (v2 ENVIADO list is stale)
+    // 2. Reports that the admin Excel shows as rejected (also stale in v2)
+    // Reports with Excel "Aprovado" at step N are NOT filtered — they're partially approved,
+    // still pending at step N+1, and the v2 API correctly keeps them as ENVIADO.
+    const v2IdSet = new Set(allReports.map((r: any) => r.id));
+    const staleIds = new Set<number>(rejectedIds);
+    for (const id of staleFromOtherStatuses) {
+      if (v2IdSet.has(id)) {
+        staleIds.add(id);
+      }
+    }
+    if (staleIds.size > 0) {
       const beforeCount = allReports.length;
-      allReports = allReports.filter((r: any) => waitingStepMap.has(r.id));
-      console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports (not in admin Excel ENVIADO list)`);
+      allReports = allReports.filter((r: any) => !staleIds.has(r.id));
+      console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports (v2-status=${staleFromOtherStatuses.size}, excel-rejected=${rejectedIds.size})`);
     }
 
     // Build result with approval flow info

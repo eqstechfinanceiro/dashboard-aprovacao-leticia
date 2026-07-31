@@ -29,11 +29,13 @@ import {
   Search,
   Eye,
   Receipt,
+  AlertTriangle,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
 import { PreApproveReviewModal, type PreApproveExpense } from '@/components/pre-approve-review-modal';
 import { useAuth } from '@/lib/auth-context';
+import type { HorusSummary } from '@/lib/horus';
 
 interface ReportApproval {
   approver_name: string;
@@ -110,6 +112,27 @@ interface ReportAuditData {
   expenses: ExpenseAuditResult[];
 }
 
+interface HorusDetailData {
+  has_duplicates: boolean;
+  has_restrictive_tags: boolean;
+  expenses: Record<number, {
+    sync: string;
+    has_possible_duplicates: boolean;
+    has_restrictive_tags: boolean;
+    duplicates: Array<{
+      id: number;
+      title: string;
+      amount: number;
+      date: string;
+      score: number;
+      fields: string[];
+      user: { name: string } | null;
+      report: { id: number; description: string; status: string } | null;
+    }>;
+    restrictive_tags: string[];
+  }>;
+}
+
 const STATUS_CONFIG: Record<string, {
   label: string;
   color: string;
@@ -178,10 +201,14 @@ export default function AprovacaoDinamicaPage() {
   const [approveError, setApproveError] = useState<Record<number, string>>({});
   const [visibleCount, setVisibleCount] = useState(30);
   const [preApproveModal, setPreApproveModal] = useState<{ reportId: number; description: string } | null>(null);
+  const [horusSummary, setHorusSummary] = useState<Record<number, HorusSummary | { error: string }>>({});
+  const [horusDetails, setHorusDetails] = useState<Record<number, HorusDetailData>>({});
+  const [loadingHorusDetails, setLoadingHorusDetails] = useState<Set<number>>(new Set());
+  const [horusOnly, setHorusOnly] = useState(false);
 
   useEffect(() => {
     setVisibleCount(30);
-  }, [searchTerm, readyOnly, stepOneOnly, approverFilter]);
+  }, [searchTerm, readyOnly, stepOneOnly, approverFilter, horusOnly]);
 
   // Keep ref in sync with auditResults
   useEffect(() => {
@@ -233,12 +260,46 @@ export default function AprovacaoDinamicaPage() {
       fetchExpenseCounts(data.data || []);
       // Fetch existing approvals
       fetchApprovals(data.data || []);
+      // Fetch Hórus batch summary
+      fetchHorusBatch(data.data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }, [loadAllSavedResults, approverFilter, stepOneOnly]);
+
+  const fetchHorusBatch = useCallback(async (reportList: PendingReport[]) => {
+    if (reportList.length === 0) return;
+    try {
+      const ids = reportList.map(r => r.id).join(',');
+      const res = await fetch(`/api/aprovacao-dinamica/horus/batch?report_ids=${ids}`);
+      if (res.ok) {
+        const data = await res.json();
+        setHorusSummary(data.data || {});
+      }
+    } catch (err) {
+      console.error('Error fetching Hórus batch:', err);
+    }
+  }, []);
+
+  const fetchHorusDetails = useCallback(async (reportId: number) => {
+    if (horusDetails[reportId] || loadingHorusDetails.has(reportId)) return;
+    setLoadingHorusDetails(prev => new Set(prev).add(reportId));
+    try {
+      const res = await fetch(`/api/aprovacao-dinamica/horus/${reportId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          setHorusDetails(prev => ({ ...prev, [reportId]: data.data as HorusDetailData }));
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching Hórus details:', err);
+    } finally {
+      setLoadingHorusDetails(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+    }
+  }, [horusDetails, loadingHorusDetails]);
 
   const fetchApprovals = useCallback(async (reportList: PendingReport[]) => {
     if (reportList.length === 0) return;
@@ -320,6 +381,10 @@ export default function AprovacaoDinamicaPage() {
     setExpandedReport(isExpanded ? null : reportId);
     if (!isExpanded) {
       loadExpenses(reportId);
+      const hs = horusSummary[reportId];
+      if (hs && !('error' in hs) && (hs.has_duplicates || hs.has_restrictive_tags)) {
+        fetchHorusDetails(reportId);
+      }
     }
   };
 
@@ -456,6 +521,12 @@ export default function AprovacaoDinamicaPage() {
     if (readyOnly) {
       filtered = filtered.filter(r => isReportReadyToApprove(r.id) && !reportApprovals[r.id]);
     }
+    if (horusOnly) {
+      filtered = filtered.filter(r => {
+        const h = horusSummary[r.id];
+        return h && !('error' in h) && (h.has_duplicates || h.has_restrictive_tags);
+      });
+    }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
@@ -467,7 +538,7 @@ export default function AprovacaoDinamicaPage() {
       );
     }
     return filtered;
-  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals]);
+  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals, horusOnly, horusSummary]);
 
   const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
 
@@ -630,6 +701,8 @@ export default function AprovacaoDinamicaPage() {
         userName={preApproveModal ? reports.find(r => r.id === preApproveModal.reportId)?.user?.name || null : null}
         expenses={preApproveModal ? (reportExpenses[preApproveModal.reportId] || []).map(exp => {
           const audit = auditResults[preApproveModal.reportId]?.[exp.id] || null;
+          const horusDetail = horusDetails[preApproveModal.reportId];
+          const horusExpData = horusDetail?.expenses?.[exp.id] || horusDetail?.expenses?.[exp.expense_id];
           return {
             id: exp.id,
             expense_id: exp.expense_id,
@@ -647,6 +720,12 @@ export default function AprovacaoDinamicaPage() {
               rules_triggered: audit.rules_triggered,
               summary: audit.summary,
             } : null,
+            horus: horusExpData ? {
+              has_possible_duplicates: horusExpData.has_possible_duplicates,
+              has_restrictive_tags: horusExpData.has_restrictive_tags,
+              duplicates: horusExpData.duplicates,
+              restrictive_tags: horusExpData.restrictive_tags,
+            } : null,
           } as PreApproveExpense;
         }) : []}
         onApprove={() => {
@@ -656,6 +735,14 @@ export default function AprovacaoDinamicaPage() {
           }
         }}
         approving={false}
+        hasHorusDuplicates={preApproveModal ? (() => {
+          const hs = horusSummary[preApproveModal.reportId];
+          return hs && !('error' in hs) && hs.has_duplicates;
+        })() : false}
+        hasHorusRestrictiveTags={preApproveModal ? (() => {
+          const hs = horusSummary[preApproveModal.reportId];
+          return hs && !('error' in hs) && hs.has_restrictive_tags;
+        })() : false}
       />
 
       {/* Header */}
@@ -768,6 +855,15 @@ export default function AprovacaoDinamicaPage() {
             className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
           />
           Prontos para aprovar
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={horusOnly}
+            onChange={e => setHorusOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+          />
+          Só com alertas Hórus
         </label>
       </div>
 
@@ -959,6 +1055,26 @@ export default function AprovacaoDinamicaPage() {
                         {auditedCount}/{expenseCounts[report.id]}
                       </Badge>
                     )}
+                    {(() => {
+                      const hs = horusSummary[report.id];
+                      if (!hs || 'error' in hs) return null;
+                      return (
+                        <>
+                          {hs.has_duplicates && (
+                            <Badge className="bg-red-100 text-red-800 text-xs" title="Hórus detectou possíveis duplicatas">
+                              <AlertCircle className="mr-1 h-3 w-3" />
+                              Hórus: duplicatas
+                            </Badge>
+                          )}
+                          {hs.has_restrictive_tags && (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs" title="Hórus detectou tags restritivas">
+                              <AlertTriangle className="mr-1 h-3 w-3" />
+                              Hórus: tags restritivas
+                            </Badge>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                     {report.user && (
@@ -1092,7 +1208,13 @@ export default function AprovacaoDinamicaPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setPreApproveModal({ reportId: report.id, description: report.description || '' })}
+                        onClick={() => {
+                          setPreApproveModal({ reportId: report.id, description: report.description || '' });
+                          const hs = horusSummary[report.id];
+                          if (hs && !('error' in hs) && (hs.has_duplicates || hs.has_restrictive_tags)) {
+                            fetchHorusDetails(report.id);
+                          }
+                        }}
                         className="border-green-300 text-green-700 hover:bg-green-100"
                       >
                         <Receipt className="h-4 w-4" />
@@ -1127,6 +1249,78 @@ export default function AprovacaoDinamicaPage() {
                   )}
                 </div>
               )}
+
+              {/* Hórus Alert Panel */}
+              {isExpanded && (() => {
+                const hd = horusDetails[report.id];
+                const hs = horusSummary[report.id];
+                const isLoadingHorus = loadingHorusDetails.has(report.id);
+                const hasHorusIssues = hs && !('error' in hs) && (hs.has_duplicates || hs.has_restrictive_tags);
+                if (!hasHorusIssues && !isLoadingHorus) return null;
+                return (
+                  <div className="border-t border-red-200 bg-red-50 p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertCircle className="h-5 w-5 text-red-600" />
+                      <span className="font-medium text-red-800">Alerta Hórus — Antifraude VExpenses</span>
+                    </div>
+                    {isLoadingHorus ? (
+                      <div className="flex items-center gap-2 text-sm text-red-700">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Analisando duplicatas com IA Hórus...
+                      </div>
+                    ) : hd ? (
+                      <div className="space-y-2">
+                        {hd.has_duplicates && (
+                          <p className="text-sm text-red-800">
+                            <strong>Possíveis duplicatas detectadas.</strong> Revise antes de aprovar.
+                          </p>
+                        )}
+                        {hd.has_restrictive_tags && (
+                          <p className="text-sm text-orange-800">
+                            <strong>Tags restritivas encontradas.</strong> Itens fora da política detectados.
+                          </p>
+                        )}
+                        {Object.entries(hd.expenses).map(([expId, expData]) => {
+                          if (!expData.has_possible_duplicates && !expData.has_restrictive_tags) return null;
+                          return (
+                            <div key={expId} className="rounded border border-red-200 bg-white p-2">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-gray-700">Despesa #{expId}</span>
+                                {expData.has_possible_duplicates && (
+                                  <Badge className="bg-red-100 text-red-700 text-xs">Duplicata</Badge>
+                                )}
+                                {expData.has_restrictive_tags && (
+                                  <Badge className="bg-orange-100 text-orange-700 text-xs">Tag restritiva</Badge>
+                                )}
+                              </div>
+                              {expData.duplicates.map((dup, idx) => (
+                                <div key={idx} className="ml-4 text-xs text-gray-600">
+                                  <span className="font-medium">Score: {dup.score}%</span>
+                                  {' — '}
+                                  <span>{dup.title}</span>
+                                  {' — '}
+                                  <span>R$ {dup.amount.toFixed(2)}</span>
+                                  {' — '}
+                                  <span>{dup.date}</span>
+                                  {' — '}
+                                  <span>Campos: {dup.fields.join(', ')}</span>
+                                  {dup.user && <span> — {dup.user.name}</span>}
+                                  {dup.report && <span> — Report #{dup.report.id} ({dup.report.status})</span>}
+                                </div>
+                              ))}
+                              {expData.restrictive_tags.length > 0 && (
+                                <div className="ml-4 text-xs text-orange-700">
+                                  Tags: {expData.restrictive_tags.join(', ')}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })()}
 
               {/* Expanded Content */}
               {isExpanded && (

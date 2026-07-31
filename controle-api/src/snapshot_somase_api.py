@@ -36,22 +36,46 @@ load_dotenv(BASE / ".env")
 NEON_URL = os.getenv("NEON_DATABASE_URL")
 
 
+def is_fatura_or_cartao(name: str) -> bool:
+    """Comprehensive FATURA/CARTAO filter matching ref BASE PREST behavior."""
+    n = name.strip().upper()
+    if 'CAIXA ITAU' in n or 'CAIXA ITAÚ' in n:
+        return True
+    if n.startswith('CAIXA'):
+        return False
+    if n.startswith(('FATURA', 'CARTAO', 'CARTÃO', 'FATUAR', 'FARTUR', 'FATUT', 'FARUR', 'FATUTR')):
+        return True
+    if 'CARTÃO DE CRÉDITO' in n or 'CARTAO DE CREDITO' in n or 'CARTÃO DE CREDITO' in n:
+        return True
+    if 'CARTÃO CORPORATIVO' in n:
+        return True
+    if ('ITAU' in n or 'ITAÚ' in n) and 'CAIXA' not in n:
+        return True
+    if 'DOLAR' in n or 'DÓLAR' in n:
+        return True
+    if n.startswith('DESPESA') and 'FATURA' in n:
+        return True
+    if n.startswith('COMPLEMENTAR') and 'FATURA' in n:
+        return True
+    if 'CARTÃO' in n and 'CRÉDITO' in n:
+        return True
+    if 'CARTAO' in n and 'CREDITO' in n:
+        return True
+    if n.startswith('CARTÃO VEXPENSES'):
+        return True
+    return False
+
+
 def get_cutoff(quinzena_id: str) -> str:
     """
-    Retorna o cutoff da quinzena (data em que o snapshot é finalizado = próxima quinzena fecha).
-    1QZ mês M → 25/M
-    2QZ mês M → 10/(M+1)
+    Retorna o cutoff financeiro: dia 30 do mês anterior (mesmo para QZ1 e QZ2).
     """
     year, month, q = quinzena_id.split("-")
     year = int(year)
     month = int(month)
-    q = int(q)
-    if q == 1:
-        return f"{year}-{month:02d}-25"
-    else:
-        next_month = month + 1 if month < 12 else 1
-        next_year = year if month < 12 else year + 1
-        return f"{next_year}-{next_month:02d}-10"
+    prev_month = month - 1 if month > 1 else 12
+    prev_year = year if month > 1 else year - 1
+    return f"{prev_year}-{prev_month:02d}-30"
 
 
 def snapshot_somase(quinzena_id: str, dry_run: bool = False):
@@ -62,7 +86,7 @@ def snapshot_somase(quinzena_id: str, dry_run: bool = False):
     cutoff_str = f"{cutoff} 23:59:59"
 
     # 1. Check freshness of prestacao data
-    cur.execute("SELECT COUNT(*) FROM prestacao_reports WHERE status = 'APROVADO'")
+    cur.execute("SELECT COUNT(*) FROM prestacao_reports WHERE status ILIKE 'Aprovado' OR status ILIKE 'Enviado'")
     approved_count = cur.fetchone()[0]
     cur.execute("SELECT COUNT(*) FROM prestacao_expenses")
     exp_count = cur.fetchone()[0]
@@ -74,17 +98,32 @@ def snapshot_somase(quinzena_id: str, dry_run: bool = False):
         conn.close()
         return
 
-    # 2. Compute somase by CPF from approved reports up to the cutoff
+    # 2. Compute somase by CPF from APROVADO + ENVIADO reports (snapshot on closing date)
+    # Filter FATURA/CARTAO in Python using comprehensive filter
     cur.execute("""
+        SELECT pr.id, pr.name
+        FROM prestacao_reports pr
+        WHERE (pr.status ILIKE 'Aprovado' OR pr.status ILIKE 'Enviado')
+          AND pr.user_cpf IS NOT NULL
+    """)
+    all_reports = cur.fetchall()
+    valid_rids = [rid for rid, name in all_reports if not is_fatura_or_cartao(str(name or ''))]
+    print(f"  Valid reports (after FATURA/CARTAO filter): {len(valid_rids)}/{len(all_reports)}")
+
+    if not valid_rids:
+        print("ERROR: No valid reports after FATURA/CARTAO filter.")
+        conn.close()
+        return
+
+    placeholders = ','.join(['%s'] * len(valid_rids))
+    cur.execute(f"""
         SELECT pr.user_cpf, SUM(pe.value) as total
         FROM prestacao_expenses pe
         JOIN prestacao_reports pr ON pe.report_id = pr.id
-        WHERE pr.status = 'APROVADO'
-          AND pr.user_cpf IS NOT NULL
-          AND (pr.updated_at IS NULL OR pr.updated_at <= %s)
+        WHERE pr.id IN ({placeholders})
         GROUP BY pr.user_cpf
         ORDER BY SUM(pe.value) DESC
-    """, (cutoff_str,))
+    """, valid_rids)
     rows = cur.fetchall()
     print(f"  CPFs with approved expenses: {len(rows)}")
     print(f"  Total somase: R$ {sum(float(r[1]) for r in rows):,.2f}")
@@ -117,14 +156,12 @@ def snapshot_somase(quinzena_id: str, dry_run: bool = False):
     deleted_snap = cur.rowcount
     conn.commit()
 
-    cur.execute("""
+    cur.execute(f"""
         SELECT pe.id, pr.user_cpf, pe.value
         FROM prestacao_expenses pe
         JOIN prestacao_reports pr ON pe.report_id = pr.id
-        WHERE pr.status = 'APROVADO'
-          AND pr.user_cpf IS NOT NULL
-          AND (pr.updated_at IS NULL OR pr.updated_at <= %s)
-    """, (cutoff_str,))
+        WHERE pr.id IN ({placeholders})
+    """, valid_rids)
     snap_rows = [(row[0], quinzena_id, float(row[2]), row[1]) for row in cur.fetchall()]
     execute_batch(cur, """
         INSERT INTO prestacao_expense_snapshots (id, quinzena, value, user_cpf)

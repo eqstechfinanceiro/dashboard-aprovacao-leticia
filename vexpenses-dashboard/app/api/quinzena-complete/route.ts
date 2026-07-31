@@ -117,35 +117,62 @@ const MONTH_NAMES = [
 ];
 
 /**
- * Regra quinzenal validada (regra_quinzena.json):
- *   1ª QZ: 26 do mês anterior → 10 do mês atual  (fechamento dia 10)
- *   2ª QZ: 11 → 25 do mês atual                  (fechamento dia 25)
+ * Regra quinzenal (validada em jul/2026):
+ *   1ª QZ: período 26 do mês anterior → 10 do mês atual  (fechamento dia 11)
+ *   2ª QZ: período 11 → 25 do mês atual                  (fechamento dia 25)
+ *
+ * Cutoff financeiro (carga/transf/tarifa/prestação): dia 30 do mês anterior
+ * Saldo cartão CONTROLE: último snapshot até dia 1 do mês atual
+ * Saldo cartão CARGA: último snapshot até a data de fechamento (11 ou 25)
  */
 function getQuinzenaDates(year: number, month: number, quinzena: number) {
   const mm = String(month).padStart(2, '0');
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear  = month === 1 ? year - 1 : year;
+  const pmm = String(prevMonth).padStart(2, '0');
+
+  // Financial data cutoff: day 30 of previous month (same for both quinzenas)
+  const financial_cutoff = `${prevYear}-${pmm}-30`;
+
+  // Saldo cartão CONTROLE: last snapshot up to day 1 of current month
+  const saldo_cartao_controle_date = `${year}-${mm}-01`;
+
   if (quinzena === 1) {
-    const prevMonth = month === 1 ? 12 : month - 1;
-    const prevYear  = month === 1 ? year - 1 : year;
-    const pmm = String(prevMonth).padStart(2, '0');
-    // SOMASE cutoff: next quinzena's end date (when sheet is finalized)
-    const somase_cutoff = `${year}-${mm}-25`;
     return {
       start_date:    `${prevYear}-${pmm}-26`,
       end_date:      `${year}-${mm}-10`,
-      fechamento:    `${year}-${mm}-10`,
-      somase_cutoff,
+      fechamento:    `${year}-${mm}-11`,
+      financial_cutoff,
+      saldo_cartao_controle_date,
+      saldo_cartao_carga_date: `${year}-${mm}-11`,
     };
   }
-  // QZ2: next quinzena is QZ1 of next month (ending on the 10th)
-  const nextMonth = month === 12 ? 1 : month + 1;
-  const nextYear  = month === 12 ? year + 1 : year;
-  const nmm = String(nextMonth).padStart(2, '0');
-  const somase_cutoff = `${nextYear}-${nmm}-10`;
   return {
     start_date:  `${year}-${mm}-11`,
     end_date:    `${year}-${mm}-25`,
     fechamento:  `${year}-${mm}-25`,
+    financial_cutoff,
+    saldo_cartao_controle_date,
+    saldo_cartao_carga_date: `${year}-${mm}-25`,
   };
+}
+
+/** Comprehensive FATURA/CARTAO filter matching ref BASE PREST behavior */
+function isFaturaOrCartao(name: string): boolean {
+  const n = name.trim().toUpperCase();
+  if (n.includes('CAIXA ITAU') || n.includes('CAIXA ITAÚ')) return true;
+  if (n.startsWith('CAIXA')) return false;
+  if (/^(FATURA|CARTAO|CARTÃO|FATUAR|FARTUR|FATUT|FARUR|FATUTR)/.test(n)) return true;
+  if (n.includes('CARTÃO DE CRÉDITO') || n.includes('CARTAO DE CREDITO') || n.includes('CARTÃO DE CREDITO')) return true;
+  if (n.includes('CARTÃO CORPORATIVO')) return true;
+  if ((n.includes('ITAU') || n.includes('ITAÚ')) && !n.includes('CAIXA')) return true;
+  if (n.includes('DOLAR') || n.includes('DÓLAR')) return true;
+  if (n.startsWith('DESPESA') && n.includes('FATURA')) return true;
+  if (n.startsWith('COMPLEMENTAR') && n.includes('FATURA')) return true;
+  if (n.includes('CARTÃO') && n.includes('CRÉDITO')) return true;
+  if (n.includes('CARTAO') && n.includes('CREDITO')) return true;
+  if (n.startsWith('CARTÃO VEXPENSES')) return true;
+  return false;
 }
 
 function toNum(v: string | null | undefined): number {
@@ -184,7 +211,7 @@ function fuzzyMatchRatio(a: string, b: string): number {
   return (2 * intersection) / (ba.size + bb.size);
 }
 
-/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88) */
+/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88), then prefix */
 function resolveCpfByName(
   extratoName: string,
   nomeToCpf: Map<string, string>,
@@ -197,7 +224,7 @@ function resolveCpfByName(
   // Fuzzy cache (avoid re-computing for same name)
   const cached = fuzzyCache.get(normalized);
   if (cached) return cached;
-  // Fuzzy match
+  // Fuzzy match FIRST (handles LUIZ vs LUIS, typos, etc.)
   let bestCpf: string | undefined;
   let bestRatio = 0;
   for (const [cadName, cpf] of nomeToCpf) {
@@ -210,6 +237,17 @@ function resolveCpfByName(
   if (bestRatio >= 0.88 && bestCpf) {
     fuzzyCache.set(normalized, bestCpf);
     return bestCpf;
+  }
+  // Prefix match: fallback for truncated names (15 chars, then 10)
+  if (normalized.length >= 10) {
+    const prefix15 = normalized.slice(0, 15);
+    for (const [cadName, cpf] of nomeToCpf) {
+      if (cadName.slice(0, 15) === prefix15) return cpf;
+    }
+    const prefix10 = normalized.slice(0, 10);
+    for (const [cadName, cpf] of nomeToCpf) {
+      if (cadName.slice(0, 10) === prefix10) return cpf;
+    }
   }
   return undefined;
 }
@@ -273,7 +311,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Parametros invalidos' }, { status: 400 });
   }
 
-  const { start_date, end_date, fechamento } = getQuinzenaDates(year, month, quinzena);
+  const { start_date, end_date, fechamento, financial_cutoff, saldo_cartao_controle_date, saldo_cartao_carga_date } = getQuinzenaDates(year, month, quinzena);
 
   try {
     // 0. Read reembolso multiplier from config table
@@ -418,34 +456,56 @@ export async function GET(request: NextRequest) {
     }
     const fuzzyCache = new Map<string, string>();
 
-    // 2d. Extrato cumulativo até end_date
+    // 2d. Extrato cumulativo até financial_cutoff (dia 30 do mês anterior)
+    // Dedup: use codigo_transacao when present, else use hora as tiebreaker
+    // (same-day fees have different hora, true duplicates have same hora)
     const extratoRows = await sql`
+      WITH deduped AS (
+        SELECT DISTINCT ON (
+          UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+        )
+          UPPER(usuario) AS usuario_up,
+          data, tipo, valor, codigo_transacao
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${financial_cutoff}
+        ORDER BY UPPER(usuario), data, tipo, valor,
+          COALESCE(NULLIF(codigo_transacao, ''), hora::text)
+      )
       SELECT
-        UPPER(usuario) AS usuario_up,
+        usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
-      FROM extrato_movimentacao
-      WHERE is_snapshot = FALSE
-        AND data <= ${end_date}
-      GROUP BY UPPER(usuario)
+      FROM deduped
+      GROUP BY usuario_up
     `;
 
-    // 2e. Somase (prestação de contas) from web export data
-    const somaseRows = await sql`
-      SELECT
-        r.user_cpf,
-        COALESCE(SUM(e.value), 0)::text AS total
+    // 2e. Somase (prestação de contas) — Aprovado+Enviado reports, cumulative since card creation
+    // Filter FATURA/CARTAO in JS using comprehensive filter (catches all variations)
+    const reportRows = await sql`
+      SELECT r.id, r.name
       FROM prestacao_reports r
-      JOIN prestacao_expenses e ON e.report_id = r.id
       WHERE (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
         AND r.user_cpf IS NOT NULL
-        AND r.created_at <= ${end_date}
-        AND r.name NOT ILIKE 'FATURA%'
-        AND r.name NOT ILIKE 'Cartão%'
-        AND r.name NOT ILIKE 'CARTAO%'
-      GROUP BY r.user_cpf
     `;
+    const validReportIds = reportRows
+      .filter((r: { id: number; name: string }) => !isFaturaOrCartao(r.name || ''))
+      .map((r: { id: number }) => r.id);
+
+    let somaseRows: { user_cpf: string; total: string }[] = [];
+    if (validReportIds.length > 0) {
+      somaseRows = await sql`
+        SELECT
+          r.user_cpf,
+          COALESCE(SUM(e.value), 0)::text AS total
+        FROM prestacao_reports r
+        JOIN prestacao_expenses e ON e.report_id = r.id
+        WHERE r.id = ANY(${validReportIds})
+        GROUP BY r.user_cpf
+      `;
+    }
     const somaseByCpf = new Map<string, number>();
     for (const r of somaseRows) {
       if (r.user_cpf) {
@@ -474,89 +534,110 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2g. Saldo cartão: hybrid approach (snapshot + adjustment, or computed)
-    const saldoRows = quinzena === 1
-      ? await sql`
-          WITH latest_snap AS (
-            SELECT DISTINCT ON (UPPER(usuario))
-              UPPER(usuario) AS usuario_up,
-              valor AS saldo,
-              data AS snapshot_date
-            FROM extrato_movimentacao
-            WHERE is_snapshot = TRUE
-              AND valor IS NOT NULL
-              AND data <= ${end_date}
-            ORDER BY UPPER(usuario), data DESC
-          ),
-          post_snap_txns AS (
-            SELECT UPPER(e.usuario) AS usuario_up, SUM(e.valor) AS adjustment
-            FROM extrato_movimentacao e
-            JOIN latest_snap s ON UPPER(e.usuario) = s.usuario_up
-            WHERE e.is_snapshot = FALSE
-              AND e.data > s.snapshot_date
-              AND e.data <= ${end_date}
-            GROUP BY UPPER(e.usuario)
-          ),
-          computed_balance AS (
-            SELECT UPPER(usuario) AS usuario_up, COALESCE(SUM(valor), 0) AS saldo
-            FROM extrato_movimentacao
-            WHERE is_snapshot = FALSE
-              AND data <= ${end_date}
-            GROUP BY UPPER(usuario)
-          )
-          SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
-                 COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
-                 COALESCE(c.saldo, 0) AS computed_saldo,
-                 (s.usuario_up IS NOT NULL) AS has_snapshot
-          FROM latest_snap s
-          FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
-          FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
-        `
-      : await sql`
-          WITH latest_snap AS (
-            SELECT DISTINCT ON (UPPER(usuario))
-              UPPER(usuario) AS usuario_up,
-              valor AS saldo,
-              data AS snapshot_date
-            FROM extrato_movimentacao
-            WHERE is_snapshot = TRUE
-              AND valor IS NOT NULL
-              AND data < ${end_date}
-            ORDER BY UPPER(usuario), data DESC
-          ),
-          post_snap_txns AS (
-            SELECT UPPER(e.usuario) AS usuario_up, SUM(e.valor) AS adjustment
-            FROM extrato_movimentacao e
-            JOIN latest_snap s ON UPPER(e.usuario) = s.usuario_up
-            WHERE e.is_snapshot = FALSE
-              AND e.data > s.snapshot_date
-              AND e.data < ${end_date}
-            GROUP BY UPPER(e.usuario)
-          ),
-          computed_balance AS (
-            SELECT UPPER(usuario) AS usuario_up, COALESCE(SUM(valor), 0) AS saldo
-            FROM extrato_movimentacao
-            WHERE is_snapshot = FALSE
-              AND data < ${end_date}
-            GROUP BY UPPER(usuario)
-          )
-          SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
-                 COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
-                 COALESCE(c.saldo, 0) AS computed_saldo,
-                 (s.usuario_up IS NOT NULL) AS has_snapshot
-          FROM latest_snap s
-          FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
-          FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
-        `;
+    // 2g. Saldo cartão — two views:
+    //   CONTROLE: last snapshot up to day 1 of current month (used in saldo_final calculation)
+    //   CARGA: last snapshot up to closing date (11 or 25) — the "real-time" balance
+    const saldoControleRows = await sql`
+      WITH deduped AS (
+        SELECT DISTINCT ON (UPPER(usuario), data, tipo, valor, codigo_transacao)
+          UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${saldo_cartao_controle_date}
+        ORDER BY UPPER(usuario), data, tipo, valor, codigo_transacao
+      ),
+      latest_snap AS (
+        SELECT DISTINCT ON (UPPER(usuario))
+          UPPER(usuario) AS usuario_up,
+          valor AS saldo,
+          data AS snapshot_date
+        FROM extrato_movimentacao
+        WHERE is_snapshot = TRUE
+          AND valor IS NOT NULL
+          AND data <= ${saldo_cartao_controle_date}
+        ORDER BY UPPER(usuario), data DESC
+      ),
+      post_snap_txns AS (
+        SELECT d.usuario_up, SUM(d.valor) AS adjustment
+        FROM deduped d
+        JOIN latest_snap s ON d.usuario_up = s.usuario_up
+        WHERE d.data > s.snapshot_date
+        GROUP BY d.usuario_up
+      ),
+      computed_balance AS (
+        SELECT usuario_up, COALESCE(SUM(valor), 0) AS saldo
+        FROM deduped
+        GROUP BY usuario_up
+      )
+      SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
+             COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
+             COALESCE(c.saldo, 0) AS computed_saldo,
+             (s.usuario_up IS NOT NULL) AS has_snapshot
+      FROM latest_snap s
+      FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
+      FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+    `;
 
-    const saldoCartaoByCpf = new Map<string, number>();
-    for (const r of saldoRows) {
+    const saldoCargaRows = await sql`
+      WITH deduped AS (
+        SELECT DISTINCT ON (UPPER(usuario), data, tipo, valor, codigo_transacao)
+          UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND data <= ${saldo_cartao_carga_date}
+        ORDER BY UPPER(usuario), data, tipo, valor, codigo_transacao
+      ),
+      latest_snap AS (
+        SELECT DISTINCT ON (UPPER(usuario))
+          UPPER(usuario) AS usuario_up,
+          valor AS saldo,
+          data AS snapshot_date
+        FROM extrato_movimentacao
+        WHERE is_snapshot = TRUE
+          AND valor IS NOT NULL
+          AND data <= ${saldo_cartao_carga_date}
+        ORDER BY UPPER(usuario), data DESC
+      ),
+      post_snap_txns AS (
+        SELECT d.usuario_up, SUM(d.valor) AS adjustment
+        FROM deduped d
+        JOIN latest_snap s ON d.usuario_up = s.usuario_up
+        WHERE d.data > s.snapshot_date
+        GROUP BY d.usuario_up
+      ),
+      computed_balance AS (
+        SELECT usuario_up, COALESCE(SUM(valor), 0) AS saldo
+        FROM deduped
+        GROUP BY usuario_up
+      )
+      SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
+             COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
+             COALESCE(c.saldo, 0) AS computed_saldo,
+             (s.usuario_up IS NOT NULL) AS has_snapshot
+      FROM latest_snap s
+      FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
+      FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+    `;
+
+    const saldoCartaoControleByCpf = new Map<string, number>();
+    for (const r of saldoControleRows) {
       const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
       if (cpf) {
         const hasSnap = r.has_snapshot;
         const snapSaldo = toNum(r.snap_saldo as string);
         const computedSaldo = toNum(r.computed_saldo as string);
-        saldoCartaoByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+        saldoCartaoControleByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+      }
+    }
+
+    const saldoCartaoCargaByCpf = new Map<string, number>();
+    for (const r of saldoCargaRows) {
+      const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
+      if (cpf) {
+        const hasSnap = r.has_snapshot;
+        const snapSaldo = toNum(r.snap_saldo as string);
+        const computedSaldo = toNum(r.computed_saldo as string);
+        saldoCartaoCargaByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
       }
     }
 
@@ -565,19 +646,22 @@ export async function GET(request: NextRequest) {
       const manual = manualByCpf.get(snap.cpf) ?? null;
 
       const sp = saldoPrestacaoByCpf.get(snap.cpf) ?? 0;
-      const sc = saldoCartaoByCpf.get(snap.cpf) ?? 0;
+      const sc_controle = saldoCartaoControleByCpf.get(snap.cpf) ?? 0;
+      const sc_carga = saldoCartaoCargaByCpf.get(snap.cpf) ?? 0;
       const carga = cargaByCpf.get(snap.cpf) ?? 0;
       const transf = transfByCpf.get(snap.cpf) ?? 0;
       const tarifa = tarifaByCpf.get(snap.cpf) ?? 0;
       const prestacao = somaseByCpf.get(snap.cpf) ?? 0;
 
-      const sf_novo = r2(sp - sc);
+      // Saldo final uses CONTROLE saldo cartão (snapshot up to day 1)
+      const sf_novo = r2(sp - sc_controle);
 
       const saldo_final = sf_novo;
-      const saldo_cartao = sc;
+      const saldo_cartao = sc_controle;
       const saldo_prestacao = sp;
       const saldo_final_carga = Math.max(sf_novo, 0);
-      const saldo_cartao_carga = sc;
+      // Carga calculations use CARGA saldo cartão (snapshot up to closing date)
+      const saldo_cartao_carga = sc_carga;
       const saldo_reembolsar = Math.max(-sf_novo, 0);
 
       // Manuais
