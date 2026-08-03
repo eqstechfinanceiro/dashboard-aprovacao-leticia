@@ -618,6 +618,12 @@ export default function AprovacaoDinamicaPage() {
       if (!res.ok) {
         const errMsg = data.error || 'Failed to approve report';
         setApproveError(prev => ({ ...prev, [reportId]: errMsg }));
+
+        if (data.error_type === 'not_approver_in_step') {
+          setShowApproveUI(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+          setReports(prev => prev.filter(r => r.id !== reportId));
+          fetchPending();
+        }
         return;
       }
       setReportApprovals(prev => ({

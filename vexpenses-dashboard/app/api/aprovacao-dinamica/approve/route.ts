@@ -81,8 +81,26 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[Approve] API error ${response.status}:`, errorText);
+
+      // Parse VExpenses error to provide structured feedback
+      let errorType = 'api_error';
+      let userMessage = `API error ${response.status}: ${errorText.slice(0, 500)}`;
+      try {
+        const parsed = JSON.parse(errorText);
+        const approverError = parsed.data?.errors?.approver;
+        if (approverError && approverError.some((e: string) => e.includes('not an approver in this step'))) {
+          errorType = 'not_approver_in_step';
+          userMessage = 'Este relatório não está mais na etapa de aprovação esperada. A lista será atualizada automaticamente.';
+        }
+      } catch { /* keep default error */ }
+
+      if (errorType === 'api_error' && errorText.includes('not an approver in this step')) {
+        errorType = 'not_approver_in_step';
+        userMessage = 'Este relatório não está mais na etapa de aprovação esperada. A lista será atualizada automaticamente.';
+      }
+
       return NextResponse.json(
-        { error: `API error ${response.status}: ${errorText.slice(0, 500)}` },
+        { error: userMessage, error_type: errorType },
         { status: response.status }
       );
     }
