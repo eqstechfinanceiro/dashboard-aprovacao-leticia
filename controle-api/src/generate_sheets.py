@@ -81,10 +81,31 @@ def fuzzy_ratio(a, b):
     return (2 * len(ba & bb)) / (len(ba) + len(bb))
 
 def is_card_report(name):
-    n = name.upper().strip()
-    if re.match(r'^(FATU|FARUR|CART)', n):
+    """Comprehensive FATURA/CARTAO filter matching snapshot_somase_api.py."""
+    n = name.strip().upper()
+    if 'CAIXA ITAU' in n or 'CAIXA ITAÚ' in n:
         return True
-    if re.search(r'(FATURA|FATUAR|FATUT|FARUR)', n):
+    if n.startswith('CAIXA'):
+        return False
+    if n.startswith(('FATURA', 'CARTAO', 'CARTÃO', 'FATUAR', 'FARTUR', 'FATUT', 'FARUR', 'FATUTR')):
+        return True
+    if 'CARTÃO DE CRÉDITO' in n or 'CARTAO DE CREDITO' in n or 'CARTÃO DE CREDITO' in n:
+        return True
+    if 'CARTÃO CORPORATIVO' in n:
+        return True
+    if ('ITAU' in n or 'ITAÚ' in n) and 'CAIXA' not in n:
+        return True
+    if 'DOLAR' in n or 'DÓLAR' in n:
+        return True
+    if n.startswith('DESPESA') and 'FATURA' in n:
+        return True
+    if n.startswith('COMPLEMENTAR') and 'FATURA' in n:
+        return True
+    if 'CARTÃO' in n and 'CRÉDITO' in n:
+        return True
+    if 'CARTAO' in n and 'CREDITO' in n:
+        return True
+    if n.startswith('CARTÃO VEXPENSES'):
         return True
     return False
 
@@ -166,22 +187,29 @@ def main():
     extrato = cur.fetchall()
     print(f"  Extrato (deduped): {len(extrato)} users")
 
-    # 5. Somase (prestação) — Aprovado+Enviado, excluding FATURA/CARTAO
+    # 5. Somase (prestação) — Aprovado+Enviado, comprehensive FATURA/CARTAO filter in Python
     cur.execute("""
         SELECT
             r.user_cpf,
+            r.id as report_id,
+            r.name as report_name,
             COALESCE(SUM(e.value), 0) AS total
         FROM prestacao_reports r
         JOIN prestacao_expenses e ON e.report_id = r.id
         WHERE (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
           AND r.user_cpf IS NOT NULL
-          AND TRIM(r.name) !~* '^(fatu|farur|cart)'
-          AND TRIM(r.name) !~* '(fatura|fatuar|fatut|farur)'
-        GROUP BY r.user_cpf
+        GROUP BY r.user_cpf, r.id, r.name
     """)
-    somase_rows = cur.fetchall()
-    somase_by_cpf = {r["user_cpf"]: float(r["total"]) for r in somase_rows}
-    print(f"  Somase: {len(somase_by_cpf)} CPFs, R$ {sum(somase_by_cpf.values()):,.2f}")
+    all_somase_rows = cur.fetchall()
+    somase_by_cpf = {}
+    filtered_out = 0
+    for r in all_somase_rows:
+        if is_card_report(str(r["report_name"] or '')):
+            filtered_out += 1
+            continue
+        cpf = r["user_cpf"]
+        somase_by_cpf[cpf] = somase_by_cpf.get(cpf, 0.0) + float(r["total"])
+    print(f"  Somase: {len(somase_by_cpf)} CPFs, R$ {sum(somase_by_cpf.values()):,.2f} (filtered out {filtered_out} card/fatura reports)")
 
     # 6. Saldo cartão (controle + carga) — snapshot + post-snapshot txns
     def compute_saldo_cartao(cutoff_date):

@@ -1,5 +1,24 @@
 import { sql, isDatabaseAvailable } from './neon';
 
+// ---- FATURA/CARTAO filter (must match quinzena-complete route) --------------
+
+function isFaturaOrCartao(name: string): boolean {
+  const n = name.trim().toUpperCase();
+  if (n.includes('CAIXA ITAU') || n.includes('CAIXA ITAÚ')) return true;
+  if (n.startsWith('CAIXA')) return false;
+  if (/^(FATURA|CARTAO|CARTÃO|FATUAR|FARTUR|FATUT|FARUR|FATUTR)/.test(n)) return true;
+  if (n.includes('CARTÃO DE CRÉDITO') || n.includes('CARTAO DE CREDITO') || n.includes('CARTÃO DE CREDITO')) return true;
+  if (n.includes('CARTÃO CORPORATIVO')) return true;
+  if ((n.includes('ITAU') || n.includes('ITAÚ')) && !n.includes('CAIXA')) return true;
+  if (n.includes('DOLAR') || n.includes('DÓLAR')) return true;
+  if (n.startsWith('DESPESA') && n.includes('FATURA')) return true;
+  if (n.startsWith('COMPLEMENTAR') && n.includes('FATURA')) return true;
+  if (n.includes('CARTÃO') && n.includes('CRÉDITO')) return true;
+  if (n.includes('CARTAO') && n.includes('CREDITO')) return true;
+  if (n.startsWith('CARTÃO VEXPENSES')) return true;
+  return false;
+}
+
 // ---- Types -----------------------------------------------------------------
 
 export type PipelineStep =
@@ -707,23 +726,34 @@ export async function snapshotSomase(quinzenaId: string): Promise<Record<string,
   };
 }
 
-/** Helper: snapshot a single quinzena's somase from current APROVADO data (cumulative, filtered by cutoff) */
+/** Helper: snapshot a single quinzena's somase from current APROVADO+ENVIADO data (cumulative, filtered by cutoff) */
 async function snapshotSingleQuinzena(quinzenaId: string): Promise<number> {
   if (!sql) throw new Error('Database not available');
 
   const cutoff = getQuinzenaCutoff(quinzenaId);
 
-  // Compute and insert somase by CPF in a single INSERT...SELECT query
-  // Cumulative: captures ALL approved expenses up to the cutoff date
+  // Fetch valid report IDs (exclude FATURA/CARTAO by name, same as quinzena-complete route)
+  const reportRows = await sql`
+    SELECT r.id, r.name
+    FROM prestacao_reports r
+    WHERE (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
+      AND r.user_cpf IS NOT NULL
+      AND COALESCE((r.raw_data->>'approval_date')::timestamp, r.updated_at, '1970-01-01'::timestamp) <= ${cutoff + ' 23:59:59'}
+  `;
+  const validReportIds = reportRows
+    .filter((r: { id: number; name: string }) => !isFaturaOrCartao(r.name || ''))
+    .map((r: { id: number }) => r.id);
+
+  if (validReportIds.length === 0) return 0;
+
   await sql`DELETE FROM somase_snapshots WHERE quinzena = ${quinzenaId}`;
   const insertResult = await sql`
     INSERT INTO somase_snapshots (quinzena, user_cpf, total)
     SELECT ${quinzenaId}, pr.user_cpf, SUM(pe.value) as total
     FROM prestacao_expenses pe
     JOIN prestacao_reports pr ON pe.report_id = pr.id
-    WHERE pr.status = 'APROVADO'
-      AND pr.user_cpf IS NOT NULL
-      AND (pr.updated_at IS NULL OR pr.updated_at <= ${cutoff + ' 23:59:59'})
+    WHERE pr.id = ANY(${validReportIds})
+      AND COALESCE(pe.raw_data->>'payment_method_id', '') != '627401'
     GROUP BY pr.user_cpf
     ON CONFLICT (quinzena, user_cpf) DO UPDATE SET total = EXCLUDED.total
     RETURNING 1
@@ -737,15 +767,28 @@ async function snapshotExpenseSnapshots(quinzenaId: string): Promise<number> {
 
   const cutoff = getQuinzenaCutoff(quinzenaId);
 
+  // Fetch valid report IDs (exclude FATURA/CARTAO by name, same as quinzena-complete route)
+  const reportRows = await sql`
+    SELECT r.id, r.name
+    FROM prestacao_reports r
+    WHERE (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
+      AND r.user_cpf IS NOT NULL
+      AND COALESCE((r.raw_data->>'approval_date')::timestamp, r.updated_at, '1970-01-01'::timestamp) <= ${cutoff + ' 23:59:59'}
+  `;
+  const validReportIds = reportRows
+    .filter((r: { id: number; name: string }) => !isFaturaOrCartao(r.name || ''))
+    .map((r: { id: number }) => r.id);
+
+  if (validReportIds.length === 0) return 0;
+
   await sql`DELETE FROM prestacao_expense_snapshots WHERE quinzena = ${quinzenaId}`;
   const snapResult = await sql`
     INSERT INTO prestacao_expense_snapshots (id, quinzena, value, user_cpf)
     SELECT pe.id, ${quinzenaId}, pe.value, pr.user_cpf
     FROM prestacao_expenses pe
     JOIN prestacao_reports pr ON pe.report_id = pr.id
-    WHERE pr.status = 'APROVADO'
-      AND pr.user_cpf IS NOT NULL
-      AND (pr.updated_at IS NULL OR pr.updated_at <= ${cutoff + ' 23:59:59'})
+    WHERE pr.id = ANY(${validReportIds})
+      AND COALESCE(pe.raw_data->>'payment_method_id', '') != '627401'
     ON CONFLICT (id, quinzena) DO UPDATE SET value = EXCLUDED.value, user_cpf = EXCLUDED.user_cpf
     RETURNING 1
   `;

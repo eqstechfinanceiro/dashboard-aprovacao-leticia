@@ -503,6 +503,7 @@ export async function GET(request: NextRequest) {
         FROM prestacao_reports r
         JOIN prestacao_expenses e ON e.report_id = r.id
         WHERE r.id = ANY(${validReportIds})
+          AND COALESCE(e.raw_data->>'payment_method_id', '') != '627401'
         GROUP BY r.user_cpf
       `;
     }

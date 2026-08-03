@@ -195,7 +195,7 @@ scenarios = [
 ]
 
 print("\n" + "=" * 100)
-print(f"{'Scenario':<40} {'Reports':>8} {'Expenses':>9} {'Total R$':>14} {'Δ Reports':>10} {'Δ Expenses':>11} {'Δ Value R$':>14}")
+print(f"{'Scenario':<40} {'Reports':>8} {'Expenses':>9} {'Total R$':>14} {'D Reports':>10} {'D Expenses':>11} {'D Value R$':>14}")
 print("=" * 100)
 
 for name, filter_fn in scenarios:

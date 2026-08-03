@@ -197,6 +197,7 @@ export async function GET(request: NextRequest) {
     const trackingData = await fetchApprovalTrackingSteps();
     const waitingStepMap = trackingData.steps;
     const rejectedIds = trackingData.rejected;
+    const approvedLastActionIds = trackingData.approvedLastAction;
 
     let allReports: any[] = [];
 
@@ -347,6 +348,71 @@ export async function GET(request: NextRequest) {
       const beforeCount = allReports.length;
       allReports = allReports.filter((r: any) => !staleIds.has(r.id));
       console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports (v2-status=${staleFromOtherStatuses.size}, excel-rejected=${rejectedIds.size})`);
+    }
+
+    // Filter out fully-approved reports that v2 still shows as ENVIADO (stale).
+    // A report is fully approved if:
+    // - Its last action in the admin Excel is "Aprovado" (approvedLastActionIds)
+    // - AND its waitingStep exceeds the max step of its approval flow (all steps done)
+    // This avoids fetching the 6974+ APROVADO reports from v2 — we use the Excel data we already have.
+    {
+      const fullyApprovedIds = new Set<number>();
+      for (const r of allReports) {
+        if (!approvedLastActionIds.has(r.id)) continue;
+        const userId = r.user_id;
+        const flowId = userId ? userFlowMap.get(userId) : undefined;
+        if (!flowId) continue;
+        const stepMap = flowStepApprovers.get(flowId);
+        if (!stepMap || stepMap.size === 0) continue;
+        const maxStep = Math.max(...stepMap.keys());
+        const waitingStep = waitingStepMap.has(r.id) ? waitingStepMap.get(r.id)! : 1;
+        if (waitingStep > maxStep) {
+          fullyApprovedIds.add(r.id);
+        }
+      }
+      if (fullyApprovedIds.size > 0) {
+        const beforeCount = allReports.length;
+        allReports = allReports.filter((r: any) => !fullyApprovedIds.has(r.id));
+        console.log(`[Pending] Filtered ${beforeCount - allReports.length} fully-approved reports (v2 stale ENVIADO, Excel confirmed Aprovado)`);
+      }
+    }
+
+    // Individual status verification: the v2 bulk /status/ENVIADO endpoint is stale
+    // and includes reports that are actually APROVADO or REPROVADO. The Excel-based
+    // filter above catches some, but not all (e.g., reports approved through paths
+    // the Excel doesn't capture). Do a lightweight individual status check for each
+    // remaining report to filter out any that are not truly ENVIADO.
+    {
+      const staleIndividual = new Set<number>();
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < allReports.length; i += BATCH_SIZE) {
+        const batch = allReports.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(
+          batch.map(async (r: any) => {
+            try {
+              const resp = await fetch(`${API_URL}/v2/reports/${r.id}`, {
+                headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+                signal: AbortSignal.timeout(15000),
+              });
+              if (!resp.ok) return { id: r.id, status: null };
+              const data = await resp.json();
+              return { id: r.id, status: data.data?.status || null };
+            } catch {
+              return { id: r.id, status: null };
+            }
+          })
+        );
+        for (const { id, status } of results) {
+          if (status && status !== 'ENVIADO') {
+            staleIndividual.add(id);
+          }
+        }
+      }
+      if (staleIndividual.size > 0) {
+        const beforeCount = allReports.length;
+        allReports = allReports.filter((r: any) => !staleIndividual.has(r.id));
+        console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports via individual status check (not actually ENVIADO)`);
+      }
     }
 
     // Build result with approval flow info

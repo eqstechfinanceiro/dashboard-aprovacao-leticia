@@ -388,19 +388,26 @@ export default function QuinzenaDinamicaPage() {
       const title = `${monthName} ${period.year} - ${period.quinzena}a Quinzena (${period.start_date} a ${period.end_date})`;
 
       // Column definitions: [header, key, group, width]
-      // groups: id | neon | carga | manual | calc
-      const COLS: { h: string; key: string; group: 'id'|'neon'|'carga'|'manual'|'calc'; w: number }[] = [
+      // groups: id | painel | carga | manual | calc
+      const COLS: { h: string; key: string; group: 'id'|'painel'|'carga'|'manual'|'calc'; w: number }[] = [
         { h: 'CPF',               key: 'cpf',               group: 'id',     w: 15 },
         { h: 'COLABORADOR',       key: 'colaborador',        group: 'id',     w: 34 },
         { h: 'SITUACAO',          key: 'situacao',           group: 'id',     w: 10 },
         { h: 'REGIONAL',          key: 'regional',           group: 'id',     w: 16 },
         { h: 'CENTRO DE CUSTO',   key: 'centro_custo',       group: 'id',     w: 30 },
         { h: 'GESTOR',            key: 'gestor',             group: 'id',     w: 28 },
+        { h: 'DIRETOR',           key: 'diretor',            group: 'id',     w: 28 },
         { h: 'STATUS CARTAO',     key: 'status_cartao',      group: 'id',     w: 16 },
-        { h: 'SALDO FINAL',       key: 'saldo_final',        group: 'neon',   w: 14 },
-        { h: 'SALDO CARTAO',      key: 'saldo_cartao',       group: 'neon',   w: 14 },
-        { h: 'SALDO PRESTACAO',   key: 'saldo_prestacao',    group: 'neon',   w: 16 },
-        { h: 'SALDO REEMBOLSAR',  key: 'saldo_reembolsar',   group: 'neon',   w: 16 },
+        // PAINEL breakdown (audit columns)
+        { h: 'CARGA',             key: 'carga',              group: 'painel', w: 14 },
+        { h: 'TRANSFERENCIA',     key: 'transferencia',      group: 'painel', w: 14 },
+        { h: 'TARIFA',            key: 'tarifa',             group: 'painel', w: 12 },
+        { h: 'PRESTACAO',         key: 'prestacao',          group: 'painel', w: 14 },
+        { h: 'SALDO PRESTACAO',   key: 'saldo_prestacao',    group: 'painel', w: 16 },
+        // CARGA columns (using carga variants: max(0,sf) and carga-date saldo_cartao)
+        { h: 'SALDO FINAL',       key: 'saldo_final_carga',  group: 'carga',  w: 14 },
+        { h: 'SALDO REEMBOLSAR',  key: 'saldo_reembolsar',   group: 'carga',  w: 16 },
+        { h: 'SALDO CARTAO',      key: 'saldo_cartao_carga', group: 'carga',  w: 14 },
         { h: `${period.quinzena}a QZ (planilha)`, key: 'col_qz',    group: 'carga',  w: 16 },
         { h: `${period.quinzena}a QZ (manual)`,   key: 'col_qz_manual', group: 'manual', w: 16 },
         { h: 'ADIANTAMENTO',      key: 'adiantamento',       group: 'manual', w: 14 },
@@ -411,7 +418,8 @@ export default function QuinzenaDinamicaPage() {
       ];
 
       const numericKeys = new Set([
-        'saldo_final','saldo_cartao','saldo_prestacao','saldo_reembolsar',
+        'carga','transferencia','tarifa','prestacao','saldo_prestacao',
+        'saldo_final_carga','saldo_cartao_carga','saldo_reembolsar',
         'col_qz','col_qz_manual','adiantamento','carga_parcial','reembolso','carga_final',
       ]);
 
@@ -429,7 +437,7 @@ export default function QuinzenaDinamicaPage() {
 
       // Row 2 — group sub-headers
       const GROUP_LABELS: Record<string, string> = {
-        id: 'IDENTIFICACAO', neon: 'DADOS NEON', carga: 'CARGA (planilha)',
+        id: 'IDENTIFICACAO', painel: 'PAINEL (extrato)', carga: 'CARGA',
         manual: 'CAMPOS MANUAIS', calc: 'CALCULADO',
       };
       wsData.push(COLS.map(c => GROUP_LABELS[c.group]));
@@ -467,13 +475,13 @@ export default function QuinzenaDinamicaPage() {
       // Cell styles
       const groupFill: Record<string, string> = {
         id:     'DBEAFE', // blue-100
-        neon:   'DCFCE7', // green-100
+        painel: 'DCFCE7', // green-100
         carga:  'FEF9C3', // yellow-100
         manual: 'FEF3C7', // amber-100
         calc:   'EDE9FE', // purple-100
       };
       const groupFont: Record<string, string> = {
-        id: '1E3A5F', neon: '14532D', carga: '713F12', manual: '92400E', calc: '3B0764',
+        id: '1E3A5F', painel: '14532D', carga: '713F12', manual: '92400E', calc: '3B0764',
       };
 
       const numFmt = '#,##0.00';
