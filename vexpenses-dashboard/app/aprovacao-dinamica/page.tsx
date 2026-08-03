@@ -30,6 +30,7 @@ import {
   Eye,
   Receipt,
   AlertTriangle,
+  X,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
@@ -179,6 +180,7 @@ export default function AprovacaoDinamicaPage() {
   const [reportExpenses, setReportExpenses] = useState<Record<number, ReportExpense[]>>({});
   const [auditResults, setAuditResults] = useState<Record<number, Record<number, ExpenseAuditResult>>>({});
   const auditResultsRef = useRef(auditResults);
+  const excludedReportsRef = useRef<Set<number>>(new Set());
   const [auditingExpense, setAuditingExpense] = useState<string | null>(null);
   const [loadingExpenses, setLoadingExpenses] = useState<number | null>(null);
   const [showReceiptFor, setShowReceiptFor] = useState<string | null>(null);
@@ -199,6 +201,7 @@ export default function AprovacaoDinamicaPage() {
   const [approveObservation, setApproveObservation] = useState<Record<number, string>>({});
   const [showApproveUI, setShowApproveUI] = useState<Set<number>>(new Set());
   const [approveError, setApproveError] = useState<Record<number, string>>({});
+  const [approvalNotice, setApprovalNotice] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(30);
   const [preApproveModal, setPreApproveModal] = useState<{ reportId: number; description: string } | null>(null);
   const [horusSummary, setHorusSummary] = useState<Record<number, HorusSummary | { error: string }>>({});
@@ -208,6 +211,8 @@ export default function AprovacaoDinamicaPage() {
 
   useEffect(() => {
     setVisibleCount(30);
+    excludedReportsRef.current = new Set();
+    setApprovalNotice(null);
   }, [searchTerm, readyOnly, stepOneOnly, approverFilter, horusOnly]);
 
   // Keep ref in sync with auditResults
@@ -254,7 +259,8 @@ export default function AprovacaoDinamicaPage() {
       const res = await fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`);
       if (!res.ok) throw new Error('Failed to fetch pending reports');
       const data = await res.json();
-      setReports(data.data || []);
+      const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+      setReports(filtered);
       await loadAllSavedResults();
       // Fetch expense counts for all reports in background
       fetchExpenseCounts(data.data || []);
@@ -621,7 +627,9 @@ export default function AprovacaoDinamicaPage() {
 
         if (data.error_type === 'not_approver_in_step') {
           setShowApproveUI(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+          excludedReportsRef.current.add(reportId);
           setReports(prev => prev.filter(r => r.id !== reportId));
+          setApprovalNotice(`Relatório #${reportId} removido: ${errMsg}`);
           fetchPending();
         }
         return;
@@ -946,6 +954,19 @@ export default function AprovacaoDinamicaPage() {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Approval notice */}
+      {approvalNotice && (
+        <div className="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{approvalNotice}</span>
+          </div>
+          <button onClick={() => setApprovalNotice(null)} className="text-amber-600 hover:text-amber-800">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
