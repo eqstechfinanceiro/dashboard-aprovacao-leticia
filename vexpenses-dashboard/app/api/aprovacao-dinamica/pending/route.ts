@@ -200,6 +200,7 @@ export async function GET(request: NextRequest) {
     const approvedLastActionIds = trackingData.approvedLastAction;
 
     let allReports: any[] = [];
+    const seenReportIds = new Set<number>();
 
     for (const status of PENDING_STATUSES) {
       try {
@@ -216,9 +217,17 @@ export async function GET(request: NextRequest) {
           if (response.ok) {
             const data = await response.json();
             const reports = data.data || [];
-            allReports.push(...reports);
-            console.log(`[Pending] Fetched ${reports.length} reports for status ${status} (page ${page})`);
-            if (reports.length < 100) break;
+            let newCount = 0;
+            for (const r of reports) {
+              if (!seenReportIds.has(r.id)) {
+                seenReportIds.add(r.id);
+                allReports.push(r);
+                newCount++;
+              }
+            }
+            console.log(`[Pending] Fetched ${reports.length} reports for status ${status} (page ${page}), ${newCount} new unique`);
+            // If no new unique reports, we've exhausted the data (v2 API ignores pagination)
+            if (newCount === 0 || reports.length === 0) break;
             page++;
           } else {
             console.log(`[Pending] Status ${response.status} for reports/status/${status}`);
@@ -229,6 +238,7 @@ export async function GET(request: NextRequest) {
         console.log(`[Pending] Error fetching status ${status}:`, err);
       }
     }
+    console.log(`[Pending] Total unique reports: ${allReports.length}`);
 
     // Fetch REPROVADO reports to identify stale ENVIADO entries
     // (v2 /status/ENVIADO sometimes includes reports that are already rejected)
@@ -237,6 +247,7 @@ export async function GET(request: NextRequest) {
     const staleFromOtherStatuses = new Set<number>();
     try {
       let page = 1;
+      const staleSeenIds = new Set<number>();
       while (page <= 5) {
         const response = await fetch(`${API_URL}/v2/reports/status/REPROVADO?per_page=100&page=${page}`, {
           headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
@@ -245,11 +256,16 @@ export async function GET(request: NextRequest) {
         if (response.ok) {
           const data = await response.json();
           const reports = data.data || [];
+          let newCount = 0;
           for (const r of reports) {
-            staleFromOtherStatuses.add(r.id);
+            if (!staleSeenIds.has(r.id)) {
+              staleSeenIds.add(r.id);
+              staleFromOtherStatuses.add(r.id);
+              newCount++;
+            }
           }
-          console.log(`[Pending] Fetched ${reports.length} REPROVADO reports (page ${page}) for stale check`);
-          if (reports.length < 100) break;
+          console.log(`[Pending] Fetched ${reports.length} REPROVADO reports (page ${page}), ${newCount} new unique`);
+          if (newCount === 0 || reports.length === 0) break;
           page++;
         } else {
           break;
@@ -264,6 +280,7 @@ export async function GET(request: NextRequest) {
     const flowNamesMap = new Map<number, string>();
     try {
       let page = 1;
+      const tmSeenIds = new Set<number>();
       while (page <= 20) {
         const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=100&page=${page}`, {
           headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
@@ -272,13 +289,18 @@ export async function GET(request: NextRequest) {
         if (tmResp.ok) {
           const tmData = await tmResp.json();
           const members = tmData.data || [];
+          let newCount = 0;
           for (const m of members) {
-            if (m.approval_flow_id) {
-              userFlowMap.set(m.id, m.approval_flow_id);
+            if (!tmSeenIds.has(m.id)) {
+              tmSeenIds.add(m.id);
+              if (m.approval_flow_id) {
+                userFlowMap.set(m.id, m.approval_flow_id);
+              }
+              newCount++;
             }
           }
-          console.log(`[Pending] Fetched ${members.length} team-members (page ${page})`);
-          if (members.length < 100) break;
+          console.log(`[Pending] Fetched ${members.length} team-members (page ${page}), ${newCount} new unique`);
+          if (newCount === 0 || members.length === 0) break;
           page++;
         } else {
           break;
