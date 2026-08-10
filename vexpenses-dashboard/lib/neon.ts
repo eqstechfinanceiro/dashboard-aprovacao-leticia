@@ -28,7 +28,7 @@ let pool: Pool | null = null;
 if (DATABASE_URL && !isBuildTime) {
   pool = new Pool({
     ...parseConnString(DATABASE_URL),
-    max: 10,
+    max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
   });
@@ -52,7 +52,8 @@ export const sql = pool ? (sqlFn as any) : null;
 export const isDatabaseAvailable = !!DATABASE_URL && !isBuildTime;
 
 // Flag para evitar múltiplas tentativas de criação da tabela
-let tableCreationAttempted = false;
+let cacheTableEnsured = false;
+let preloadStatsTableEnsured = false;
 
 // Funções auxiliares para o cache
 export async function createCacheTable() {
@@ -87,12 +88,12 @@ export async function createCacheTable() {
 }
 
 export async function ensureCacheTable() {
-  if (tableCreationAttempted) {
+  if (cacheTableEnsured) {
     return;
   }
   
-  tableCreationAttempted = true;
   await createCacheTable();
+  cacheTableEnsured = true;
 }
 
 export async function clearCacheTable() {
@@ -149,10 +150,11 @@ export async function createPreloadStatsTable() {
 }
 
 export async function ensurePreloadStatsTable() {
+  if (preloadStatsTableEnsured) return;
   try {
     await createPreloadStatsTable();
+    preloadStatsTableEnsured = true;
   } catch (error) {
     console.error('[Neon] Erro ao garantir tabela de preload_stats:', error);
-    // Não lançar erro para não quebrar a aplicação
   }
 }
