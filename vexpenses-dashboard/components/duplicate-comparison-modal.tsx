@@ -234,7 +234,7 @@ export function DuplicateComparisonModal({
             const dupDate = dup.date ? dup.date.split('T')[0] : '';
             const dupObs = dup.observation || '';
             const origReceipt = originalExpense?.receipt_url;
-            const match = expenses.find(e => {
+            const match = expenses.find((e: any) => {
               if (Number(e.value) !== Number(dup.value)) return false;
               if (e.title !== dup.title) return false;
               if (!e.receipt_url) return false;

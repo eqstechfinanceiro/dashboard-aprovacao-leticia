@@ -195,7 +195,7 @@ scenarios = [
 ]
 
 print("\n" + "=" * 100)
-print(f"{'Scenario':<40} {'Reports':>8} {'Expenses':>9} {'Total R$':>14} {'D Reports':>10} {'D Expenses':>11} {'D Value R$':>14}")
+print(f"{'Scenario':<40} {'Reports':>8} {'Expenses':>9} {'Total R$':>14} {'Δ Reports':>10} {'Δ Expenses':>11} {'Δ Value R$':>14}")
 print("=" * 100)
 
 for name, filter_fn in scenarios:
@@ -263,7 +263,7 @@ if missing_reports:
     # Load ref report names
     wb2 = openpyxl.load_workbook(REF_PATH, read_only=True, data_only=True)
     ws2 = wb2["BASE PREST "]
-    ref_report_info = {}
+    ref_report_info = {}    
     for row in ws2.iter_rows(min_row=4, values_only=True):
         if row[0] is None:
             continue

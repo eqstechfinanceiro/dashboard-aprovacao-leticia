@@ -50,7 +50,7 @@ try:
         # Verificar se tem palavras-chave de cabeçalho
         keywords = ['COLABORADOR', 'NOME', 'SALDO', 'CARTAO', 'PRESTACAO', 'CPF', 'STATUS']
         matches = sum(1 for k in keywords if any(k in t for t in row_texts))
-
+is
         if matches >= 2:
             header_row_idx = i
             log(f"\n>>> CABECALHO DETECTADO NA LINHA {i} (indice {i}, linha Excel {i+1})")
