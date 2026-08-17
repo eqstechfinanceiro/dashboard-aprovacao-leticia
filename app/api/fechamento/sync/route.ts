@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     let extratoSynced = 0;
     let extratoError: string | null = null;
     try {
-      const extratoResult = await downloadExtrato();
+      const extratoResult = await downloadExtrato(undefined, { incremental: true });
       extratoSynced = (extratoResult.totalRows as number) || 0;
     } catch (e: any) {
       console.error('[Sync] Extrato download failed:', e);

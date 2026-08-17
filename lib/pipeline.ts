@@ -285,19 +285,42 @@ const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
 /** Step 0: Download extrato from API v3 (XLSX via S3 presigned URL) */
 export async function downloadExtrato(
-  onProgress?: (chunk: number, total: number) => void
+  onProgress?: (chunk: number, total: number) => void,
+  options?: { incremental?: boolean }
 ): Promise<Record<string, unknown>> {
   if (!sql) throw new Error('Database not available');
   const cookieStr = await getLaravelCookieString();
   if (!cookieStr) throw new Error('Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão.');
   const db = sql;
 
-  // Determine date range: from Jan 1 of previous year to today
-  // (planilha CONTROLE has extrato data since May 2025, so we need at least that far back)
+  // Determine date range
   const now = new Date();
-  const year = now.getFullYear();
-  const startDate = `${year - 1}-01-01`;
   const endDate = now.toISOString().slice(0, 10);
+
+  let startDate: string;
+  if (options?.incremental) {
+    // Only download from last known date in DB (minus 2 days overlap for safety)
+    try {
+      const lastRow = await db`SELECT MAX(data) as max_data FROM extrato_movimentacao`;
+      const lastDate = (lastRow[0] as any)?.max_data;
+      if (lastDate) {
+        const d = new Date(lastDate);
+        d.setDate(d.getDate() - 2);
+        startDate = d.toISOString().slice(0, 10);
+      } else {
+        // No data yet — fall back to full range
+        const year = now.getFullYear();
+        startDate = `${year - 1}-01-01`;
+      }
+    } catch {
+      const year = now.getFullYear();
+      startDate = `${year - 1}-01-01`;
+    }
+  } else {
+    // Full range: from Jan 1 of previous year to today
+    const year = now.getFullYear();
+    startDate = `${year - 1}-01-01`;
+  }
 
   // Split into 15-day chunks
   const chunks: [string, string][] = [];
