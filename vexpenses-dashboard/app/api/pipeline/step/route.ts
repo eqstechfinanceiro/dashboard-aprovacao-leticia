@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { snapshotSomase, getCurrentQuinzenaId, refreshReports, downloadExpenses, refreshCadastro } from '@/lib/pipeline';
+import { snapshotSomase, getCurrentQuinzenaId, refreshReports, downloadExpenses, refreshCadastro, downloadExtrato } from '@/lib/pipeline';
 import { recordStepStart, recordStepFinish, type PipelineStep } from '@/lib/pipeline';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 300; // 5 min
+export const maxDuration = 600; // 10 min (extrato download with historical data)
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,6 +17,9 @@ export async function POST(request: NextRequest) {
 
     let meta: Record<string, unknown> = {};
     switch (step) {
+      case 'download_extrato':
+        meta = await downloadExtrato();
+        break;
       case 'snapshot_somase':
         meta = await snapshotSomase(quinzenaId);
         break;

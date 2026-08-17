@@ -131,8 +131,9 @@ function getQuinzenaDates(year: number, month: number, quinzena: number) {
   const prevYear  = month === 1 ? year - 1 : year;
   const pmm = String(prevMonth).padStart(2, '0');
 
-  // Financial data cutoff: day 30 of previous month (same for both quinzenas)
-  const financial_cutoff = `${prevYear}-${pmm}-30`;
+  // Financial data cutoff: last day of previous month (same for both quinzenas)
+  const prevMonthLastDay = new Date(prevYear, prevMonth, 0).getDate();
+  const financial_cutoff = `${prevYear}-${pmm}-${String(prevMonthLastDay).padStart(2, '0')}`;
 
   // Saldo cartão CONTROLE: last snapshot up to day 1 of current month
   const saldo_cartao_controle_date = `${year}-${mm}-01`;
@@ -303,6 +304,7 @@ export async function GET(request: NextRequest) {
   const year     = parseInt(searchParams.get('year')     ?? '2026');
   const month    = parseInt(searchParams.get('month')    ?? '5');
   const quinzena = parseInt(searchParams.get('quinzena') ?? '1');
+  const forceCalc = searchParams.get('forceCalc') === 'true';
 
   if (
     isNaN(year) || isNaN(month) || isNaN(quinzena) ||
@@ -324,8 +326,8 @@ export async function GET(request: NextRequest) {
       ? parseFloat(configRows[0].reembolso_multiplier as string)
       : 0.5;
 
-    // 1. Check if this period is frozen
-    const frozenRows = await sql`
+    // 1. Check if this period is frozen (skip if forceCalc=true)
+    const frozenRows = forceCalc ? [] : await sql`
       SELECT
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
@@ -449,10 +451,23 @@ export async function GET(request: NextRequest) {
     }
 
     // 2c. Build name→cpf map for extrato matching
+    // When duplicate names exist, prefer the CPF with non-null situacao (real user over ghost entry)
     const nomeToCpf = new Map<string, string>();
+    const nomeHasSituacao = new Set<string>();
     for (const c of cadastroBase) {
       const normalized = normalizeName(c.colaborador);
-      if (normalized) nomeToCpf.set(normalized, c.cpf);
+      if (!normalized) continue;
+      const hasSituacao = c.situacao !== null && c.situacao !== undefined && c.situacao !== '';
+      if (!nomeToCpf.has(normalized)) {
+        nomeToCpf.set(normalized, c.cpf);
+        if (hasSituacao) nomeHasSituacao.add(normalized);
+      } else {
+        // Duplicate name — prefer the one with situacao
+        if (hasSituacao && !nomeHasSituacao.has(normalized)) {
+          nomeToCpf.set(normalized, c.cpf);
+          nomeHasSituacao.add(normalized);
+        }
+      }
     }
     const fuzzyCache = new Map<string, string>();
 
@@ -477,7 +492,7 @@ export async function GET(request: NextRequest) {
         usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
+        COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')), 0) AS tarifa_raw
       FROM deduped
       GROUP BY usuario_up
     `;

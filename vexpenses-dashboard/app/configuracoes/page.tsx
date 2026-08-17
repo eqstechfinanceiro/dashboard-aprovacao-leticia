@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { RefreshCw, CheckCircle2, XCircle, Clock, AlertCircle, Zap, Calendar } from 'lucide-react';
+import { RefreshCw, CheckCircle2, XCircle, Clock, AlertCircle, Zap, Calendar, Snowflake } from 'lucide-react';
 import { useAuth } from '@/lib/auth-context';
 import { UsersManagement } from '@/components/users-management';
 
@@ -92,6 +92,9 @@ export default function Configuracoes() {
   const [running, setRunning] = useState(false);
   const [runResult, setRunResult] = useState<{ success: boolean; message: string } | null>(null);
   const [progressMsg, setProgressMsg] = useState<string>('');
+  const [freezing, setFreezing] = useState(false);
+  const [freezeResult, setFreezeResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [freezeStatus, setFreezeStatus] = useState<{ is_frozen: boolean; frozen_at: string | null } | null>(null);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -106,6 +109,55 @@ export default function Configuracoes() {
       setLoading(false);
     }
   }, []);
+
+  const fetchFreezeStatus = useCallback(async () => {
+    try {
+      const q = pipelineStatus?.current_quinzena || pipelineStatus?.quinzena;
+      if (!q) return;
+      const [year, month, quinzena] = q.split('-');
+      const resp = await fetch(`/api/quinzena-freeze?year=${year}&month=${month}&quinzena=${quinzena}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        setFreezeStatus({ is_frozen: data.is_frozen, frozen_at: data.frozen_at });
+      }
+    } catch (err) {
+      console.error('Error fetching freeze status:', err);
+    }
+  }, [pipelineStatus]);
+
+  useEffect(() => {
+    if (pipelineStatus) fetchFreezeStatus();
+  }, [pipelineStatus, fetchFreezeStatus]);
+
+  const freezeQuinzena = async () => {
+    const q = pipelineStatus?.current_quinzena || pipelineStatus?.quinzena;
+    if (!q) return;
+    const [yearStr, monthStr, quinzenaStr] = q.split('-');
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr);
+    const quinzena = parseInt(quinzenaStr);
+
+    setFreezing(true);
+    setFreezeResult(null);
+    try {
+      const resp = await fetch('/api/quinzena-freeze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, month, quinzena }),
+      });
+      const data = await resp.json();
+      if (data.ok) {
+        setFreezeResult({ success: true, message: `Quinzena ${year}/${month} Q${quinzena} congelada! ${data.rows_frozen} linhas salvas.` });
+        fetchFreezeStatus();
+      } else {
+        setFreezeResult({ success: false, message: data.error || 'Erro ao congelar' });
+      }
+    } catch (err) {
+      setFreezeResult({ success: false, message: err instanceof Error ? err.message : 'Erro desconhecido' });
+    } finally {
+      setFreezing(false);
+    }
+  };
 
   useEffect(() => {
     fetchStatus();
@@ -250,8 +302,30 @@ export default function Configuracoes() {
             </div>
           )}
 
-          {/* Action button */}
-          <div className="flex gap-3">
+          {/* Freeze result */}
+          {freezeResult && (
+            <div className={`p-3 rounded-lg text-sm ${freezeResult.success ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+              {freezeResult.message}
+            </div>
+          )}
+
+          {/* Freeze status */}
+          {freezeStatus && (
+            <div className="flex items-center gap-2 text-sm bg-gray-50 rounded-lg p-3">
+              <Snowflake className="h-4 w-4 text-blue-500" />
+              <span>
+                Status de congelamento:{' '}
+                {freezeStatus.is_frozen ? (
+                  <strong className="text-green-700">Congelada em {formatDate(freezeStatus.frozen_at)}</strong>
+                ) : (
+                  <strong className="text-orange-600">Não congelada</strong>
+                )}
+              </span>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div className="flex gap-3 flex-wrap">
             <Button
               onClick={runPipeline}
               disabled={running}
@@ -263,6 +337,19 @@ export default function Configuracoes() {
                 <Zap className="h-4 w-4" />
               )}
               {running ? 'Executando...' : 'Executar Pipeline Agora'}
+            </Button>
+            <Button
+              onClick={freezeQuinzena}
+              disabled={freezing || freezeStatus?.is_frozen}
+              variant="secondary"
+              className="flex items-center gap-2"
+            >
+              {freezing ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Snowflake className="h-4 w-4" />
+              )}
+              {freezing ? 'Congelando...' : 'Congelar Quinzena'}
             </Button>
             <Button
               onClick={fetchStatus}

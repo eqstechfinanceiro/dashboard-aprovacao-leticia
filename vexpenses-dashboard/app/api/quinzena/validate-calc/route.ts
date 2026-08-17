@@ -177,11 +177,24 @@ export async function GET(request: NextRequest) {
     `;
 
     // Mapa nome_normalizado -> cpf e ancora por cpf
+    // Prefer CPF with non-null situacao for duplicate names
     const nomeToCpf = new Map<string, string>();
+    const nomeHasSituacao = new Set<string>();
     const ancoraByCpf = new Map<string, { saldo_prestacao: number; saldo_cartao: number }>();
     for (const c of cadastroRows) {
       const normalized = normalizeName(c.colaborador);
-      if (normalized) nomeToCpf.set(normalized, c.cpf);
+      if (normalized) {
+        const hasSituacao = c.situacao !== null && c.situacao !== undefined && c.situacao !== '';
+        if (!nomeToCpf.has(normalized)) {
+          nomeToCpf.set(normalized, c.cpf);
+          if (hasSituacao) nomeHasSituacao.add(normalized);
+        } else {
+          if (hasSituacao && !nomeHasSituacao.has(normalized)) {
+            nomeToCpf.set(normalized, c.cpf);
+            nomeHasSituacao.add(normalized);
+          }
+        }
+      }
       if (c.cpf) {
         ancoraByCpf.set(c.cpf, {
           saldo_prestacao: toNum(c.saldo_prestacao),
@@ -261,7 +274,7 @@ export async function GET(request: NextRequest) {
         usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
+        COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')), 0) AS tarifa_raw
       FROM deduped
       GROUP BY usuario_up
     `;
@@ -282,7 +295,7 @@ export async function GET(request: NextRequest) {
         usuario_up,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Taxa'), 0) AS tarifa_raw
+        COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')), 0) AS tarifa_raw
       FROM deduped
       GROUP BY usuario_up
     `;

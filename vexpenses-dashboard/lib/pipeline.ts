@@ -292,10 +292,11 @@ export async function downloadExtrato(
   if (!cookieStr) throw new Error('Laravel token expirado. Acesse app.vexpenses.com para atualizar via extensão.');
   const db = sql;
 
-  // Determine date range: from Jan 1 of current year to today
+  // Determine date range: from Jan 1 of previous year to today
+  // (planilha CONTROLE has extrato data since May 2025, so we need at least that far back)
   const now = new Date();
   const year = now.getFullYear();
-  const startDate = `${year}-01-01`;
+  const startDate = `${year - 1}-01-01`;
   const endDate = now.toISOString().slice(0, 10);
 
   // Split into 15-day chunks
@@ -572,19 +573,21 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
 }
 
 /** Step 1: Refresh all report statuses from VExpenses API
- *  Uses the internal /api/vexpenses/reports endpoint which has caching
- *  and avoids Incapsula blocking that occurs with paginate=true.
+ *  Calls VExpenses API directly to avoid middleware auth issues.
  */
 export async function refreshReports(): Promise<Record<string, unknown>> {
   if (!sql) throw new Error('Database not available');
   if (!API_KEY) throw new Error('VEXPENSES_API_KEY not configured');
 
-  const baseUrl = process.env.NEXT_PUBLIC_LOCAL_URL || 'http://localhost:3000';
-  const resp = await fetch(`${baseUrl}/api/vexpenses/reports?include=user`, {
-    headers: { Accept: 'application/json' },
+  // Call VExpenses API directly (not through internal route which requires auth)
+  const resp = await fetch(`${API_URL}/v2/reports?include=user`, {
+    headers: {
+      'Authorization': API_KEY,
+      'Accept': 'application/json',
+    },
     signal: AbortSignal.timeout(300000),
   });
-  if (!resp.ok) throw new Error(`Internal reports API returned ${resp.status}`);
+  if (!resp.ok) throw new Error(`VExpenses reports API returned ${resp.status}`);
   const data = await resp.json();
   const allReports: any[] = data.data || [];
 
@@ -649,21 +652,31 @@ export async function downloadExpenses(
     const results = await Promise.allSettled(
       batch.map(async (rid) => {
         try {
-          const resp = await fetch(`${API_URL}/v2/reports/${rid}?include=expenses`, {
+          let resp = await fetch(`${API_URL}/v2/reports/${rid}?include=expenses`, {
             headers: { Authorization: API_KEY, Accept: 'application/json' },
             signal: AbortSignal.timeout(30000),
           });
-          if (!resp.ok) return 0;
+          if (!resp.ok) {
+            // Retry once after 1s
+            await new Promise(r => setTimeout(r, 1000));
+            resp = await fetch(`${API_URL}/v2/reports/${rid}?include=expenses`, {
+              headers: { Authorization: API_KEY, Accept: 'application/json' },
+              signal: AbortSignal.timeout(30000),
+            });
+            if (!resp.ok) return 0;
+          }
           const data = await resp.json();
           const expenses = data.data?.expenses?.data || [];
           if (expenses.length === 0) return 0;
 
-          // Batch insert expenses for this report
-          if (expenses.length > 0) {
+          // Insert expenses in sub-batches of 50 to avoid param limits
+          const SUB_BATCH = 50;
+          for (let j = 0; j < expenses.length; j += SUB_BATCH) {
+            const subBatch = expenses.slice(j, j + SUB_BATCH);
             const valueGroups: string[] = [];
             const params: any[] = [];
             let pIdx = 1;
-            for (const e of expenses) {
+            for (const e of subBatch) {
               const placeholders = Array.from({ length: 7 }, () => `$${pIdx++}`);
               valueGroups.push(`(${placeholders.join(', ')})`);
               params.push(e.id, rid, e.value, e.date || null, e.title || e.description || null, e.status || null, JSON.stringify(e));
@@ -676,7 +689,8 @@ export async function downloadExpenses(
             await db.query(query, params);
           }
           return expenses.length;
-        } catch {
+        } catch (err: any) {
+          console.error(`[downloadExpenses] Report ${rid} failed:`, err?.message || err);
           return 0;
         }
       })
