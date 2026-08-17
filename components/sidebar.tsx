@@ -13,7 +13,8 @@ import {
   FileSpreadsheet,
   Hourglass,
   Bot,
-  ClipboardList
+  ClipboardList,
+  FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -28,6 +29,7 @@ const ALL_NAVIGATION = [
   { id: 'gestao-caixa', name: 'Gestão Caixa', href: '/gestao-caixa', icon: TrendingUp },
   { id: 'quinzena-dinamica', name: 'Quinzena Dinâmica', href: '/quinzena-dinamica', icon: FileSpreadsheet },
   { id: 'controle', name: 'Controle', href: '/controle', icon: ClipboardList },
+  { id: 'fechamento', name: 'Fechamento', href: '/fechamento', icon: FileText },
   { id: 'aprovacao-dinamica', name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
   { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];

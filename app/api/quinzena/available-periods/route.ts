@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
-import { getQuinzenaCutoff } from '@/lib/pipeline';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,14 +152,15 @@ export async function GET() {
       }
     }
 
-    // Filtrar: excluir quinzenas cujo cutoff ainda não chegou
+    // Filtrar: excluir quinzenas cujo período ainda não terminou
+    // Usa a data de fim da própria quinzena (10/M para 1QZ, 25/M para 2QZ),
+    // não o cutoff da próxima quinzena (que é para finalização de snapshot).
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const filtered = periods.filter(p => {
-      const qzId = `${p.year}-${String(p.month).padStart(2, '0')}-${p.quinzena}`;
-      const cutoff = getQuinzenaCutoff(qzId);
-      const cutoffDate = new Date(cutoff + 'T23:59:59');
-      return cutoffDate <= today;
+      const { end } = getQuinzenaDateRange(p.year, p.month, p.quinzena);
+      const endDate = new Date(end + 'T23:59:59');
+      return endDate <= today;
     });
 
     // Ordenar: mais recente primeiro

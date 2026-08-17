@@ -29,11 +29,17 @@ import {
   Search,
   Eye,
   Receipt,
+  AlertTriangle,
+  X,
+  Copy,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
 import { PreApproveReviewModal, type PreApproveExpense } from '@/components/pre-approve-review-modal';
 import { useAuth } from '@/lib/auth-context';
+import type { ReportValidationSummary } from '@/lib/nf-validator';
+import { DuplicateComparisonModal, type ComparisonExpense } from '@/components/duplicate-comparison-modal';
+import { BatchDuplicateReviewModal } from '@/components/batch-duplicate-review-modal';
 
 interface ReportApproval {
   approver_name: string;
@@ -110,6 +116,81 @@ interface ReportAuditData {
   expenses: ExpenseAuditResult[];
 }
 
+interface ValidationDetailData {
+  has_duplicates: boolean;
+  has_date_mismatch: boolean;
+  has_total_mismatch: boolean;
+  expenses: Record<number, {
+    expense_id: number;
+    has_duplicate: boolean;
+    has_date_mismatch: boolean;
+    duplicates: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    confirmed_duplicates: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    dismissed_duplicates: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    date_mismatch_detail: { expected_period: string; expense_date: string } | null;
+  }>;
+  total_expected: number | null;
+  total_calculated: number;
+  total_difference: number;
+}
+
 const STATUS_CONFIG: Record<string, {
   label: string;
   color: string;
@@ -156,6 +237,8 @@ export default function AprovacaoDinamicaPage() {
   const [reportExpenses, setReportExpenses] = useState<Record<number, ReportExpense[]>>({});
   const [auditResults, setAuditResults] = useState<Record<number, Record<number, ExpenseAuditResult>>>({});
   const auditResultsRef = useRef(auditResults);
+  const excludedReportsRef = useRef<Set<number>>(new Set());
+  const validationBatchFetchedRef = useRef(false);
   const [auditingExpense, setAuditingExpense] = useState<string | null>(null);
   const [loadingExpenses, setLoadingExpenses] = useState<number | null>(null);
   const [showReceiptFor, setShowReceiptFor] = useState<string | null>(null);
@@ -176,12 +259,21 @@ export default function AprovacaoDinamicaPage() {
   const [approveObservation, setApproveObservation] = useState<Record<number, string>>({});
   const [showApproveUI, setShowApproveUI] = useState<Set<number>>(new Set());
   const [approveError, setApproveError] = useState<Record<number, string>>({});
+  const [approvalNotice, setApprovalNotice] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(30);
   const [preApproveModal, setPreApproveModal] = useState<{ reportId: number; description: string } | null>(null);
+  const [validationSummary, setValidationSummary] = useState<Record<number, ReportValidationSummary | { error: string }>>({});
+  const [validationDetails, setValidationDetails] = useState<Record<number, ValidationDetailData>>({});
+  const [loadingValidationDetails, setLoadingValidationDetails] = useState<Set<number>>(new Set());
+  const [alertsOnly, setAlertsOnly] = useState(false);
+  const [comparisonModal, setComparisonModal] = useState<{ original: ComparisonExpense; duplicates: ComparisonExpense[] } | null>(null);
+  const [batchDupModalOpen, setBatchDupModalOpen] = useState(false);
 
   useEffect(() => {
     setVisibleCount(30);
-  }, [searchTerm, readyOnly, stepOneOnly, approverFilter]);
+    excludedReportsRef.current = new Set();
+    setApprovalNotice(null);
+  }, [searchTerm, readyOnly, stepOneOnly, approverFilter, alertsOnly]);
 
   // Keep ref in sync with auditResults
   useEffect(() => {
@@ -218,7 +310,7 @@ export default function AprovacaoDinamicaPage() {
     }
   }, []);
 
-  const fetchPending = useCallback(async () => {
+  const fetchPending = useCallback(async (opts?: { skipValidation?: boolean }) => {
     setLoading(true);
     setError(null);
     try {
@@ -227,18 +319,56 @@ export default function AprovacaoDinamicaPage() {
       const res = await fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`);
       if (!res.ok) throw new Error('Failed to fetch pending reports');
       const data = await res.json();
-      setReports(data.data || []);
+      const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+      setReports(filtered);
       await loadAllSavedResults();
       // Fetch expense counts for all reports in background
       fetchExpenseCounts(data.data || []);
       // Fetch existing approvals
       fetchApprovals(data.data || []);
+      // Fetch NF validation batch summary only on first load or explicit refresh
+      if (!opts?.skipValidation && !validationBatchFetchedRef.current) {
+        validationBatchFetchedRef.current = true;
+        fetchValidationBatch(data.data || []);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   }, [loadAllSavedResults, approverFilter, stepOneOnly]);
+
+  const fetchValidationBatch = useCallback(async (reportList: PendingReport[]) => {
+    if (reportList.length === 0) return;
+    try {
+      const ids = reportList.map(r => r.id).join(',');
+      const res = await fetch(`/api/aprovacao-dinamica/validation/batch?report_ids=${ids}`);
+      if (res.ok) {
+        const data = await res.json();
+        setValidationSummary(data.data || {});
+      }
+    } catch (err) {
+      console.error('Error fetching NF validation batch:', err);
+    }
+  }, []);
+
+  const fetchValidationDetails = useCallback(async (reportId: number) => {
+    if (validationDetails[reportId] || loadingValidationDetails.has(reportId)) return;
+    setLoadingValidationDetails(prev => new Set(prev).add(reportId));
+    try {
+      const res = await fetch(`/api/aprovacao-dinamica/validation/${reportId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data) {
+          setValidationDetails(prev => ({ ...prev, [reportId]: data.data as ValidationDetailData }));
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching NF validation details:', err);
+    } finally {
+      setLoadingValidationDetails(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+    }
+  }, [validationDetails, loadingValidationDetails]);
 
   const fetchApprovals = useCallback(async (reportList: PendingReport[]) => {
     if (reportList.length === 0) return;
@@ -279,7 +409,7 @@ export default function AprovacaoDinamicaPage() {
   useEffect(() => {
     if (globalAuditing || auditingExpense) return;
     const interval = setInterval(() => {
-      fetchPending();
+      fetchPending({ skipValidation: true });
     }, 60000);
     return () => clearInterval(interval);
   }, [fetchPending, globalAuditing, auditingExpense]);
@@ -320,6 +450,10 @@ export default function AprovacaoDinamicaPage() {
     setExpandedReport(isExpanded ? null : reportId);
     if (!isExpanded) {
       loadExpenses(reportId);
+      const vs = validationSummary[reportId];
+      if (vs && !('error' in vs) && (vs.has_duplicates || vs.has_date_mismatch || vs.has_total_mismatch)) {
+        fetchValidationDetails(reportId);
+      }
     }
   };
 
@@ -456,6 +590,12 @@ export default function AprovacaoDinamicaPage() {
     if (readyOnly) {
       filtered = filtered.filter(r => isReportReadyToApprove(r.id) && !reportApprovals[r.id]);
     }
+    if (alertsOnly) {
+      filtered = filtered.filter(r => {
+        const v = validationSummary[r.id];
+        return v && !('error' in v) && (v.has_duplicates || v.has_date_mismatch || v.has_total_mismatch);
+      });
+    }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(r =>
@@ -467,7 +607,7 @@ export default function AprovacaoDinamicaPage() {
       );
     }
     return filtered;
-  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals]);
+  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals, alertsOnly, validationSummary]);
 
   const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
 
@@ -547,6 +687,14 @@ export default function AprovacaoDinamicaPage() {
       if (!res.ok) {
         const errMsg = data.error || 'Failed to approve report';
         setApproveError(prev => ({ ...prev, [reportId]: errMsg }));
+
+        if (data.error_type === 'not_approver_in_step') {
+          setShowApproveUI(prev => { const n = new Set(prev); n.delete(reportId); return n; });
+          excludedReportsRef.current.add(reportId);
+          setReports(prev => prev.filter(r => r.id !== reportId));
+          setApprovalNotice(`Relatório #${reportId} removido: ${errMsg}`);
+          fetchPending();
+        }
         return;
       }
       setReportApprovals(prev => ({
@@ -589,6 +737,67 @@ export default function AprovacaoDinamicaPage() {
     }
   };
 
+  const handleDismissDuplicate = useCallback(async (originalExpenseId: number, duplicateExpenseId: number, isDuplicate: boolean) => {
+    if (!user) return;
+    await fetch('/api/aprovacao-dinamica/validation/dismiss', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        expense_id: originalExpenseId,
+        duplicate_expense_id: duplicateExpenseId,
+        dismissed_by: user.name,
+        dismissed_by_email: user.email,
+        note: isDuplicate ? 'Confirmado como duplicata' : 'Descartado — não é duplicata',
+        is_duplicate: isDuplicate,
+      }),
+    });
+    // Find which report this expense belongs to and re-fetch validation
+    for (const [reportIdStr, expenses] of Object.entries(reportExpenses)) {
+      if (expenses.some(e => e.id === originalExpenseId)) {
+        const reportId = parseInt(reportIdStr);
+        try {
+          const res = await fetch(`/api/aprovacao-dinamica/validation/${reportId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.data) {
+              setValidationDetails(prev => ({ ...prev, [reportId]: data.data }));
+            }
+          }
+        } catch {}
+        break;
+      }
+    }
+  }, [user, reportExpenses]);
+
+  const handleBatchDismissDuplicate = useCallback(async (originalExpenseId: number, duplicateExpenseId: number, isDuplicate: boolean) => {
+    if (!user) return;
+    // Fire-and-forget: only POST, don't wait for re-validation
+    fetch('/api/aprovacao-dinamica/validation/dismiss', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        expense_id: originalExpenseId,
+        duplicate_expense_id: duplicateExpenseId,
+        dismissed_by: user.name,
+        dismissed_by_email: user.email,
+        note: isDuplicate ? 'Confirmado como duplicata' : 'Descartado — não é duplicata',
+        is_duplicate: isDuplicate,
+      }),
+    }).catch(() => {});
+  }, [user]);
+
+  const lookupReceiptUrl = useCallback((reportId: number, value: number, title: string, date?: string, excludeId?: number): string | null => {
+    const expenses = reportExpenses[reportId];
+    if (!expenses) return null;
+    const found = expenses.find(e =>
+      Number(e.value) === Number(value) &&
+      e.title === title &&
+      (!date || e.date?.split(' ')[0] === date) &&
+      (!excludeId || e.id !== excludeId)
+    );
+    return found?.receipt_url || null;
+  }, [reportExpenses]);
+
   const handleReviewComplete = useCallback((reportId: number, expenseId: number, decision: string, reviewerName?: string) => {
     setAuditResults(prev => {
       const reportResults = prev[reportId];
@@ -630,6 +839,8 @@ export default function AprovacaoDinamicaPage() {
         userName={preApproveModal ? reports.find(r => r.id === preApproveModal.reportId)?.user?.name || null : null}
         expenses={preApproveModal ? (reportExpenses[preApproveModal.reportId] || []).map(exp => {
           const audit = auditResults[preApproveModal.reportId]?.[exp.id] || null;
+          const valDetail = validationDetails[preApproveModal.reportId];
+          const valExpData = valDetail?.expenses?.[exp.id] || valDetail?.expenses?.[exp.expense_id];
           return {
             id: exp.id,
             expense_id: exp.expense_id,
@@ -647,6 +858,12 @@ export default function AprovacaoDinamicaPage() {
               rules_triggered: audit.rules_triggered,
               summary: audit.summary,
             } : null,
+            validation: valExpData ? {
+              has_duplicate: valExpData.has_duplicate,
+              has_date_mismatch: valExpData.has_date_mismatch,
+              duplicates: valExpData.duplicates,
+              date_mismatch_detail: valExpData.date_mismatch_detail,
+            } : null,
           } as PreApproveExpense;
         }) : []}
         onApprove={() => {
@@ -656,6 +873,67 @@ export default function AprovacaoDinamicaPage() {
           }
         }}
         approving={false}
+        hasValidationDuplicates={preApproveModal ? (() => {
+          const vs = validationSummary[preApproveModal.reportId];
+          return vs && !('error' in vs) && vs.has_duplicates;
+        })() : false}
+        hasValidationDateMismatch={preApproveModal ? (() => {
+          const vs = validationSummary[preApproveModal.reportId];
+          return vs && !('error' in vs) && vs.has_date_mismatch;
+        })() : false}
+        hasValidationTotalMismatch={preApproveModal ? (() => {
+          const vs = validationSummary[preApproveModal.reportId];
+          return vs && !('error' in vs) && vs.has_total_mismatch;
+        })() : false}
+        onCompareDuplicate={(origExp, dup) => {
+          const original: ComparisonExpense = {
+            expense_id: origExp.id,
+            title: origExp.title,
+            value: origExp.value,
+            date: origExp.date,
+            observation: origExp.observation,
+            receipt_url: origExp.receipt_url,
+            expense_type: origExp.expense_type?.description ?? null,
+            costs_center: origExp.costs_center?.name ?? null,
+            report_name: preApproveModal?.description ?? '',
+            report_id: preApproveModal?.reportId ?? 0,
+            user_name: reports.find(r => r.id === preApproveModal?.reportId)?.user?.name ?? '',
+            match_fields: dup.match_fields,
+            same_report: dup.same_report,
+          };
+          const dupExp: ComparisonExpense = {
+            expense_id: dup.expense_id,
+            title: dup.title,
+            value: dup.value,
+            date: dup.date,
+            observation: dup.observation,
+            receipt_url: dup.receipt_url || lookupReceiptUrl(dup.report_id, dup.value, dup.title, dup.date, origExp.id),
+            expense_type: dup.expense_type,
+            costs_center: dup.costs_center,
+            report_name: dup.report_name,
+            report_id: dup.report_id,
+            user_name: dup.user_name,
+            match_fields: dup.match_fields,
+            same_report: dup.same_report,
+          };
+          setComparisonModal({ original, duplicates: [dupExp] });
+        }}
+      />
+
+      <DuplicateComparisonModal
+        open={!!comparisonModal}
+        onClose={() => setComparisonModal(null)}
+        originalExpense={comparisonModal?.original ?? null}
+        duplicateExpenses={comparisonModal?.duplicates ?? []}
+        onDismiss={handleDismissDuplicate}
+        dismissedBy={user?.name}
+      />
+
+      <BatchDuplicateReviewModal
+        open={batchDupModalOpen}
+        onClose={() => setBatchDupModalOpen(false)}
+        onDismiss={handleBatchDismissDuplicate}
+        dismissedBy={user?.name}
       />
 
       {/* Header */}
@@ -688,6 +966,15 @@ export default function AprovacaoDinamicaPage() {
             )}
           </Button>
           <Button
+            onClick={() => setBatchDupModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="border-orange-300 text-orange-700 hover:bg-orange-100"
+          >
+            <Copy className="h-4 w-4" />
+            Revisar Duplicatas
+          </Button>
+          <Button
             onClick={auditAllReports}
             disabled={globalAuditing || loading || reports.length === 0}
             size="sm"
@@ -699,7 +986,7 @@ export default function AprovacaoDinamicaPage() {
             )}
             Auditar Tudo
           </Button>
-          <Button onClick={fetchPending} disabled={loading || globalAuditing} variant="outline" size="sm">
+          <Button onClick={() => { validationBatchFetchedRef.current = false; fetchPending(); }} disabled={loading || globalAuditing} variant="outline" size="sm">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Atualizar
           </Button>
@@ -768,6 +1055,15 @@ export default function AprovacaoDinamicaPage() {
             className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
           />
           Prontos para aprovar
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={alertsOnly}
+            onChange={e => setAlertsOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+          />
+          Só com alertas NF
         </label>
       </div>
 
@@ -844,6 +1140,19 @@ export default function AprovacaoDinamicaPage() {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Approval notice */}
+      {approvalNotice && (
+        <div className="flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{approvalNotice}</span>
+          </div>
+          <button onClick={() => setApprovalNotice(null)} className="text-amber-600 hover:text-amber-800">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
@@ -959,6 +1268,32 @@ export default function AprovacaoDinamicaPage() {
                         {auditedCount}/{expenseCounts[report.id]}
                       </Badge>
                     )}
+                    {(() => {
+                      const vs = validationSummary[report.id];
+                      if (!vs || 'error' in vs) return null;
+                      return (
+                        <>
+                          {vs.has_duplicates && (
+                            <Badge className="bg-red-100 text-red-800 text-xs" title="Despesas duplicadas detectadas">
+                              <AlertCircle className="mr-1 h-3 w-3" />
+                              NF: duplicatas
+                            </Badge>
+                          )}
+                          {vs.has_date_mismatch && (
+                            <Badge className="bg-orange-100 text-orange-800 text-xs" title="Despesas com data fora do período do relatório">
+                              <AlertTriangle className="mr-1 h-3 w-3" />
+                              NF: data divergente
+                            </Badge>
+                          )}
+                          {vs.has_total_mismatch && (
+                            <Badge className="bg-purple-100 text-purple-800 text-xs" title="Soma das despesas não bate com o total do relatório">
+                              <AlertTriangle className="mr-1 h-3 w-3" />
+                              NF: total divergente
+                            </Badge>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                   <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
                     {report.user && (
@@ -1025,6 +1360,78 @@ export default function AprovacaoDinamicaPage() {
                         )}
                       </Button>
                     )}
+                    {(() => {
+                      const vs = validationSummary[report.id];
+                      const vd = validationDetails[report.id];
+                      const hasDups = vs && !('error' in vs) && vs.has_duplicates;
+                      const hasDismissed = vd && Object.values(vd.expenses).some(e => (e as any).dismissed_duplicates?.length > 0);
+                      if (!hasDups && !hasDismissed) return null;
+                      const dupCount = vd ? Object.values(vd.expenses).filter(e => e.has_duplicate).length : 0;
+                      const dismissedCount = vd ? Object.values(vd.expenses).reduce((s, e) => s + ((e as any).dismissed_duplicates?.length || 0), 0) : 0;
+                      return (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-red-300 text-red-700 hover:bg-red-100"
+                          onClick={() => {
+                            if (!vd) {
+                              fetchValidationDetails(report.id);
+                            }
+                            const exps = reportExpenses[report.id] || [];
+                            const dupEntries: { original: ComparisonExpense; duplicates: ComparisonExpense[] }[] = [];
+                            for (const [expIdStr, expData] of Object.entries(vd?.expenses || {})) {
+                              const allDups = [...expData.duplicates, ...((expData as any).confirmed_duplicates || []), ...((expData as any).dismissed_duplicates || [])];
+                              if (allDups.length === 0) continue;
+                              const origExp = exps.find(e => e.id === parseInt(expIdStr));
+                              if (!origExp) continue;
+                              const original: ComparisonExpense = {
+                                expense_id: origExp.id,
+                                title: origExp.title,
+                                value: origExp.value,
+                                date: origExp.date,
+                                observation: origExp.observation,
+                                receipt_url: origExp.receipt_url,
+                                expense_type: origExp.expense_type?.description ?? null,
+                                costs_center: origExp.costs_center?.name ?? null,
+                                report_name: report.description || '',
+                                report_id: report.id,
+                                user_name: report.user?.name ?? '',
+                                match_fields: [],
+                                same_report: false,
+                              };
+                              const dupExps: ComparisonExpense[] = allDups.map((dup: any) => ({
+                                expense_id: dup.expense_id,
+                                title: dup.title,
+                                value: dup.value,
+                                date: dup.date,
+                                observation: dup.observation,
+                                receipt_url: dup.receipt_url || lookupReceiptUrl(dup.report_id, dup.value, dup.title, dup.date, origExp.id),
+                                expense_type: dup.expense_type,
+                                costs_center: dup.costs_center,
+                                report_name: dup.report_name,
+                                report_id: dup.report_id,
+                                user_name: dup.user_name,
+                                match_fields: dup.match_fields,
+                                same_report: dup.same_report,
+                              }));
+                              dupEntries.push({ original, duplicates: dupExps });
+                            }
+                            if (dupEntries.length > 0) {
+                              setComparisonModal(dupEntries[0]);
+                            }
+                          }}
+                        >
+                          <AlertTriangle className="h-4 w-4" />
+                          Analisar duplicatas
+                          {dupCount > 0 && (
+                            <Badge className="ml-1 bg-red-500 text-white text-xs">{dupCount}</Badge>
+                          )}
+                          {dupCount === 0 && dismissedCount > 0 && (
+                            <Badge className="ml-1 bg-green-500 text-white text-xs">{dismissedCount}</Badge>
+                          )}
+                        </Button>
+                      );
+                    })()}
                     <Button
                       size="sm"
                       variant="outline"
@@ -1092,7 +1499,13 @@ export default function AprovacaoDinamicaPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setPreApproveModal({ reportId: report.id, description: report.description || '' })}
+                        onClick={() => {
+                          setPreApproveModal({ reportId: report.id, description: report.description || '' });
+                          const vs = validationSummary[report.id];
+                          if (vs && !('error' in vs) && (vs.has_duplicates || vs.has_date_mismatch || vs.has_total_mismatch)) {
+                            fetchValidationDetails(report.id);
+                          }
+                        }}
                         className="border-green-300 text-green-700 hover:bg-green-100"
                       >
                         <Receipt className="h-4 w-4" />
@@ -1127,6 +1540,262 @@ export default function AprovacaoDinamicaPage() {
                   )}
                 </div>
               )}
+
+              {/* NF Validation Alert Panel */}
+              {isExpanded && (() => {
+                const vd = validationDetails[report.id];
+                const vs = validationSummary[report.id];
+                const isLoadingValidation = loadingValidationDetails.has(report.id);
+                const hasValidationIssues = vs && !('error' in vs) && (vs.has_duplicates || vs.has_date_mismatch || vs.has_total_mismatch);
+                const hasDismissedOnly = vd && !vd.has_duplicates && !vd.has_date_mismatch && !vd.has_total_mismatch &&
+                  Object.values(vd.expenses).some(e => (e as any).dismissed_duplicates?.length > 0 && !((e as any).confirmed_duplicates?.length > 0));
+                const hasConfirmedOnly = vd && !vd.has_duplicates && !vd.has_date_mismatch && !vd.has_total_mismatch &&
+                  Object.values(vd.expenses).some(e => (e as any).confirmed_duplicates?.length > 0);
+                if (!hasValidationIssues && !hasDismissedOnly && !hasConfirmedOnly && !isLoadingValidation) return null;
+                const isAlert = hasValidationIssues && !isLoadingValidation;
+                const isConfirmedOnly = hasConfirmedOnly && !isAlert;
+                const panelClass = isAlert ? 'border-red-200 bg-red-50' : isConfirmedOnly ? 'border-orange-200 bg-orange-50' : 'border-green-200 bg-green-50';
+                const panelIcon = isAlert ? <AlertCircle className="h-5 w-5 text-red-600" /> : isConfirmedOnly ? <AlertTriangle className="h-5 w-5 text-orange-600" /> : <CheckCircle className="h-5 w-5 text-green-600" />;
+                const panelTitle = isAlert ? 'Alerta NF — Validação de Notas Fiscais' : isConfirmedOnly ? 'NF — Duplicatas confirmadas' : 'NF — Duplicatas descartadas';
+                const panelTitleClass = isAlert ? 'text-red-800' : isConfirmedOnly ? 'text-orange-800' : 'text-green-800';
+                return (
+                  <div className={`border-t p-4 ${panelClass}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      {panelIcon}
+                      <span className={`font-medium ${panelTitleClass}`}>
+                        {panelTitle}
+                      </span>
+                    </div>
+                    {isLoadingValidation ? (
+                      <div className="flex items-center gap-2 text-sm text-red-700">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Analisando duplicatas e divergências...
+                      </div>
+                    ) : vd ? (
+                      <div className="space-y-2">
+                        {isConfirmedOnly && (
+                          <p className="text-sm text-orange-800">
+                            <strong>Duplicatas confirmadas pelo revisor.</strong> Necessária atenção antes de aprovar.
+                          </p>
+                        )}
+                        {!isAlert && !isConfirmedOnly && (
+                          <p className="text-sm text-green-800">
+                            <strong>Todas as duplicatas foram revisadas e descartadas.</strong>
+                          </p>
+                        )}
+                        {vd.has_duplicates && (
+                          <p className="text-sm text-red-800">
+                            <strong>Possíveis duplicatas detectadas.</strong> Revise antes de aprovar.
+                          </p>
+                        )}
+                        {vd.has_date_mismatch && (
+                          <p className="text-sm text-orange-800">
+                            <strong>Despesas com data fora do período do relatório.</strong> Verifique as datas.
+                          </p>
+                        )}
+                        {vd.has_total_mismatch && (
+                          <p className="text-sm text-purple-800">
+                            <strong>Soma das despesas não confere com o total do relatório.</strong>{' '}
+                            Esperado: R$ {vd.total_expected?.toFixed(2)} — Calculado: R$ {vd.total_calculated.toFixed(2)}{' '}
+                            — Diferença: R$ {vd.total_difference.toFixed(2)}
+                          </p>
+                        )}
+                        {Object.entries(vd.expenses).map(([expId, expData]) => {
+                          const confirmedDups = (expData as any).confirmed_duplicates || [];
+                          if (!expData.has_duplicate && !expData.has_date_mismatch && !confirmedDups.length && !(expData as any).dismissed_duplicates?.length) return null;
+                          const dismissedDups = (expData as any).dismissed_duplicates || [];
+                          return (
+                            <div key={expId} className="rounded border border-red-200 bg-white p-2">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-medium text-gray-700">Despesa #{expId}</span>
+                                {expData.has_duplicate && (
+                                  <Badge className="bg-red-100 text-red-700 text-xs">Duplicata</Badge>
+                                )}
+                                {expData.has_date_mismatch && (
+                                  <Badge className="bg-orange-100 text-orange-700 text-xs">Data divergente</Badge>
+                                )}
+                                {confirmedDups.length > 0 && (
+                                  <Badge className="bg-orange-100 text-orange-700 text-xs">Duplicata confirmada</Badge>
+                                )}
+                                {dismissedDups.length > 0 && !expData.has_duplicate && (
+                                  <Badge className="bg-green-100 text-green-700 text-xs">Duplicata descartada</Badge>
+                                )}
+                              </div>
+                              {expData.duplicates.map((dup, idx) => (
+                                <div key={idx} className="ml-4 flex flex-wrap items-center gap-2 text-xs text-gray-600">
+                                  <span>{dup.title}</span>
+                                  <span>—</span>
+                                  <span>R$ {dup.value.toFixed(2)}</span>
+                                  <span>—</span>
+                                  <span>{dup.date}</span>
+                                  <span>—</span>
+                                  <span>Campos: {dup.match_fields.join(', ')}</span>
+                                  {dup.same_report
+                                    ? <span>— Mesmo relatório</span>
+                                    : <span>— Report #{dup.report_id} ({dup.report_status})</span>}
+                                  {dup.user_name && <span>— {dup.user_name}</span>}
+                                  <button
+                                    onClick={() => {
+                                      const origExp = expenses.find(e => e.id === parseInt(expId));
+                                      const original: ComparisonExpense = {
+                                        expense_id: origExp?.id ?? parseInt(expId),
+                                        title: origExp?.title ?? '',
+                                        value: origExp?.value ?? 0,
+                                        date: origExp?.date ?? '',
+                                        observation: origExp?.observation ?? null,
+                                        receipt_url: origExp?.receipt_url ?? null,
+                                        expense_type: origExp?.expense_type?.description ?? null,
+                                        costs_center: origExp?.costs_center?.name ?? null,
+                                        report_name: report.description || '',
+                                        report_id: report.id,
+                                        user_name: report.user?.name ?? '',
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      const dupExp: ComparisonExpense = {
+                                        expense_id: dup.expense_id,
+                                        title: dup.title,
+                                        value: dup.value,
+                                        date: dup.date,
+                                        observation: dup.observation,
+                                        receipt_url: dup.receipt_url || lookupReceiptUrl(dup.report_id, dup.value, dup.title, dup.date, origExp?.id),
+                                        expense_type: dup.expense_type,
+                                        costs_center: dup.costs_center,
+                                        report_name: dup.report_name,
+                                        report_id: dup.report_id,
+                                        user_name: dup.user_name,
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      setComparisonModal({ original, duplicates: [dupExp] });
+                                    }}
+                                    className="ml-1 inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 hover:bg-blue-200"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    Comparar comprovantes
+                                  </button>
+                                </div>
+                              ))}
+                              {expData.date_mismatch_detail && (
+                                <div className="ml-4 text-xs text-orange-700">
+                                  Data da despesa: {expData.date_mismatch_detail.expense_date}{' '}
+                                  — Período esperado: {expData.date_mismatch_detail.expected_period}
+                                </div>
+                              )}
+                              {confirmedDups.map((dup: any, idx: number) => (
+                                <div key={`confirmed-${idx}`} className="ml-4 mt-1 flex flex-wrap items-center gap-2 text-xs text-orange-700">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  <span>{dup.title}</span>
+                                  <span>—</span>
+                                  <span>R$ {dup.value.toFixed(2)}</span>
+                                  <span>—</span>
+                                  <span>Confirmada como duplicata por <strong>{dup.dismissed_by}</strong></span>
+                                  {dup.dismissed_at && (
+                                    <span>— {new Date(dup.dismissed_at).toLocaleString('pt-BR')}</span>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      const origExp = expenses.find(e => e.id === parseInt(expId));
+                                      const original: ComparisonExpense = {
+                                        expense_id: origExp?.id ?? parseInt(expId),
+                                        title: origExp?.title ?? '',
+                                        value: origExp?.value ?? 0,
+                                        date: origExp?.date ?? '',
+                                        observation: origExp?.observation ?? null,
+                                        receipt_url: origExp?.receipt_url ?? null,
+                                        expense_type: origExp?.expense_type?.description ?? null,
+                                        costs_center: origExp?.costs_center?.name ?? null,
+                                        report_name: report.description || '',
+                                        report_id: report.id,
+                                        user_name: report.user?.name ?? '',
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      const dupExp: ComparisonExpense = {
+                                        expense_id: dup.expense_id,
+                                        title: dup.title,
+                                        value: dup.value,
+                                        date: dup.date,
+                                        observation: dup.observation,
+                                        receipt_url: dup.receipt_url || lookupReceiptUrl(dup.report_id, dup.value, dup.title, dup.date, origExp?.id),
+                                        expense_type: dup.expense_type,
+                                        costs_center: dup.costs_center,
+                                        report_name: dup.report_name,
+                                        report_id: dup.report_id,
+                                        user_name: dup.user_name,
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      setComparisonModal({ original, duplicates: [dupExp] });
+                                    }}
+                                    className="ml-1 inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-gray-600 hover:bg-gray-200"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    Ver comprovantes
+                                  </button>
+                                </div>
+                              ))}
+                              {dismissedDups.map((dup: any, idx: number) => (
+                                <div key={`dismissed-${idx}`} className="ml-4 mt-1 flex flex-wrap items-center gap-2 text-xs text-green-700">
+                                  <CheckCircle className="h-3 w-3" />
+                                  <span>{dup.title}</span>
+                                  <span>—</span>
+                                  <span>R$ {dup.value.toFixed(2)}</span>
+                                  <span>—</span>
+                                  <span>Descartada por <strong>{dup.dismissed_by}</strong></span>
+                                  {dup.dismissed_at && (
+                                    <span>— {new Date(dup.dismissed_at).toLocaleString('pt-BR')}</span>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      const origExp = expenses.find(e => e.id === parseInt(expId));
+                                      const original: ComparisonExpense = {
+                                        expense_id: origExp?.id ?? parseInt(expId),
+                                        title: origExp?.title ?? '',
+                                        value: origExp?.value ?? 0,
+                                        date: origExp?.date ?? '',
+                                        observation: origExp?.observation ?? null,
+                                        receipt_url: origExp?.receipt_url ?? null,
+                                        expense_type: origExp?.expense_type?.description ?? null,
+                                        costs_center: origExp?.costs_center?.name ?? null,
+                                        report_name: report.description || '',
+                                        report_id: report.id,
+                                        user_name: report.user?.name ?? '',
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      const dupExp: ComparisonExpense = {
+                                        expense_id: dup.expense_id,
+                                        title: dup.title,
+                                        value: dup.value,
+                                        date: dup.date,
+                                        observation: dup.observation,
+                                        receipt_url: dup.receipt_url || lookupReceiptUrl(dup.report_id, dup.value, dup.title, dup.date, origExp?.id),
+                                        expense_type: dup.expense_type,
+                                        costs_center: dup.costs_center,
+                                        report_name: dup.report_name,
+                                        report_id: dup.report_id,
+                                        user_name: dup.user_name,
+                                        match_fields: dup.match_fields,
+                                        same_report: dup.same_report,
+                                      };
+                                      setComparisonModal({ original, duplicates: [dupExp] });
+                                    }}
+                                    className="ml-1 inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-gray-600 hover:bg-gray-200"
+                                  >
+                                    <Eye className="h-3 w-3" />
+                                    Ver comprovantes
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })()}
 
               {/* Expanded Content */}
               {isExpanded && (

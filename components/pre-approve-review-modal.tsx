@@ -13,6 +13,7 @@ import {
   ChevronRight,
   AlertTriangle,
   Receipt,
+  Eye,
 } from 'lucide-react';
 
 export interface PreApproveExpense {
@@ -40,6 +41,71 @@ export interface PreApproveExpense {
     rules_triggered: { rule: string; reason: string; confidence: number }[];
     summary: string;
   } | null;
+  validation?: {
+    has_duplicate: boolean;
+    has_date_mismatch: boolean;
+    duplicates: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    confirmed_duplicates?: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    dismissed_duplicates?: Array<{
+      expense_id: number;
+      report_id: number;
+      report_name: string;
+      report_status: string;
+      user_name: string;
+      title: string;
+      value: number;
+      date: string;
+      same_report: boolean;
+      match_fields: string[];
+      receipt_url: string | null;
+      observation: string | null;
+      expense_type: string | null;
+      costs_center: string | null;
+      dismissed: boolean;
+      is_duplicate: boolean;
+      dismissed_by: string | null;
+      dismissed_at: string | null;
+    }>;
+    date_mismatch_detail: { expected_period: string; expense_date: string } | null;
+  } | null;
 }
 
 interface PreApproveReviewModalProps {
@@ -51,6 +117,10 @@ interface PreApproveReviewModalProps {
   expenses: PreApproveExpense[];
   onApprove: () => void;
   approving: boolean;
+  hasValidationDuplicates?: boolean;
+  hasValidationDateMismatch?: boolean;
+  hasValidationTotalMismatch?: boolean;
+  onCompareDuplicate?: (originalExpense: PreApproveExpense, duplicate: NonNullable<NonNullable<PreApproveExpense['validation']>['duplicates']>[0]) => void;
 }
 
 function formatCurrency(value: number) {
@@ -66,13 +136,21 @@ export function PreApproveReviewModal({
   expenses,
   onApprove,
   approving,
+  hasValidationDuplicates,
+  hasValidationDateMismatch,
+  hasValidationTotalMismatch,
+  onCompareDuplicate,
 }: PreApproveReviewModalProps) {
   const [expandedExpense, setExpandedExpense] = useState<number | null>(null);
   const [showReceiptFor, setShowReceiptFor] = useState<number | null>(null);
+  const [validationAcknowledged, setValidationAcknowledged] = useState(false);
 
   const totalValue = useMemo(() => expenses.reduce((sum, e) => sum + e.value, 0), [expenses]);
   const withDivergences = useMemo(() => expenses.filter(e => e.audit && e.audit.divergences.length > 0).length, [expenses]);
   const withRules = useMemo(() => expenses.filter(e => e.audit && e.audit.rules_triggered.length > 0).length, [expenses]);
+  const withDuplicates = useMemo(() => expenses.filter(e => e.validation?.has_duplicate).length, [expenses]);
+  const withDateMismatch = useMemo(() => expenses.filter(e => e.validation?.has_date_mismatch).length, [expenses]);
+  const hasValidationIssues = (hasValidationDuplicates || withDuplicates > 0) || (hasValidationDateMismatch || withDateMismatch > 0) || hasValidationTotalMismatch;
 
   if (!open) return null;
 
@@ -118,6 +196,24 @@ export function PreApproveReviewModal({
               {withRules} com regras
             </span>
           )}
+          {(withDuplicates > 0 || hasValidationDuplicates) && (
+            <span className="flex items-center gap-1 text-red-700">
+              <AlertTriangle className="h-4 w-4" />
+              {withDuplicates || 0} com duplicata NF
+            </span>
+          )}
+          {(withDateMismatch > 0 || hasValidationDateMismatch) && (
+            <span className="flex items-center gap-1 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              {withDateMismatch || 0} com data divergente
+            </span>
+          )}
+          {hasValidationTotalMismatch && (
+            <span className="flex items-center gap-1 text-purple-700">
+              <AlertTriangle className="h-4 w-4" />
+              Total divergente
+            </span>
+          )}
         </div>
 
         {/* Expense list */}
@@ -157,6 +253,17 @@ export function PreApproveReviewModal({
                         {audit?.divergences && audit.divergences.length > 0 && (
                           <Badge className="bg-orange-100 text-orange-700 text-xs">
                             {audit.divergences.length} divergência{audit.divergences.length !== 1 ? 's' : ''}
+                          </Badge>
+                        )}
+                        {expense.validation?.has_duplicate && (
+                          <Badge className="bg-red-100 text-red-700 text-xs">
+                            <AlertTriangle className="mr-1 h-3 w-3" />
+                            Duplicata NF
+                          </Badge>
+                        )}
+                        {expense.validation?.has_date_mismatch && (
+                          <Badge className="bg-orange-100 text-orange-700 text-xs">
+                            Data divergente
                           </Badge>
                         )}
                       </div>
@@ -259,6 +366,43 @@ export function PreApproveReviewModal({
                         <p className="mt-2 text-xs italic text-gray-500">{audit.summary}</p>
                       )}
 
+                      {/* NF duplicates */}
+                      {expense.validation?.has_duplicate && expense.validation.duplicates.length > 0 && (
+                        <div className="mt-2 rounded border border-red-200 bg-red-50 p-2">
+                          <p className="text-xs font-medium text-red-800">NF — Possíveis duplicatas:</p>
+                          {expense.validation.duplicates.map((dup, i) => (
+                            <div key={i} className="mt-1 text-xs text-red-700">
+                              <strong>{dup.title}</strong> — R$ {dup.value.toFixed(2)} — {dup.date}
+                              <br />
+                              <span className="text-gray-600">Campos: {dup.match_fields.join(', ')}</span>
+                              {dup.same_report
+                                ? <span className="text-gray-600"> — Mesmo relatório</span>
+                                : <span className="text-gray-600"> — Report #{dup.report_id} ({dup.report_status})</span>}
+                              {dup.user_name && <span className="text-gray-600"> — {dup.user_name}</span>}
+                              {onCompareDuplicate && (
+                                <button
+                                  onClick={() => onCompareDuplicate(expense, dup)}
+                                  className="ml-2 inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-blue-700 hover:bg-blue-200"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  Comparar comprovantes
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* NF date mismatch */}
+                      {expense.validation?.has_date_mismatch && expense.validation.date_mismatch_detail && (
+                        <div className="mt-2 rounded border border-orange-200 bg-orange-50 p-2">
+                          <p className="text-xs font-medium text-orange-800">NF — Data divergente:</p>
+                          <p className="text-xs text-orange-700">
+                            Data da despesa: {expense.validation.date_mismatch_detail.expense_date} — Período esperado: {expense.validation.date_mismatch_detail.expected_period}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Receipt preview */}
                       {showReceipt && expense.receipt_url && (
                         <div className="mt-3">
@@ -290,6 +434,30 @@ export function PreApproveReviewModal({
 
         {/* Footer with approve button */}
         <div className="border-t border-gray-200 p-4">
+          {hasValidationIssues && !validationAcknowledged && (
+            <div className="mb-3 rounded-md border border-red-300 bg-red-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-red-800">
+                    Validação NF detectou duplicatas, datas divergentes ou total divergente neste relatório.
+                  </p>
+                  <p className="text-xs text-red-700 mt-1">
+                    Revise as despesas marcadas acima antes de aprovar.
+                  </p>
+                  <label className="mt-2 flex items-center gap-2 text-sm text-red-800">
+                    <input
+                      type="checkbox"
+                      checked={validationAcknowledged}
+                      onChange={e => setValidationAcknowledged(e.target.checked)}
+                      className="h-4 w-4 rounded border-red-400 text-red-600 focus:ring-red-500"
+                    />
+                    Confirmo que revisei os alertas de validação NF
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600">
               Total: <strong className="text-gray-900">{formatCurrency(totalValue)}</strong> em {expenses.length} despesa{expenses.length !== 1 ? 's' : ''}
@@ -300,7 +468,7 @@ export function PreApproveReviewModal({
               </Button>
               <Button
                 onClick={onApprove}
-                disabled={approving}
+                disabled={approving || (hasValidationIssues && !validationAcknowledged)}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {approving ? (

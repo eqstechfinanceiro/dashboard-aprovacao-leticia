@@ -15,8 +15,10 @@ export interface AuditRecord {
   created_at?: string;
 }
 
+let tableEnsured = false;
+
 export async function ensureAuditTable(): Promise<void> {
-  if (!sql) return;
+  if (tableEnsured || !sql) return;
   try {
     await sql`
       CREATE TABLE IF NOT EXISTS expense_audit_results (
@@ -37,6 +39,7 @@ export async function ensureAuditTable(): Promise<void> {
     `;
     await sql`CREATE INDEX IF NOT EXISTS idx_audit_report ON expense_audit_results(report_id)`;
     await sql`CREATE INDEX IF NOT EXISTS idx_audit_status ON expense_audit_results(status)`;
+    tableEnsured = true;
     console.log('[Audit DB] Table ensured');
   } catch (error) {
     console.error('[Audit DB] Error ensuring table:', error);
