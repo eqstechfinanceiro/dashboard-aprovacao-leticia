@@ -137,11 +137,11 @@ export async function POST(request: NextRequest) {
           FROM prestacao_expenses
           WHERE report_id = ${report.id}
         `;
-        const dbIds = new Set(dbExpenses.map((e: any) => e.id));
-        const dbVals = new Map(dbExpenses.map((e: any) => [e.id, Number(e.value)]));
+        const dbIds: Set<number> = new Set(dbExpenses.map((e: any) => e.id));
+        const dbVals: Map<number, number> = new Map(dbExpenses.map((e: any) => [e.id, Number(e.value)]));
 
         // 3. Find differences
-        const toDelete = [...dbIds].filter(id => !apiIds.has(id));
+        const toDelete: number[] = [...dbIds].filter((id: number) => !apiIds.has(id));
         const toInsert = apiExpenses.filter((e: any) => !dbIds.has(e.id));
         const toUpdate = apiExpenses.filter((e: any) => {
           if (!dbIds.has(e.id)) return false;
@@ -193,8 +193,8 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          const changeValue = toDelete.reduce((s, id) => s + (dbVals.get(id) || 0), 0)
-            - toInsert.reduce((s, e) => s + Number(e.value), 0);
+          const changeValue = toDelete.reduce((s: number, id: number) => s + (dbVals.get(id) || 0), 0)
+            - toInsert.reduce((s: number, e: any) => s + Number(e.value), 0);
 
           progress.recentChanges.unshift({
             report_id: report.id,

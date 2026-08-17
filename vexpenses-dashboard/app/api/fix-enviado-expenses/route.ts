@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     ORDER BY r.id
   `;
 
-  const reportIds = rows.map((r: any) => r.id);
+  const reportIds: number[] = rows.map((r: any) => r.id);
   const uniqueIds = Array.from(new Set(reportIds)).sort((a, b) => a - b);
 
   // Initialize progress

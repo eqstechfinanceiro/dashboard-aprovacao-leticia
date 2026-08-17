@@ -341,7 +341,7 @@ export default function Configuracoes() {
             <Button
               onClick={freezeQuinzena}
               disabled={freezing || freezeStatus?.is_frozen}
-              variant="secondary"
+              variant="outline"
               className="flex items-center gap-2"
             >
               {freezing ? (
