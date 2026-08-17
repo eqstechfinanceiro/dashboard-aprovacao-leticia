@@ -34,8 +34,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     djonatan_carga: djonatanCarga,
-    djonatan_carga_sum: djonatanCarga.reduce((s, r) => s + Number(r.valor), 0),
+    djonatan_carga_sum: djonatanCarga.reduce((s: number, r: any) => s + Number(r.valor), 0),
     luis_carlos_carga: luisCarlosCarga,
-    luis_carlos_carga_sum: luisCarlosCarga.reduce((s, r) => s + Number(r.valor), 0),
+    luis_carlos_carga_sum: luisCarlosCarga.reduce((s: number, r: any) => s + Number(r.valor), 0),
   });
 }
