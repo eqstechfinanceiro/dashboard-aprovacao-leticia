@@ -1,0 +1,16 @@
+# Exclude large files and non-app directories
+*.xlsx
+*.xls
+fechamentos/
+controle-api/
+.devin/
+.windsurf/
+.git/
+**/node_modules/
+
+# Exclude Python/PowerShell debug scripts (not needed for Next.js build)
+*.py
+*.ps1
+
+# Exclude docs
+*.md
