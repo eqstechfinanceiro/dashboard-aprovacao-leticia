@@ -110,6 +110,13 @@ function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
+function getFirstNameLastName(fullName: string): { firstName: string; lastName: string } {
+  const parts = fullName.trim().split(/\s+/);
+  const firstName = parts[0] || '';
+  const lastName = parts.length > 1 ? parts[parts.length - 1] : firstName;
+  return { firstName, lastName };
+}
+
 // Parse report name to extract month/year (e.g. "CAIXA 10/2025" -> {ano: 2025, mes: 'OUTUBRO'})
 // Returns null if name doesn't contain a MM/YYYY pattern
 function getReportPeriod(reportName: string): { ano: number; mes: string } | null {
@@ -189,7 +196,7 @@ export async function GET(request: NextRequest) {
     let extratoRows: ExtratoRow[] = [];
     if (sql) {
       try {
-        const normalizedNome = colaboradorName.trim();
+        const { firstName, lastName } = getFirstNameLastName(colaboradorName);
         const rows = await sql`
           SELECT
             data::text as data,
@@ -201,7 +208,8 @@ export async function GET(request: NextRequest) {
             valor,
             is_snapshot
           FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + normalizedNome + '%'})
+          WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstName + '%'})
+            AND unaccent(usuario) ILIKE unaccent(${'%' + lastName + '%'})
             AND is_snapshot = false
           ORDER BY data ASC, hora ASC
         `;
@@ -376,10 +384,12 @@ export async function GET(request: NextRequest) {
     let saldoCartao = 0;
     if (sql) {
       try {
+        const { firstName: fn, lastName: ln } = getFirstNameLastName(colaboradorName);
         const snapshotRows = await sql`
           SELECT valor
           FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + colaboradorName.trim() + '%'})
+          WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
+            AND unaccent(usuario) ILIKE unaccent(${'%' + ln + '%'})
             AND is_snapshot = true
           ORDER BY data DESC
           LIMIT 1
