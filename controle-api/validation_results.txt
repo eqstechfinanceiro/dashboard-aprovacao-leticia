@@ -1,0 +1,318 @@
+=== VALIDATION RESULTS: API vs CARGA sheets ===
+Date: 2026-07-14
+
+================================================================================
+VALIDATION: 01/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 507
+
+  Compared: 503 CPFs
+  saldo_final matches:   235/503 (46.7%)
+  col_qz matches:        503/503 (100.0%)
+  carga_final matches:   206/503 (41.0%)
+  ALL 3 match:           64/503 (12.7%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=    328.69 d= -328.69 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  17698.75 sheet=   9662.31 d= 8036.44
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=  17062.27 sheet=   9837.00 d= 7225.27
+    GUILHERME FERREIRA DA SIL CPF=41997553813 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2000.00 sheet= 2000.00 d=    0.00 | CF: api=   7782.03 sheet=   1992.23 d= 5789.80
+    PATRICK FERNANDO GOULART  CPF=07214272946 | SF: api=      0.00 sheet=    312.67 d= -312.67 | CQ: api= 2500.00 sheet= 2500.00 d=    0.00 | CF: api=   7495.01 sheet=   2184.72 d= 5310.29
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=   8819.50 sheet=    967.69 d= 7851.81 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   5030.42 d=-5030.42
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  20178.09 sheet=    216.74 d=19961.35 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4732.83 d=-4732.83
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=      0.00 sheet=   3964.03 d=-3964.03 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=   4540.71 sheet=      0.00 d= 4540.71
+    JUAN CARLOS PANTOJA AMANA CPF=51027941249 | SF: api=   5999.32 sheet=      0.00 d= 5999.32 | CQ: api= 4520.00 sheet= 4520.00 d=    0.00 | CF: api=      0.00 sheet=   4377.94 d=-4377.94
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   5413.50 sheet=   1196.92 d= 4216.58
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 7000.00 sheet= 7000.00 d=    0.00 | CF: api=  11194.61 sheet=   7025.14 d= 4169.47
+    LEANDRO GUSMAO MUNIZ      CPF=13126691790 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api=  500.00 sheet=  500.00 d=    0.00 | CF: api=   4481.91 sheet=    493.46 d= 3988.45
+    ORESTE BARBOSA DA SILVA J CPF=25075562850 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   8121.89 sheet=   4328.93 d= 3792.96
+    EDUARDO ANDREY VENSON SIL CPF=02960685946 | SF: api=      0.00 sheet=   2618.08 d=-2618.08 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4876.39 sheet=   1373.47 d= 3502.92
+    VALTER HUGO SILVERIO DA S CPF=21704495822 | SF: api=      0.00 sheet=   1012.70 d=-1012.70 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   7328.73 sheet=   3982.71 d= 3346.02
+    VICTOR SIGOLO PINHEIRO PI CPF=12237490619 | SF: api=      0.00 sheet=   2726.63 d=-2726.63 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   5611.34 sheet=   2269.91 d= 3341.43
+
+================================================================================
+VALIDATION: 01/2026 QZ2
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 513
+
+  Compared: 509 CPFs
+  saldo_final matches:   115/509 (22.6%)
+  col_qz matches:        509/509 (100.0%)
+  carga_final matches:   285/509 (56.0%)
+  ALL 3 match:           115/509 (22.6%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api= 148362.75 sheet=  49249.50 d=99113.25 | CQ: api=10000.00 sheet=10000.00 d=    0.00 | CF: api=      0.00 sheet=   9995.69 d=-9995.69
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api= 130856.83 sheet=  25050.15 d=105806.68 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=      0.00 sheet=   9820.00 d=-9820.00
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=  23895.33 sheet=      0.00 d=23895.33 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   7808.66 d=-7808.66
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=  34291.97 sheet=      0.00 d=34291.97 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   5986.54 d=-5986.54
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  28901.91 sheet=      0.00 d=28901.91 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4991.80 d=-4991.80
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=  16193.06 sheet=      0.00 d=16193.06 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4954.16 d=-4954.16
+    VALTER HUGO SILVERIO DA S CPF=21704495822 | SF: api=  18287.91 sheet=      0.00 d=18287.91 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4918.20 d=-4918.20
+    FLAVIO FERNANDES DOS REIS CPF=01767960107 | SF: api=  24274.39 sheet=   5796.77 d=18477.62 | CQ: api= 4900.00 sheet= 4900.00 d=    0.00 | CF: api=      0.00 sheet=   4530.75 d=-4530.75
+    MARIO MARQUES SOARES      CPF=92772048268 | SF: api=  19513.23 sheet=   9746.15 d= 9767.08 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4504.11 d=-4504.11
+    CARLOS EDUARDO SCATAMBULO CPF=22730778829 | SF: api=  30381.91 sheet=      0.00 d=30381.91 | CQ: api= 4300.00 sheet= 4300.00 d=    0.00 | CF: api=      0.00 sheet=   4221.65 d=-4221.65
+    CHARLES NEVES MATTIUZZI   CPF=12547938790 | SF: api=  23974.08 sheet=  12328.01 d=11646.07 | CQ: api= 4200.00 sheet= 4200.00 d=    0.00 | CF: api=      0.00 sheet=   4198.00 d=-4198.00
+    VICTOR SIGOLO PINHEIRO PI CPF=12237490619 | SF: api=  32788.27 sheet=    689.35 d=32098.92 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4051.28 d=-4051.28
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=  65437.64 sheet=   5403.22 d=60034.42 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3995.24 d=-3995.24
+    CARLOS NASCIMENTO NONATO  CPF=65973500225 | SF: api=  49612.00 sheet=      0.00 d=49612.00 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3991.88 d=-3991.88
+    JOSE CLAUDIO RIBEIRO      CPF=61158852649 | SF: api=  31800.73 sheet=      0.00 d=31800.73 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3977.66 d=-3977.66
+
+================================================================================
+VALIDATION: 02/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 522
+
+  Compared: 519 CPFs
+  saldo_final matches:   346/519 (66.7%)
+  col_qz matches:        519/519 (100.0%)
+  carga_final matches:   302/519 (58.2%)
+  ALL 3 match:           236/519 (45.5%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=    161.78 d= -161.78 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  22043.35 sheet=  15837.22 d= 6206.13
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api=      0.00 sheet=    359.41 d= -359.41 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=  14785.14 sheet=   9480.59 d= 5304.55
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  25728.93 sheet=      0.00 d=25728.93 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4993.00 d=-4993.00
+    GUILHERME FERREIRA DA SIL CPF=41997553813 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2000.00 sheet= 2000.00 d=    0.00 | CF: api=   6829.59 sheet=   1914.00 d= 4915.59
+    SANDRO BARRETO DE SOUZA   CPF=78021324953 | SF: api=    184.08 sheet=   4456.91 d=-4272.83 | CQ: api= 4240.00 sheet= 4240.00 d=    0.00 | CF: api=   4046.92 sheet=      0.00 d= 4046.92
+    LUDGERO HORACIO DE OLIVEI CPF=06576198922 | SF: api=      0.00 sheet=   1184.81 d=-1184.81 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=   8842.40 sheet=   4831.22 d= 4011.18
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   5777.18 sheet=   1992.75 d= 3784.43
+    EDUARDO ANDREY VENSON SIL CPF=02960685946 | SF: api=      0.00 sheet=   3270.58 d=-3270.58 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4442.23 sheet=    689.97 d= 3752.26
+    ARLEY HENRIQUE DE SOUZA L CPF=01170402232 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2000.00 sheet= 2000.00 d=    0.00 | CF: api=   5730.93 sheet=   1995.80 d= 3735.13
+    JUAN CARLOS PANTOJA AMANA CPF=51027941249 | SF: api=    831.75 sheet=   5447.30 d=-4615.55 | CQ: api= 4520.00 sheet= 4520.00 d=    0.00 | CF: api=   3688.25 sheet=      0.00 d= 3688.25
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=      0.00 sheet=   2623.37 d=-2623.37 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   6003.32 sheet=   2361.63 d= 3641.69
+    ORESTE BARBOSA DA SILVA J CPF=25075562850 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   7236.67 sheet=   3999.24 d= 3237.43
+    GUILHERME MOTTA RIBEIRO S CPF=11178519740 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   4037.55 sheet=    973.61 d= 3063.94
+    CHARLES NEVES MATTIUZZI   CPF=12547938790 | SF: api=   1992.17 sheet=      0.00 d= 1992.17 | CQ: api= 4200.00 sheet= 4200.00 d=    0.00 | CF: api=   2035.83 sheet=   4963.61 d=-2927.78
+    ALESSANDRO DE OLIVEIRA AZ CPF=27494577858 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 3000.00 sheet= 3000.00 d=    0.00 | CF: api=   5757.37 sheet=   2990.99 d= 2766.38
+
+================================================================================
+VALIDATION: 02/2026 QZ2
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 304
+
+  Compared: 304 CPFs
+  saldo_final matches:   10/304 (3.3%)
+  col_qz matches:        304/304 (100.0%)
+  carga_final matches:   92/304 (30.3%)
+  ALL 3 match:           8/304 (2.6%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api= 162031.34 sheet=      0.00 d=162031.34 | CQ: api=10000.00 sheet=10000.00 d=    0.00 | CF: api=      0.00 sheet=   9996.78 d=-9996.78
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api= 147493.70 sheet=      0.00 d=147493.70 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=      0.00 sheet=   9807.41 d=-9807.41
+    ANA CRISTINA FREIRE HOLAN CPF=60023937220 | SF: api=  50501.56 sheet=      0.00 d=50501.56 | CQ: api= 5500.00 sheet= 5500.00 d=    0.00 | CF: api=      0.00 sheet=   5500.00 d=-5500.00
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=  21006.31 sheet=      0.00 d=21006.31 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4994.37 d=-4994.37
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  33853.37 sheet=      0.00 d=33853.37 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4991.30 d=-4991.30
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=  34551.07 sheet=      0.00 d=34551.07 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   4944.00 d=-4944.00
+    CARLOS EDUARDO SCATAMBULO CPF=22730778829 | SF: api=  34990.86 sheet=      0.00 d=34990.86 | CQ: api= 4300.00 sheet= 4300.00 d=    0.00 | CF: api=      0.00 sheet=   4295.10 d=-4295.10
+    CHARLES NEVES MATTIUZZI   CPF=12547938790 | SF: api=  26449.78 sheet=      0.00 d=26449.78 | CQ: api= 4200.00 sheet= 4200.00 d=    0.00 | CF: api=      0.00 sheet=   4099.39 d=-4099.39
+    JOSE CLAUDIO RIBEIRO      CPF=61158852649 | SF: api=  31376.06 sheet=      0.00 d=31376.06 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   4000.00 d=-4000.00
+    FRANCIELLY FELIX CAVALCAN CPF=09276240446 | SF: api=  38522.88 sheet=      0.00 d=38522.88 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3998.00 d=-3998.00
+    CARLOS NASCIMENTO NONATO  CPF=65973500225 | SF: api=  57645.12 sheet=      0.00 d=57645.12 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3993.64 d=-3993.64
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=  81432.62 sheet=      0.00 d=81432.62 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3965.01 d=-3965.01
+    EDSON VEIGA SILVEIRA      CPF=62063774072 | SF: api=   3341.44 sheet=      0.00 d= 3341.44 | CQ: api= 6660.00 sheet= 6660.00 d=    0.00 | CF: api=   2867.45 sheet=   6208.89 d=-3341.44
+    LUCIANO JOSE DO AMARAL PE CPF=04434355708 | SF: api=  36286.74 sheet=    628.14 d=35658.60 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3331.21 d=-3331.21
+    ULISSES FERREIRA DE OLIVE CPF=01595939644 | SF: api=  19964.74 sheet=    952.44 d=19012.30 | CQ: api= 4150.00 sheet= 4150.00 d=    0.00 | CF: api=      0.00 sheet=   3158.10 d=-3158.10
+
+================================================================================
+VALIDATION: 03/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 475
+
+  Compared: 475 CPFs
+  saldo_final matches:   180/475 (37.9%)
+  col_qz matches:        475/475 (100.0%)
+  carga_final matches:   218/475 (45.9%)
+  ALL 3 match:           69/475 (14.5%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=   2668.40 d=-2668.40 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  26301.92 sheet=  13331.60 d=12970.32
+    GEORGE LUIS ROCHA FIGUEIR CPF=06792773310 | SF: api=  11534.23 sheet=  16105.21 d=-4570.98 | CQ: api= 4500.00 sheet= 4500.00 d=    0.00 | CF: api=      0.00 sheet= -11605.21 d=11605.21
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   7919.04 sheet=      0.00 d= 7919.04
+    MARCELA CARVALHO LEITAO   CPF=00827902212 | SF: api=   6362.37 sheet=   5097.63 d= 1264.74 | CQ: api=    0.00 sheet=    0.00 d=    0.00 | CF: api=      0.00 sheet=  -5097.63 d= 5097.63
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=      0.00 sheet=   1826.15 d=-1826.15 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=   8466.39 sheet=   3492.04 d= 4974.35
+    GUILHERME FERREIRA DA SIL CPF=41997553813 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2000.00 sheet= 2000.00 d=    0.00 | CF: api=   6882.89 sheet=   1997.69 d= 4885.20
+    FABIO DIOGO BITTENCOURT   CPF=00526143959 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2800.00 sheet= 2800.00 d=    0.00 | CF: api=   7664.10 sheet=   2800.00 d= 4864.10
+    CARLOS EDUARDO SCATAMBULO CPF=22730778829 | SF: api=      0.00 sheet=   4235.59 d=-4235.59 | CQ: api= 2300.00 sheet= 2300.00 d=    0.00 | CF: api=   2865.02 sheet=  -1962.03 d= 4827.05
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 7000.00 sheet= 7000.00 d=    0.00 | CF: api=  11597.63 sheet=   6925.50 d= 4672.13
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  34790.93 sheet=    426.36 d=34364.57 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4573.64 d=-4573.64
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=      0.00 sheet=   2918.53 d=-2918.53 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   6643.38 sheet=   2081.47 d= 4561.91
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api=   4466.72 sheet=      0.72 d= 4466.00 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=   5368.28 sheet=   9834.28 d=-4466.00
+    ORESTE BARBOSA DA SILVA J CPF=25075562850 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   8187.78 sheet=   4000.00 d= 4187.78
+    VICTOR SIGOLO PINHEIRO PI CPF=12237490619 | SF: api=      0.00 sheet=   3987.59 d=-3987.59 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   5063.97 sheet=   1012.41 d= 4051.56
+    EDUARDO ANDREY VENSON SIL CPF=02960685946 | SF: api=    226.65 sheet=   4272.63 d=-4045.98 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   3770.01 sheet=   -272.63 d= 4042.64
+
+================================================================================
+VALIDATION: 04/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 330
+
+  Compared: 330 CPFs
+  saldo_final matches:   163/330 (49.4%)
+  col_qz matches:        330/330 (100.0%)
+  carga_final matches:   134/330 (40.6%)
+  ALL 3 match:           82/330 (24.8%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    ANDRE ARANHA MEISTER      CPF=03032275326 | SF: api=      0.00 sheet=  18329.50 d=-18329.50 | CQ: api= 9000.00 sheet= 9000.00 d=    0.00 | CF: api=  14415.73 sheet=      0.00 d=14415.73
+    SAULO ARAUJO DE PAULA     CPF=31040091806 | SF: api=   3124.95 sheet=   3099.95 d=   25.00 | CQ: api= 5750.00 sheet= 5750.00 d=    0.00 | CF: api=   2562.75 sheet=  14671.75 d=-12109.00
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=    291.66 d= -291.66 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  24594.71 sheet=  15688.34 d= 8906.37
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   7435.54 sheet=    990.82 d= 6444.72
+    LUDGERO HORACIO DE OLIVEI CPF=06576198922 | SF: api=      0.00 sheet=   3693.10 d=-3693.10 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=   8264.05 sheet=   1825.21 d= 6438.84
+    CLAUDEMIR GREGOSKI RODRIG CPF=05144026958 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=    180.60 sheet=   6035.00 d=-5854.40
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  39306.66 sheet=      0.00 d=39306.66 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4995.00 d=-4995.00
+    LUCIANO JOSE DO AMARAL PE CPF=04434355708 | SF: api=      0.00 sheet=   3591.91 d=-3591.91 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   5159.53 sheet=    358.57 d= 4800.96
+    JOELSON FERREIRA DOS SANT CPF=07690263623 | SF: api=    659.80 sheet=   5903.25 d=-5243.45 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   4283.02 sheet=      0.00 d= 4283.02
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=   8088.26 sheet=   1674.27 d= 6413.99 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   4267.73 d=-4267.73
+    FABIO DIOGO BITTENCOURT   CPF=00526143959 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 2800.00 sheet= 2800.00 d=    0.00 | CF: api=   7050.51 sheet=   2791.00 d= 4259.51
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=      0.00 sheet=   1614.44 d=-1614.44 | CQ: api= 7000.00 sheet= 7000.00 d=    0.00 | CF: api=   9445.73 sheet=   5383.56 d= 4062.17
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=      0.00 sheet=   1784.53 d=-1784.53 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=   8232.96 sheet=   4211.41 d= 4021.55
+    FRANCIELLY FELIX CAVALCAN CPF=09276240446 | SF: api=      0.00 sheet=    798.78 d= -798.78 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4000.00 sheet=      0.00 d= 4000.00
+    CHARLES NEVES MATTIUZZI   CPF=12547938790 | SF: api=      0.00 sheet=   3430.11 d=-3430.11 | CQ: api= 4200.00 sheet= 4200.00 d=    0.00 | CF: api=   4520.43 sheet=    750.16 d= 3770.27
+
+================================================================================
+VALIDATION: 05/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 340
+
+  Compared: 340 CPFs
+  saldo_final matches:   165/340 (48.5%)
+  col_qz matches:        340/340 (100.0%)
+  carga_final matches:   157/340 (46.2%)
+  ALL 3 match:           102/340 (30.0%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=   1978.54 d=-1978.54 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  25304.12 sheet=  13984.46 d=11319.66
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api=      0.00 sheet=   4284.49 d=-4284.49 | CQ: api= 7000.00 sheet= 7000.00 d=    0.00 | CF: api=   9485.50 sheet=   2713.51 d= 6771.99
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=  11405.38 sheet=   4995.19 d= 6410.19
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=     30.40 d=  -30.40 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   6950.22 sheet=    966.60 d= 5983.62
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=      0.00 sheet=   2524.71 d=-2524.71 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=   8025.79 sheet=   2525.85 d= 5499.94
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=  15788.23 sheet=  10323.51 d= 5464.72
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=   2699.54 sheet=      0.00 d= 2699.54 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=   3289.73 sheet=   8680.91 d=-5391.18
+    ANDRE ARANHA MEISTER      CPF=03032275326 | SF: api=      0.00 sheet=   1702.92 d=-1702.92 | CQ: api= 9000.00 sheet= 9000.00 d=    0.00 | CF: api=  12640.61 sheet=   7254.81 d= 5385.80
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=      0.00 sheet=   6084.36 d=-6084.36 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   5383.72 sheet=      0.00 d= 5383.72
+    LUDGERO HORACIO DE OLIVEI CPF=06576198922 | SF: api=      0.00 sheet=   3774.22 d=-3774.22 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=   5161.45 sheet=    275.43 d= 4886.02
+    SANDRO BARRETO DE SOUZA   CPF=78021324953 | SF: api=      0.00 sheet=   2320.18 d=-2320.18 | CQ: api= 4240.00 sheet= 4240.00 d=    0.00 | CF: api=   6795.18 sheet=   1919.15 d= 4876.03
+    LUCIANO JOSE DO AMARAL PE CPF=04434355708 | SF: api=      0.00 sheet=   3676.09 d=-3676.09 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4800.47 sheet=    320.82 d= 4479.65
+    FELIPE MORAES COSTA DE BR CPF=04347084102 | SF: api=      0.00 sheet=   2446.51 d=-2446.51 | CQ: api= 2500.00 sheet= 2500.00 d=    0.00 | CF: api=   4514.12 sheet=     51.25 d= 4462.87
+    FERNANDO RODRIGUES DUARTE CPF=03377983112 | SF: api=      0.00 sheet=   2114.91 d=-2114.91 | CQ: api= 3200.00 sheet= 3200.00 d=    0.00 | CF: api=   4538.29 sheet=    583.09 d= 3955.20
+    ENZIO CARVALHO DA MOTA    CPF=38548259515 | SF: api=      0.00 sheet=   3462.38 d=-3462.38 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4142.29 sheet=    501.88 d= 3640.41
+
+================================================================================
+VALIDATION: 05/2026 QZ2
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 325
+
+  Compared: 325 CPFs
+  saldo_final matches:   10/325 (3.1%)
+  col_qz matches:        325/325 (100.0%)
+  carga_final matches:   102/325 (31.4%)
+  ALL 3 match:           10/325 (3.1%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api= 232964.12 sheet=      0.00 d=232964.12 | CQ: api=10000.00 sheet=10000.00 d=    0.00 | CF: api=      0.00 sheet=   9980.54 d=-9980.54
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api= 185669.78 sheet=      0.00 d=185669.78 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=      0.00 sheet=   9820.49 d=-9820.49
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=  56881.80 sheet=      0.00 d=56881.80 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   5985.09 d=-5985.09
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=  65042.98 sheet=      0.00 d=65042.98 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   5971.36 d=-5971.36
+    SILVIO VINICIUS PINHEIRO  CPF=51182084168 | SF: api=  29595.10 sheet=      0.00 d=29595.10 | CQ: api= 5700.00 sheet= 5700.00 d=    0.00 | CF: api=      0.00 sheet=   5700.00 d=-5700.00
+    FLAVIO FERNANDES DOS REIS CPF=01767960107 | SF: api=  33030.54 sheet=      0.00 d=33030.54 | CQ: api= 4900.00 sheet= 4900.00 d=    0.00 | CF: api=      0.00 sheet=   4543.75 d=-4543.75
+    WALTER DE CAMPOS NUNES NE CPF=99114160030 | SF: api=   4534.64 sheet=      0.00 d= 4534.64 | CQ: api= 5600.00 sheet= 5600.00 d=    0.00 | CF: api=     48.54 sheet=   4583.18 d=-4534.64
+    NILSON RODRIGUES CARDOSO  CPF=04025408325 | SF: api=  16752.20 sheet=   1520.19 d=15232.01 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   4478.15 d=-4478.15
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=  88939.67 sheet=    520.90 d=88418.77 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4473.91 d=-4473.91
+    CARLOS NASCIMENTO NONATO  CPF=65973500225 | SF: api=  81087.56 sheet=      0.00 d=81087.56 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3995.80 d=-3995.80
+    JOSE CLAUDIO RIBEIRO      CPF=61158852649 | SF: api=  43068.20 sheet=      0.00 d=43068.20 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3995.26 d=-3995.26
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api= 102865.28 sheet=    151.06 d=102714.22 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3848.94 d=-3848.94
+    CARLOS EDUARDO SCATAMBULO CPF=22730778829 | SF: api=  50007.46 sheet=    730.32 d=49277.14 | CQ: api= 4300.00 sheet= 4300.00 d=    0.00 | CF: api=      0.00 sheet=   3568.33 d=-3568.33
+    LUCIANO JOSE DO AMARAL PE CPF=04434355708 | SF: api=  47386.64 sheet=    707.82 d=46678.82 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3285.27 d=-3285.27
+    PAULO NILTON COSTA MOREIR CPF=45159599053 | SF: api=  51373.46 sheet=      0.00 d=51373.46 | CQ: api= 3000.00 sheet= 3000.00 d=    0.00 | CF: api=      0.00 sheet=   2987.41 d=-2987.41
+
+================================================================================
+VALIDATION: 06/2026 QZ1
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 337
+
+  Compared: 337 CPFs
+  saldo_final matches:   65/337 (19.3%)
+  col_qz matches:        337/337 (100.0%)
+  carga_final matches:   87/337 (25.8%)
+  ALL 3 match:           13/337 (3.9%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    BRUNO FERREIRA DE SOUZA R CPF=16306431730 | SF: api=      0.00 sheet=  32541.00 d=-32541.00 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=   7800.07 sheet=      0.00 d= 7800.07
+    ANTONIO JOSE PEREIRA DA S CPF=08326260401 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 1000.00 sheet= 1000.00 d=    0.00 | CF: api=   7476.72 sheet=   1391.25 d= 6085.47
+    JOSE CARLOS BATISTA       CPF=26652452804 | SF: api=   5213.67 sheet=    405.82 d= 4807.85 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=    778.33 sheet=   5586.18 d=-4807.85
+    ANDRE ARANHA MEISTER      CPF=03032275326 | SF: api=    438.75 sheet=  35614.06 d=-35175.31 | CQ: api= 9000.00 sheet= 9000.00 d=    0.00 | CF: api=   4556.68 sheet=      0.00 d= 4556.68
+    RUBENS BELO HERBSTER      CPF=02701688345 | SF: api=      0.00 sheet=   6110.51 d=-6110.51 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=   4425.58 sheet=      0.00 d= 4425.58
+    SILVIO VINICIUS PINHEIRO  CPF=51182084168 | SF: api=   1008.92 sheet=   5401.92 d=-4393.00 | CQ: api= 5700.00 sheet= 5700.00 d=    0.00 | CF: api=   4691.08 sheet=    298.08 d= 4393.00
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api=      0.00 sheet=   2286.43 d=-2286.43 | CQ: api=16000.00 sheet=16000.00 d=    0.00 | CF: api=  17645.13 sheet=  13690.57 d= 3954.56
+    CARLOS RENATO PACHECO DA  CPF=90443306087 | SF: api=   4793.76 sheet=      0.00 d= 4793.76 | CQ: api= 2800.00 sheet= 2800.00 d=    0.00 | CF: api=      0.00 sheet=   3830.55 d=-3830.55
+    FLAVIO FERNANDES DOS REIS CPF=01767960107 | SF: api=   1870.37 sheet=   6063.23 d=-4192.86 | CQ: api= 5700.00 sheet= 5700.00 d=    0.00 | CF: api=   3736.63 sheet=      0.00 d= 3736.63
+    GUILHERME FERREIRA DA SIL CPF=41997553813 | SF: api=      0.00 sheet=  22202.81 d=-22202.81 | CQ: api= 2000.00 sheet= 2000.00 d=    0.00 | CF: api=   3677.81 sheet=      0.00 d= 3677.81
+    SAULO ARAUJO DE PAULA     CPF=31040091806 | SF: api=  27248.71 sheet=   2422.74 d=24825.97 | CQ: api= 5750.00 sheet= 5750.00 d=    0.00 | CF: api=      0.00 sheet=   3319.26 d=-3319.26
+    FELIPE MORAES COSTA DE BR CPF=04347084102 | SF: api=      0.00 sheet=   9180.31 d=-9180.31 | CQ: api= 2500.00 sheet= 2500.00 d=    0.00 | CF: api=   3274.31 sheet=      0.00 d= 3274.31
+    RODRIGO VANZETTA          CPF=99532344004 | SF: api=      0.00 sheet=   3279.03 d=-3279.03 | CQ: api= 2800.00 sheet= 2800.00 d=    0.00 | CF: api=   3216.77 sheet=      0.00 d= 3216.77
+    WALTER DE CAMPOS NUNES NE CPF=99114160030 | SF: api=      0.00 sheet=   5772.81 d=-5772.81 | CQ: api= 5600.00 sheet= 5600.00 d=    0.00 | CF: api=   3047.57 sheet=      0.00 d= 3047.57
+    LUDGERO HORACIO DE OLIVEI CPF=06576198922 | SF: api=      0.00 sheet=      0.00 d=    0.00 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=   9367.06 sheet=   6426.21 d= 2940.85
+
+================================================================================
+VALIDATION: 06/2026 QZ2
+================================================================================
+  API data_mode: calculado
+  API total rows: 738
+  Sheet total rows: 315
+
+  Compared: 315 CPFs
+  saldo_final matches:   9/315 (2.9%)
+  col_qz matches:        315/315 (100.0%)
+  carga_final matches:   116/315 (36.8%)
+  ALL 3 match:           8/315 (2.5%)
+
+  TOP 15 MISMATCHES (by carga_final diff):
+    ABNER ANDRADE CAVALCANTE  CPF=02027745203 | SF: api= 190426.79 sheet=      0.00 d=190426.79 | CQ: api= 9840.00 sheet= 9840.00 d=    0.00 | CF: api=      0.00 sheet=   9837.18 d=-9837.18
+    RAFAEL AMORIM VELLO       CPF=01677920599 | SF: api= 251120.13 sheet=   3581.76 d=247538.37 | CQ: api=10000.00 sheet=10000.00 d=    0.00 | CF: api=      0.00 sheet=   6411.67 d=-6411.67
+    SILVIO VINICIUS PINHEIRO  CPF=51182084168 | SF: api=  29630.00 sheet=      8.92 d=29621.08 | CQ: api= 5700.00 sheet= 5700.00 d=    0.00 | CF: api=      0.00 sheet=   5691.08 d=-5691.08
+    LUCAS MARTINS MACAN       CPF=00975748998 | SF: api=  66394.71 sheet=    956.87 d=65437.84 | CQ: api= 6000.00 sheet= 6000.00 d=    0.00 | CF: api=      0.00 sheet=   5035.79 d=-5035.79
+    ANTONIO FERREIRA DE MENDO CPF=05766838760 | SF: api=  33817.42 sheet=      0.00 d=33817.42 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   4348.00 d=-4348.00
+    LUDGERO HORACIO DE OLIVEI CPF=06576198922 | SF: api=  69540.56 sheet=      0.00 d=69540.56 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=      0.00 sheet=   4021.93 d=-4021.93
+    JAEDER RODRIGUES JUNIOR   CPF=07505987607 | SF: api= 108050.34 sheet=      0.00 d=108050.34 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3990.92 d=-3990.92
+    JOSE CLAUDIO RIBEIRO      CPF=61158852649 | SF: api=  49220.34 sheet=      0.00 d=49220.34 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3954.30 d=-3954.30
+    CARLOS EDUARDO SCATAMBULO CPF=22730778829 | SF: api=  53229.66 sheet=    451.96 d=52777.70 | CQ: api= 4300.00 sheet= 4300.00 d=    0.00 | CF: api=      0.00 sheet=   3839.73 d=-3839.73
+    VICTOR SIGOLO PINHEIRO PI CPF=12237490619 | SF: api=  53484.79 sheet=   2886.87 d=50597.92 | CQ: api= 6500.00 sheet= 6500.00 d=    0.00 | CF: api=      0.00 sheet=   3588.65 d=-3588.65
+    LUCIANO JOSE DO AMARAL PE CPF=04434355708 | SF: api=  50154.18 sheet=    702.89 d=49451.29 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   3277.35 d=-3277.35
+    MARCIO CAMPOS RIBEIRO     CPF=17427326822 | SF: api=   8792.28 sheet=      0.00 d= 8792.28 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   3088.01 d=-3088.01
+    MARCO AURELIO DE ANDRADE  CPF=72756284220 | SF: api=  43614.70 sheet=   1985.92 d=41628.78 | CQ: api= 5000.00 sheet= 5000.00 d=    0.00 | CF: api=      0.00 sheet=   3008.95 d=-3008.95
+    ORESTE BARBOSA DA SILVA J CPF=25075562850 | SF: api=  72851.68 sheet=      0.00 d=72851.68 | CQ: api= 3000.00 sheet= 3000.00 d=    0.00 | CF: api=      0.00 sheet=   2996.14 d=-2996.14
+    FRANCIELLY FELIX CAVALCAN CPF=09276240446 | SF: api=  50347.36 sheet=      0.00 d=50347.36 | CQ: api= 4000.00 sheet= 4000.00 d=    0.00 | CF: api=      0.00 sheet=   2981.44 d=-2981.44
+
+================================================================================
+SUMMARY TABLE
+================================================================================
+ Month  QZ Compared    SF%    CQ%    CF%   ALL%
+------ --- -------- ------ ------ ------ ------
+     1   1      503  46.7% 100.0%  41.0%  12.7%
+     1   2      509  22.6% 100.0%  56.0%  22.6%
+     2   1      519  66.7% 100.0%  58.2%  45.5%
+     2   2      304   3.3% 100.0%  30.3%   2.6%
+     3   1      475  37.9% 100.0%  45.9%  14.5%
+     4   1      330  49.4% 100.0%  40.6%  24.8%
+     5   1      340  48.5% 100.0%  46.2%  30.0%
+     5   2      325   3.1% 100.0%  31.4%   3.1%
+     6   1      337  19.3% 100.0%  25.8%   3.9%
+     6   2      315   2.9% 100.0%  36.8%   2.5%

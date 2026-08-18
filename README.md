@@ -1,106 +1,86 @@
-# vExpenses Dashboard
+# Dashboard VExpenses
 
-Dashboard para gestão de despesas corporativas usando a API vExpenses v2.
-
-## Stack Tecnológica
-
-- **Frontend**: Next.js 14+ com App Router e TypeScript
-- **Styling**: TailwindCSS
-- **UI Components**: shadcn/ui
-- **Gráficos**: Recharts
-- **HTTP Client**: Axios
-- **Ícones**: Lucide React
-
-## Pré-requisitos
-
-- Node.js 18+ instalado
-- API Key da vExpenses
-
-## Instalação
-
-1. Clone o repositório e entre na pasta do projeto:
-```bash
-cd vexpenses-dashboard
-```
-
-2. Instale as dependências:
-```bash
-npm install
-```
-
-3. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
-```
-
-4. Edite o arquivo `.env` e adicione sua API Key:
-```env
-NEXT_PUBLIC_API_URL=https://api.vexpenses.com
-VEXPENSES_API_KEY=sua_api_key_aqui
-```
-
-## Rodar o Projeto
-
-### Modo Desenvolvimento
-```bash
-npm run dev
-```
-
-Acesse: http://localhost:3000
-
-### Build para Produção
-```bash
-npm run build
-npm start
-```
+Dashboard de controle financeiro integrado com a API VExpenses, com backend Python para verificação de planilhas e frontend Next.js.
 
 ## Estrutura do Projeto
 
 ```
-vexpenses-dashboard/
-├── app/
-│   ├── globals.css       # Estilos globais com Tailwind
-│   ├── layout.tsx        # Layout principal
-│   └── page.tsx          # Página inicial (dashboard)
-├── components/
-│   └── ui/               # Componentes shadcn/ui
-├── lib/
-│   ├── api.ts            # Serviço da API vExpenses
-│   └── utils.ts          # Funções utilitárias
-├── public/               # Arquivos estáticos
-├── package.json          # Dependências
-├── tsconfig.json         # Configuração TypeScript
-├── tailwind.config.ts    # Configuração TailwindCSS
-└── next.config.js        # Configuração Next.js
+dashboard-test/
+├── controle-api/               # Backend Python (FastAPI)
+│   ├── src/                    # Código-fonte principal
+│   │   ├── server.py           # Servidor FastAPI (porta 8000)
+│   │   ├── verifier.py         # Executor de verificações
+│   │   ├── api_client.py       # Cliente da API VExpenses
+│   │   ├── gerar_carga_qz.py   # Gerador de carga quinzenal
+│   │   └── checks/             # Módulos de verificação por planilha
+│   ├── data/                   # Banco SQLite e arquivos de dados
+│   ├── docs/                   # Documentação de endpoints e mapeamentos
+│   ├── temp/                   # Scripts de análise e investigação (one-off)
+│   ├── requirements.txt        # Dependências Python
+│   └── .env                    # Variáveis de ambiente (API keys)
+│
+├── vexpenses-dashboard/        # Frontend Next.js
+│   ├── app/                    # Rotas e páginas (App Router)
+│   │   ├── api/                # API routes (proxy VExpenses + cache)
+│   │   ├── despesas/           # Página de despesas
+│   │   ├── aprovacoes/         # Página de aprovações
+│   │   ├── gestao-caixa/       # Gestão de caixa
+│   │   ├── status-caixa/       # Status do caixa
+│   │   └── quinzena-dinamica/  # Quinzena dinâmica
+│   ├── components/             # Componentes React
+│   ├── lib/                    # Utilitários (API, cache, cálculos)
+│   ├── docs/                   # Documentação e análises do frontend
+│   └── scripts/                # Scripts de análise e investigação (one-off)
+│
+└── docs/                       # Documentação e notas de investigação da raiz
 ```
 
-## Página de Teste
+## Setup Local
 
-A página inicial (`app/page.tsx`) é uma página de teste que mostra:
+### Backend (controle-api)
 
-- **Cards de Resumo**: Total de despesas, relatórios, membros e centros de custo
-- **Valor Total**: Soma de todas as despesas
-- **Tabela de Despesas**: Últimas 10 despesas com detalhes
-- **Tabela de Relatórios**: Últimos 10 relatórios com status
-- **Tipos de Despesa**: Lista dos tipos disponíveis
-- **Centros de Custo**: Lista dos centros disponíveis
+```bash
+cd controle-api
+pip install -r requirements.txt
+python src/server.py
+# Acesse: http://localhost:8000
+```
 
-Esta página serve para validar a conexão com a API e visualizar os dados retornados.
+### Frontend (vexpenses-dashboard)
 
-## Próximos Passos
+```bash
+cd vexpenses-dashboard
+npm install
+npm run dev
+# Acesse: http://localhost:3000
+```
 
-1. Adicionar componentes shadcn/ui necessários
-2. Criar páginas do dashboard (aprovação, despesas, analytics, etc.)
-3. Implementar gráficos com Recharts
-4. Adicionar filtros e paginação
-5. Implementar autenticação
-6. Testes E2E
+## Variáveis de Ambiente
 
-## Documentação da API
+### controle-api/.env
+```env
+VEXPENSES_API_KEY=...
+VEXPENSES_ACCOUNT_ID=...
+```
 
-- [API_ROUTES.md](../API_ROUTES.md) - Documentação completa das rotas da API
-- [PLANO_PAGINAS.md](../PLANO_PAGINAS.md) - Plano detalhado das páginas
+### vexpenses-dashboard/.env
+```env
+VEXPENSES_API_KEY=...
+NEON_DATABASE_URL=...
+```
 
-## Suporte
+## Endpoints do Backend (porta 8000)
 
-Para dúvidas sobre a API vExpenses, consulte a documentação oficial: https://developers.vexpenses.com/v2/
+- `GET /api/sheets` - Lista planilhas e colunas do banco SQLite
+- `GET /api/sheets/{table}/data` - Dados paginados de uma tabela
+- `GET /api/health` - Status do servidor e banco
+- `GET /api/verify/tables` - Tabelas com checks definidos
+- `GET /api/sheets/mapping-status` - Status de mapeamento por tabela
+- `GET /api/verify/{table}` - Executa verificações de uma tabela
+
+## Deploy
+
+O frontend é deployado no Vercel/Railway. Ver `vexpenses-dashboard/vercel.json` e `vexpenses-dashboard/railway.json`.
+
+---
+**Última atualização:** 2026-06-15

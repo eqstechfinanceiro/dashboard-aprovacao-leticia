@@ -1,0 +1,2266 @@
+﻿{
+    "totals":  {
+                   "report_count":  "4798",
+                   "expense_count":  "76410",
+                   "total_value":  "7249353.33"
+               },
+    "last_expense":  {
+                         "total_rows":  "112623",
+                         "max_id":  88098321
+                     },
+    "enviado_reports":  [
+                            {
+                                "id":  11038292,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00049250256",
+                                "user_name":  "DHIEGO RIBEIRO DINIZ",
+                                "expense_count":  "18",
+                                "total_value":  "1068.28"
+                            },
+                            {
+                                "id":  10924401,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00053957040",
+                                "user_name":  "ANDERSON BICA PEREZ",
+                                "expense_count":  "6",
+                                "total_value":  "499"
+                            },
+                            {
+                                "id":  10859799,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00448428997",
+                                "user_name":  "LUIS FELIPE COSTA",
+                                "expense_count":  "64",
+                                "total_value":  "5508.42"
+                            },
+                            {
+                                "id":  11217267,
+                                "name":  "Caixa julho 2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00448960001",
+                                "user_name":  "HEITOR MAURMANN LEITAO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10857193,
+                                "name":  "Caixa 07 /2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00461757923",
+                                "user_name":  "ELIANDRO BRUNING",
+                                "expense_count":  "20",
+                                "total_value":  "1150.37"
+                            },
+                            {
+                                "id":  10642367,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00965306186",
+                                "user_name":  "JAIME ALVES DE ABREU SILVA",
+                                "expense_count":  "23",
+                                "total_value":  "1865.72"
+                            },
+                            {
+                                "id":  11122918,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00965306186",
+                                "user_name":  "JAIME ALVES DE ABREU SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10856757,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "00975748998",
+                                "user_name":  "LUCAS MARTINS MACAN",
+                                "expense_count":  "165",
+                                "total_value":  "13918.03"
+                            },
+                            {
+                                "id":  10875518,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01050938232",
+                                "user_name":  "CHARLYTON COSTA ANDRADE",
+                                "expense_count":  "207",
+                                "total_value":  "36509.42"
+                            },
+                            {
+                                "id":  10912883,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01050938232",
+                                "user_name":  "CHARLYTON COSTA ANDRADE",
+                                "expense_count":  "134",
+                                "total_value":  "25699.98"
+                            },
+                            {
+                                "id":  10922807,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01063690080",
+                                "user_name":  "JORGE ANTONIO VARGAS DA SILVA",
+                                "expense_count":  "2",
+                                "total_value":  "250"
+                            },
+                            {
+                                "id":  11034783,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01066881030",
+                                "user_name":  "DANIELA CARVALHO STAHLER",
+                                "expense_count":  "7",
+                                "total_value":  "352.55"
+                            },
+                            {
+                                "id":  10954666,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01310014264",
+                                "user_name":  "JAQUELINE LEVATI PEREIRA",
+                                "expense_count":  "27",
+                                "total_value":  "1486.26"
+                            },
+                            {
+                                "id":  10867299,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01356318665",
+                                "user_name":  "MARCO AURELIO DE LIMA",
+                                "expense_count":  "16",
+                                "total_value":  "2949.03"
+                            },
+                            {
+                                "id":  10326290,
+                                "name":  "CAIXA 05/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01677920599",
+                                "user_name":  "RAFAEL AMORIM VELLO",
+                                "expense_count":  "169",
+                                "total_value":  "24352.83"
+                            },
+                            {
+                                "id":  10912854,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01677920599",
+                                "user_name":  "RAFAEL AMORIM VELLO",
+                                "expense_count":  "55",
+                                "total_value":  "8918.72"
+                            },
+                            {
+                                "id":  10889824,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01730674500",
+                                "user_name":  "MARCEL DA HORA CARVALHO",
+                                "expense_count":  "11",
+                                "total_value":  "2306.75"
+                            },
+                            {
+                                "id":  11038984,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01767960107",
+                                "user_name":  "FLAVIO FERNANDES DOS REIS LIMA",
+                                "expense_count":  "3",
+                                "total_value":  "1922.6"
+                            },
+                            {
+                                "id":  11095249,
+                                "name":  "CAIXA 06/2026 complemtento  ",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01767960107",
+                                "user_name":  "FLAVIO FERNANDES DOS REIS LIMA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11073774,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "01932662537",
+                                "user_name":  "ADAN LEONARDO SOUZA BATISTA",
+                                "expense_count":  "17",
+                                "total_value":  "674.47"
+                            },
+                            {
+                                "id":  11204475,
+                                "name":  "Caixa 07/08",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02224415931",
+                                "user_name":  "SIDNEI FRANCISCO DA SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11112604,
+                                "name":  "CAIXA 07/26",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02426123931",
+                                "user_name":  "GIULLIANNO CHARLES DE SOUZA PEREIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10793715,
+                                "name":  "CAIXA 01/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02474960902",
+                                "user_name":  "ALESSANDRO RODRIGO PASTRELLI",
+                                "expense_count":  "14",
+                                "total_value":  "886.09"
+                            },
+                            {
+                                "id":  10869926,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02701688345",
+                                "user_name":  "RUBENS BELO HERBSTER",
+                                "expense_count":  "62",
+                                "total_value":  "4949.47"
+                            },
+                            {
+                                "id":  11047104,
+                                "name":  "caixa 06-2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02706762950",
+                                "user_name":  "SILMARA CHAVES",
+                                "expense_count":  "36",
+                                "total_value":  "1468.69"
+                            },
+                            {
+                                "id":  11041221,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02862032786",
+                                "user_name":  "CRISTIANO ANESIO GOMES DO NASCIMENTO",
+                                "expense_count":  "11",
+                                "total_value":  "236.30"
+                            },
+                            {
+                                "id":  11052594,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "02960685946",
+                                "user_name":  "EDUARDO ANDREY VENSON SILVA",
+                                "expense_count":  "38",
+                                "total_value":  "3010.12"
+                            },
+                            {
+                                "id":  11000350,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "03067535960",
+                                "user_name":  "OSCAR DOMINGO PALARO",
+                                "expense_count":  "17",
+                                "total_value":  "1691.04"
+                            },
+                            {
+                                "id":  10938615,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "Enviado",
+                                "user_cpf":  "03393455354",
+                                "user_name":  "JOSE WILKESON OLIVEIRA SILVA",
+                                "expense_count":  "1",
+                                "total_value":  "60"
+                            },
+                            {
+                                "id":  10959192,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "03398821235",
+                                "user_name":  "EDUARDA CONCEICAO DE ALMEIDA",
+                                "expense_count":  "31",
+                                "total_value":  "2461.68"
+                            },
+                            {
+                                "id":  10900985,
+                                "name":  "CAIXA 07-2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "03528389907",
+                                "user_name":  "JOELSON JUNIOR MARTINS DE GOES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10884933,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "03686605597",
+                                "user_name":  "UELITON SANTANA SANTOS",
+                                "expense_count":  "8",
+                                "total_value":  "381.86"
+                            },
+                            {
+                                "id":  10612458,
+                                "name":  "Caxia 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04013986175",
+                                "user_name":  "LUCAS RODRIGUES DE MOURA GALVAO",
+                                "expense_count":  "13",
+                                "total_value":  "2146.75"
+                            },
+                            {
+                                "id":  10993366,
+                                "name":  "CAIXA 07/26",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04050867095",
+                                "user_name":  "EDUARDO FRAGA DOS REIS",
+                                "expense_count":  "6",
+                                "total_value":  "692.60"
+                            },
+                            {
+                                "id":  10869132,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04434355708",
+                                "user_name":  "LUCIANO JOSE DO AMARAL PEREIRA",
+                                "expense_count":  "28",
+                                "total_value":  "683.50"
+                            },
+                            {
+                                "id":  11013081,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04614285988",
+                                "user_name":  "EDERSON LUIS BARROS DA ROSA",
+                                "expense_count":  "6",
+                                "total_value":  "230.1"
+                            },
+                            {
+                                "id":  11237463,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04661413199",
+                                "user_name":  "TIAGO DE JESUS ARAUJO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10858875,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "04817177900",
+                                "user_name":  "DAVID DE OLIVEIRA FRIGERIO",
+                                "expense_count":  "28",
+                                "total_value":  "2139.22"
+                            },
+                            {
+                                "id":  11091415,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05168980945",
+                                "user_name":  "PRISCILA GOTARDO PEREIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10683069,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05375810654",
+                                "user_name":  "MARCELO DE SOUZA DALA VEDOVA",
+                                "expense_count":  "7",
+                                "total_value":  "770.82"
+                            },
+                            {
+                                "id":  10898083,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05375810654",
+                                "user_name":  "MARCELO DE SOUZA DALA VEDOVA",
+                                "expense_count":  "3",
+                                "total_value":  "680"
+                            },
+                            {
+                                "id":  10859280,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05492458981",
+                                "user_name":  "FABIO MARTINS BORGES",
+                                "expense_count":  "3",
+                                "total_value":  "318.68"
+                            },
+                            {
+                                "id":  11078292,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05731312958",
+                                "user_name":  "FABIO PROVESI",
+                                "expense_count":  "17",
+                                "total_value":  "2186.48"
+                            },
+                            {
+                                "id":  10872445,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05864921947",
+                                "user_name":  "CLEBERSON APARECIDO BORGES DOS SANTOS",
+                                "expense_count":  "49",
+                                "total_value":  "1192.42"
+                            },
+                            {
+                                "id":  10902151,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "05892698440",
+                                "user_name":  "LEONARDO ORESTES SOARES",
+                                "expense_count":  "7",
+                                "total_value":  "886.33"
+                            },
+                            {
+                                "id":  11082699,
+                                "name":  "CAIXA 07/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "06271222994",
+                                "user_name":  "MICHEL DOS SANTOS VENANCIO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10868299,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "06439531670",
+                                "user_name":  "HELDER ARCHANJO FERREIRA",
+                                "expense_count":  "1",
+                                "total_value":  "80"
+                            },
+                            {
+                                "id":  10918775,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "06576198922",
+                                "user_name":  "LUDGERO HORACIO DE OLIVEIRA",
+                                "expense_count":  "18",
+                                "total_value":  "2859.34"
+                            },
+                            {
+                                "id":  11106547,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07053418952",
+                                "user_name":  "CAIOS VINICIUS NUNES BROERING",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10869845,
+                                "name":  "CAIXA 07/2026.",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07060404902",
+                                "user_name":  "JEFERSON ZAMPRONIO DA SILVA",
+                                "expense_count":  "24",
+                                "total_value":  "1726.76"
+                            },
+                            {
+                                "id":  10867804,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07198282440",
+                                "user_name":  "THIEGO LEANDRO ALVES DE OLIVEIRA",
+                                "expense_count":  "34",
+                                "total_value":  "4257.86"
+                            },
+                            {
+                                "id":  11128759,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07318362780",
+                                "user_name":  "MARCIO BOUZAS FERREIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10861517,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07505987607",
+                                "user_name":  "JAEDER RODRIGUES JUNIOR",
+                                "expense_count":  "73",
+                                "total_value":  "8623.42"
+                            },
+                            {
+                                "id":  11013011,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07634898910",
+                                "user_name":  "SILVIO ODELI FILHO",
+                                "expense_count":  "3",
+                                "total_value":  "140.17"
+                            },
+                            {
+                                "id":  10836554,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07643300712",
+                                "user_name":  "ANGELICA SOARES AMARANTE SILVA",
+                                "expense_count":  "6",
+                                "total_value":  "2676.01"
+                            },
+                            {
+                                "id":  11051337,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07643300712",
+                                "user_name":  "ANGELICA SOARES AMARANTE SILVA",
+                                "expense_count":  "16",
+                                "total_value":  "2580.72"
+                            },
+                            {
+                                "id":  10897355,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07690263623",
+                                "user_name":  "JOELSON FERREIRA DOS SANTOS",
+                                "expense_count":  "90",
+                                "total_value":  "4165.13"
+                            },
+                            {
+                                "id":  11004032,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07747008406",
+                                "user_name":  "BRUNA LAIS AZEVEDO CUNHA",
+                                "expense_count":  "8",
+                                "total_value":  "953.05"
+                            },
+                            {
+                                "id":  10845172,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07774700986",
+                                "user_name":  "MARLON ARAUJO",
+                                "expense_count":  "21",
+                                "total_value":  "1642.04"
+                            },
+                            {
+                                "id":  10652703,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07809466690",
+                                "user_name":  "AMANDA CRISTINA DA SILVA",
+                                "expense_count":  "2",
+                                "total_value":  "120"
+                            },
+                            {
+                                "id":  11237110,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "07809466690",
+                                "user_name":  "AMANDA CRISTINA DA SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10852427,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08030478437",
+                                "user_name":  "LUAN THIAGO DA SILVA",
+                                "expense_count":  "17",
+                                "total_value":  "2385.40"
+                            },
+                            {
+                                "id":  11222190,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08072851969",
+                                "user_name":  "DOUGLAS VENTURA SILVEIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10930882,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08103183776",
+                                "user_name":  "JEFFERSON NAZARENO SILVA FREITAS",
+                                "expense_count":  "13",
+                                "total_value":  "1110.59"
+                            },
+                            {
+                                "id":  10968225,
+                                "name":  "Caixa 07/ 2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08204909977",
+                                "user_name":  "LUCAS DE PAULA SILVA",
+                                "expense_count":  "9",
+                                "total_value":  "1094.3"
+                            },
+                            {
+                                "id":  9800173,
+                                "name":  "CAIXA 02/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "11",
+                                "total_value":  "806.68"
+                            },
+                            {
+                                "id":  9842254,
+                                "name":  "CAIXA 10/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "1",
+                                "total_value":  "50"
+                            },
+                            {
+                                "id":  9842324,
+                                "name":  "CAIXA 11/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "1",
+                                "total_value":  "78.5"
+                            },
+                            {
+                                "id":  9842412,
+                                "name":  "CAIXA 12/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "4",
+                                "total_value":  "311.47"
+                            },
+                            {
+                                "id":  11170228,
+                                "name":  "CAIXA 12/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11170631,
+                                "name":  "CAIXA 05/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11237940,
+                                "name":  "CAIXA 09/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08325368730",
+                                "user_name":  "LEANDRO PINTO NUNES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10878403,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08492402989",
+                                "user_name":  "DOUGLAS TIAGO DE OLIVEIRA",
+                                "expense_count":  "18",
+                                "total_value":  "871.33"
+                            },
+                            {
+                                "id":  10736656,
+                                "name":  "Caixa 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08781221924",
+                                "user_name":  "LUCAS CARVALHO DE SOUZA",
+                                "expense_count":  "38",
+                                "total_value":  "1142.81"
+                            },
+                            {
+                                "id":  11108938,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08781221924",
+                                "user_name":  "LUCAS CARVALHO DE SOUZA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10876536,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "08935547905",
+                                "user_name":  "JEFERSON ADRIANO WERNER",
+                                "expense_count":  "27",
+                                "total_value":  "1593.26"
+                            },
+                            {
+                                "id":  10959769,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09072032640",
+                                "user_name":  "LEANDRO DE MENEZES ASSUNCAO",
+                                "expense_count":  "10",
+                                "total_value":  "771.91"
+                            },
+                            {
+                                "id":  10855517,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09199781930",
+                                "user_name":  "HIGOR KELVYN SILVA AMORIM",
+                                "expense_count":  "60",
+                                "total_value":  "1442.70"
+                            },
+                            {
+                                "id":  10920635,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09276240446",
+                                "user_name":  "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+                                "expense_count":  "53",
+                                "total_value":  "4912.49"
+                            },
+                            {
+                                "id":  10880317,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09407167631",
+                                "user_name":  "DIEGO DE ALCANTARA MOTA MENDES",
+                                "expense_count":  "5",
+                                "total_value":  "245.33"
+                            },
+                            {
+                                "id":  11165525,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09428255947",
+                                "user_name":  "JULIA SCHURHAUS PERETTI",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11045341,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "09867858816",
+                                "user_name":  "CARLOS ROBERTO DE CARVALHO PERES",
+                                "expense_count":  "15",
+                                "total_value":  "2838.65"
+                            },
+                            {
+                                "id":  10868326,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10054353670",
+                                "user_name":  "JUNIO VICENTE BARBOSA",
+                                "expense_count":  "20",
+                                "total_value":  "2795.69"
+                            },
+                            {
+                                "id":  9366847,
+                                "name":  "CAIXA 01/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10137575483",
+                                "user_name":  "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+                                "expense_count":  "47",
+                                "total_value":  "5406.33"
+                            },
+                            {
+                                "id":  10882891,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10137575483",
+                                "user_name":  "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+                                "expense_count":  "48",
+                                "total_value":  "5317.35"
+                            },
+                            {
+                                "id":  11165299,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10254434894",
+                                "user_name":  "MARCELO PEREIRA LIMA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11227205,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10310899699",
+                                "user_name":  "Giulliano filipe de almeida",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10395788,
+                                "name":  "CAIXA 04/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10420741607",
+                                "user_name":  "HENRIQUE ALMEIDA LAIGNIER",
+                                "expense_count":  "1",
+                                "total_value":  "43.25"
+                            },
+                            {
+                                "id":  10464091,
+                                "name":  "CAIXA 05/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10420741607",
+                                "user_name":  "HENRIQUE ALMEIDA LAIGNIER",
+                                "expense_count":  "7",
+                                "total_value":  "268.65"
+                            },
+                            {
+                                "id":  11059577,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10489127959",
+                                "user_name":  "GUILHERME DOS SANTOS GOMES",
+                                "expense_count":  "6",
+                                "total_value":  "366.2"
+                            },
+                            {
+                                "id":  10917688,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "10521167957",
+                                "user_name":  "MURILO DE ALMEIDA",
+                                "expense_count":  "5",
+                                "total_value":  "782.16"
+                            },
+                            {
+                                "id":  10871611,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11178519740",
+                                "user_name":  "GUILHERME MOTTA RIBEIRO SILVA",
+                                "expense_count":  "16",
+                                "total_value":  "1063.9"
+                            },
+                            {
+                                "id":  11055898,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11178519740",
+                                "user_name":  "GUILHERME MOTTA RIBEIRO SILVA",
+                                "expense_count":  "7",
+                                "total_value":  "183.49"
+                            },
+                            {
+                                "id":  11146905,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11340265796",
+                                "user_name":  "PALOMA CARLOS SPINOLA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10973623,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11422891844",
+                                "user_name":  "DIVAN ALVES DE AMORIM",
+                                "expense_count":  "9",
+                                "total_value":  "1217"
+                            },
+                            {
+                                "id":  11036661,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11489828923",
+                                "user_name":  "LUCIANO DA SILVA DE PAULA",
+                                "expense_count":  "1",
+                                "total_value":  "86.03"
+                            },
+                            {
+                                "id":  10906759,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11590627733",
+                                "user_name":  "THIAGO DE MEDEIROS VANZELER",
+                                "expense_count":  "12",
+                                "total_value":  "849.07"
+                            },
+                            {
+                                "id":  10858684,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11823866603",
+                                "user_name":  "MARCOS VINICIUS DE SOUZA ALVES",
+                                "expense_count":  "6",
+                                "total_value":  "546.95"
+                            },
+                            {
+                                "id":  10917112,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11897381638",
+                                "user_name":  "ANDRE LUIZ SANTANA",
+                                "expense_count":  "21",
+                                "total_value":  "2801.25"
+                            },
+                            {
+                                "id":  11193823,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "11897381638",
+                                "user_name":  "ANDRE LUIZ SANTANA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10979210,
+                                "name":  "Caixa 07-2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "12068745976",
+                                "user_name":  "IVO LUCIANO DA SILVA WAGNER JUNIOR",
+                                "expense_count":  "1",
+                                "total_value":  "24"
+                            },
+                            {
+                                "id":  10620884,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "12237490619",
+                                "user_name":  "VICTOR SIGOLO PINHEIRO PIMENTA",
+                                "expense_count":  "75",
+                                "total_value":  "6804.52"
+                            },
+                            {
+                                "id":  10875230,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "12237490619",
+                                "user_name":  "VICTOR SIGOLO PINHEIRO PIMENTA",
+                                "expense_count":  "40",
+                                "total_value":  "3267.66"
+                            },
+                            {
+                                "id":  10884486,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "13126691790",
+                                "user_name":  "LEANDRO GUSMAO MUNIZ",
+                                "expense_count":  "10",
+                                "total_value":  "1136.92"
+                            },
+                            {
+                                "id":  10578091,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "13514820686",
+                                "user_name":  "HUGO AZEVEDO SANTOS",
+                                "expense_count":  "22",
+                                "total_value":  "2583.13"
+                            },
+                            {
+                                "id":  10874367,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "13514820686",
+                                "user_name":  "HUGO AZEVEDO SANTOS",
+                                "expense_count":  "3",
+                                "total_value":  "150.43"
+                            },
+                            {
+                                "id":  10988244,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "14084321613",
+                                "user_name":  "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA",
+                                "expense_count":  "1",
+                                "total_value":  "31.98"
+                            },
+                            {
+                                "id":  11071206,
+                                "name":  "RelatÃ³rio 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "14355734803",
+                                "user_name":  "ROGERIO MACARIO PINTO",
+                                "expense_count":  "6",
+                                "total_value":  "411.87"
+                            },
+                            {
+                                "id":  10959447,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "16996346886",
+                                "user_name":  "SANDRO CAPISTRANO",
+                                "expense_count":  "7",
+                                "total_value":  "956.9"
+                            },
+                            {
+                                "id":  11057744,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "17074849707",
+                                "user_name":  "TANDARA MARIA DO VALES PEREIRA ALVES",
+                                "expense_count":  "2",
+                                "total_value":  "915"
+                            },
+                            {
+                                "id":  11004128,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "17278189705",
+                                "user_name":  "CLEBER ELIAS DA SILVA JUNIOR",
+                                "expense_count":  "7",
+                                "total_value":  "1428.68"
+                            },
+                            {
+                                "id":  11092974,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "20005473896",
+                                "user_name":  "CARLOS ALEXANDRE GIGI",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10898870,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "21641472863",
+                                "user_name":  "DAVID VICHI DE BRITO",
+                                "expense_count":  "41",
+                                "total_value":  "3494.40"
+                            },
+                            {
+                                "id":  9110306,
+                                "name":  "CAIXA 12/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "22730778829",
+                                "user_name":  "CARLOS EDUARDO SCATAMBULO",
+                                "expense_count":  "84",
+                                "total_value":  "3857.06"
+                            },
+                            {
+                                "id":  9328902,
+                                "name":  "CAIXA  01/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "22730778829",
+                                "user_name":  "CARLOS EDUARDO SCATAMBULO",
+                                "expense_count":  "76",
+                                "total_value":  "3737.65"
+                            },
+                            {
+                                "id":  10944416,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "22730778829",
+                                "user_name":  "CARLOS EDUARDO SCATAMBULO",
+                                "expense_count":  "34",
+                                "total_value":  "1963.34"
+                            },
+                            {
+                                "id":  11189211,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "22730778829",
+                                "user_name":  "CARLOS EDUARDO SCATAMBULO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10866932,
+                                "name":  "CAIXA07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "25075562850",
+                                "user_name":  "ORESTE BARBOSA DA SILVA JUNIOR",
+                                "expense_count":  "66",
+                                "total_value":  "5894.82"
+                            },
+                            {
+                                "id":  10955820,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26513583802",
+                                "user_name":  "LEANDRO FIGUEREDO BELCHIOR",
+                                "expense_count":  "3",
+                                "total_value":  "319.6"
+                            },
+                            {
+                                "id":  9823071,
+                                "name":  "CAIXA 02/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26652452804",
+                                "user_name":  "JOSE CARLOS BATISTA",
+                                "expense_count":  "56",
+                                "total_value":  "4664.19"
+                            },
+                            {
+                                "id":  9823077,
+                                "name":  "CAIXA 03/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26652452804",
+                                "user_name":  "JOSE CARLOS BATISTA",
+                                "expense_count":  "100",
+                                "total_value":  "9873.71"
+                            },
+                            {
+                                "id":  10372756,
+                                "name":  "CAIXA 05/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26652452804",
+                                "user_name":  "JOSE CARLOS BATISTA",
+                                "expense_count":  "198",
+                                "total_value":  "12238.22"
+                            },
+                            {
+                                "id":  10671215,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26652452804",
+                                "user_name":  "JOSE CARLOS BATISTA",
+                                "expense_count":  "183",
+                                "total_value":  "12851.36"
+                            },
+                            {
+                                "id":  10919916,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26652452804",
+                                "user_name":  "JOSE CARLOS BATISTA",
+                                "expense_count":  "39",
+                                "total_value":  "3932.93"
+                            },
+                            {
+                                "id":  10856892,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "26687333836",
+                                "user_name":  "TEOFILO TOLLENDAL PACHECO",
+                                "expense_count":  "27",
+                                "total_value":  "2506.01"
+                            },
+                            {
+                                "id":  9307469,
+                                "name":  "CAIXA 01/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "27494577858",
+                                "user_name":  "ALESSANDRO DE OLIVEIRA AZEVEDO",
+                                "expense_count":  "30",
+                                "total_value":  "5844.47"
+                            },
+                            {
+                                "id":  10852909,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "27494577858",
+                                "user_name":  "ALESSANDRO DE OLIVEIRA AZEVEDO",
+                                "expense_count":  "14",
+                                "total_value":  "3292.77"
+                            },
+                            {
+                                "id":  10976892,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "27668763830",
+                                "user_name":  "RICARDO MURCIA GARCIA FILHO",
+                                "expense_count":  "7",
+                                "total_value":  "919.85"
+                            },
+                            {
+                                "id":  10918622,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29011288823",
+                                "user_name":  "MARCEL GOMES DE OLIVEIRA",
+                                "expense_count":  "24",
+                                "total_value":  "1088.00"
+                            },
+                            {
+                                "id":  10927080,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29157549850",
+                                "user_name":  "ERICSON PINHEIRO DOS SANTOS",
+                                "expense_count":  "1",
+                                "total_value":  "25"
+                            },
+                            {
+                                "id":  11181919,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29157549850",
+                                "user_name":  "ERICSON PINHEIRO DOS SANTOS",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  9306931,
+                                "name":  "CAIXA 01/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29758827855",
+                                "user_name":  "RONALDO RUFINO SANTANA",
+                                "expense_count":  "51",
+                                "total_value":  "5832.69"
+                            },
+                            {
+                                "id":  10880734,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29758827855",
+                                "user_name":  "RONALDO RUFINO SANTANA",
+                                "expense_count":  "39",
+                                "total_value":  "3915.91"
+                            },
+                            {
+                                "id":  11047403,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "29856268893",
+                                "user_name":  "LUIZ GUSTAVO DI GIORGIO",
+                                "expense_count":  "2",
+                                "total_value":  "359"
+                            },
+                            {
+                                "id":  11063053,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "31040091806",
+                                "user_name":  "SAULO ARAUJO DE PAULA",
+                                "expense_count":  "23",
+                                "total_value":  "2335.94"
+                            },
+                            {
+                                "id":  8940480,
+                                "name":  "CAIXA 10/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "31275798888",
+                                "user_name":  "FABIO DA CONCEICAO LIMA",
+                                "expense_count":  "15",
+                                "total_value":  "1409.59"
+                            },
+                            {
+                                "id":  8941383,
+                                "name":  "CAIXA 08/2025",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "31275798888",
+                                "user_name":  "FABIO DA CONCEICAO LIMA",
+                                "expense_count":  "11",
+                                "total_value":  "1652.72"
+                            },
+                            {
+                                "id":  11063599,
+                                "name":  "07/26",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "31832240894",
+                                "user_name":  "MARCOS YOSHIMASSA MURAKAMI",
+                                "expense_count":  "5",
+                                "total_value":  "143.4"
+                            },
+                            {
+                                "id":  11108157,
+                                "name":  "CAIXA 07/2026\n",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "31832240894",
+                                "user_name":  "MARCOS YOSHIMASSA MURAKAMI",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10639380,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "34168918807",
+                                "user_name":  "EMERSON LEITE DE BARROS",
+                                "expense_count":  "31",
+                                "total_value":  "6291.70"
+                            },
+                            {
+                                "id":  10905992,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "34168918807",
+                                "user_name":  "EMERSON LEITE DE BARROS",
+                                "expense_count":  "11",
+                                "total_value":  "1328.75"
+                            },
+                            {
+                                "id":  11057874,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "34459886847",
+                                "user_name":  "RODRIGO FRANCISCO DE SOUSA",
+                                "expense_count":  "25",
+                                "total_value":  "1365.82"
+                            },
+                            {
+                                "id":  10865224,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "34757123850",
+                                "user_name":  "FRANCO CARLOS DALLACQUA",
+                                "expense_count":  "28",
+                                "total_value":  "1764.59"
+                            },
+                            {
+                                "id":  10906730,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "35575473880",
+                                "user_name":  "BEATRIZ SILVA DE SIQUEIRA",
+                                "expense_count":  "13",
+                                "total_value":  "460.46"
+                            },
+                            {
+                                "id":  11193592,
+                                "name":  "RELANÃAMENTO DE NOTAS",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "35575473880",
+                                "user_name":  "BEATRIZ SILVA DE SIQUEIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10912756,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "36020922839",
+                                "user_name":  "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI",
+                                "expense_count":  "24",
+                                "total_value":  "1327.5"
+                            },
+                            {
+                                "id":  10961347,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "36447007888",
+                                "user_name":  "RENAN VICTORIO DE LIMA",
+                                "expense_count":  "37",
+                                "total_value":  "2034.32"
+                            },
+                            {
+                                "id":  11113486,
+                                "name":  "CAIXA 04/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "36447007888",
+                                "user_name":  "RENAN VICTORIO DE LIMA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10951625,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "37258325875",
+                                "user_name":  "JAQUELINE ONORIO DOS SANTOS ALVES",
+                                "expense_count":  "32",
+                                "total_value":  "3204.49"
+                            },
+                            {
+                                "id":  10890498,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "37425574837",
+                                "user_name":  "MICHAEL RODRIGUES SANTOS",
+                                "expense_count":  "117",
+                                "total_value":  "2520.27"
+                            },
+                            {
+                                "id":  10914024,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "37695259810",
+                                "user_name":  "VANDERLEI DE SOUZA NORONHA JUNIOR",
+                                "expense_count":  "1",
+                                "total_value":  "22"
+                            },
+                            {
+                                "id":  10928670,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "37896893860",
+                                "user_name":  "EDIPO SANTOS BARRETO",
+                                "expense_count":  "37",
+                                "total_value":  "1097.29"
+                            },
+                            {
+                                "id":  10683558,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "38880279858",
+                                "user_name":  "FABIANA CAMILA BARBOSA DE MORAES LIMA",
+                                "expense_count":  "3",
+                                "total_value":  "540.63"
+                            },
+                            {
+                                "id":  10874586,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "38950693291",
+                                "user_name":  "GERSON PEREIRA",
+                                "expense_count":  "22",
+                                "total_value":  "4534.38"
+                            },
+                            {
+                                "id":  10904340,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "41997553813",
+                                "user_name":  "GUILHERME FERREIRA DA SILVA",
+                                "expense_count":  "4",
+                                "total_value":  "584.2"
+                            },
+                            {
+                                "id":  11078347,
+                                "name":  "CAIXA 04/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "43089240068",
+                                "user_name":  "GILBERTO DE ALMEIDA",
+                                "expense_count":  "2",
+                                "total_value":  "1532"
+                            },
+                            {
+                                "id":  11118138,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "44012861549",
+                                "user_name":  "JAZEMIR DE SANTANA MARQUES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10891589,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "44519188806",
+                                "user_name":  "GUILHERME MATEUS VAZ DOS SANTOS",
+                                "expense_count":  "41",
+                                "total_value":  "2843.64"
+                            },
+                            {
+                                "id":  11074051,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "44997574600",
+                                "user_name":  "JORGE NEGRI NETO",
+                                "expense_count":  "20",
+                                "total_value":  "1860.54"
+                            },
+                            {
+                                "id":  10662783,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "45154701836",
+                                "user_name":  "KATIA RESENDE DA SILVA",
+                                "expense_count":  "60",
+                                "total_value":  "3406.91"
+                            },
+                            {
+                                "id":  11076571,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "45154701836",
+                                "user_name":  "KATIA RESENDE DA SILVA",
+                                "expense_count":  "6",
+                                "total_value":  "944.06"
+                            },
+                            {
+                                "id":  10977210,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "46850229800",
+                                "user_name":  "Rafael Almeida Lopes",
+                                "expense_count":  "15",
+                                "total_value":  "1001.91"
+                            },
+                            {
+                                "id":  10915039,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "47111830865",
+                                "user_name":  "THIAGO SEPULVEDA CUNHA",
+                                "expense_count":  "2",
+                                "total_value":  "329.53"
+                            },
+                            {
+                                "id":  10977179,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "47502843604",
+                                "user_name":  "RONALDO DE MATOS LELIS",
+                                "expense_count":  "9",
+                                "total_value":  "1118.44"
+                            },
+                            {
+                                "id":  11237594,
+                                "name":  "CAIXA - 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "47514649816",
+                                "user_name":  "LUCAS TAVARES GARCIA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10934712,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "48210811053",
+                                "user_name":  "KLEBER SILVA DA SILVA",
+                                "expense_count":  "6",
+                                "total_value":  "920.28"
+                            },
+                            {
+                                "id":  10795461,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "49637513809",
+                                "user_name":  "SARA ARAGAO DA SILVA BARBOSA",
+                                "expense_count":  "4",
+                                "total_value":  "1153.27"
+                            },
+                            {
+                                "id":  11229439,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "49637513809",
+                                "user_name":  "SARA ARAGAO DA SILVA BARBOSA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11125117,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "55889913115",
+                                "user_name":  "JOSE JONAS FURLANETTO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11094469,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "61158852649",
+                                "user_name":  "JOSE CLAUDIO RIBEIRO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10853544,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "62063774072",
+                                "user_name":  "EDSON VEIGA SILVEIRA",
+                                "expense_count":  "9",
+                                "total_value":  "639.67"
+                            },
+                            {
+                                "id":  10095869,
+                                "name":  "CAIXA 03/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "63194252020",
+                                "user_name":  "ALEXANDRE DA SILVEIRA GROSS",
+                                "expense_count":  "6",
+                                "total_value":  "418.53"
+                            },
+                            {
+                                "id":  11115556,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "68746458204",
+                                "user_name":  "MOISES DOS SANTOS CABRAL",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11109237,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "72656204968",
+                                "user_name":  "CARLOS EDUARDO CAVALHEIRO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10869668,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "72756284220",
+                                "user_name":  "MARCO AURELIO DE ANDRADE MORAES",
+                                "expense_count":  "54",
+                                "total_value":  "7490.02"
+                            },
+                            {
+                                "id":  10616701,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "73574031491",
+                                "user_name":  "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+                                "expense_count":  "33",
+                                "total_value":  "3495.76"
+                            },
+                            {
+                                "id":  10901011,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "73574031491",
+                                "user_name":  "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+                                "expense_count":  "13",
+                                "total_value":  "1172.96"
+                            },
+                            {
+                                "id":  11146789,
+                                "name":  "CAIXA 01/2026 CORREÃÃO",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "73574031491",
+                                "user_name":  "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11154505,
+                                "name":  "CAIXA 05/2025 CORREÃÃO",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "73574031491",
+                                "user_name":  "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10946709,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "74548565949",
+                                "user_name":  "UBIRAJARA DE ARAUJO TEIXEIRA",
+                                "expense_count":  "4",
+                                "total_value":  "201.5"
+                            },
+                            {
+                                "id":  10966606,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "77522532000",
+                                "user_name":  "EDISON FERREIRA GONCALVES",
+                                "expense_count":  "8",
+                                "total_value":  "679.07"
+                            },
+                            {
+                                "id":  10860512,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "78021324953",
+                                "user_name":  "SANDRO BARRETO DE SOUZA",
+                                "expense_count":  "27",
+                                "total_value":  "5834.46"
+                            },
+                            {
+                                "id":  11221182,
+                                "name":  "Caixa 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "78296277972",
+                                "user_name":  "JOSE DO PRADO ROSA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10862888,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "81480261068",
+                                "user_name":  "ROBERTO DOMINGUES PEREIRA",
+                                "expense_count":  "59",
+                                "total_value":  "2285.61"
+                            },
+                            {
+                                "id":  11159806,
+                                "name":  "CAIXA 08/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "81480261068",
+                                "user_name":  "ROBERTO DOMINGUES PEREIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11128415,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "83978054515",
+                                "user_name":  "RAMON GOMES TEIXEIRA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10953153,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "89591640030",
+                                "user_name":  "ROGERIO GOMES DE OLIVEIRA",
+                                "expense_count":  "1",
+                                "total_value":  "49.46"
+                            },
+                            {
+                                "id":  11115677,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "90443306087",
+                                "user_name":  "CARLOS RENATO PACHECO DA SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11218312,
+                                "name":  "CAIXA 06/2026 COMPLEMENTO",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "90443306087",
+                                "user_name":  "CARLOS RENATO PACHECO DA SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  9762856,
+                                "name":  "CAIXA 03/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "91688205004",
+                                "user_name":  "EVERTON CAMARGO DE LOURETO",
+                                "expense_count":  "42",
+                                "total_value":  "3820.15"
+                            },
+                            {
+                                "id":  10068599,
+                                "name":  "CAIXA 04/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "91688205004",
+                                "user_name":  "EVERTON CAMARGO DE LOURETO",
+                                "expense_count":  "56",
+                                "total_value":  "3143.58"
+                            },
+                            {
+                                "id":  10880326,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "91688205004",
+                                "user_name":  "EVERTON CAMARGO DE LOURETO",
+                                "expense_count":  "27",
+                                "total_value":  "1639.77"
+                            },
+                            {
+                                "id":  11127287,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "91920795987",
+                                "user_name":  "CLAUDINEI VICENTE DE LIMA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11168909,
+                                "name":  "CAIXA 05/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "91959381091",
+                                "user_name":  "ANDERSON LUIS GONCALVES",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  11122987,
+                                "name":  "Caixa do mÃªs 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "93457235953",
+                                "user_name":  "CLAUDIO DONIZETE DA SILVA",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10899117,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "94551804304",
+                                "user_name":  "ADSON ARAUJO DA SILVA",
+                                "expense_count":  "23",
+                                "total_value":  "2994.86"
+                            },
+                            {
+                                "id":  10857988,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "97592439549",
+                                "user_name":  "DANIEL SANTOS DE ASSUNCAO",
+                                "expense_count":  "31",
+                                "total_value":  "1563.20"
+                            },
+                            {
+                                "id":  11203618,
+                                "name":  "CAIXA -07-26",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "98394282091",
+                                "user_name":  "MAURICIO JOSE CARDOSO",
+                                "expense_count":  "0",
+                                "total_value":  "0"
+                            },
+                            {
+                                "id":  10979331,
+                                "name":  "CAIXA 07/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "98717251087",
+                                "user_name":  "MARCIO CORREA DA SILVA",
+                                "expense_count":  "1",
+                                "total_value":  "60"
+                            },
+                            {
+                                "id":  10582518,
+                                "name":  "CAIXA 06/2026",
+                                "status":  "ENVIADO",
+                                "user_cpf":  "99532344004",
+                                "user_name":  "RODRIGO VANZETTA",
+                                "expense_count":  "46",
+                                "total_value":  "5905.70"
+                            }
+                        ],
+    "suspicious_aprovado":  [
+                                {
+                                    "id":  9317731,
+                                    "name":  "CAIXA 11/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "30336341920",
+                                    "user_name":  "CARLOS GONZAGA ARAGAO",
+                                    "expense_count":  "3",
+                                    "total_value":  "7485.96"
+                                },
+                                {
+                                    "id":  9425237,
+                                    "name":  "CAIXA 09/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "30336341920",
+                                    "user_name":  "CARLOS GONZAGA ARAGAO",
+                                    "expense_count":  "1",
+                                    "total_value":  "7444"
+                                },
+                                {
+                                    "id":  10510391,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01696239478",
+                                    "user_name":  "JONAS CAVALCANTI DE OLIVEIRA",
+                                    "expense_count":  "2",
+                                    "total_value":  "5773.04"
+                                },
+                                {
+                                    "id":  9124094,
+                                    "name":  "CAIXA 12/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86016172049",
+                                    "user_name":  "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+                                    "expense_count":  "2",
+                                    "total_value":  "5629"
+                                },
+                                {
+                                    "id":  7697474,
+                                    "name":  "CAIXA 05/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86016172049",
+                                    "user_name":  "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+                                    "expense_count":  "2",
+                                    "total_value":  "4400"
+                                },
+                                {
+                                    "id":  9265813,
+                                    "name":  "CAIXA 12/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "84743603404",
+                                    "user_name":  "CLEBER RICARDO NASCIMENTO SILVA",
+                                    "expense_count":  "1",
+                                    "total_value":  "4390.47"
+                                },
+                                {
+                                    "id":  9425263,
+                                    "name":  "CAIXA 07/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "30336341920",
+                                    "user_name":  "CARLOS GONZAGA ARAGAO",
+                                    "expense_count":  "1",
+                                    "total_value":  "4072"
+                                },
+                                {
+                                    "id":  11043368,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "85798304000",
+                                    "user_name":  "GUILHERME DE MATTOS NASCIMENTO ROSA",
+                                    "expense_count":  "4",
+                                    "total_value":  "3886"
+                                },
+                                {
+                                    "id":  10467315,
+                                    "name":  "CAIXA/DESCONTO EM RESCISÃO 05/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "07024923610",
+                                    "user_name":  "RODRIGO CESAR DOS SANTOS",
+                                    "expense_count":  "1",
+                                    "total_value":  "3842.09"
+                                },
+                                {
+                                    "id":  9425328,
+                                    "name":  "CAIXA 06/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "30336341920",
+                                    "user_name":  "CARLOS GONZAGA ARAGAO",
+                                    "expense_count":  "1",
+                                    "total_value":  "3680"
+                                },
+                                {
+                                    "id":  7700622,
+                                    "name":  "CAIXA 06/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86016172049",
+                                    "user_name":  "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+                                    "expense_count":  "2",
+                                    "total_value":  "3317.2"
+                                },
+                                {
+                                    "id":  9357471,
+                                    "name":  "CAIXA 01/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "30336341920",
+                                    "user_name":  "CARLOS GONZAGA ARAGAO",
+                                    "expense_count":  "2",
+                                    "total_value":  "3300"
+                                },
+                                {
+                                    "id":  7979369,
+                                    "name":  "CAIXA 07/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86016172049",
+                                    "user_name":  "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+                                    "expense_count":  "2",
+                                    "total_value":  "3300"
+                                },
+                                {
+                                    "id":  7663899,
+                                    "name":  "CAIXA 06/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "05456615959",
+                                    "user_name":  "CLERITON BACILA DOS SANTOS",
+                                    "expense_count":  "4",
+                                    "total_value":  "2939.13"
+                                },
+                                {
+                                    "id":  11047088,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "80873367049",
+                                    "user_name":  "ARNALDO VARGAS NETO",
+                                    "expense_count":  "3",
+                                    "total_value":  "2926"
+                                },
+                                {
+                                    "id":  11042682,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01962886069",
+                                    "user_name":  "ENIOIR NOGUEIRA ANTUNES",
+                                    "expense_count":  "4",
+                                    "total_value":  "2910"
+                                },
+                                {
+                                    "id":  11081495,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01949569039",
+                                    "user_name":  "VALDOIR NOGUEIRA ANTUNES",
+                                    "expense_count":  "3",
+                                    "total_value":  "2880"
+                                },
+                                {
+                                    "id":  11081343,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "82753342091",
+                                    "user_name":  "RUDINEI MACHADO RODRIGUES",
+                                    "expense_count":  "3",
+                                    "total_value":  "2660"
+                                },
+                                {
+                                    "id":  11080905,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "60707461049",
+                                    "user_name":  "PEDRO LUIS PIRES DOS SANTOS",
+                                    "expense_count":  "3",
+                                    "total_value":  "2660"
+                                },
+                                {
+                                    "id":  11046514,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "75728923020",
+                                    "user_name":  "ALEX CARVALHO DOS SANTOS",
+                                    "expense_count":  "3",
+                                    "total_value":  "2660"
+                                },
+                                {
+                                    "id":  10978428,
+                                    "name":  "CAIXA 02/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "31118068807",
+                                    "user_name":  "EDJUNIO FERNANDES DE SANTANA",
+                                    "expense_count":  "3",
+                                    "total_value":  "2640"
+                                },
+                                {
+                                    "id":  11043838,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86880918034",
+                                    "user_name":  "MARCOS ALESSANDRO SILVA GOMES",
+                                    "expense_count":  "4",
+                                    "total_value":  "2300"
+                                },
+                                {
+                                    "id":  11081001,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86733028034",
+                                    "user_name":  "RIQUELME DE OLIVEIRA E SILVA",
+                                    "expense_count":  "3",
+                                    "total_value":  "2272"
+                                },
+                                {
+                                    "id":  9064383,
+                                    "name":  "CAIXA 12/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "36813601890",
+                                    "user_name":  "DOUGLAS ALEXANDRE BARBOSA",
+                                    "expense_count":  "4",
+                                    "total_value":  "2189.55"
+                                },
+                                {
+                                    "id":  11043671,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "84736305053",
+                                    "user_name":  "JONATA OLIVEIRA DA SILVA",
+                                    "expense_count":  "4",
+                                    "total_value":  "2160"
+                                },
+                                {
+                                    "id":  11018589,
+                                    "name":  "CAIXA 02/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02653570041",
+                                    "user_name":  "NELSON FILIPE MARTINS DA SILVA",
+                                    "expense_count":  "4",
+                                    "total_value":  "2156"
+                                },
+                                {
+                                    "id":  11080482,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86880918034",
+                                    "user_name":  "MARCOS ALESSANDRO SILVA GOMES",
+                                    "expense_count":  "1",
+                                    "total_value":  "2090"
+                                },
+                                {
+                                    "id":  10987311,
+                                    "name":  "CAIXA 06/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01553544692",
+                                    "user_name":  "DIEGO JOSE DE PAULO",
+                                    "expense_count":  "4",
+                                    "total_value":  "2068.28"
+                                },
+                                {
+                                    "id":  10718749,
+                                    "name":  "Desconto em folha rescisÃ£o",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "04025408325",
+                                    "user_name":  "NILSON RODRIGUES CARDOSO JUNIOR",
+                                    "expense_count":  "1",
+                                    "total_value":  "2030.95"
+                                },
+                                {
+                                    "id":  8019699,
+                                    "name":  "Caixa 07/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "10491624719",
+                                    "user_name":  "TIAGO DE OLIVEIRA PAIVA",
+                                    "expense_count":  "2",
+                                    "total_value":  "1970"
+                                },
+                                {
+                                    "id":  11046450,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02299450076",
+                                    "user_name":  "ALEKSANDER GONCALVES DE ALMEIDA",
+                                    "expense_count":  "4",
+                                    "total_value":  "1940"
+                                },
+                                {
+                                    "id":  10977814,
+                                    "name":  "CAIXA 02/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02299450076",
+                                    "user_name":  "ALEKSANDER GONCALVES DE ALMEIDA",
+                                    "expense_count":  "2",
+                                    "total_value":  "1920"
+                                },
+                                {
+                                    "id":  11043026,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02083958063",
+                                    "user_name":  "EVERTON REIS DO NASCIMENTO",
+                                    "expense_count":  "2",
+                                    "total_value":  "1920"
+                                },
+                                {
+                                    "id":  11080145,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "37634925004",
+                                    "user_name":  "IVON RAMOS MIRANDA",
+                                    "expense_count":  "2",
+                                    "total_value":  "1920"
+                                },
+                                {
+                                    "id":  9353926,
+                                    "name":  "CAIXA 01/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "06945595633",
+                                    "user_name":  "GLAUCIO GONCALVES DE OLIVEIRA",
+                                    "expense_count":  "1",
+                                    "total_value":  "1905.07"
+                                },
+                                {
+                                    "id":  7551743,
+                                    "name":  "CAIXA 05/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "05456615959",
+                                    "user_name":  "CLERITON BACILA DOS SANTOS",
+                                    "expense_count":  "1",
+                                    "total_value":  "1900"
+                                },
+                                {
+                                    "id":  11045397,
+                                    "name":  "CAIXA 03/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "82753342091",
+                                    "user_name":  "RUDINEI MACHADO RODRIGUES",
+                                    "expense_count":  "3",
+                                    "total_value":  "1876"
+                                },
+                                {
+                                    "id":  10606259,
+                                    "name":  "CAIXA 06/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02265549967",
+                                    "user_name":  "JULIO CESAR ALVES DA ROCHA",
+                                    "expense_count":  "1",
+                                    "total_value":  "1824"
+                                },
+                                {
+                                    "id":  8857682,
+                                    "name":  "CAIXA 10/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86016172049",
+                                    "user_name":  "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+                                    "expense_count":  "4",
+                                    "total_value":  "1800"
+                                },
+                                {
+                                    "id":  8043174,
+                                    "name":  "CAIXA 07/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01419704648",
+                                    "user_name":  "MICHEL RODRIGUES FIALHO",
+                                    "expense_count":  "4",
+                                    "total_value":  "1790"
+                                },
+                                {
+                                    "id":  10769926,
+                                    "name":  "CAIXA 06/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "01767960107",
+                                    "user_name":  "FLAVIO FERNANDES DOS REIS LIMA",
+                                    "expense_count":  "4",
+                                    "total_value":  "1785"
+                                },
+                                {
+                                    "id":  10265127,
+                                    "name":  "CAiXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "07646535630",
+                                    "user_name":  "HUGO ALEXANDRE DE SOUSA",
+                                    "expense_count":  "4",
+                                    "total_value":  "1785"
+                                },
+                                {
+                                    "id":  10582248,
+                                    "name":  "PIX VEXPENSES 05/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "22136444972",
+                                    "user_name":  "ILMAR FONTES VIEIRA",
+                                    "expense_count":  "3",
+                                    "total_value":  "1780"
+                                },
+                                {
+                                    "id":  10718617,
+                                    "name":  "Desconto de rescisÃ£o",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "00526143959",
+                                    "user_name":  "FABIO DIOGO BITTENCOURT",
+                                    "expense_count":  "1",
+                                    "total_value":  "1748.07"
+                                },
+                                {
+                                    "id":  9362287,
+                                    "name":  "Caixa 01/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "09428255947",
+                                    "user_name":  "JULIA SCHURHAUS PERETTI",
+                                    "expense_count":  "4",
+                                    "total_value":  "1738"
+                                },
+                                {
+                                    "id":  10626655,
+                                    "name":  "CAIXA 06/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "58021353287",
+                                    "user_name":  "GERSON ALMEIDA DE ANDRADE",
+                                    "expense_count":  "3",
+                                    "total_value":  "1716.01"
+                                },
+                                {
+                                    "id":  11018390,
+                                    "name":  "CAIXA 02/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "86880918034",
+                                    "user_name":  "MARCOS ALESSANDRO SILVA GOMES",
+                                    "expense_count":  "2",
+                                    "total_value":  "1688"
+                                },
+                                {
+                                    "id":  11080762,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "72747072053",
+                                    "user_name":  "PAULO OLDAIR CUNHA PINTO",
+                                    "expense_count":  "4",
+                                    "total_value":  "1640"
+                                },
+                                {
+                                    "id":  11080573,
+                                    "name":  "CAIXA 04/2026",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "02653570041",
+                                    "user_name":  "NELSON FILIPE MARTINS DA SILVA",
+                                    "expense_count":  "4",
+                                    "total_value":  "1640"
+                                },
+                                {
+                                    "id":  9217524,
+                                    "name":  "CAIXA 12/2025",
+                                    "status":  "APROVADO",
+                                    "user_cpf":  "33162718805",
+                                    "user_name":  "ANDRESA INDIRA SANTANA AGGIO",
+                                    "expense_count":  "4",
+                                    "total_value":  "1537.37"
+                                }
+                            ],
+    "enviado_count":  201
+}

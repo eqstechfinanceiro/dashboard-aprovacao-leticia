@@ -1,0 +1,73 @@
+Sheet names: ['1 QZ JUNHO', 'Planilha1', 'RETIRAR', 'STATUS CARTAO']
+
+=== Row 1 ===
+
+=== Row 2 ===
+
+=== Row 3 ===
+
+=== Row 4 ===
+  [13] (Col N) = 0.6
+
+=== Row 5 ===
+  [7] (Col H) = 0
+  [8] (Col I) = 9122.950000000006
+  [9] (Col J) = 1500
+  [10] (Col K) = 17.1
+  [11] (Col L) = 0
+  [12] (Col M) = -7640.050000000007
+  [13] (Col N) = 0
+  [14] (Col O) = 0
+
+=== Row 6 ===
+  [0] (Col A) = 'COLABORADOR'
+  [1] (Col B) = 'CPF'
+  [2] (Col C) = 'SITUAÇÃO'
+  [3] (Col D) = 'REGIONAL'
+  [4] (Col E) = 'CENTRO DE CUSTO'
+  [5] (Col F) = 'GESTOR'
+  [6] (Col G) = 'DIRETOR'
+  [7] (Col H) = 'SALDO REEMBOLSAR'
+  [8] (Col I) = 'SALDO FINAL'
+  [9] (Col J) = '1ª QZ'
+  [10] (Col K) = 'SALDO CARTAO'
+  [11] (Col L) = 'Adiantamento '
+  [12] (Col M) = 'CARGA PARCIAL'
+  [13] (Col N) = 'REEMBOLSO'
+  [14] (Col O) = 'Carga Final '
+  [15] (Col P) = 'obs'
+  [16] (Col Q) = 'STATUS DO CARTÃO'
+
+=== Row 7 ===
+  [0] (Col A) = 'ABNER ANDRADE CAVALCANTE'
+  [1] (Col B) = '02027745203'
+  [2] (Col C) = 'ATIVO'
+  [3] (Col D) = 'REGIONAL CO'
+  [4] (Col E) = 'CEF AM AC RR'
+  [5] (Col F) = 'ANGELICA SOARES'
+  [6] (Col G) = 'ROGERIO SCATAMBULO'
+  [7] (Col H) = 227.55000000013388
+  [8] (Col I) = 0
+  [9] (Col J) = 9840
+  [10] (Col K) = 5
+  [12] (Col M) = 9835
+  [13] (Col N) = 136.53000000008032
+  [14] (Col O) = 9948.775000000067
+  [16] (Col Q) = 'Cartão ativo'
+
+=== Row 8 ===
+  [0] (Col A) = 'ADAN LEONARDO SOUZA BATISTA'
+  [1] (Col B) = '01932662537'
+  [2] (Col C) = 'ATIVO'
+  [3] (Col D) = 'REGIONAL NE'
+  [4] (Col E) = 'TELEFONICA BA'
+  [5] (Col F) = 'GERSON OLIVEIRA'
+  [6] (Col G) = 'ROGERIO SCATAMBULO'
+  [7] (Col H) = 0
+  [8] (Col I) = 601.409999999998
+  [9] (Col J) = 1000
+  [10] (Col K) = 3
+  [12] (Col M) = 395.59000000000196
+  [13] (Col N) = 0
+  [14] (Col O) = 395.59000000000196
+  [16] (Col Q) = 'Cartão ativo'
