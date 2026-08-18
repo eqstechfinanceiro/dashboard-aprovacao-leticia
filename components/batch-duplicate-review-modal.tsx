@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { X, FileText, ExternalLink, AlertCircle, CheckCircle, XCircle, Loader2, ChevronLeft, ChevronRight, SkipForward, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -138,8 +138,43 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
   const [skippedSet, setSkippedSet] = useState<Set<number>>(new Set());
   const [receiptFallbacks, setReceiptFallbacks] = useState<Record<number, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [filterMode, setFilterMode] = useState<'all' | 'different' | 'same'>('all');
+  const [only2026, setOnly2026] = useState(true);
 
-  // Load all pairs when modal opens
+  const visibleIndices = useMemo(() => {
+    return pairs
+      .map((_, i) => i)
+      .filter(i => {
+        if (filterMode === 'different') return !pairs[i].duplicate.same_report;
+        if (filterMode === 'same') return pairs[i].duplicate.same_report;
+        return true;
+      });
+  }, [pairs, filterMode]);
+
+  const currentVisiblePos = visibleIndices.indexOf(currentIdx);
+  const totalVisible = visibleIndices.length;
+
+  const goNext = useCallback(() => {
+    const pos = visibleIndices.indexOf(currentIdx);
+    if (pos < visibleIndices.length - 1) {
+      setCurrentIdx(visibleIndices[pos + 1]);
+    }
+  }, [visibleIndices, currentIdx]);
+
+  const goPrev = useCallback(() => {
+    const pos = visibleIndices.indexOf(currentIdx);
+    if (pos > 0) {
+      setCurrentIdx(visibleIndices[pos - 1]);
+    }
+  }, [visibleIndices, currentIdx]);
+
+  useEffect(() => {
+    if (visibleIndices.length > 0 && !visibleIndices.includes(currentIdx)) {
+      setCurrentIdx(visibleIndices[0]);
+    }
+  }, [filterMode, visibleIndices]);
+
+  // Load all pairs when modal opens or year filter changes
   useEffect(() => {
     if (!open) return;
     setLoading(true);
@@ -152,7 +187,10 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
 
     (async () => {
       try {
-        const resp = await fetch('/api/aprovacao-dinamica/batch-duplicates');
+        const url = only2026
+          ? '/api/aprovacao-dinamica/batch-duplicates?since=2026'
+          : '/api/aprovacao-dinamica/batch-duplicates?since=2020';
+        const resp = await fetch(url);
         if (!resp.ok) throw new Error('Failed to fetch duplicates');
         const json = await resp.json();
         const fetchedPairs: BatchDuplicatePair[] = (json?.data?.pairs || []).map((p: any) => ({
@@ -166,7 +204,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
         setLoading(false);
       }
     })();
-  }, [open]);
+  }, [open, only2026]);
 
   // Fetch receipt fallbacks for current pair
   useEffect(() => {
@@ -190,16 +228,8 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
           const expenses = json?.data?.expenses || [];
           for (const exp of missing) {
             if (exp.report_id !== rid) continue;
-            const expDate = exp.date ? exp.date.split('T')[0] : '';
-            const match = expenses.find((e: any) => {
-              if (Number(e.value) !== Number(exp.value)) return false;
-              if (e.title !== exp.title) return false;
-              if (!e.receipt_url) return false;
-              const eDate = e.date ? e.date.split(' ')[0] : '';
-              if (expDate && eDate && eDate !== expDate) return false;
-              return true;
-            });
-            if (match) results[exp.expense_id] = match.receipt_url;
+            const match = expenses.find((e: any) => e.id === exp.expense_id);
+            if (match?.receipt_url) results[exp.expense_id] = match.receipt_url;
           }
         } catch {}
       }
@@ -217,17 +247,16 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
     onDismiss(pair.original.expense_id, pair.duplicate.expense_id, isDuplicate);
     setDecidedSet(prev => new Set(prev).add(currentIdx));
     // Auto-advance after decision
-    if (currentIdx < pairs.length - 1) {
-      setCurrentIdx(currentIdx + 1);
-    }
-  }, [pairs, currentIdx, decidedSet, onDismiss]);
+    goNext();
+  }, [pairs, currentIdx, decidedSet, onDismiss, goNext]);
 
   const handleSkip = useCallback(() => {
-    if (currentIdx < pairs.length - 1) {
+    const pos = visibleIndices.indexOf(currentIdx);
+    if (pos < visibleIndices.length - 1) {
       setSkippedSet(prev => new Set(prev).add(currentIdx));
-      setCurrentIdx(currentIdx + 1);
+      goNext();
     }
-  }, [currentIdx, pairs.length]);
+  }, [currentIdx, visibleIndices, goNext]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -235,10 +264,10 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        if (currentIdx < pairs.length - 1) setCurrentIdx(currentIdx + 1);
+        goNext();
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        if (currentIdx > 0) setCurrentIdx(currentIdx - 1);
+        goPrev();
       } else if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         if (!decidedSet.has(currentIdx)) handleDecision(true);
@@ -255,13 +284,13 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [open, loading, pairs, currentIdx, decidedSet, handleDecision, handleSkip, onClose]);
+  }, [open, loading, pairs, currentIdx, decidedSet, handleDecision, handleSkip, goNext, goPrev, onClose]);
 
   if (!open) return null;
 
-  const decidedCount = decidedSet.size;
-  const skippedCount = skippedSet.size;
-  const remaining = pairs.length - decidedCount - skippedCount;
+  const decidedCount = visibleIndices.filter(i => decidedSet.has(i)).length;
+  const skippedCount = visibleIndices.filter(i => skippedSet.has(i)).length;
+  const remaining = totalVisible - decidedCount - skippedCount;
   const currentPair = pairs[currentIdx];
   const isDecided = decidedSet.has(currentIdx);
   const isSkipped = skippedSet.has(currentIdx);
@@ -276,7 +305,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
             <h2 className="text-lg font-semibold text-gray-900">Revisão em Lote de Duplicatas</h2>
             {pairs.length > 0 && (
               <Badge className="bg-blue-100 text-blue-700">
-                {currentIdx + 1} / {pairs.length}
+                {currentVisiblePos + 1} / {totalVisible}
               </Badge>
             )}
           </div>
@@ -285,15 +314,56 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
           </button>
         </div>
 
+        {/* Filter bar */}
+        {pairs.length > 0 && (
+          <div className="flex items-center gap-2 border-b border-gray-100 bg-gray-50 px-6 py-2">
+            <span className="text-xs text-gray-500">Filtro:</span>
+            <Button
+              size="sm"
+              variant={filterMode === 'all' ? 'default' : 'outline'}
+              onClick={() => setFilterMode('all')}
+              className="h-7 text-xs"
+            >
+              Todas
+            </Button>
+            <Button
+              size="sm"
+              variant={filterMode === 'different' ? 'default' : 'outline'}
+              onClick={() => setFilterMode('different')}
+              className="h-7 text-xs"
+            >
+              Relatórios diferentes
+            </Button>
+            <Button
+              size="sm"
+              variant={filterMode === 'same' ? 'default' : 'outline'}
+              onClick={() => setFilterMode('same')}
+              className="h-7 text-xs"
+            >
+              Mesmo relatório
+            </Button>
+            <div className="ml-2 flex items-center gap-1">
+              <input
+                id="only2026"
+                type="checkbox"
+                checked={only2026}
+                onChange={e => setOnly2026(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-gray-300"
+              />
+              <label htmlFor="only2026" className="text-xs text-gray-600 cursor-pointer select-none">Apenas 2026+</label>
+            </div>
+          </div>
+        )}
+
         {/* Progress bar */}
         {pairs.length > 0 && (
           <div className="border-b border-gray-100 bg-gray-50 px-6 py-2">
             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
               <span>Decididas: <strong className="text-green-600">{decidedCount}</strong> | Puladas: <strong className="text-gray-500">{skippedCount}</strong> | Restantes: <strong className="text-orange-600">{remaining}</strong></span>
-              <span>{Math.round((decidedCount / pairs.length) * 100)}% concluído</span>
+              <span>{totalVisible > 0 ? Math.round((decidedCount / totalVisible) * 100) : 0}% concluído</span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
-              <div className="h-full rounded-full bg-green-500 transition-all duration-300" style={{ width: `${(decidedCount / pairs.length) * 100}%` }} />
+              <div className="h-full rounded-full bg-green-500 transition-all duration-300" style={{ width: `${totalVisible > 0 ? (decidedCount / totalVisible) * 100 : 0}%` }} />
             </div>
           </div>
         )}
@@ -345,7 +415,10 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
               {/* Side-by-side comparison */}
               <div className="flex gap-3">
                 <MiniExpenseDetail
-                  expense={currentPair.original}
+                  expense={{
+                    ...currentPair.original,
+                    receipt_url: currentPair.original.receipt_url || receiptFallbacks[currentPair.original.expense_id] || null,
+                  }}
                   label="Original"
                   highlight
                 />
@@ -418,7 +491,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                     size="sm"
                     className="border-gray-300 text-gray-600 hover:bg-gray-100"
                     onClick={handleSkip}
-                    disabled={currentIdx >= pairs.length - 1}
+                    disabled={currentVisiblePos >= totalVisible - 1}
                   >
                     <SkipForward className="h-4 w-4" />
                     Pular
@@ -426,10 +499,10 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                 </>
               )}
               <div className="mx-1 h-6 w-px bg-gray-200" />
-              <Button variant="outline" size="sm" onClick={() => setCurrentIdx(i => Math.max(0, i - 1))} disabled={currentIdx === 0}>
+              <Button variant="outline" size="sm" onClick={goPrev} disabled={currentVisiblePos === 0}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setCurrentIdx(i => Math.min(pairs.length - 1, i + 1))} disabled={currentIdx >= pairs.length - 1}>
+              <Button variant="outline" size="sm" onClick={goNext} disabled={currentVisiblePos >= totalVisible - 1}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
               <Button variant="outline" size="sm" onClick={onClose}>

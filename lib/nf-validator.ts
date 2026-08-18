@@ -586,3 +586,128 @@ export async function getBatchDuplicates(
 
   return pairs;
 }
+
+export async function getBatchDuplicatesSince(
+  sinceDate: string
+): Promise<BatchDuplicatePair[]> {
+  if (!sql) return [];
+
+  // Find duplicate groups: expenses with same (user_cpf, value, date) from 2026+
+  const duplicateGroups = await sql`
+    SELECT pr.user_cpf, pe.value, pe.date, array_agg(pe.id ORDER BY pe.id) as expense_ids
+    FROM prestacao_expenses pe
+    JOIN prestacao_reports pr ON pe.report_id = pr.id
+    WHERE pe.date >= ${sinceDate}
+      AND pr.user_cpf IS NOT NULL AND pr.user_cpf != ''
+      AND pe.value IS NOT NULL
+      AND pe.date IS NOT NULL
+    GROUP BY pr.user_cpf, pe.value, pe.date
+    HAVING COUNT(*) > 1
+  `;
+
+  if ((duplicateGroups as any[]).length === 0) return [];
+
+  // Collect all expense IDs involved in duplicates
+  const allExpIds: number[] = [];
+  for (const g of duplicateGroups as any[]) {
+    allExpIds.push(...g.expense_ids);
+  }
+
+  // Fetch full details for all involved expenses
+  const allRows = await sql`
+    SELECT pe.id, pe.report_id, pe.value, pe.date, pe.description,
+      pe.raw_data,
+      pr.name as report_name, pr.status as report_status,
+      pr.user_cpf, pr.user_name, pr.id as report_id_ref
+    FROM prestacao_expenses pe
+    JOIN prestacao_reports pr ON pe.report_id = pr.id
+    WHERE pe.id = ANY(${allExpIds})
+  `;
+
+  const expMap = new Map<number, any>();
+  for (const row of allRows as any[]) {
+    expMap.set(row.id, row);
+  }
+
+  // Fetch dismissals for all involved expense IDs
+  let dismissalSet = new Set<string>();
+  try {
+    await ensureDismissalsTable();
+    const dismissals = await sql`
+      SELECT expense_id, duplicate_expense_id
+      FROM nf_duplicate_dismissals
+      WHERE expense_id = ANY(${allExpIds})
+         OR duplicate_expense_id = ANY(${allExpIds})
+    `;
+    for (const d of dismissals as any[]) {
+      dismissalSet.add(`${d.expense_id}|${d.duplicate_expense_id}`);
+      dismissalSet.add(`${d.duplicate_expense_id}|${d.expense_id}`);
+    }
+  } catch (e) {
+    console.error('[Batch Duplicates] Error fetching dismissals:', e);
+  }
+
+  const pairs: BatchDuplicatePair[] = [];
+  const seenPairs = new Set<string>();
+
+  for (const g of duplicateGroups as any[]) {
+    const ids: number[] = g.expense_ids;
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const a = expMap.get(ids[i]);
+        const b = expMap.get(ids[j]);
+        if (!a || !b) continue;
+
+        const pairKey = `${Math.min(a.id, b.id)}|${Math.max(a.id, b.id)}`;
+        if (seenPairs.has(pairKey) || dismissalSet.has(pairKey)) continue;
+        seenPairs.add(pairKey);
+
+        const aRaw = a.raw_data;
+        const bRaw = b.raw_data;
+
+        const matchFields: string[] = ['value', 'date', 'user'];
+        const aTitle = (a.description || '').trim().toLowerCase();
+        const bTitle = (b.description || '').trim().toLowerCase();
+        if (aTitle && bTitle && aTitle === bTitle) matchFields.push('title');
+
+        pairs.push({
+          original: {
+            expense_id: a.id,
+            title: a.description || '',
+            value: Number(a.value),
+            date: a.date ? new Date(a.date).toISOString().split('T')[0] : '',
+            observation: aRaw?.observation || null,
+            receipt_url: aRaw?.reicept_url || aRaw?.receipt_url || null,
+            expense_type: aRaw?.expense_type?.data?.description || aRaw?.expense_type?.description || null,
+            costs_center: aRaw?.costs_center?.data?.name || aRaw?.costs_center?.name || null,
+            report_name: a.report_name || '',
+            report_id: a.report_id_ref,
+            user_name: a.user_name || '',
+          },
+          duplicate: {
+            expense_id: b.id,
+            report_id: b.report_id_ref,
+            report_name: b.report_name || '',
+            report_status: b.report_status || '',
+            user_name: b.user_name || '',
+            title: b.description || '',
+            value: Number(b.value),
+            date: b.date ? new Date(b.date).toISOString().split('T')[0] : '',
+            same_report: a.report_id_ref === b.report_id_ref,
+            match_fields: matchFields,
+            receipt_url: bRaw?.reicept_url || bRaw?.receipt_url || null,
+            observation: bRaw?.observation || null,
+            expense_type: bRaw?.expense_type?.data?.description || bRaw?.expense_type?.description || null,
+            costs_center: bRaw?.costs_center?.data?.name || bRaw?.costs_center?.name || null,
+            dismissed: false,
+            is_duplicate: false,
+            dismissed_by: null,
+            dismissed_at: null,
+          },
+        });
+      }
+    }
+  }
+
+  return pairs;
+}

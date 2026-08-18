@@ -143,9 +143,12 @@ export async function POST(request: NextRequest) {
         // 3. Find differences
         const toDelete: number[] = [...dbIds].filter((id: number) => !apiIds.has(id));
         const toInsert = apiExpenses.filter((e: any) => !dbIds.has(e.id));
+        const dbReceipts: Map<number, string> = new Map(dbExpenses.map((e: any) => [e.id, e.raw_data?.reicept_url || '']));
         const toUpdate = apiExpenses.filter((e: any) => {
           if (!dbIds.has(e.id)) return false;
-          return Math.abs(Number(e.value) - (dbVals.get(e.id) || 0)) > 0.01;
+          if (Math.abs(Number(e.value) - (dbVals.get(e.id) || 0)) > 0.01) return true;
+          if ((e.reicept_url || '') !== (dbReceipts.get(e.id) || '')) return true;
+          return false;
         });
 
         const hasChanges = toDelete.length > 0 || toInsert.length > 0 || toUpdate.length > 0;
