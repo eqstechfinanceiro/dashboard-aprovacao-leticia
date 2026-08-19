@@ -934,6 +934,7 @@ export default function AprovacaoDinamicaPage() {
         onClose={() => setBatchDupModalOpen(false)}
         onDismiss={handleBatchDismissDuplicate}
         dismissedBy={user?.name}
+        currentUserName={user?.name}
       />
 
       {/* Header */}
@@ -972,7 +973,7 @@ export default function AprovacaoDinamicaPage() {
             className="border-orange-300 text-orange-700 hover:bg-orange-100"
           >
             <Copy className="h-4 w-4" />
-            Revisar Duplicatas
+            Revisar Duplicadas
           </Button>
           <Button
             onClick={auditAllReports}
@@ -1276,7 +1277,7 @@ export default function AprovacaoDinamicaPage() {
                           {vs.has_duplicates && (
                             <Badge className="bg-red-100 text-red-800 text-xs" title="Despesas duplicadas detectadas">
                               <AlertCircle className="mr-1 h-3 w-3" />
-                              NF: duplicatas
+                              NF: duplicadas
                             </Badge>
                           )}
                           {vs.has_date_mismatch && (
@@ -1422,7 +1423,7 @@ export default function AprovacaoDinamicaPage() {
                           }}
                         >
                           <AlertTriangle className="h-4 w-4" />
-                          Analisar duplicatas
+                          Analisar duplicadas
                           {dupCount > 0 && (
                             <Badge className="ml-1 bg-red-500 text-white text-xs">{dupCount}</Badge>
                           )}

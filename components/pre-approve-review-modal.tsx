@@ -199,7 +199,7 @@ export function PreApproveReviewModal({
           {(withDuplicates > 0 || hasValidationDuplicates) && (
             <span className="flex items-center gap-1 text-red-700">
               <AlertTriangle className="h-4 w-4" />
-              {withDuplicates || 0} com duplicata NF
+              {withDuplicates || 0} com duplicada NF
             </span>
           )}
           {(withDateMismatch > 0 || hasValidationDateMismatch) && (
@@ -258,7 +258,7 @@ export function PreApproveReviewModal({
                         {expense.validation?.has_duplicate && (
                           <Badge className="bg-red-100 text-red-700 text-xs">
                             <AlertTriangle className="mr-1 h-3 w-3" />
-                            Duplicata NF
+                            Duplicada NF
                           </Badge>
                         )}
                         {expense.validation?.has_date_mismatch && (
@@ -369,7 +369,7 @@ export function PreApproveReviewModal({
                       {/* NF duplicates */}
                       {expense.validation?.has_duplicate && expense.validation.duplicates.length > 0 && (
                         <div className="mt-2 rounded border border-red-200 bg-red-50 p-2">
-                          <p className="text-xs font-medium text-red-800">NF — Possíveis duplicatas:</p>
+                          <p className="text-xs font-medium text-red-800">NF — Possíveis duplicadas:</p>
                           {expense.validation.duplicates.map((dup, i) => (
                             <div key={i} className="mt-1 text-xs text-red-700">
                               <strong>{dup.title}</strong> — R$ {dup.value.toFixed(2)} — {dup.date}
@@ -440,7 +440,7 @@ export function PreApproveReviewModal({
                 <AlertTriangle className="h-5 w-5 flex-shrink-0 text-red-600 mt-0.5" />
                 <div className="flex-1">
                   <p className="text-sm font-medium text-red-800">
-                    Validação NF detectou duplicatas, datas divergentes ou total divergente neste relatório.
+                    Validação NF detectou duplicadas, datas divergentes ou total divergente neste relatório.
                   </p>
                   <p className="text-xs text-red-700 mt-1">
                     Revise as despesas marcadas acima antes de aprovar.

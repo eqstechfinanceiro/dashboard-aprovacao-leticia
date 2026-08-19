@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { X, FileText, ExternalLink, AlertCircle, CheckCircle, XCircle, Loader2, ChevronLeft, ChevronRight, SkipForward, Copy } from 'lucide-react';
+import { X, FileText, ExternalLink, AlertCircle, CheckCircle, XCircle, Loader2, ChevronLeft, ChevronRight, SkipForward, Copy, Mail, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { ComparisonExpense } from './duplicate-comparison-modal';
@@ -16,6 +16,7 @@ interface BatchDuplicateReviewModalProps {
   onClose: () => void;
   onDismiss: (originalExpenseId: number, duplicateExpenseId: number, isDuplicate: boolean) => Promise<void> | void;
   dismissedBy?: string;
+  currentUserName?: string;
 }
 
 function ReceiptViewer({ url, label }: { url: string | null; label: string }) {
@@ -98,6 +99,15 @@ function MiniExpenseDetail({ expense, label, highlight }: { expense: ComparisonE
         <span className="text-xs text-gray-400">#{expense.expense_id}</span>
       </div>
       <ReceiptViewer url={expense.receipt_url} label={label} />
+      <a
+        href={`https://amp.vexpenses.com/relatorios/${expense.report_id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-100"
+      >
+        <ExternalLink className="h-3 w-3" />
+        Abrir relatório #{expense.report_id}
+      </a>
       <div className="mt-2 space-y-1">
         <div className="flex justify-between text-xs">
           <span className="text-gray-500">Título</span>
@@ -130,7 +140,7 @@ function MiniExpenseDetail({ expense, label, highlight }: { expense: ComparisonE
   );
 }
 
-export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDuplicateReviewModalProps) {
+export function BatchDuplicateReviewModal({ open, onClose, onDismiss, dismissedBy, currentUserName }: BatchDuplicateReviewModalProps) {
   const [loading, setLoading] = useState(false);
   const [pairs, setPairs] = useState<BatchDuplicatePair[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
@@ -140,6 +150,26 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
   const [error, setError] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'different' | 'same'>('all');
   const [only2026, setOnly2026] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<string>('all');
+  const [emailText, setEmailText] = useState<string | null>(null);
+  const [emailCopied, setEmailCopied] = useState(false);
+
+  const userStats = useMemo(() => {
+    const map = new Map<string, { count: number; total: number }>();
+    for (let i = 0; i < pairs.length; i++) {
+      if (filterMode === 'different' && pairs[i].duplicate.same_report) continue;
+      if (filterMode === 'same' && !pairs[i].duplicate.same_report) continue;
+      const pair = pairs[i];
+      const name = pair.duplicate.user_name || pair.original.user_name || 'Desconhecido';
+      const entry = map.get(name) || { count: 0, total: 0 };
+      entry.count += 1;
+      entry.total += pair.duplicate.value;
+      map.set(name, entry);
+    }
+    return Array.from(map.entries())
+      .map(([name, stats]) => ({ name, ...stats }))
+      .sort((a, b) => b.total - a.total);
+  }, [pairs, filterMode]);
 
   const visibleIndices = useMemo(() => {
     return pairs
@@ -148,8 +178,13 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
         if (filterMode === 'different') return !pairs[i].duplicate.same_report;
         if (filterMode === 'same') return pairs[i].duplicate.same_report;
         return true;
+      })
+      .filter(i => {
+        if (selectedUser === 'all') return true;
+        const userName = pairs[i].duplicate.user_name || pairs[i].original.user_name || 'Desconhecido';
+        return userName === selectedUser;
       });
-  }, [pairs, filterMode]);
+  }, [pairs, filterMode, selectedUser]);
 
   const currentVisiblePos = visibleIndices.indexOf(currentIdx);
   const totalVisible = visibleIndices.length;
@@ -172,7 +207,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
     if (visibleIndices.length > 0 && !visibleIndices.includes(currentIdx)) {
       setCurrentIdx(visibleIndices[0]);
     }
-  }, [filterMode, visibleIndices]);
+  }, [filterMode, selectedUser, visibleIndices]);
 
   // Load all pairs when modal opens or year filter changes
   useEffect(() => {
@@ -250,6 +285,33 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
     goNext();
   }, [pairs, currentIdx, decidedSet, onDismiss, goNext]);
 
+  const generateEmailText = useCallback(() => {
+    const pair = pairs[currentIdx];
+    if (!pair) return;
+    const userName = pair.duplicate.user_name || pair.original.user_name || 'Colaborador';
+    const reportName = pair.original.report_name || '';
+    const expenseValue = formatCurrency(pair.duplicate.value);
+    const signedBy = currentUserName || dismissedBy || 'Equipe EQS';
+    const text = `Olá! Prezado(a) ${userName},
+
+Seu relatório ${reportName} foi reprovado devido à despesa(s) duplicada(s).
+Favor excluir a despesa no valor de ${expenseValue} da Vexpenses e reabrir o relatório corretamente.
+
+Obrigado!
+
+Att, ${signedBy}`;
+    setEmailText(text);
+    setEmailCopied(false);
+  }, [pairs, currentIdx, currentUserName, dismissedBy]);
+
+  const copyEmailText = useCallback(() => {
+    if (!emailText) return;
+    navigator.clipboard.writeText(emailText).then(() => {
+      setEmailCopied(true);
+      setTimeout(() => setEmailCopied(false), 2000);
+    });
+  }, [emailText]);
+
   const handleSkip = useCallback(() => {
     const pos = visibleIndices.indexOf(currentIdx);
     if (pos < visibleIndices.length - 1) {
@@ -302,7 +364,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-3">
           <div className="flex items-center gap-2">
             <Copy className="h-5 w-5 text-orange-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Revisão em Lote de Duplicatas</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Revisão em Lote de Duplicadas</h2>
             {pairs.length > 0 && (
               <Badge className="bg-blue-100 text-blue-700">
                 {currentVisiblePos + 1} / {totalVisible}
@@ -342,6 +404,18 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
             >
               Mesmo relatório
             </Button>
+            <select
+              value={selectedUser}
+              onChange={e => setSelectedUser(e.target.value)}
+              className="h-7 rounded border border-gray-300 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="all">Todos os usuários ({userStats.reduce((s, u) => s + u.count, 0)})</option>
+              {userStats.map(u => (
+                <option key={u.name} value={u.name}>
+                  {u.name} — {u.count} duplicada(s) — {formatCurrency(u.total)}
+                </option>
+              ))}
+            </select>
             <div className="ml-2 flex items-center gap-1">
               <input
                 id="only2026"
@@ -374,7 +448,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
             <div className="flex h-64 items-center justify-center">
               <div className="text-center">
                 <Loader2 className="mx-auto h-10 w-10 animate-spin text-blue-500" />
-                <p className="mt-2 text-sm text-gray-500">Carregando todas as duplicatas...</p>
+                <p className="mt-2 text-sm text-gray-500">Carregando todas as duplicadas...</p>
               </div>
             </div>
           ) : error ? (
@@ -388,7 +462,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
             <div className="flex h-64 items-center justify-center">
               <div className="text-center">
                 <CheckCircle className="mx-auto h-10 w-10 text-green-400" />
-                <p className="mt-2 text-sm text-gray-600">Nenhuma duplicata pendente encontrada!</p>
+                <p className="mt-2 text-sm text-gray-600">Nenhuma duplicada pendente encontrada!</p>
               </div>
             </div>
           ) : currentPair ? (
@@ -427,7 +501,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                     ...currentPair.duplicate,
                     receipt_url: currentPair.duplicate.receipt_url || receiptFallbacks[currentPair.duplicate.expense_id] || null,
                   }}
-                  label="Duplicata"
+                  label="Duplicada"
                 />
               </div>
 
@@ -439,7 +513,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                     <p className="text-base font-semibold text-gray-900">{formatCurrency(currentPair.original.value)}</p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Duplicata</p>
+                    <p className="text-xs text-gray-500">Duplicada</p>
                     <p className="text-base font-semibold text-gray-900">{formatCurrency(currentPair.duplicate.value)}</p>
                   </div>
                   <div>
@@ -458,7 +532,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
         {!loading && pairs.length > 0 && (
           <div className="flex items-center justify-between border-t border-gray-200 px-6 py-3">
             <div className="text-xs text-gray-400 hidden sm:block">
-              Atalhos: <kbd className="px-1 bg-gray-100 rounded">D</kbd> = duplicata | <kbd className="px-1 bg-gray-100 rounded">N</kbd> = não | <kbd className="px-1 bg-gray-100 rounded">S</kbd> = pular | <kbd className="px-1 bg-gray-100 rounded">←→</kbd> = navegar
+              Atalhos: <kbd className="px-1 bg-gray-100 rounded">D</kbd> = duplicada | <kbd className="px-1 bg-gray-100 rounded">N</kbd> = não | <kbd className="px-1 bg-gray-100 rounded">S</kbd> = pular | <kbd className="px-1 bg-gray-100 rounded">←→</kbd> = navegar
             </div>
             <div className="flex items-center gap-2">
               {isDecided ? (
@@ -475,7 +549,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                     onClick={() => handleDecision(true)}
                   >
                     <CheckCircle className="h-4 w-4" />
-                    É duplicata
+                    É duplicada
                   </Button>
                   <Button
                     variant="outline"
@@ -484,7 +558,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                     onClick={() => handleDecision(false)}
                   >
                     <XCircle className="h-4 w-4" />
-                    Não é duplicata
+                    Não é duplicada
                   </Button>
                   <Button
                     variant="outline"
@@ -509,6 +583,35 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss }: BatchDup
                 Fechar
               </Button>
             </div>
+          </div>
+        )}
+
+        {/* Email text section */}
+        {!loading && pairs.length > 0 && currentPair && (
+          <div className="border-t border-gray-200 px-6 py-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                onClick={generateEmailText}
+              >
+                <Mail className="h-4 w-4" />
+                Gerar texto de e-mail
+              </Button>
+            </div>
+            {emailText && (
+              <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans pr-8">{emailText}</pre>
+                <button
+                  onClick={copyEmailText}
+                  className="absolute right-2 top-2 rounded-md bg-white/90 px-2 py-1 text-xs text-gray-600 shadow-sm hover:bg-white"
+                  title="Copiar"
+                >
+                  {emailCopied ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Clipboard className="h-4 w-4" />}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

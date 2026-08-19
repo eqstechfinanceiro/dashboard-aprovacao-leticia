@@ -272,7 +272,7 @@ export function DuplicateComparisonModal({
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-3">
           <div className="flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-red-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Comparação de Possível Duplicata</h2>
+            <h2 className="text-lg font-semibold text-gray-900">Comparação de Possível Duplicada</h2>
             {hasMultiple && (
               <Badge className="bg-blue-100 text-blue-700">
                 {currentIdx + 1} de {duplicateExpenses.length}
@@ -312,7 +312,7 @@ export function DuplicateComparisonModal({
             />
             <ExpenseDetail
               expense={{ ...currentDup, receipt_url: currentDup.receipt_url || receiptFallbacks[currentDup.expense_id] || null }}
-              label={`Duplicata Suspeita ${hasMultiple ? `(${currentIdx + 1}/${duplicateExpenses.length})` : ''}`}
+              label={`Duplicada Suspeita ${hasMultiple ? `(${currentIdx + 1}/${duplicateExpenses.length})` : ''}`}
             />
           </div>
 
@@ -324,7 +324,7 @@ export function DuplicateComparisonModal({
                 <p className="text-lg font-semibold text-gray-900">{formatCurrency(originalExpense.value)}</p>
               </div>
               <div>
-                <p className="text-xs text-gray-500">Duplicata</p>
+                <p className="text-xs text-gray-500">Duplicada</p>
                 <p className="text-lg font-semibold text-gray-900">{formatCurrency(currentDup.value)}</p>
               </div>
               <div>
@@ -369,7 +369,7 @@ export function DuplicateComparisonModal({
                       }}
                     >
                       {dismissing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                      É duplicata
+                      É duplicada
                     </Button>
                     <Button
                       variant="outline"
@@ -388,7 +388,7 @@ export function DuplicateComparisonModal({
                       }}
                     >
                       {dismissing ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
-                      Não é duplicata
+                      Não é duplicada
                     </Button>
                   </>
                 )}
