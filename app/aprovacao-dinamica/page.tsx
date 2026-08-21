@@ -34,6 +34,7 @@ import {
   Copy,
   ScrollText,
   ExternalLink,
+  CreditCard,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
@@ -43,6 +44,8 @@ import type { ReportValidationSummary } from '@/lib/nf-validator';
 import { DuplicateComparisonModal, type ComparisonExpense } from '@/components/duplicate-comparison-modal';
 import { BatchDuplicateReviewModal } from '@/components/batch-duplicate-review-modal';
 import { DismissLogsModal } from '@/components/dismiss-logs-modal';
+import { FaturaUploadModal } from '@/components/fatura-upload-modal';
+import type { FaturaValidationRecord } from '@/lib/fatura-db';
 
 interface ReportApproval {
   approver_name: string;
@@ -276,6 +279,8 @@ export default function AprovacaoDinamicaPage() {
   const [rejectingExpense, setRejectingExpense] = useState<string | null>(null);
   const [rejectObservation, setRejectObservation] = useState<Record<string, string>>({});
   const [rejectingReport, setRejectingReport] = useState<number | null>(null);
+  const [faturaModalReport, setFaturaModalReport] = useState<number | null>(null);
+  const [faturaValidations, setFaturaValidations] = useState<Record<number, Record<number, FaturaValidationRecord>>>({});
 
   useEffect(() => {
     setVisibleCount(30);
@@ -456,6 +461,21 @@ export default function AprovacaoDinamicaPage() {
             ...prev,
             [reportId]: { done: savedData.data.expenses.length, total: data.data.expenses.length },
           }));
+        }
+      }
+
+      const faturaRes = await fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${reportId}`);
+      if (faturaRes.ok) {
+        const faturaData = await faturaRes.json();
+        if (faturaData.data && Array.isArray(faturaData.data)) {
+          const vMap: Record<number, FaturaValidationRecord> = {};
+          for (const v of faturaData.data as FaturaValidationRecord[]) {
+            const existing = vMap[v.expense_id];
+            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
+              vMap[v.expense_id] = v;
+            }
+          }
+          setFaturaValidations(prev => ({ ...prev, [reportId]: vMap }));
         }
       }
     } catch (err) {
@@ -1003,6 +1023,33 @@ export default function AprovacaoDinamicaPage() {
         onClose={() => setLogsModalOpen(false)}
       />
 
+      <FaturaUploadModal
+        open={faturaModalReport !== null}
+        onClose={() => setFaturaModalReport(null)}
+        reportId={faturaModalReport || 0}
+        reportDescription={reports.find(r => r.id === faturaModalReport)?.description || ''}
+        validatedBy={user?.name || 'Sistema'}
+        onValidationComplete={() => {
+          if (faturaModalReport) {
+            fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${faturaModalReport}`)
+              .then(res => res.json())
+              .then(data => {
+                if (data.data && Array.isArray(data.data)) {
+                  const vMap: Record<number, FaturaValidationRecord> = {};
+                  for (const v of data.data as FaturaValidationRecord[]) {
+                    const existing = vMap[v.expense_id];
+                    if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
+                      vMap[v.expense_id] = v;
+                    }
+                  }
+                  setFaturaValidations(prev => ({ ...prev, [faturaModalReport]: vMap }));
+                }
+              })
+              .catch(err => console.error('Error refreshing fatura validations:', err));
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -1521,6 +1568,15 @@ export default function AprovacaoDinamicaPage() {
                       )}
                       Auditar Tudo
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                      onClick={() => setFaturaModalReport(report.id)}
+                    >
+                      <CreditCard className="h-4 w-4" />
+                      Validar Fatura
+                    </Button>
                     <a
                       href={`https://amp.vexpenses.com/relatorios/${report.id}`}
                       target="_blank"
@@ -1967,17 +2023,46 @@ export default function AprovacaoDinamicaPage() {
                                 </div>
                               </div>
 
-                              {expAudit && (
-                                <div className="flex flex-col items-end gap-1">
+                              <div className="flex flex-col items-end gap-1">
+                                {(() => {
+                                  const fatura = faturaValidations[report.id]?.[expense.expense_id];
+                                  if (!fatura) return null;
+                                  if (fatura.status === 'VALIDATED') {
+                                    return (
+                                      <div className="flex items-center gap-1 rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700" title={`Validado contra ${fatura.fatura_filename} em ${fatura.validated_at ? new Date(fatura.validated_at).toLocaleString('pt-BR') : '-'}`}>
+                                        <CheckCircle className="h-3 w-3" />
+                                        Fatura OK
+                                      </div>
+                                    );
+                                  }
+                                  if (fatura.status === 'MISMATCH') {
+                                    return (
+                                      <div className="flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700" title={`Divergência: R$ ${fatura.difference.toFixed(2)} — ${fatura.fatura_filename}`}>
+                                        <AlertCircle className="h-3 w-3" />
+                                        Fatura Divergente
+                                      </div>
+                                    );
+                                  }
+                                  if (fatura.status === 'NOT_FOUND') {
+                                    return (
+                                      <div className="flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700" title={`Não encontrada na fatura ${fatura.fatura_filename}`}>
+                                        <XCircle className="h-3 w-3" />
+                                        Sem Fatura
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                                {expAudit && (
                                   <div className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                                     {React.createElement(STATUS_CONFIG[expAudit.status]?.icon || CheckCircle, { className: 'h-3 w-3' })}
                                     {STATUS_CONFIG[expAudit.status]?.label || expAudit.status}
                                   </div>
-                                  {expAudit.audited_by && (expAudit.status === 'APROVADO_HUMANO' || expAudit.status === 'REPROVADO_HUMANO') && (
-                                    <span className="text-xs text-gray-500">por {expAudit.audited_by}</span>
-                                  )}
-                                </div>
-                              )}
+                                )}
+                                {expAudit?.audited_by && (expAudit.status === 'APROVADO_HUMANO' || expAudit.status === 'REPROVADO_HUMANO') && (
+                                  <span className="text-xs text-gray-500">por {expAudit.audited_by}</span>
+                                )}
+                              </div>
                               {isAuditingThis && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
                             </div>
 
@@ -1992,6 +2077,32 @@ export default function AprovacaoDinamicaPage() {
                               {expense.observation && (
                                 <p className="text-xs text-gray-400">Obs: {expense.observation}</p>
                               )}
+
+                              {(() => {
+                                const fatura = faturaValidations[report.id]?.[expense.expense_id];
+                                if (!fatura || fatura.status === 'NOT_FOUND') return null;
+                                return (
+                                  <div className="rounded border border-purple-200 bg-purple-50 p-1.5">
+                                    <p className="text-xs font-medium text-purple-800">Fatura Itaú:</p>
+                                    <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-purple-700">
+                                      <span>Arquivo: {fatura.fatura_filename}</span>
+                                      {fatura.fatura_date && <span>• Data: {fatura.fatura_date}</span>}
+                                      {fatura.fatura_description && <span>• {fatura.fatura_description}</span>}
+                                    </div>
+                                    <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-purple-700">
+                                      <span>Fatura: R$ {fatura.fatura_value.toFixed(2)}</span>
+                                      <span>• Despesa: R$ {fatura.expense_value.toFixed(2)}</span>
+                                      {fatura.difference !== 0 && <span className="font-medium text-orange-700">• Diferença: R$ {fatura.difference.toFixed(2)}</span>}
+                                    </div>
+                                    {fatura.validated_at && (
+                                      <p className="mt-0.5 text-xs text-purple-400">
+                                        Validado em {new Date(fatura.validated_at).toLocaleString('pt-BR')}
+                                        {fatura.validated_by ? ` por ${fatura.validated_by}` : ''}
+                                      </p>
+                                    )}
+                                  </div>
+                                );
+                              })()}
 
                               {/* Audit Result Details */}
                               {expAudit && (

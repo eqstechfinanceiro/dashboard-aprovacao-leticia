@@ -11,7 +11,7 @@ export async function GET() {
       return NextResponse.json({
         success: true,
         data: {
-          fechamento: { totalReports: 0, totalExpenses: 0, totalSyncs: 0, lastSync: null, reportsByStatus: {} },
+          fechamento: { totalReports: 0, totalExpenses: 0, totalSyncs: 0, lastSync: null },
           aprovacaoDinamica: {
             totalAudited: 0,
             approvedByBot: 0,
@@ -41,7 +41,6 @@ export async function GET() {
       totalExpenses: 0,
       totalSyncs: 0,
       lastSync: null as string | null,
-      reportsByStatus: {} as Record<string, number>,
     };
 
     try {
@@ -65,14 +64,6 @@ export async function GET() {
       `;
       fechamentoMetrics.lastSync = lastSyncRows[0]?.synced_at || null;
 
-      const statusRows = await sql`
-        SELECT status, COUNT(*)::int as count
-        FROM prestacao_reports
-        GROUP BY status
-      `;
-      for (const row of statusRows) {
-        fechamentoMetrics.reportsByStatus[row.status] = row.count;
-      }
     } catch (e) {
       console.error('[Resultados] Fechamento metrics error:', e);
     }
@@ -133,6 +124,7 @@ export async function GET() {
       totalDetected: 0,
       confirmedDuplicates: 0,
       dismissedAsNotDuplicate: 0,
+      confirmedDuplicateAmount: 0,
       recentDismissals: [] as any[],
     };
 
@@ -166,6 +158,14 @@ export async function GET() {
       `;
       duplicateMetrics.dismissedAsNotDuplicate = dupDismissedRows[0]?.count || 0;
 
+      const dupAmountRows = await sql`
+        SELECT COALESCE(SUM(e1.value), 0)::float8 as total_amount
+        FROM nf_duplicate_dismissals d
+        LEFT JOIN prestacao_expenses e1 ON d.expense_id = e1.id
+        WHERE d.is_duplicate = true
+      `;
+      duplicateMetrics.confirmedDuplicateAmount = dupAmountRows[0]?.total_amount || 0;
+
       const recentRows = await sql`
         SELECT
           d.expense_id,
@@ -185,6 +185,7 @@ export async function GET() {
         LEFT JOIN prestacao_reports r1 ON e1.report_id = r1.id
         LEFT JOIN prestacao_expenses e2 ON d.duplicate_expense_id = e2.id
         LEFT JOIN prestacao_reports r2 ON e2.report_id = r2.id
+        WHERE d.is_duplicate = true
         ORDER BY d.dismissed_at DESC
         LIMIT 10
       `;
