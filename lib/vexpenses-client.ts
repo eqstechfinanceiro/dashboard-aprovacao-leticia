@@ -68,7 +68,7 @@ export async function vexpensesFetchWithRotation(
       cache: 'no-store',
     });
 
-    if (resp.status !== 403) return resp;
+    if (resp.status !== 403 && resp.status !== 429) return resp;
 
     if (cookie) {
       markTokenCooldown(cookie);
@@ -76,12 +76,16 @@ export async function vexpensesFetchWithRotation(
 
     const activeCount = await getActiveTokenCount();
     if (activeCount > 0 && attempt < retries - 1) {
-      await sleep(500);
+      const wait = resp.status === 429 ? 2000 : 500;
+      await sleep(wait);
       continue;
     }
 
     if (attempt < retries - 1) {
-      await sleep(Math.min(2000 * Math.pow(2, attempt), 8000));
+      const backoff = resp.status === 429
+        ? Math.min(3000 * Math.pow(2, attempt), 15000)
+        : Math.min(2000 * Math.pow(2, attempt), 8000);
+      await sleep(backoff);
       continue;
     }
     return resp;
