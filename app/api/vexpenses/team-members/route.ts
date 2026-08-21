@@ -49,7 +49,8 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/team-members?${params.toString()}`, {
       headers: getApiHeaders(),
-      signal: AbortSignal.timeout(120000), // 2 minutos de timeout
+      signal: AbortSignal.timeout(120000),
+      cache: 'no-store', // 2 minutos de timeout
     });
     
     if (!response.ok) {

@@ -43,6 +43,7 @@ export async function POST() {
           {
             headers: getApiHeaders(),
             signal: AbortSignal.timeout(30000),
+      cache: 'no-store',
           }
         );
         if (resp.status !== 429 && resp.status !== 403) break;

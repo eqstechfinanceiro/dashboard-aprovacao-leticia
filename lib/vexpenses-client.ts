@@ -22,12 +22,41 @@ export function getApiHeaders(extra?: Record<string, string>): Record<string, st
   };
 }
 
+let cachedCookie: string | null = null;
+let cookieExpiresAt = 0;
+
+export async function getLaravelApiCookie(): Promise<string | null> {
+  if (cachedCookie && cookieExpiresAt > Date.now()) {
+    return cachedCookie;
+  }
+  try {
+    const { getLaravelCookieString } = await import('./laravel-token');
+    const cookie = await getLaravelCookieString();
+    if (cookie) {
+      cachedCookie = cookie;
+      cookieExpiresAt = Date.now() + 5 * 60 * 1000;
+      return cookie;
+    }
+  } catch {}
+  return null;
+}
+
+export async function getApiHeadersWithCookie(extra?: Record<string, string>): Promise<Record<string, string>> {
+  const headers = getApiHeaders(extra);
+  const cookie = await getLaravelApiCookie();
+  if (cookie) {
+    headers['Cookie'] = cookie;
+  }
+  return headers;
+}
+
 export async function vexpensesFetch(path: string, options?: RequestInit): Promise<Response> {
-  const headers = getApiHeaders(
+  const headers = await getApiHeadersWithCookie(
     options?.headers ? Object.fromEntries(Object.entries(options.headers)) : undefined
   );
   return fetch(`${API_URL}${path}`, {
     ...options,
     headers,
+    cache: 'no-store',
   });
 }

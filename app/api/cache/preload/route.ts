@@ -74,7 +74,8 @@ async function preloadData(keys: string[]) {
       let fetchUrl: string;
       let fetchOptions: RequestInit = {
         headers: getApiHeaders(),
-        signal: AbortSignal.timeout(300000), // 5 minutos
+        signal: AbortSignal.timeout(300000),
+      cache: 'no-store', // 5 minutos
       };
 
       if (key.startsWith('expenses:')) {

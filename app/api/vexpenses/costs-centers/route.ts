@@ -34,7 +34,8 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/costs-centers`, {
       headers: getApiHeaders(),
-      signal: AbortSignal.timeout(120000), // 2 minutos de timeout
+      signal: AbortSignal.timeout(120000),
+      cache: 'no-store', // 2 minutos de timeout
     });
     
     if (!response.ok) {
@@ -64,7 +65,8 @@ async function refreshCacheInBackground(cacheKey: string) {
     
     const response = await fetch(`${API_URL}/v2/costs-centers`, {
       headers: getApiHeaders(),
-      signal: AbortSignal.timeout(120000), // 2 minutos
+      signal: AbortSignal.timeout(120000),
+      cache: 'no-store', // 2 minutos
     });
     
     if (!response.ok) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
+import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
 
     const response = await fetch(`${getApiUrl()}/v2/reports/${report_id}/approve`, {
       method: 'POST',
-      headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+      headers: await getApiHeadersWithCookie({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(30000),
+      cache: 'no-store',
     });
 
     if (!response.ok) {

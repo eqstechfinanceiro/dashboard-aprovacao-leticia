@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_URL}/v2/approval-flows?paginate=false`, {
       headers: getApiHeaders(),
       signal: AbortSignal.timeout(60000),
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -65,6 +66,7 @@ async function refreshCacheInBackground(cacheKey: string) {
     const response = await fetch(`${API_URL}/v2/approval-flows?paginate=false`, {
       headers: getApiHeaders(),
       signal: AbortSignal.timeout(60000),
+      cache: 'no-store',
     });
 
     if (!response.ok) {

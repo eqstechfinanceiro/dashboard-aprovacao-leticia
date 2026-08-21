@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
+import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -17,8 +17,9 @@ export async function GET(
       response = await fetch(
         `${getApiUrl()}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
         {
-          headers: getApiHeaders(),
+          headers: await getApiHeadersWithCookie(),
           signal: AbortSignal.timeout(120000),
+          cache: 'no-store',
         }
       );
 

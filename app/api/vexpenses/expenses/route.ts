@@ -91,7 +91,8 @@ export async function GET(request: NextRequest) {
     
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: getApiHeaders(),
-      signal: AbortSignal.timeout(300000), // 5 minutos de timeout
+      signal: AbortSignal.timeout(300000),
+      cache: 'no-store', // 5 minutos de timeout
     });
     
     if (!response.ok) {
@@ -157,7 +158,8 @@ async function refreshCacheInBackground(
     
     const response = await fetch(`${API_URL}/v2/expenses?${params.toString()}`, {
       headers: getApiHeaders(),
-      signal: AbortSignal.timeout(300000), // 5 minutos
+      signal: AbortSignal.timeout(300000),
+      cache: 'no-store', // 5 minutos
     });
     
     if (!response.ok) {

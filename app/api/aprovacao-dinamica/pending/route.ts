@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureAuditTable, getAuditedReportIds } from '@/lib/audit-db';
 import { getLaravelCookieString } from '@/lib/laravel-token';
-import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
+import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -207,8 +207,9 @@ export async function GET(request: NextRequest) {
         let page = 1;
         while (page <= 20) {
           const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user,expenses&per_page=100&page=${page}`, {
-            headers: getApiHeaders(),
+            headers: await getApiHeadersWithCookie(),
             signal: AbortSignal.timeout(120000),
+            cache: 'no-store',
           });
 
           if (response.ok) {
@@ -247,8 +248,9 @@ export async function GET(request: NextRequest) {
       const staleSeenIds = new Set<number>();
       while (page <= 5) {
         const response = await fetch(`${API_URL}/v2/reports/status/REPROVADO?per_page=100&page=${page}`, {
-          headers: getApiHeaders(),
+          headers: await getApiHeadersWithCookie(),
           signal: AbortSignal.timeout(30000),
+          cache: 'no-store',
         });
         if (response.ok) {
           const data = await response.json();
@@ -280,8 +282,9 @@ export async function GET(request: NextRequest) {
       const tmSeenIds = new Set<number>();
       while (page <= 20) {
         const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=100&page=${page}`, {
-          headers: getApiHeaders(),
+          headers: await getApiHeadersWithCookie(),
           signal: AbortSignal.timeout(30000),
+          cache: 'no-store',
         });
         if (tmResp.ok) {
           const tmData = await tmResp.json();
@@ -316,8 +319,9 @@ export async function GET(request: NextRequest) {
     }
     try {
       const flowsResp = await fetch(`${API_URL}/v2/approval-flows?include=steps`, {
-        headers: getApiHeaders(),
+        headers: await getApiHeadersWithCookie(),
         signal: AbortSignal.timeout(30000),
+        cache: 'no-store',
       });
       if (flowsResp.ok) {
         const flowsData = await flowsResp.json();
@@ -410,8 +414,9 @@ export async function GET(request: NextRequest) {
           batch.map(async (r: any) => {
             try {
               const resp = await fetch(`${API_URL}/v2/reports/${r.id}`, {
-                headers: getApiHeaders(),
+                headers: await getApiHeadersWithCookie(),
                 signal: AbortSignal.timeout(15000),
+                cache: 'no-store',
               });
               if (resp.status === 403) {
                 console.log(`[Pending] 403 on individual status check for report ${r.id}, skipping`);

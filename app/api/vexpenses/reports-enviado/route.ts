@@ -30,6 +30,7 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${API_URL}/v2/reports/status/ENVIADO?${params.toString()}`, {
       headers: getApiHeaders(),
       signal: AbortSignal.timeout(120000),
+      cache: 'no-store',
     });
 
     if (!response.ok) {
@@ -71,6 +72,7 @@ async function refreshCacheInBackground(cacheKey: string) {
     const response = await fetch(`${API_URL}/v2/reports/status/ENVIADO?${params.toString()}`, {
       headers: getApiHeaders(),
       signal: AbortSignal.timeout(120000),
+      cache: 'no-store',
     });
 
     if (!response.ok) {

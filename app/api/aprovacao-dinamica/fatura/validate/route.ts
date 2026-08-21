@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
+import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
 import { ensureFaturaTable, saveFaturaValidations, FaturaValidationRecord } from '@/lib/fatura-db';
 
 export const dynamic = 'force-dynamic';
@@ -89,8 +89,9 @@ async function fetchPendingItauReports(): Promise<ReportWithExpenses[]> {
       const response = await fetch(
         `${getApiUrl()}/v2/reports/status/${status}?include=user,expenses.payment_method&per_page=100&page=${page}`,
         {
-          headers: getApiHeaders(),
+          headers: await getApiHeadersWithCookie(),
           signal: AbortSignal.timeout(120000),
+          cache: 'no-store',
         }
       );
       if (!response.ok) break;
