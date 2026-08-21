@@ -5,8 +5,6 @@ import path from 'path';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const appDir = path.join(process.cwd(), 'app');
-  const resultadosPath = path.join(appDir, 'resultados', 'page.tsx');
   const nextDir = path.join(process.cwd(), '.next', 'server', 'app');
   
   let nextResultados: string[] = [];
@@ -14,11 +12,17 @@ export async function GET() {
     nextResultados = fs.readdirSync(nextDir).filter(f => f.includes('resultados'));
   } catch {}
 
+  let tsxFiles = '';
+  try {
+    tsxFiles = fs.readFileSync(path.join(process.cwd(), 'tsx_files.txt'), 'utf-8');
+  } catch (e) {
+    tsxFiles = `Error reading: ${e}`;
+  }
+
   return NextResponse.json({
     cwd: process.cwd(),
-    resultadosExists: fs.existsSync(resultadosPath),
-    resultadosPath,
     nextResultados,
-    appDirExists: fs.existsSync(appDir),
+    tsxFiles,
   });
 }
+

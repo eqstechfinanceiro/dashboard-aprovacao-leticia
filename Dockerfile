@@ -10,7 +10,8 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-RUN find app -name "*.tsx" | sort || echo "find failed"
+RUN find app -name "*.tsx" | sort > /tmp/tsx_files.txt || echo "find failed" > /tmp/tsx_files.txt
+RUN cat /tmp/tsx_files.txt
 RUN npm run build
 
 FROM node:18-alpine AS runner
@@ -27,6 +28,7 @@ COPY --from=builder /app/node_modules ./node_modules
 RUN npm prune --production
 
 COPY --from=builder /app/.next ./.next
+COPY --from=builder /tmp/tsx_files.txt ./tsx_files.txt
 
 WORKDIR /app
 
