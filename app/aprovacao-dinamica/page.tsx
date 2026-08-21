@@ -64,6 +64,7 @@ interface PendingReport {
   approval_stage_id: number | null;
   approval_date: string | null;
   current_step: number;
+  expense_count?: number;
 }
 
 interface ReportExpense {
@@ -329,8 +330,20 @@ export default function AprovacaoDinamicaPage() {
       const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
       setReports(filtered);
       await loadAllSavedResults();
-      // Fetch expense counts for all reports in background
-      fetchExpenseCounts(data.data || []);
+      // Use expense_count from pending response (avoids separate API call that gets 403'd by WAF)
+      const counts: Record<number, number> = {};
+      for (const r of (data.data || []) as PendingReport[]) {
+        if (r.expense_count !== undefined && r.expense_count > 0) {
+          counts[r.id] = r.expense_count;
+        }
+      }
+      if (Object.keys(counts).length > 0) {
+        setExpenseCounts(counts);
+      }
+      // Only fetch expense counts separately if pending response didn't include them
+      if (Object.keys(counts).length === 0) {
+        fetchExpenseCounts(data.data || []);
+      }
       // Fetch existing approvals
       fetchApprovals(data.data || []);
       // Fetch NF validation batch summary only on first load or explicit refresh

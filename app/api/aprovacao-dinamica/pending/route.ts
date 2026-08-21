@@ -206,7 +206,7 @@ export async function GET(request: NextRequest) {
       try {
         let page = 1;
         while (page <= 20) {
-          const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user&per_page=100&page=${page}`, {
+          const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user,expenses&per_page=100&page=${page}`, {
             headers: getApiHeaders(),
             signal: AbortSignal.timeout(120000),
           });
@@ -413,6 +413,10 @@ export async function GET(request: NextRequest) {
                 headers: getApiHeaders(),
                 signal: AbortSignal.timeout(15000),
               });
+              if (resp.status === 403) {
+                console.log(`[Pending] 403 on individual status check for report ${r.id}, skipping`);
+                return { id: r.id, status: 'ENVIADO' };
+              }
               if (!resp.ok) return { id: r.id, status: null };
               const data = await resp.json();
               return { id: r.id, status: data.data?.status || null };
@@ -439,6 +443,7 @@ export async function GET(request: NextRequest) {
       const userId = r.user_id;
       const flowId = userId ? userFlowMap.get(userId) : undefined;
       const waitingStep = waitingStepMap.has(r.id) ? waitingStepMap.get(r.id)! : 1;
+      const expenseCount = r.expenses?.data?.length ?? r.expenses?.length ?? 0;
       return {
         id: r.id,
         description: r.description,
@@ -452,6 +457,7 @@ export async function GET(request: NextRequest) {
         approval_stage_id: r.approval_stage_id || null,
         approval_date: r.approval_date || null,
         current_step: waitingStep,
+        expense_count: expenseCount,
       };
     });
 
