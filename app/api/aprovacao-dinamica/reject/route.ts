@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,13 +34,9 @@ export async function POST(request: NextRequest) {
       payload.expenses = {};
     }
 
-    const response = await fetch(`${API_URL}/v2/reports/${report_id}/approve`, {
+    const response = await fetch(`${getApiUrl()}/v2/reports/${report_id}/approve`, {
       method: 'POST',
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
+      headers: getApiHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(30000),
     });

@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 
 // Log para debug (remover em produção)
-console.log('[Cache Preload] API_KEY exists:', !!API_KEY);
-console.log('[Cache Preload] API_KEY length:', API_KEY?.length);
-console.log('[Cache Preload] API_KEY prefix:', API_KEY?.substring(0, 10));
+console.log('[Cache Preload] API_KEY exists:', !!process.env.VEXPENSES_API_KEY);
+console.log('[Cache Preload] API_KEY length:', process.env.VEXPENSES_API_KEY?.length);
 
 // Endpoint para pré-carregar dados essenciais do dashboard
 // Este endpoint carrega os dados que serão usados no dashboard principal
@@ -74,10 +73,7 @@ async function preloadData(keys: string[]) {
       // Determinar qual endpoint chamar
       let fetchUrl: string;
       let fetchOptions: RequestInit = {
-        headers: {
-          'Authorization': API_KEY,
-          'Accept': 'application/json',
-        },
+        headers: getApiHeaders(),
         signal: AbortSignal.timeout(300000), // 5 minutos
       };
 

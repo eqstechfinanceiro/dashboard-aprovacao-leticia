@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureAuditTable, getAuditedReportIds } from '@/lib/audit-db';
 import { getLaravelCookieString } from '@/lib/laravel-token';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 const APP_URL = 'https://app.vexpenses.com';
 
 const PENDING_STATUSES = ['ENVIADO'];
@@ -207,10 +207,7 @@ export async function GET(request: NextRequest) {
         let page = 1;
         while (page <= 20) {
           const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user&per_page=100&page=${page}`, {
-            headers: {
-              'Authorization': API_KEY,
-              'Accept': 'application/json',
-            },
+            headers: getApiHeaders(),
             signal: AbortSignal.timeout(120000),
           });
 
@@ -250,7 +247,7 @@ export async function GET(request: NextRequest) {
       const staleSeenIds = new Set<number>();
       while (page <= 5) {
         const response = await fetch(`${API_URL}/v2/reports/status/REPROVADO?per_page=100&page=${page}`, {
-          headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+          headers: getApiHeaders(),
           signal: AbortSignal.timeout(30000),
         });
         if (response.ok) {
@@ -283,7 +280,7 @@ export async function GET(request: NextRequest) {
       const tmSeenIds = new Set<number>();
       while (page <= 20) {
         const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=100&page=${page}`, {
-          headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+          headers: getApiHeaders(),
           signal: AbortSignal.timeout(30000),
         });
         if (tmResp.ok) {
@@ -319,7 +316,7 @@ export async function GET(request: NextRequest) {
     }
     try {
       const flowsResp = await fetch(`${API_URL}/v2/approval-flows?include=steps`, {
-        headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+        headers: getApiHeaders(),
         signal: AbortSignal.timeout(30000),
       });
       if (flowsResp.ok) {
@@ -413,7 +410,7 @@ export async function GET(request: NextRequest) {
           batch.map(async (r: any) => {
             try {
               const resp = await fetch(`${API_URL}/v2/reports/${r.id}`, {
-                headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+                headers: getApiHeaders(),
                 signal: AbortSignal.timeout(15000),
               });
               if (!resp.ok) return { id: r.id, status: null };

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
@@ -7,13 +8,11 @@ export const dynamic = 'force-dynamic';
 // Verificar se estamos em ambiente de build
 const isBuildTime = process.env.NEXT_PHASE === 'phase-build' || process.env.NODE_ENV === 'production' && !process.env.NEON_DATABASE_URL;
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 
 // Log para debug (remover em produção)
-console.log('[Team Members API] API_KEY exists:', !!API_KEY);
-console.log('[Team Members API] API_KEY length:', API_KEY?.length);
-console.log('[Team Members API] API_KEY prefix:', API_KEY?.substring(0, 10));
+console.log('[Team Members API] API_KEY exists:', !!process.env.VEXPENSES_API_KEY);
+console.log('[Team Members API] API_KEY length:', process.env.VEXPENSES_API_KEY?.length);
 
 export async function GET(request: NextRequest) {
   // Se estivermos em build time, retornar dados vazios para não falhar
@@ -49,10 +48,7 @@ export async function GET(request: NextRequest) {
     if (include) params.append('include', include);
     
     const response = await fetch(`${API_URL}/v2/team-members?${params.toString()}`, {
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-      },
+      headers: getApiHeaders(),
       signal: AbortSignal.timeout(120000), // 2 minutos de timeout
     });
     

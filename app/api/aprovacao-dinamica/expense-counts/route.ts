@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -42,8 +40,8 @@ export async function GET(request: NextRequest) {
       const promises = batch.map(async (id) => {
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
-            const resp = await fetch(`${API_URL}/v2/reports/${id}?include=expenses`, {
-              headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+            const resp = await fetch(`${getApiUrl()}/v2/reports/${id}?include=expenses`, {
+              headers: getApiHeaders(),
               signal: AbortSignal.timeout(30000),
             });
             if (resp.ok) {

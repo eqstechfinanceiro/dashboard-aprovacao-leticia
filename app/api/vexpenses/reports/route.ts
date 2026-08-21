@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 
 // Log para debug (remover em produção)
-console.log('[Reports API] API_KEY exists:', !!API_KEY);
-console.log('[Reports API] API_KEY length:', API_KEY?.length);
-console.log('[Reports API] API_KEY prefix:', API_KEY?.substring(0, 10));
+console.log('[Reports API] API_KEY exists:', !!process.env.VEXPENSES_API_KEY);
+console.log('[Reports API] API_KEY length:', process.env.VEXPENSES_API_KEY?.length);
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,10 +39,7 @@ export async function GET(request: NextRequest) {
     if (include) params.append('include', include);
     
     const response = await fetch(`${API_URL}/v2/reports?${params.toString()}`, {
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-      },
+      headers: getApiHeaders(),
       signal: AbortSignal.timeout(300000), // 5 minutos de timeout (reports é muito lento)
     });
     
@@ -113,10 +109,7 @@ async function refreshCacheInBackground(cacheKey: string, include: string | null
     if (include) params.append('include', include);
     
     const response = await fetch(`${API_URL}/v2/reports?${params.toString()}`, {
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-      },
+      headers: getApiHeaders(),
       signal: AbortSignal.timeout(300000), // 5 minutos
     });
     

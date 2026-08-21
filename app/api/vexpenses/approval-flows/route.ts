@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,10 +25,7 @@ export async function GET(request: NextRequest) {
     console.log('Cache miss for approval-flows');
 
     const response = await fetch(`${API_URL}/v2/approval-flows?paginate=false`, {
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-      },
+      headers: getApiHeaders(),
       signal: AbortSignal.timeout(60000),
     });
 
@@ -66,10 +63,7 @@ async function refreshCacheInBackground(cacheKey: string) {
     console.log(`[Background Refresh] Refreshing approval-flows`);
 
     const response = await fetch(`${API_URL}/v2/approval-flows?paginate=false`, {
-      headers: {
-        'Authorization': API_KEY,
-        'Accept': 'application/json',
-      },
+      headers: getApiHeaders(),
       signal: AbortSignal.timeout(60000),
     });
 

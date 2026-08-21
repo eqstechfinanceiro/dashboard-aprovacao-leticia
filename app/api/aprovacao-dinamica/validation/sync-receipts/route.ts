@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/neon';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
 
 export async function POST() {
   if (!sql) {
@@ -41,9 +39,9 @@ export async function POST() {
       let resp: Response | null = null;
       for (let attempt = 0; attempt < 3; attempt++) {
         resp = await fetch(
-          `${API_URL}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method`,
+          `${getApiUrl()}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method`,
           {
-            headers: { Authorization: API_KEY, Accept: 'application/json' },
+            headers: getApiHeaders(),
             signal: AbortSignal.timeout(30000),
           }
         );

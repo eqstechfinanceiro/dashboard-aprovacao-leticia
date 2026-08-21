@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiCache } from '@/lib/neon-cache';
+import { getApiHeaders, getApiUrl } from '@/lib/vexpenses-client';
 
 // Force dynamic to prevent static generation during build
 export const dynamic = 'force-dynamic';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
-const API_KEY = process.env.VEXPENSES_API_KEY || '';
+const API_URL = getApiUrl();
 
 // Log para debug (remover em produção)
-console.log('[Cache Refresh Background] API_KEY exists:', !!API_KEY);
-console.log('[Cache Refresh Background] API_KEY length:', API_KEY?.length);
-console.log('[Cache Refresh Background] API_KEY prefix:', API_KEY?.substring(0, 10));
+console.log('[Cache Refresh Background] API_KEY exists:', !!process.env.VEXPENSES_API_KEY);
+console.log('[Cache Refresh Background] API_KEY length:', process.env.VEXPENSES_API_KEY?.length);
 
 // Endpoint para atualizar cache em background
 // Este endpoint não espera pela resposta da API vExpenses
@@ -53,10 +52,7 @@ async function refreshCacheInBackground(keys: string[]) {
       // Determinar qual endpoint chamar baseado na chave
       let fetchUrl: string;
       let fetchOptions: RequestInit = {
-        headers: {
-          'Authorization': API_KEY,
-          'Accept': 'application/json',
-        },
+        headers: getApiHeaders(),
         signal: AbortSignal.timeout(300000), // 5 minutos
       };
 
