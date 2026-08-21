@@ -55,8 +55,7 @@ export async function GET(request: NextRequest) {
             if (resp.status === 403) {
               consecutive403++;
               const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
-              const body = await resp.text().catch(() => 'no body');
-              console.log(`[Expense Counts] 403 on report ${id}, attempt ${attempt + 1}, waiting ${backoff}ms, body: ${body.slice(0, 200)}`);
+              console.log(`[Expense Counts] 403 on report ${id}, attempt ${attempt + 1}, waiting ${backoff}ms`);
               await sleep(backoff);
               continue;
             }
