@@ -317,7 +317,7 @@ function checkTotalMismatch(
   reportTotalValue: number | null
 ): { calculated: number; expected: number; difference: number } | null {
   if (!isFaturaOrCartao(reportName)) return null;
-  if (reportTotalValue === null || reportTotalValue === undefined) return null;
+  if (reportTotalValue === null || reportTotalValue === undefined || Number(reportTotalValue) === 0) return null;
   if (expenses.length === 0) return null;
 
   const calculated = expenses.reduce((sum, e) => sum + Number(e.value), 0);

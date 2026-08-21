@@ -14,7 +14,8 @@ import {
   Hourglass,
   Bot,
   ClipboardList,
-  FileText
+  FileText,
+  Trophy
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -31,6 +32,7 @@ const ALL_NAVIGATION = [
   { id: 'controle', name: 'Controle', href: '/controle', icon: ClipboardList },
   { id: 'fechamento', name: 'Fechamento', href: '/fechamento', icon: FileText },
   { id: 'aprovacao-dinamica', name: 'Aprovação Dinâmica', href: '/aprovacao-dinamica', icon: Bot },
+  { id: 'resultados', name: 'Resultados', href: '/resultados', icon: Trophy },
   { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
 ];
 

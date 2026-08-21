@@ -289,13 +289,27 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss, dismissedB
     const pair = pairs[currentIdx];
     if (!pair) return;
     const userName = pair.duplicate.user_name || pair.original.user_name || 'Colaborador';
-    const reportName = pair.original.report_name || '';
-    const expenseValue = formatCurrency(pair.duplicate.value);
+    const origName = pair.original.report_name || '';
+    const dupName = pair.duplicate.report_name || '';
+    const origIsFatura = /FATURA/i.test(origName);
+    const dupIsFatura = /FATURA/i.test(dupName);
+    let reportName: string;
+    let expenseValue: string;
+    if (origIsFatura && !dupIsFatura) {
+      reportName = dupName;
+      expenseValue = formatCurrency(pair.duplicate.value);
+    } else if (dupIsFatura && !origIsFatura) {
+      reportName = origName;
+      expenseValue = formatCurrency(pair.original.value);
+    } else {
+      reportName = origName;
+      expenseValue = formatCurrency(pair.duplicate.value);
+    }
     const signedBy = currentUserName || dismissedBy || 'Equipe EQS';
     const text = `Olá! Prezado(a) ${userName},
 
 Seu relatório ${reportName} foi reprovado devido à despesa(s) duplicada(s).
-Favor excluir a despesa no valor de ${expenseValue} da Vexpenses e reabrir o relatório corretamente.
+Favor excluir a despesa no valor de ${expenseValue} da Vexpenses e reenviar o relatório corretamente.
 
 Obrigado!
 

@@ -32,6 +32,8 @@ import {
   AlertTriangle,
   X,
   Copy,
+  ScrollText,
+  ExternalLink,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
@@ -40,6 +42,7 @@ import { useAuth } from '@/lib/auth-context';
 import type { ReportValidationSummary } from '@/lib/nf-validator';
 import { DuplicateComparisonModal, type ComparisonExpense } from '@/components/duplicate-comparison-modal';
 import { BatchDuplicateReviewModal } from '@/components/batch-duplicate-review-modal';
+import { DismissLogsModal } from '@/components/dismiss-logs-modal';
 
 interface ReportApproval {
   approver_name: string;
@@ -268,6 +271,10 @@ export default function AprovacaoDinamicaPage() {
   const [alertsOnly, setAlertsOnly] = useState(false);
   const [comparisonModal, setComparisonModal] = useState<{ original: ComparisonExpense; duplicates: ComparisonExpense[] } | null>(null);
   const [batchDupModalOpen, setBatchDupModalOpen] = useState(false);
+  const [logsModalOpen, setLogsModalOpen] = useState(false);
+  const [rejectingExpense, setRejectingExpense] = useState<string | null>(null);
+  const [rejectObservation, setRejectObservation] = useState<Record<string, string>>({});
+  const [rejectingReport, setRejectingReport] = useState<number | null>(null);
 
   useEffect(() => {
     setVisibleCount(30);
@@ -715,6 +722,47 @@ export default function AprovacaoDinamicaPage() {
     }
   };
 
+  const handleRejectExpense = async (reportId: number, expense: ReportExpense) => {
+    const key = `${reportId}-${expense.id}`;
+    const observation = rejectObservation[key]?.trim();
+    if (!observation) return;
+    setRejectingReport(reportId);
+    try {
+      const approverId = parseInt(approverFilter) || 891904;
+      const allExpenses = reportExpenses[reportId] || [];
+      const expensesPayload: Record<string, boolean> = {};
+      for (const exp of allExpenses) {
+        expensesPayload[String(exp.expense_id)] = exp.id === expense.id ? false : true;
+      }
+      const res = await fetch('/api/aprovacao-dinamica/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          report_id: reportId,
+          approver_id: approverId,
+          comment: `Despesa "${expense.title}" (#${expense.expense_id}) reprovada via dashboard por ${user?.name || 'approver'}. Motivo: ${observation}`,
+          expenses: expensesPayload,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setApproveError(prev => ({ ...prev, [reportId]: data.error || 'Failed to reject expense' }));
+        return;
+      }
+      setRejectingExpense(null);
+      setRejectObservation(prev => { const n = { ...prev }; delete n[key]; return n; });
+      setApprovalNotice(`Despesa "${expense.title}" do relatório #${reportId} reprovada com sucesso.`);
+      excludedReportsRef.current.add(reportId);
+      setReports(prev => prev.filter(r => r.id !== reportId));
+      fetchPending();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      setApproveError(prev => ({ ...prev, [reportId]: msg }));
+    } finally {
+      setRejectingReport(null);
+    }
+  };
+
   const loadReviewQueue = async (reportId?: number) => {
     setReviewLoading(true);
     try {
@@ -937,6 +985,11 @@ export default function AprovacaoDinamicaPage() {
         currentUserName={user?.name}
       />
 
+      <DismissLogsModal
+        open={logsModalOpen}
+        onClose={() => setLogsModalOpen(false)}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -974,6 +1027,15 @@ export default function AprovacaoDinamicaPage() {
           >
             <Copy className="h-4 w-4" />
             Revisar Duplicadas
+          </Button>
+          <Button
+            onClick={() => setLogsModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="border-blue-300 text-blue-700 hover:bg-blue-100"
+          >
+            <ScrollText className="h-4 w-4" />
+            Logs
           </Button>
           <Button
             onClick={auditAllReports}
@@ -1446,6 +1508,20 @@ export default function AprovacaoDinamicaPage() {
                       )}
                       Auditar Tudo
                     </Button>
+                    <a
+                      href={`https://amp.vexpenses.com/relatorios/${report.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Ir para o relatório
+                      </Button>
+                    </a>
                   </div>
                 )}
               </div>
@@ -1845,16 +1921,29 @@ export default function AprovacaoDinamicaPage() {
                             {/* Card Header */}
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2">
-                                <button
-                                  onClick={() => setShowReceiptFor(showReceipt ? null : expense.receipt_url)}
-                                  className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded border border-gray-200 bg-gray-50 hover:border-blue-400"
-                                >
-                                  {expense.receipt_url ? (
-                                    <ImageIcon className="h-5 w-5 text-gray-400" />
-                                  ) : (
-                                    <FileText className="h-5 w-5 text-gray-400" />
+                                <div className="flex flex-shrink-0 items-center gap-1">
+                                  <button
+                                    onClick={() => setShowReceiptFor(showReceipt ? null : expense.receipt_url)}
+                                    className="flex h-10 w-10 items-center justify-center rounded border border-gray-200 bg-gray-50 hover:border-blue-400"
+                                  >
+                                    {expense.receipt_url ? (
+                                      <ImageIcon className="h-5 w-5 text-gray-400" />
+                                    ) : (
+                                      <FileText className="h-5 w-5 text-gray-400" />
+                                    )}
+                                  </button>
+                                  {expense.receipt_url && (
+                                    <a
+                                      href={expense.receipt_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex h-10 w-10 items-center justify-center rounded border border-gray-200 bg-gray-50 hover:border-blue-400"
+                                      title="Abrir comprovante em nova aba"
+                                    >
+                                      <ExternalLink className="h-5 w-5 text-gray-400" />
+                                    </a>
                                   )}
-                                </button>
+                                </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
                                     {expense.title || `Despesa #${expense.id}`}
@@ -1865,7 +1954,7 @@ export default function AprovacaoDinamicaPage() {
                                 </div>
                               </div>
 
-                              {expAudit ? (
+                              {expAudit && (
                                 <div className="flex flex-col items-end gap-1">
                                   <div className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                                     {React.createElement(STATUS_CONFIG[expAudit.status]?.icon || CheckCircle, { className: 'h-3 w-3' })}
@@ -1874,32 +1963,9 @@ export default function AprovacaoDinamicaPage() {
                                   {expAudit.audited_by && (expAudit.status === 'APROVADO_HUMANO' || expAudit.status === 'REPROVADO_HUMANO') && (
                                     <span className="text-xs text-gray-500">por {expAudit.audited_by}</span>
                                   )}
-                                  {expAudit.status !== 'APROVADO_HUMANO' && expAudit.status !== 'REPROVADO_HUMANO' && expAudit.status !== 'ANALISAR_DEPOIS' && !expAudit.extracted_data && !isAuditingThis && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="h-6 px-2 text-xs text-blue-600"
-                                      onClick={() => auditSingleExpense(report.id, expense, true)}
-                                    >
-                                      <RefreshCw className="h-3 w-3" />
-                                      Re-analisar
-                                    </Button>
-                                  )}
-                                  {isAuditingThis && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
                                 </div>
-                              ) : isAuditingThis ? (
-                                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 px-2 text-xs"
-                                  onClick={() => auditSingleExpense(report.id, expense)}
-                                >
-                                  <ScanLine className="h-3 w-3" />
-                                  Analisar
-                                </Button>
                               )}
+                              {isAuditingThis && <Loader2 className="h-4 w-4 animate-spin text-blue-600" />}
                             </div>
 
                             {/* Card Body */}
@@ -1981,6 +2047,74 @@ export default function AprovacaoDinamicaPage() {
                                       }}
                                     />
                                   )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Card Footer */}
+                            <div className="mt-3 border-t border-gray-100 pt-2">
+                              {rejectingExpense === `${report.id}-${expense.id}` ? (
+                                <div className="space-y-2">
+                                  <Input
+                                    placeholder="Motivo da reprovação (obrigatório)..."
+                                    value={rejectObservation[`${report.id}-${expense.id}`] || ''}
+                                    onChange={e => setRejectObservation(prev => ({ ...prev, [`${report.id}-${expense.id}`]: e.target.value }))}
+                                    className="h-8 text-xs"
+                                  />
+                                  <div className="flex gap-2">
+                                    <Button
+                                      size="sm"
+                                      className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs"
+                                      disabled={!rejectObservation[`${report.id}-${expense.id}`]?.trim() || rejectingReport === report.id}
+                                      onClick={() => handleRejectExpense(report.id, expense)}
+                                    >
+                                      {rejectingReport === report.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3" />}
+                                      Confirmar
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-xs"
+                                      onClick={() => { setRejectingExpense(null); setRejectObservation(prev => { const n = { ...prev }; delete n[`${report.id}-${expense.id}`]; return n; }); }}
+                                    >
+                                      Cancelar
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2">
+                                  {expAudit ? (
+                                    expAudit.status !== 'APROVADO_HUMANO' && expAudit.status !== 'REPROVADO_HUMANO' && expAudit.status !== 'ANALISAR_DEPOIS' && !expAudit.extracted_data && !isAuditingThis ? (
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                                        onClick={() => auditSingleExpense(report.id, expense, true)}
+                                      >
+                                        <RefreshCw className="h-3 w-3" />
+                                        Re-analisar
+                                      </Button>
+                                    ) : null
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-7 text-xs"
+                                      onClick={() => auditSingleExpense(report.id, expense)}
+                                    >
+                                      <ScanLine className="h-3 w-3" />
+                                      Analisar
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => setRejectingExpense(`${report.id}-${expense.id}`)}
+                                  >
+                                    <XCircle className="h-3 w-3" />
+                                    Reprovar
+                                  </Button>
                                 </div>
                               )}
                             </div>
