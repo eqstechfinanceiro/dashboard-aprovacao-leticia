@@ -2,6 +2,7 @@ FROM node:18-alpine AS builder
 
 ARG CACHE_BUST=1
 WORKDIR /app
+RUN echo "Cache bust: $CACHE_BUST"
 
 # Install build dependencies for native modules (canvas needs python3 + cairo/pango dev headers)
 RUN apk add --no-cache python3 make g++ pkgconfig cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev

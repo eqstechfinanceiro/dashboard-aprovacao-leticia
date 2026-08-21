@@ -3,3 +3,11 @@ node_modules/
 .next/
 tsconfig.tsbuildinfo
 railway_logs*.txt
+.env
+.env.local
+cookies*.txt
+*.json
+!package*.json
+!tsconfig.json
+!components.json
+!next-env.d.ts
