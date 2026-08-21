@@ -15,6 +15,7 @@ async function ensureTokenTable() {
       laravel_session TEXT,
       xsrf_token TEXT,
       source_label TEXT,
+      company TEXT DEFAULT 'eqs',
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       expires_at TIMESTAMP WITH TIME ZONE
     )
@@ -23,7 +24,13 @@ async function ensureTokenTable() {
     ALTER TABLE vexpenses_tokens ADD COLUMN IF NOT EXISTS source_label TEXT
   `;
   await sql`
+    ALTER TABLE vexpenses_tokens ADD COLUMN IF NOT EXISTS company TEXT DEFAULT 'eqs'
+  `;
+  await sql`
     CREATE INDEX IF NOT EXISTS idx_vexpenses_tokens_expires ON vexpenses_tokens(expires_at)
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_vexpenses_tokens_company ON vexpenses_tokens(company)
   `;
 }
 
@@ -39,6 +46,7 @@ export async function POST(request: NextRequest) {
     expires_at?: number;
     secret?: string;
     source_label?: string;
+    company?: string;
     token_id?: number;
   };
 
@@ -63,6 +71,7 @@ export async function POST(request: NextRequest) {
     : new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
 
   const sourceLabel = body.source_label || 'default';
+  const company = body.company || 'eqs';
 
   if (body.token_id) {
     await sql`
@@ -71,13 +80,14 @@ export async function POST(request: NextRequest) {
           laravel_session = ${body.laravel_session || null},
           xsrf_token = ${body.xsrf_token || null},
           source_label = ${sourceLabel},
+          company = ${company},
           updated_at = NOW(),
           expires_at = ${expiresAt}
       WHERE id = ${body.token_id}
     `;
   } else {
     const existing = await sql`
-      SELECT id FROM vexpenses_tokens WHERE source_label = ${sourceLabel} LIMIT 1
+      SELECT id FROM vexpenses_tokens WHERE source_label = ${sourceLabel} AND company = ${company} LIMIT 1
     `;
     if (existing && existing.length > 0) {
       await sql`
@@ -85,14 +95,15 @@ export async function POST(request: NextRequest) {
         SET laravel_token = ${body.laravel_token},
             laravel_session = ${body.laravel_session || null},
             xsrf_token = ${body.xsrf_token || null},
+            company = ${company},
             updated_at = NOW(),
             expires_at = ${expiresAt}
         WHERE id = ${existing[0].id}
       `;
     } else {
       await sql`
-        INSERT INTO vexpenses_tokens (laravel_token, laravel_session, xsrf_token, source_label, updated_at, expires_at)
-        VALUES (${body.laravel_token}, ${body.laravel_session || null}, ${body.xsrf_token || null}, ${sourceLabel}, NOW(), ${expiresAt})
+        INSERT INTO vexpenses_tokens (laravel_token, laravel_session, xsrf_token, source_label, company, updated_at, expires_at)
+        VALUES (${body.laravel_token}, ${body.laravel_session || null}, ${body.xsrf_token || null}, ${sourceLabel}, ${company}, NOW(), ${expiresAt})
       `;
     }
   }
@@ -109,7 +120,7 @@ export async function GET() {
   await ensureTokenTable();
 
   const rows = await sql`
-    SELECT id, source_label, updated_at, expires_at
+    SELECT id, source_label, company, updated_at, expires_at
     FROM vexpenses_tokens
     ORDER BY id
   `;
@@ -128,6 +139,7 @@ export async function GET() {
     tokens: rows.map((r: any) => ({
       id: r.id,
       source_label: r.source_label,
+      company: r.company,
       updated_at: r.updated_at,
       expires_at: r.expires_at,
       is_expired: new Date(r.expires_at).getTime() < now,

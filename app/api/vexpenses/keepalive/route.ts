@@ -23,6 +23,7 @@ export async function GET(request: Request) {
       SELECT id, laravel_token, laravel_session, xsrf_token, expires_at, source_label
       FROM vexpenses_tokens
       WHERE expires_at > NOW() - INTERVAL '1 hour'
+        AND (company = 'eqs' OR company IS NULL)
       ORDER BY id
     `;
 

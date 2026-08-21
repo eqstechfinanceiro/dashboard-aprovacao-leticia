@@ -37,6 +37,7 @@ async function loadAllTokens(): Promise<CachedToken[]> {
       SELECT id, laravel_token, laravel_session, xsrf_token, expires_at
       FROM vexpenses_tokens
       WHERE expires_at > NOW()
+        AND (company = 'eqs' OR company IS NULL)
       ORDER BY id
     `;
 
