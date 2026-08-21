@@ -10,6 +10,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
+RUN ls -la app/resultados/ || echo "resultados dir not found"
 RUN npm run build
 
 FROM node:18-alpine AS runner
