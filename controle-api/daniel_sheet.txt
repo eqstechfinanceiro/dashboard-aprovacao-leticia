@@ -1,0 +1,44 @@
+
+=== DANIEL SANTOS DE ASSUNCAO (row 65) ===
+  Col 0: None
+  Col 1: 'DANIEL SANTOS DE ASSUNCAO'
+  Col 2: '97592439549'
+  Col 3: 'ATIVO'
+  Col 4: 'BANCO ITAU BA'
+  Col 5: 11062270001
+  Col 6: 'GLAUCIO GONÇALVES'
+  Col 7: 'ROGERIO SCATAMBULO'
+  Col 8: -142.83000000001192
+  Col 9: 0
+  Col 10: 1500
+  Col 11: 8.95
+  Col 12: 0
+  Col 13: 1491.05
+  Col 14: 142.83000000001192
+  Col 15: 1491.05
+  Col 16: 1633.880000000012
+  Col 17: 'Cartão ativo'
+  Col 18: None
+  Col 19: None
+
+=== CHARLES NEVES MATTIUZZI (row 462) ===
+  Col 0: None
+  Col 1: 'CHARLES NEVES MATTIUZZI'
+  Col 2: '12547938790'
+  Col 3: 'ATIVO'
+  Col 4: 'TELEFONICA ES'
+  Col 5: 11061870001
+  Col 6: 'VINICIUS LOCATELLY'
+  Col 7: 'MARCOS CARIAS'
+  Col 8: 0
+  Col 9: 4466.470000000011
+  Col 10: 4200
+  Col 11: 32.96
+  Col 12: 0
+  Col 13: -299.43000000001115
+  Col 14: 0
+  Col 15: 0
+  Col 16: 0
+  Col 17: 'Cartão ativo'
+  Col 18: None
+  Col 19: None

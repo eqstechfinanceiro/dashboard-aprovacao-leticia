@@ -1,0 +1,1 @@
+{"success":false,"request":"https:\/\/api.vexpenses.com","method":"GET","code":401,"data":null,"errors":[{"code":100001003,"log":null,"message":"Token de Acesso inv\u00e1lido.","moreInfo":"https:\/\/developers.vexpenses.com\/moreinfo\/100001003"}]}

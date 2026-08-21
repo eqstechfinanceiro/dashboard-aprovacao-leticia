@@ -1,0 +1,171 @@
+C:\Users\italo.medrado\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\openpyxl\worksheet\_reader.py:329: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+
+================================================================================
+IMPORT ALL MONTHS — Jan-Jun 2026
+Mode: DRY RUN
+Months: [1, 2, 3, 4, 5, 6]
+================================================================================
+
+Loading CONTROLE PAINEL (JULHO 2026.xlsb)...
+  CONTROLE PAINEL: 738 colaboradores loaded.
+
+--- Month 1 QZ1 ---
+  CARGA file: 1QZ JANEIRO 2026 - VEXPENSES.xlsx
+  CARGA 1/1 (sheet '1 QZ VEXPENSES 01_2026'): 507 colaboradores.
+  Prepared 742 rows for 2026/01 QZ1
+    (with col_qz from CARGA: 507, without: 235)
+  [DRY RUN] No data written to DB.
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=1000.0000 | saldo_final=6.5200 | saldo_final_carga=6.5200
+    CPF=49637513809 | SARA ARAGAO DA SILVA BARBOSA
+      col_qz=1500.0000 | saldo_final=2311.5800 | saldo_final_carga=2311.5800
+    CPF=78296277972 | JOSE DO PRADO ROSA
+      col_qz=100.0000 | saldo_final=0.0000 | saldo_final_carga=0.0000
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 1 QZ2 ---
+  CARGA file: 2QZ JANEIRO 2026 - VEXPENSES.xlsx
+  CARGA 1/2 (sheet '2 QZ VEXPENSES 01_2026'): 513 colaboradores.
+  Prepared 742 rows for 2026/01 QZ2
+    (with col_qz from CARGA: 513, without: 229)
+  [DRY RUN] No data written to DB.
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=49637513809 | SARA ARAGAO DA SILVA BARBOSA
+      col_qz=1500.0000 | saldo_final=1962.2600 | saldo_final_carga=1962.2600
+    CPF=78296277972 | JOSE DO PRADO ROSA
+      col_qz=50.0000 | saldo_final=0.0000 | saldo_final_carga=0.0000
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 2 QZ1 ---
+  CARGA file: 1 QZN FEVEREIRO VEXPENSES 2026.xlsx
+  CARGA 2/1 (sheet '1 QZN FEV 2026'): 522 colaboradores.
+  Prepared 741 rows for 2026/02 QZ1
+    (with col_qz from CARGA: 522, without: 219)
+  [DRY RUN] No data written to DB.
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=49637513809 | SARA ARAGAO DA SILVA BARBOSA
+      col_qz=1500.0000 | saldo_final=554.2500 | saldo_final_carga=554.2500
+    CPF=78296277972 | JOSE DO PRADO ROSA
+      col_qz=100.0000 | saldo_final=70.6300 | saldo_final_carga=70.6300
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 2 QZ2 ---
+  CARGA file: 2QZ FEVEREIRO 2026 - VEXPENSES EQS.xlsx
+  CARGA 2/2 (sheet '2 QZ VEXPENSES 02_2026'): 304 colaboradores.
+  Prepared 738 rows for 2026/02 QZ2
+    (with col_qz from CARGA: 304, without: 434)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=0.0000 | saldo_final_carga=0.0000
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 3 QZ1 ---
+  CARGA file: 1 QZ MARÇO VEXPENSES 2026 (5).xlsx
+  CARGA 3/1 (sheet 'QUINZENA MARÇO'): 475 colaboradores.
+  Prepared 738 rows for 2026/03 QZ1
+    (with col_qz from CARGA: 475, without: 263)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=0.0000 | saldo_final_carga=0.0000
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 3 QZ2: NO CARGA SHEET — skipping ---
+
+--- Month 4 QZ1 ---
+  CARGA file: 1QZ ABRIL 2026 - VEXPENSES.xlsx
+  CARGA 4/1 (sheet '1 QZ VEXPENSES 04_2026'): 330 colaboradores.
+  Prepared 738 rows for 2026/04 QZ1
+    (with col_qz from CARGA: 330, without: 408)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=161.1200 | saldo_final_carga=161.1200
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 4 QZ2: NO CARGA SHEET — skipping ---
+
+--- Month 5 QZ1 ---
+  CARGA file: CARGA 1 QZ MAIO 26 VEXPENSES EQS.xlsx
+  CARGA 5/1 (sheet 'Planilha1'): 340 colaboradores.
+  Prepared 738 rows for 2026/05 QZ1
+    (with col_qz from CARGA: 340, without: 398)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=963.2800 | saldo_final_carga=963.2800
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 5 QZ2 ---
+  CARGA file: CARGA 2 QZ MAIO 26 VEXPENSES EQS.xlsx
+  CARGA 5/2 (sheet '2 QZ DE MAIO 26'): 325 colaboradores.
+  Prepared 738 rows for 2026/05 QZ2
+    (with col_qz from CARGA: 325, without: 413)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=0.0000 | saldo_final_carga=0.0000
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 6 QZ1 ---
+  CARGA file: CARGA 1 QZ JUNHO 26 VEXPENSES EQS.xlsx
+  CARGA 6/1 (sheet '1 QZ JUNHO'): 337 colaboradores.
+  Prepared 738 rows for 2026/06 QZ1
+    (with col_qz from CARGA: 292, without: 446)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=None | saldo_final=0 | saldo_final_carga=0
+  [DRY RUN] Skipping manual inputs.
+
+--- Month 6 QZ2 ---
+  CARGA file: CARGA 2 QZ JUNHO 26 VEXPENSES EQS.xlsx
+  CARGA 6/2 (sheet '2 QZ JUNHO'): 315 colaboradores.
+  Prepared 738 rows for 2026/06 QZ2
+    (with col_qz from CARGA: 315, without: 423)
+  [DRY RUN] No data written to DB.
+    CPF=51027941249 | JUAN CARLOS PANTOJA AMANAJAS
+      col_qz=None | saldo_final=-5494.7600 | saldo_final_carga=None
+    CPF=14845816792 | SAMUEL LEAL DE SOUZA
+      col_qz=None | saldo_final=6.5200 | saldo_final_carga=None
+    CPF=97135631900 | MARCOS SEGER
+      col_qz=1000.0000 | saldo_final=291.0000 | saldo_final_carga=291.0000
+  [DRY RUN] Skipping manual inputs.
+
+================================================================================
+SUMMARY:
+  01/2026 QZ1: {'rows_imported': 0, 'rows_total': 742}
+  01/2026 QZ2: {'rows_imported': 0, 'rows_total': 742}
+  02/2026 QZ1: {'rows_imported': 0, 'rows_total': 741}
+  02/2026 QZ2: {'rows_imported': 0, 'rows_total': 738}
+  03/2026 QZ1: {'rows_imported': 0, 'rows_total': 738}
+  03/2026 QZ2: skipped (no sheet)
+  04/2026 QZ1: {'rows_imported': 0, 'rows_total': 738}
+  04/2026 QZ2: skipped (no sheet)
+  05/2026 QZ1: {'rows_imported': 0, 'rows_total': 738}
+  05/2026 QZ2: {'rows_imported': 0, 'rows_total': 738}
+  06/2026 QZ1: {'rows_imported': 0, 'rows_total': 738}
+  06/2026 QZ2: {'rows_imported': 0, 'rows_total': 738}
+================================================================================

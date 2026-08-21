@@ -1,0 +1,80 @@
+=== Row 6 (headers) ===
+  Col 0: None
+  Col 1: 'PORTADOR'
+  Col 2: 'CPF'
+  Col 3: 'STATUS COLAB'
+  Col 4: 'CENTRO CUSTO'
+  Col 5: 'COD CENTRO CUSTO'
+  Col 6: 'GESTOR'
+  Col 7: 'DIREÇÃO'
+  Col 8: 'SALDO REEMBOLSAR'
+  Col 9: 'SALDO FINAL'
+  Col 10: '1QZ DE DEZ 26'
+  Col 11: 'SALDO CARTAO'
+  Col 12: 'ADIANTAMENTO'
+  Col 13: 'CARGA PARCIAL'
+  Col 14: 'REEMBOLSO'
+  Col 15: 'CARGA FINAL SEM REEMBOLSO'
+  Col 16: 'CARGA  FINAL REEMBOLSO'
+  Col 17: 'STATUS DO CARTAO'
+  Col 18: 'OBS '
+  Col 19: None
+  Col 20: None
+  Col 21: None
+  Col 22: None
+  Col 23: None
+  Col 24: None
+
+=== Row 7 (first data) ===
+  Col 0: None
+  Col 1: 'ABNER ANDRADE CAVALCANTE'
+  Col 2: '02027745203'
+  Col 3: 'ATIVO'
+  Col 4: 'CEF AM AC RR'
+  Col 5: 11030290001
+  Col 6: 'ANGELICA SOARES'
+  Col 7: 'ROGERIO SCATAMBULO'
+  Col 8: -3779.5100000000093
+  Col 9: 0
+  Col 10: 9840
+  Col 11: 3
+  Col 12: 0
+  Col 13: 9837
+  Col 14: 0
+  Col 15: 9837
+  Col 16: 9837
+  Col 17: 'Cartão ativo'
+  Col 18: None
+  Col 19: None
+  Col 20: None
+  Col 21: None
+  Col 22: None
+  Col 23: None
+  Col 24: None
+
+=== CHARLES NEVES (row 462) ===
+  Col 0: None
+  Col 1: 'CHARLES NEVES MATTIUZZI'
+  Col 2: '12547938790'
+  Col 3: 'ATIVO'
+  Col 4: 'TELEFONICA ES'
+  Col 5: 11061870001
+  Col 6: 'VINICIUS LOCATELLY'
+  Col 7: 'MARCOS CARIAS'
+  Col 8: 0
+  Col 9: 4466.470000000011
+  Col 10: 4200
+  Col 11: 32.96
+  Col 12: 0
+  Col 13: -299.43000000001115
+  Col 14: 0
+  Col 15: 0
+  Col 16: 0
+  Col 17: 'Cartão ativo'
+  Col 18: None
+  Col 19: None
+  Col 20: None
+  Col 21: None
+  Col 22: None
+  Col 23: None
+  Col 24: None

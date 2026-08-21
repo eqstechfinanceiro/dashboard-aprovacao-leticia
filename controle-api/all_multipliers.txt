@@ -1,0 +1,6 @@
+Jan QZ1: cell=0.2, users=202, most_common=[(1.0, 103), (0.2, 99)]
+Feb QZ1: cell=None, users=53, most_common=[(1.0, 53)]
+Mar QZ1: cell=None, users=5, most_common=[(2.7954, 1), (2.4587, 1), (0.0925, 1)]
+Apr QZ1: cell=None, users=2, most_common=[(1.0003, 1), (11.3426, 1)]
+May QZ1: cell=None, users=74, most_common=[(0.5, 74)]
+Jun QZ1: cell=None, users=57, most_common=[(0.6, 57)]

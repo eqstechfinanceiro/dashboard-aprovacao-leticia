@@ -1,0 +1,498 @@
+﻿================================================================================
+CPF COVERAGE
+  Reference: 765 CPFs
+  Ours:      799 CPFs
+  In both:   749 CPFs
+  Ref only:  16 CPFs
+  Ours only: 50 CPFs
+
+  CPFs only in reference:
+    00207639051 RAFAEL MEIRELES DA SILVEIRA
+    01485775043 KATIA FERNANDA DA ROSA HAHN
+    04935010029 WELLITON ROBERTO OLIVEIRA DA SILVA
+    07851945925 PETTERSON ROBSON BATISTA E SILVA
+    08304679981 VYCTOR HUGO IRINEU VIEIRA
+    08587992945 LUIZ EDUARDO SANTANA DA SILVA
+    50546120091 NILTON CARLOS DA SILVEIRA JULIO
+    65975499020 MARIO ANTONIO BRITO GUIMARAES
+    67645984015 RADAMES SANTOS DA SILVA MACHADO
+    85299839049 BRUNO VILLA VEIGA
+    85627178000 TAINAN DA SILVA VELLOSO
+    86881094000 CHRISTIAN ARAUJO DA SILVA
+    88761711004 CRISTIANO BELMONTE MARTINS
+    89386809087 JOCAFER DUTRA DE LIMA
+    94330301091 NOLO EDUARDO AZEVEDO ORESTES
+    99413736049 MARCIO EZEQUIEL MARQUES DA SILVEIRA
+
+  CPFs only in ours:
+    00185106048 LUIS FELIPE COSTA
+    00519645383 EDSON DE SOUSA ARAUJO
+    00615066992 ORIELSON CORREA
+    01077000006 Ezequiel de Oliveira Correa
+    01299509126 AMANDA ALVES MENDES
+    01419182927 ANTONIO MARCOS DE SOUZA
+    01723092550 ROGERIO SILVA DOS SANTOS
+    02335969501 MARKUS VINICIUS CAMARGO CONSTANTINO
+    02970232090 GUILHERME MINUZZI ADAM
+    03685380958 FERNANDO DE MELO
+    03738994912 PRISCILA MORAES
+    03816889689 FABIANO RODRIGUES DA SILVA
+    04141907936 ALEXANDRE DOS SANTOS
+    04199511997 ANDREY CARDOSO REGINALDO
+    04280252262 MATEUS DANTAS MIRANDA
+    04565025990 CLEDIVALDO DINIZ BERNARDO
+    04605678964 VALCLEI DA MATA
+    05934327976 RAFAEL AUDELIR KOCHE
+    06046938937 ANDRESSA CORREA SANCHES DAUSSEN
+    06085235429 ISA CARLA DE OLIVEIRA LOPES
+    06382680958 FRANCYELI ROSALI ALVES DE FREITAS
+    07193849743 CRISTIANE ANTUNES DA SILVA
+    07414082440 JEFFERSON BATISTA PEREIRA
+    07676685966 EVERTON NASCIMENTO DOS SANTOS
+    08519866921 FELIPE DE LIMA FERNANDES
+    08682230933 CESAR AUGUSTO BATISTA DE ALMEIDA
+    08979501943 ARIEL FLORES
+    09141458516 ITALO LUIZ BARROS MEDRADO
+    09603234907 PEDRO HENRIQUE MARTINS BOTELHO
+    10772366896 EDIVALDO CESAR TEIXEIRA
+    11306373603 ISABELA FERNANDA DA SILVA SOUZA
+    11504789695 NICOLAS DA COSTA
+    11843554950 STEFANI OLIVEIRA ALVES
+    13444622783 INGRID DO CARMO REIS
+    13482584974 JULIA FIGUEIREDO NECHEL
+    28707818068 SERGIO ADOLFO SOARES
+    30879661852 RAFAEL OLIVEIRA CANTANHEDE
+    35931399879 FERNANDO ONO ULISSES
+    38822580044 VOLNEI ROGERIO SUNDYN
+    42060893968 VALDEMIR PEDRO FOSS
+    54229464134 JOSE ROBERTO DA SILVA FREIRE
+    56025335249 CARLOS FREDERICO DUTRA NUNES
+    65009304015 JOSE LUIS TERRIBILE
+    80194192504 JEFERSON DA SILVA SENA
+    82533164291 ALAN KLEBER DA SILVA TITAN
+    82638837172 HERMES MOTTA SOARES
+    91128838915 ADRIANO BENEDETTI
+    91866960504 FABIO SANTOS SERPA
+    93186460972 WALTER FRANCISCO PIRES
+    97071641072 CASSIANO DOS SANTOS LYRA
+
+================================================================================
+FIELD: CARGA ÔÇö 11 divergences, total gap R$ 1,944.00
+--------------------------------------------------------------------------------
+  68187483920 LUIS CARLOS BROERING           ref=    3,113.86  ours=    2,613.86  diff=   -500.00
+  03738994912 PRISCILA MORAES                ref=        0.00  ours=      400.00  diff=   +400.00 [NOT IN REF]
+  01419182927 ANTONIO MARCOS DE SOUZA        ref=        0.00  ours=      387.00  diff=   +387.00 [NOT IN REF]
+  07136772605 ANTONIO MARCOS DE SOUZA        ref=      387.00  ours=        0.00  diff=   -387.00
+  84733977549 ALEXANDRE DOS SANTOS           ref=      100.00  ours=        0.00  diff=   -100.00
+  04141907936 ALEXANDRE DOS SANTOS           ref=        0.00  ours=      100.00  diff=   +100.00 [NOT IN REF]
+  06223031980 ADEMARCIO DUARTE LOPES         ref=   32,206.26  ours=   32,227.26  diff=    +21.00
+  11178519740 GUILHERME MOTTA RIBEIRO SILVA  ref=   39,829.78  ours=   39,850.78  diff=    +21.00
+  02013700008 WILLIAM NORONHA TEIXEIRA       ref=    7,391.69  ours=    7,405.69  diff=    +14.00
+  00041171071 JAFER DA FONTOURA AHMAD        ref=   52,566.72  ours=   52,573.72  diff=     +7.00
+  29011288823 MARCEL GOMES DE OLIVEIRA       ref=   12,475.14  ours=   12,482.14  diff=     +7.00
+
+================================================================================
+FIELD: TRANSF ÔÇö 6 divergences, total gap R$ 2,106.00
+--------------------------------------------------------------------------------
+  51182084168 SILVIO VINICIUS PINHEIRO GOES  ref=   87,178.44  ours=   86,178.44  diff= -1,000.00
+  03738994912 PRISCILA MORAES                ref=        0.00  ours=      400.00  diff=   +400.00 [NOT IN REF]
+  01419182927 ANTONIO MARCOS DE SOUZA        ref=        0.00  ours=      341.00  diff=   +341.00 [NOT IN REF]
+  07136772605 ANTONIO MARCOS DE SOUZA        ref=      341.00  ours=        0.00  diff=   -341.00
+  84733977549 ALEXANDRE DOS SANTOS           ref=       12.00  ours=        0.00  diff=    -12.00
+  04141907936 ALEXANDRE DOS SANTOS           ref=        0.00  ours=       12.00  diff=    +12.00 [NOT IN REF]
+
+================================================================================
+FIELD: TARIFA ÔÇö 57 divergences, total gap R$ 565.73
+--------------------------------------------------------------------------------
+  06576198922 LUDGERO HORACIO DE OLIVEIRA    ref=      322.00  ours=      357.00  diff=    +35.00
+  01050938232 CHARLYTON COSTA ANDRADE        ref=      421.20  ours=      391.27  diff=    -29.93
+  11178519740 GUILHERME MOTTA RIBEIRO SILVA  ref=      273.00  ours=      301.00  diff=    +28.00
+  06223031980 ADEMARCIO DUARTE LOPES         ref=       98.00  ours=      119.00  diff=    +21.00
+  17996820724 MATHEUS FERNANDES GUIMARAES    ref=      378.00  ours=      399.00  diff=    +21.00
+  65973500225 CARLOS NASCIMENTO NONATO JUNIO ref=      707.00  ours=      693.00  diff=    -14.00
+  36813601890 DOUGLAS ALEXANDRE BARBOSA      ref=       49.00  ours=       63.00  diff=    +14.00
+  72756284220 MARCO AURELIO DE ANDRADE MORAE ref=      427.00  ours=      441.00  diff=    +14.00
+  99532344004 RODRIGO VANZETTA               ref=      448.00  ours=      462.00  diff=    +14.00
+  02013700008 WILLIAM NORONHA TEIXEIRA       ref=       70.00  ours=       84.00  diff=    +14.00
+  02027745203 ABNER ANDRADE CAVALCANTE       ref=    1,554.00  ours=    1,568.00  diff=    +14.00
+  00975748998 LUCAS MARTINS MACAN            ref=      611.00  ours=      625.00  diff=    +14.00
+  11498112692 NEDSON LUIZ DURAES VELOSO      ref=      112.00  ours=      126.00  diff=    +14.00
+  94551804304 ADSON ARAUJO DA SILVA          ref=      343.00  ours=      357.00  diff=    +14.00
+  01677920599 RAFAEL AMORIM VELLO            ref=    2,054.58  ours=    2,068.58  diff=    +14.00
+  01356318665 MARCO AURELIO DE LIMA          ref=      513.06  ours=      499.06  diff=    -14.00
+  45154701836 KATIA RESENDE DA SILVA         ref=      130.19  ours=      119.69  diff=    -10.50
+  01573995088 JULIANO MACHADO DE MIRANDA     ref=       13.00  ours=        3.00  diff=    -10.00
+  47502843604 RONALDO DE MATOS LELIS         ref=      217.00  ours=      226.86  diff=     +9.86
+  00448428997 LUIS FELIPE COSTA              ref=      113.68  ours=      106.18  diff=     -7.50
+  14084321613 STEPHANIE THAINARA DE OLIVEIRA ref=      147.00  ours=      154.00  diff=     +7.00
+  38950693291 GERSON PEREIRA                 ref=      140.00  ours=      133.00  diff=     -7.00
+  00041171071 JAFER DA FONTOURA AHMAD        ref=      189.00  ours=      196.00  diff=     +7.00
+  38880279858 FABIANA CAMILA BARBOSA DE MORA ref=      162.62  ours=      169.62  diff=     +7.00
+  05766838760 ANTONIO FERREIRA DE MENDONCA N ref=      210.00  ours=      217.00  diff=     +7.00
+  05504962706 RODRIGO SANTOS DA SILVA        ref=       98.00  ours=      105.00  diff=     +7.00
+  10491624719 TIAGO DE OLIVEIRA PAIVA        ref=      119.00  ours=      126.00  diff=     +7.00
+  03032275326 ANDRE ARANHA MEISTER           ref=      217.00  ours=      224.00  diff=     +7.00
+  00965306186 JAIME ALVES DE ABREU SILVA     ref=      259.00  ours=      266.00  diff=     +7.00
+  00849381533 TIAGO FERNANDES SANTOS DE OLIV ref=      231.00  ours=      238.00  diff=     +7.00
+  11897381638 ANDRE LUIZ SANTANA             ref=      546.25  ours=      553.25  diff=     +7.00
+  10254434894 MARCELO PEREIRA LIMA           ref=       49.00  ours=       42.00  diff=     -7.00
+  83978054515 RAMON GOMES TEIXEIRA           ref=      203.00  ours=      210.00  diff=     +7.00
+  89395140259 RAQUEL PANTOJA SANTOS          ref=      133.00  ours=      140.00  diff=     +7.00
+  05168980945 PRISCILA GOTARDO PEREIRA       ref=       91.00  ours=       98.00  diff=     +7.00
+  12237490619 VICTOR SIGOLO PINHEIRO PIMENTA ref=      511.00  ours=      518.00  diff=     +7.00
+  00526143959 FABIO DIOGO BITTENCOURT        ref=      518.00  ours=      525.00  diff=     +7.00
+  06792773310 GEORGE LUIS ROCHA FIGUEIREDO   ref=      161.00  ours=      154.00  diff=     -7.00
+  01553544692 DIEGO JOSE DE PAULO            ref=      140.00  ours=      147.00  diff=     +7.00
+  26513583802 LEANDRO FIGUEREDO BELCHIOR     ref=      126.00  ours=      119.00  diff=     -7.00
+  37258325875 JAQUELINE ONORIO DOS SANTOS AL ref=       56.00  ours=       63.00  diff=     +7.00
+  16306431730 BRUNO FERREIRA DE SOUZA RODRIG ref=      707.00  ours=      700.00  diff=     -7.00
+  04025408325 NILSON RODRIGUES CARDOSO JUNIO ref=      168.00  ours=      161.00  diff=     -7.00
+  69116709004 DEISE SOARES DE CAMPOS         ref=       42.00  ours=       35.00  diff=     -7.00
+  09867858816 CARLOS ROBERTO DE CARVALHO PER ref=      238.00  ours=      245.00  diff=     +7.00
+  36447007888 RENAN VICTORIO DE LIMA         ref=       56.00  ours=       63.00  diff=     +7.00
+  61158852649 JOSE CLAUDIO RIBEIRO           ref=      462.00  ours=      469.00  diff=     +7.00
+  26687333836 TEOFILO TOLLENDAL PACHECO      ref=       77.00  ours=       70.00  diff=     -7.00
+  16996346886 SANDRO CAPISTRANO              ref=      221.35  ours=      214.35  diff=     -7.00
+  05144026958 CLAUDEMIR GREGOSKI RODRIGUES   ref=      112.00  ours=      105.00  diff=     -7.00
+  26652452804 JOSE CARLOS BATISTA            ref=      595.00  ours=      602.00  diff=     +7.00
+  29011288823 MARCEL GOMES DE OLIVEIRA       ref=      147.00  ours=      154.00  diff=     +7.00
+  02653570041 NELSON FILIPE MARTINS DA SILVA ref=      141.76  ours=      135.82  diff=     -5.94
+  04347084102 FELIPE MORAES COSTA DE BRITTO  ref=      295.41  ours=      292.41  diff=     -3.00
+  00584427905 LEANDRO SOUSA                  ref=       34.00  ours=       31.00  diff=     -3.00
+  11823866603 MARCOS VINICIUS DE SOUZA ALVES ref=       15.00  ours=       13.50  diff=     -1.50
+  46850229800 RAFAEL ALMEIDA LOPES           ref=       31.04  ours=       32.54  diff=     +1.50
+
+================================================================================
+FIELD: PRESTACAO ÔÇö 71 divergences, total gap R$ 124,062.24
+--------------------------------------------------------------------------------
+  26652452804 JOSE CARLOS BATISTA            ref=   55,247.45  ours=   82,023.57  diff=+26,776.12
+  07214272946 PATRICK FERNANDO GOULART ALVES ref=   16,689.06  ours=   29,064.52  diff=+12,375.46
+  67094260334 JACKSON CAROLINO CARNEIRO      ref=        0.00  ours=    8,822.35  diff= +8,822.35
+  85648809620 LEONARDO GONCALVES RIBEIRO FIL ref=        0.00  ours=    7,786.08  diff= +7,786.08
+  04982917906 AFONSO FIORELLO CARVALHO       ref=        0.00  ours=    5,895.32  diff= +5,895.32
+  02424765545 NELSON MOURA RIBEIRO           ref=        0.00  ours=    4,694.12  diff= +4,694.12
+  34168918807 EMERSON LEITE DE BARROS        ref=   54,057.89  ours=   58,215.97  diff= +4,158.08
+  91920795987 CLAUDINEI VICENTE DE LIMA      ref=    3,591.52  ours=    7,524.60  diff= +3,933.08
+  01949569039 VALDOIR NOGUEIRA ANTUNES       ref=    5,886.00  ours=    8,766.00  diff= +2,880.00
+  05036681681 DANIEL PORFIRIO DE SOUSA       ref=        0.00  ours=    2,768.24  diff= +2,768.24
+  60707461049 PEDRO LUIS PIRES DOS SANTOS    ref=        0.00  ours=    2,660.00  diff= +2,660.00
+  82753342091 RUDINEI MACHADO RODRIGUES      ref=    1,876.00  ours=    4,536.00  diff= +2,660.00
+  03535433061 ATILA SILVA DOS SANTOS         ref=        0.00  ours=    2,314.14  diff= +2,314.14
+  86733028034 RIQUELME DE OLIVEIRA E SILVA   ref=    1,040.00  ours=    3,312.00  diff= +2,272.00
+  06304071698 AILTON MENDES AGUILAR          ref=        0.00  ours=    2,262.06  diff= +2,262.06
+  84736305053 JONATA OLIVEIRA DA SILVA       ref=    3,268.00  ours=    5,428.00  diff= +2,160.00
+  37634925004 IVON RAMOS MIRANDA             ref=    4,192.00  ours=    6,112.00  diff= +1,920.00
+  03661672940 MARCELO BEZERRA                ref=        0.00  ours=    1,869.19  diff= +1,869.19
+  85087572634 ADAUTO JOSE PEREIRA            ref=    1,526.24  ours=    3,293.85  diff= +1,767.61
+  01773622781 ERASMO PEREIRA MONTEIRO        ref=        0.00  ours=    1,754.35  diff= +1,754.35
+  02653570041 NELSON FILIPE MARTINS DA SILVA ref=    4,616.00  ours=    6,256.00  diff= +1,640.00
+  90443306087 CARLOS RENATO PACHECO DA SILVA ref=    6,450.22  ours=    8,080.98  diff= +1,630.76
+  47331178253 FRANCIONE DE SOUZA LUCENA      ref=   16,318.92  ours=   14,854.05  diff= -1,464.87
+  77283759204 ANA LUIZA OLIVEIRA CAMELO      ref=    1,755.45  ours=    3,154.12  diff= +1,398.67
+  06109625663 FLAVIO PEREIRA DE SOUZA        ref=        0.00  ours=    1,231.91  diff= +1,231.91
+  05731312958 FABIO PROVESI                  ref=   17,203.77  ours=   18,394.09  diff= +1,190.32
+  03139017081 PAULO AUGUSTO OLIVEIRA LIMA    ref=      572.00  ours=    1,532.00  diff=   +960.00
+  05676820640 WESLEY CARLOS AUGUSTO          ref=        0.00  ours=      955.29  diff=   +955.29
+  06439531670 HELDER ARCHANJO FERREIRA       ref=    5,212.83  ours=    6,056.55  diff=   +843.72
+  17996820724 MATHEUS FERNANDES GUIMARAES    ref=   41,529.73  ours=   40,729.73  diff=   -800.00
+  01783625651 AMARAL RODRIGUES NUNES         ref=        0.00  ours=      798.60  diff=   +798.60
+  38950693291 GERSON PEREIRA                 ref=    7,164.22  ours=    6,402.22  diff=   -762.00
+  15322365737 JULIA FRANCISCO MADUREIRA      ref=    1,143.87  ours=      467.69  diff=   -676.18
+  05337927973 RAFAEL CARNIEL DA SILVA        ref=   10,716.18  ours=   10,042.36  diff=   -673.82
+  02864195054 THUANE DE OLIVEIRA MILSONI     ref=      700.00  ours=    1,352.00  diff=   +652.00
+  82341478972 BRUNO EDUARDO DE SOUZA         ref=      207.20  ours=      844.20  diff=   +637.00
+  83501967691 WAGNER FERNANDES DA SILVA      ref=        0.00  ours=      537.68  diff=   +537.68
+  38548259515 ENZIO CARVALHO DA MOTA         ref=   48,114.62  ours=   48,606.72  diff=   +492.10
+  83058133553 ADSON SANTOS DA SILVA          ref=    9,377.90  ours=    8,963.69  diff=   -414.21
+  16996346886 SANDRO CAPISTRANO              ref=   47,036.32  ours=   46,626.32  diff=   -410.00
+  46850229800 RAFAEL ALMEIDA LOPES           ref=    4,876.70  ours=    5,282.86  diff=   +406.16
+  02474960902 ALESSANDRO RODRIGO PASTRELLI   ref=   10,860.49  ours=   11,261.94  diff=   +401.45
+  02862032786 CRISTIANO ANESIO GOMES DO NASC ref=   15,406.03  ours=   15,043.43  diff=   -362.60
+  07024923610 RODRIGO CESAR DOS SANTOS       ref=   35,224.40  ours=   34,887.00  diff=   -337.40
+  04442316929 NIVALDO THIAGO DA CRUZ SANTOS  ref=      869.70  ours=    1,199.73  diff=   +330.03
+  04280602344 FRANCISCO MICHAEL CASTRO FERNA ref=        0.00  ours=      277.00  diff=   +277.00
+  02777503001 TIAGO BRANCO DE BARROS         ref=   10,868.52  ours=   10,631.72  diff=   -236.80
+  04347084102 FELIPE MORAES COSTA DE BRITTO  ref=   36,350.28  ours=   36,569.28  diff=   +219.00
+  10206563957 JACSSON MAYLON CASTRO CORREA   ref=   12,736.79  ours=   12,556.79  diff=   -180.00
+  69456313034 SANDRA CRISTINA ALVES MACHADO  ref=    6,828.49  ours=    6,993.89  diff=   +165.40
+  82877904091 ALEX SANDRO PEREIRA MARQUES    ref=    2,320.36  ours=    2,163.56  diff=   -156.80
+  29856268893 LUIZ GUSTAVO DI GIORGIO        ref=    8,552.80  ours=    8,404.10  diff=   -148.70
+  10521167957 MURILO DE ALMEIDA              ref=    5,577.65  ours=    5,694.15  diff=   +116.50
+  00846379945 OSMAN DOS SANTOS MORAIS JUNIOR ref=        0.00  ours=       95.65  diff=    +95.65
+  04141907936 ALEXANDRE DOS SANTOS           ref=        0.00  ours=       88.00  diff=    +88.00 [NOT IN REF]
+  08418392983 ROBSON DOS SANTOS GUEDES       ref=    3,881.93  ours=    3,811.93  diff=    -70.00
+  02449603050 RENATA PALMA LEAL              ref=       70.00  ours=        0.00  diff=    -70.00
+  02027745203 ABNER ANDRADE CAVALCANTE       ref=  218,431.00  ours=  218,362.32  diff=    -68.68
+  01730674500 MARCEL DA HORA CARVALHO        ref=   38,462.50  ours=   38,531.00  diff=    +68.50
+  34596010862 EDIBERTO GEORGE RELIQUIAS      ref=      909.66  ours=      844.67  diff=    -64.99
+  01050938232 CHARLYTON COSTA ANDRADE        ref=   25,645.48  ours=   25,699.98  diff=    +54.50
+  10363402950 MARIA EDUARDA ARAGAO           ref=   33,169.24  ours=   33,217.34  diff=    +48.10
+  04661413199 TIAGO DE JESUS ARAUJO          ref=    3,661.51  ours=    3,709.51  diff=    +48.00
+  45154701836 KATIA RESENDE DA SILVA         ref=    7,151.18  ours=    7,106.18  diff=    -45.00
+  26953703857 ROBERTO ALIAGA                 ref=        0.00  ours=       33.20  diff=    +33.20
+  22136444972 ILMAR FONTES VIEIRA            ref=    3,491.60  ours=    3,459.80  diff=    -31.80
+  45120065830 LARISSA SANTOS DA SILVA        ref=    7,168.83  ours=    7,186.68  diff=    +17.85
+  04434355708 LUCIANO JOSE DO AMARAL PEREIRA ref=   56,379.29  ours=   56,370.09  diff=     -9.20
+  07690263623 JOELSON FERREIRA DOS SANTOS    ref=   46,370.13  ours=   46,376.13  diff=     +6.00
+  01063690080 JORGE ANTONIO VARGAS DA SILVA  ref=    5,965.92  ours=    5,971.42  diff=     +5.50
+  07198282440 THIEGO LEANDRO ALVES DE OLIVEI ref=   44,642.68  ours=   44,644.78  diff=     +2.10
+
+================================================================================
+FIELD: SALDO_PREST ÔÇö 118 divergences, total gap R$ 126,002.23
+--------------------------------------------------------------------------------
+  26652452804 JOSE CARLOS BATISTA            ref=   23,872.11  ours=   -2,911.01  diff=-26,783.12
+  07214272946 PATRICK FERNANDO GOULART ALVES ref=      312.67  ours=  -12,062.79  diff=-12,375.46
+  67094260334 JACKSON CAROLINO CARNEIRO      ref=        0.00  ours=   -8,822.35  diff= -8,822.35
+  85648809620 LEONARDO GONCALVES RIBEIRO FIL ref=        0.00  ours=   -7,786.08  diff= -7,786.08
+  04982917906 AFONSO FIORELLO CARVALHO       ref=        0.00  ours=   -5,895.32  diff= -5,895.32
+  02424765545 NELSON MOURA RIBEIRO           ref=        0.00  ours=   -4,694.12  diff= -4,694.12
+  34168918807 EMERSON LEITE DE BARROS        ref=    1,598.78  ours=   -2,559.30  diff= -4,158.08
+  91920795987 CLAUDINEI VICENTE DE LIMA      ref=       10.52  ours=   -3,922.56  diff= -3,933.08
+  01949569039 VALDOIR NOGUEIRA ANTUNES       ref=    9,715.61  ours=    6,835.61  diff= -2,880.00
+  05036681681 DANIEL PORFIRIO DE SOUSA       ref=        0.00  ours=   -2,768.24  diff= -2,768.24
+  60707461049 PEDRO LUIS PIRES DOS SANTOS    ref=    6,256.46  ours=    3,596.46  diff= -2,660.00
+  82753342091 RUDINEI MACHADO RODRIGUES      ref=    8,108.50  ours=    5,448.50  diff= -2,660.00
+  03535433061 ATILA SILVA DOS SANTOS         ref=        0.00  ours=   -2,314.14  diff= -2,314.14
+  86733028034 RIQUELME DE OLIVEIRA E SILVA   ref=    7,288.14  ours=    5,016.14  diff= -2,272.00
+  06304071698 AILTON MENDES AGUILAR          ref=        0.00  ours=   -2,262.06  diff= -2,262.06
+  84736305053 JONATA OLIVEIRA DA SILVA       ref=    6,229.97  ours=    4,069.97  diff= -2,160.00
+  37634925004 IVON RAMOS MIRANDA             ref=    4,909.97  ours=    2,989.97  diff= -1,920.00
+  03661672940 MARCELO BEZERRA                ref=        0.00  ours=   -1,869.19  diff= -1,869.19
+  85087572634 ADAUTO JOSE PEREIRA            ref=       59.80  ours=   -1,707.81  diff= -1,767.61
+  01773622781 ERASMO PEREIRA MONTEIRO        ref=        4.33  ours=   -1,750.02  diff= -1,754.35
+  02653570041 NELSON FILIPE MARTINS DA SILVA ref=    5,409.82  ours=    3,775.76  diff= -1,634.06
+  90443306087 CARLOS RENATO PACHECO DA SILVA ref=   14,214.26  ours=   12,583.50  diff= -1,630.76
+  47331178253 FRANCIONE DE SOUZA LUCENA      ref=   -1,799.09  ours=     -334.22  diff= +1,464.87
+  77283759204 ANA LUIZA OLIVEIRA CAMELO      ref=     -965.45  ours=   -2,364.12  diff= -1,398.67
+  06109625663 FLAVIO PEREIRA DE SOUZA        ref=        0.00  ours=   -1,231.91  diff= -1,231.91
+  05731312958 FABIO PROVESI                  ref=    2,071.60  ours=      881.28  diff= -1,190.32
+  51182084168 SILVIO VINICIUS PINHEIRO GOES  ref=    4,273.90  ours=    5,273.90  diff= +1,000.00
+  03139017081 PAULO AUGUSTO OLIVEIRA LIMA    ref=    6,178.35  ours=    5,218.35  diff=   -960.00
+  05676820640 WESLEY CARLOS AUGUSTO          ref=        0.00  ours=     -955.29  diff=   -955.29
+  06439531670 HELDER ARCHANJO FERREIRA       ref=      -67.81  ours=     -911.53  diff=   -843.72
+  01783625651 AMARAL RODRIGUES NUNES         ref=        0.00  ours=     -798.60  diff=   -798.60
+  17996820724 MATHEUS FERNANDES GUIMARAES    ref=    1,140.76  ours=    1,919.76  diff=   +779.00
+  38950693291 GERSON PEREIRA                 ref=   -1,822.93  ours=   -1,053.93  diff=   +769.00
+  15322365737 JULIA FRANCISCO MADUREIRA      ref=        0.00  ours=      676.18  diff=   +676.18
+  05337927973 RAFAEL CARNIEL DA SILVA        ref=     -517.72  ours=      156.10  diff=   +673.82
+  02864195054 THUANE DE OLIVEIRA MILSONI     ref=      666.19  ours=       14.19  diff=   -652.00
+  82341478972 BRUNO EDUARDO DE SOUZA         ref=      692.80  ours=       55.80  diff=   -637.00
+  83501967691 WAGNER FERNANDES DA SILVA      ref=        0.00  ours=     -537.68  diff=   -537.68
+  68187483920 LUIS CARLOS BROERING           ref=      937.22  ours=      437.22  diff=   -500.00
+  38548259515 ENZIO CARVALHO DA MOTA         ref=    1,347.85  ours=      855.75  diff=   -492.10
+  16996346886 SANDRO CAPISTRANO              ref=    3,790.00  ours=    4,207.00  diff=   +417.00
+  83058133553 ADSON SANTOS DA SILVA          ref=     -197.09  ours=      217.12  diff=   +414.21
+  46850229800 RAFAEL ALMEIDA LOPES           ref=      610.84  ours=      203.18  diff=   -407.66
+  02474960902 ALESSANDRO RODRIGO PASTRELLI   ref=      744.08  ours=      342.63  diff=   -401.45
+  02862032786 CRISTIANO ANESIO GOMES DO NASC ref=    1,126.22  ours=    1,488.82  diff=   +362.60
+  07024923610 RODRIGO CESAR DOS SANTOS       ref=     -337.40  ours=        0.00  diff=   +337.40
+  04442316929 NIVALDO THIAGO DA CRUZ SANTOS  ref=     -106.32  ours=     -436.35  diff=   -330.03
+  04280602344 FRANCISCO MICHAEL CASTRO FERNA ref=        0.00  ours=     -277.00  diff=   -277.00
+  02777503001 TIAGO BRANCO DE BARROS         ref=    1,932.94  ours=    2,169.74  diff=   +236.80
+  04347084102 FELIPE MORAES COSTA DE BRITTO  ref=   -4,399.94  ours=   -4,615.94  diff=   -216.00
+  10206563957 JACSSON MAYLON CASTRO CORREA   ref=        0.00  ours=      180.00  diff=   +180.00
+  69456313034 SANDRA CRISTINA ALVES MACHADO  ref=      186.04  ours=       20.64  diff=   -165.40
+  82877904091 ALEX SANDRO PEREIRA MARQUES    ref=      613.14  ours=      769.94  diff=   +156.80
+  29856268893 LUIZ GUSTAVO DI GIORGIO        ref=      677.50  ours=      826.20  diff=   +148.70
+  10521167957 MURILO DE ALMEIDA              ref=    1,116.50  ours=    1,000.00  diff=   -116.50
+  00846379945 OSMAN DOS SANTOS MORAIS JUNIOR ref=        0.00  ours=      -95.65  diff=    -95.65
+  84733977549 ALEXANDRE DOS SANTOS           ref=       88.00  ours=        0.00  diff=    -88.00
+  08418392983 ROBSON DOS SANTOS GUEDES       ref=      331.63  ours=      401.63  diff=    +70.00
+  02449603050 RENATA PALMA LEAL              ref=        0.00  ours=       70.00  diff=    +70.00
+  01730674500 MARCEL DA HORA CARVALHO        ref=     -153.54  ours=     -222.04  diff=    -68.50
+  34596010862 EDIBERTO GEORGE RELIQUIAS      ref=       43.30  ours=      108.29  diff=    +64.99
+  45154701836 KATIA RESENDE DA SILVA         ref=     -930.65  ours=     -875.15  diff=    +55.50
+  02027745203 ABNER ANDRADE CAVALCANTE       ref=   -6,474.24  ours=   -6,419.56  diff=    +54.68
+  10363402950 MARIA EDUARDA ARAGAO           ref=     -997.76  ours=   -1,045.86  diff=    -48.10
+  04661413199 TIAGO DE JESUS ARAUJO          ref=      602.49  ours=      554.49  diff=    -48.00
+  01419182927 ANTONIO MARCOS DE SOUZA        ref=        0.00  ours=       46.00  diff=    +46.00 [NOT IN REF]
+  07136772605 ANTONIO MARCOS DE SOUZA        ref=       46.00  ours=        0.00  diff=    -46.00
+  06576198922 LUDGERO HORACIO DE OLIVEIRA    ref=    2,057.76  ours=    2,022.76  diff=    -35.00
+  26953703857 ROBERTO ALIAGA                 ref=    1,384.59  ours=    1,351.39  diff=    -33.20
+  22136444972 ILMAR FONTES VIEIRA            ref=      150.20  ours=      182.00  diff=    +31.80
+  01050938232 CHARLYTON COSTA ANDRADE        ref=   16,090.24  ours=   16,065.67  diff=    -24.57
+  45120065830 LARISSA SANTOS DA SILVA        ref=      290.17  ours=      272.32  diff=    -17.85
+  11498112692 NEDSON LUIZ DURAES VELOSO      ref=      857.76  ours=      843.76  diff=    -14.00
+  36813601890 DOUGLAS ALEXANDRE BARBOSA      ref=      419.40  ours=      405.40  diff=    -14.00
+  65973500225 CARLOS NASCIMENTO NONATO JUNIO ref=    1,760.65  ours=    1,774.65  diff=    +14.00
+  72756284220 MARCO AURELIO DE ANDRADE MORAE ref=    4,491.85  ours=    4,477.85  diff=    -14.00
+  00975748998 LUCAS MARTINS MACAN            ref=    5,345.32  ours=    5,331.32  diff=    -14.00
+  94551804304 ADSON ARAUJO DA SILVA          ref=      375.15  ours=      361.15  diff=    -14.00
+  01356318665 MARCO AURELIO DE LIMA          ref=      552.74  ours=      566.74  diff=    +14.00
+  01677920599 RAFAEL AMORIM VELLO            ref=    7,062.57  ours=    7,048.57  diff=    -14.00
+  99532344004 RODRIGO VANZETTA               ref=     -332.70  ours=     -346.70  diff=    -14.00
+  01573995088 JULIANO MACHADO DE MIRANDA     ref=      734.00  ours=      744.00  diff=    +10.00
+  47502843604 RONALDO DE MATOS LELIS         ref=     -157.91  ours=     -167.77  diff=     -9.86
+  04434355708 LUCIANO JOSE DO AMARAL PEREIRA ref=    3,953.82  ours=    3,963.02  diff=     +9.20
+  00448428997 LUIS FELIPE COSTA              ref=      377.90  ours=      385.40  diff=     +7.50
+  04025408325 NILSON RODRIGUES CARDOSO JUNIO ref=     -118.00  ours=     -111.00  diff=     +7.00
+  05504962706 RODRIGO SANTOS DA SILVA        ref=    1,786.30  ours=    1,779.30  diff=     -7.00
+  06792773310 GEORGE LUIS ROCHA FIGUEIREDO   ref=      258.60  ours=      265.60  diff=     +7.00
+  38880279858 FABIANA CAMILA BARBOSA DE MORA ref=      711.93  ours=      704.93  diff=     -7.00
+  00849381533 TIAGO FERNANDES SANTOS DE OLIV ref=      800.00  ours=      793.00  diff=     -7.00
+  10491624719 TIAGO DE OLIVEIRA PAIVA        ref=     -527.29  ours=     -534.29  diff=     -7.00
+  89395140259 RAQUEL PANTOJA SANTOS          ref=     -490.15  ours=     -497.15  diff=     -7.00
+  00965306186 JAIME ALVES DE ABREU SILVA     ref=    2,432.77  ours=    2,425.77  diff=     -7.00
+  10254434894 MARCELO PEREIRA LIMA           ref=      384.56  ours=      391.56  diff=     +7.00
+  83978054515 RAMON GOMES TEIXEIRA           ref=   -1,282.91  ours=   -1,289.91  diff=     -7.00
+  37258325875 JAQUELINE ONORIO DOS SANTOS AL ref=    1,344.54  ours=    1,337.54  diff=     -7.00
+  16306431730 BRUNO FERREIRA DE SOUZA RODRIG ref=   42,722.55  ours=   42,729.55  diff=     +7.00
+  26687333836 TEOFILO TOLLENDAL PACHECO      ref=     -145.77  ours=     -138.77  diff=     +7.00
+  05144026958 CLAUDEMIR GREGOSKI RODRIGUES   ref=   -2,821.10  ours=   -2,814.10  diff=     +7.00
+  05168980945 PRISCILA GOTARDO PEREIRA       ref=      625.30  ours=      618.30  diff=     -7.00
+  01553544692 DIEGO JOSE DE PAULO            ref=     -787.57  ours=     -794.57  diff=     -7.00
+  36447007888 RENAN VICTORIO DE LIMA         ref=      107.38  ours=      100.38  diff=     -7.00
+  14084321613 STEPHANIE THAINARA DE OLIVEIRA ref=      -87.78  ours=      -94.78  diff=     -7.00
+  09867858816 CARLOS ROBERTO DE CARVALHO PER ref=      102.00  ours=       95.00  diff=     -7.00
+  05766838760 ANTONIO FERREIRA DE MENDONCA N ref=    7,744.22  ours=    7,737.22  diff=     -7.00
+  26513583802 LEANDRO FIGUEREDO BELCHIOR     ref=    2,792.49  ours=    2,799.49  diff=     +7.00
+  69116709004 DEISE SOARES DE CAMPOS         ref=   -2,022.52  ours=   -2,015.52  diff=     +7.00
+  03032275326 ANDRE ARANHA MEISTER           ref=     -197.64  ours=     -204.64  diff=     -7.00
+  61158852649 JOSE CLAUDIO RIBEIRO           ref=    3,389.89  ours=    3,382.89  diff=     -7.00
+  11178519740 GUILHERME MOTTA RIBEIRO SILVA  ref=     -554.36  ours=     -561.36  diff=     -7.00
+  11897381638 ANDRE LUIZ SANTANA             ref=    2,583.15  ours=    2,576.15  diff=     -7.00
+  00526143959 FABIO DIOGO BITTENCOURT        ref=    1,051.93  ours=    1,044.93  diff=     -7.00
+  12237490619 VICTOR SIGOLO PINHEIRO PIMENTA ref=    3,567.48  ours=    3,560.48  diff=     -7.00
+  07690263623 JOELSON FERREIRA DOS SANTOS    ref=    2,924.47  ours=    2,918.47  diff=     -6.00
+  01063690080 JORGE ANTONIO VARGAS DA SILVA  ref=      490.60  ours=      485.10  diff=     -5.50
+  00584427905 LEANDRO SOUSA                  ref=    2,013.08  ours=    2,016.08  diff=     +3.00
+  07198282440 THIEGO LEANDRO ALVES DE OLIVEI ref=      531.57  ours=      529.47  diff=     -2.10
+  11823866603 MARCOS VINICIUS DE SOUZA ALVES ref=      750.00  ours=      751.50  diff=     +1.50
+
+================================================================================
+FIELD: SALDO_CARTAO ÔÇö 0 divergences, total gap R$ 0.00
+--------------------------------------------------------------------------------
+  PERFECT MATCH!
+
+================================================================================
+FIELD: SALDO_FINAL ÔÇö 118 divergences, total gap R$ 126,002.23
+--------------------------------------------------------------------------------
+  26652452804 JOSE CARLOS BATISTA            ref=   22,305.93  ours=   -4,477.19  diff=-26,783.12
+  07214272946 PATRICK FERNANDO GOULART ALVES ref=      312.67  ours=  -12,062.79  diff=-12,375.46
+  67094260334 JACKSON CAROLINO CARNEIRO      ref=        0.00  ours=   -8,822.35  diff= -8,822.35
+  85648809620 LEONARDO GONCALVES RIBEIRO FIL ref=        0.00  ours=   -7,786.08  diff= -7,786.08
+  04982917906 AFONSO FIORELLO CARVALHO       ref=        0.00  ours=   -5,895.32  diff= -5,895.32
+  02424765545 NELSON MOURA RIBEIRO           ref=        0.00  ours=   -4,694.12  diff= -4,694.12
+  34168918807 EMERSON LEITE DE BARROS        ref=    1,594.22  ours=   -2,563.86  diff= -4,158.08
+  91920795987 CLAUDINEI VICENTE DE LIMA      ref=      -48.40  ours=   -3,981.48  diff= -3,933.08
+  01949569039 VALDOIR NOGUEIRA ANTUNES       ref=    9,715.61  ours=    6,835.61  diff= -2,880.00
+  05036681681 DANIEL PORFIRIO DE SOUSA       ref=        0.00  ours=   -2,768.24  diff= -2,768.24
+  60707461049 PEDRO LUIS PIRES DOS SANTOS    ref=    6,256.20  ours=    3,596.20  diff= -2,660.00
+  82753342091 RUDINEI MACHADO RODRIGUES      ref=    8,105.50  ours=    5,445.50  diff= -2,660.00
+  03535433061 ATILA SILVA DOS SANTOS         ref=        0.00  ours=   -2,314.14  diff= -2,314.14
+  86733028034 RIQUELME DE OLIVEIRA E SILVA   ref=    7,287.80  ours=    5,015.80  diff= -2,272.00
+  06304071698 AILTON MENDES AGUILAR          ref=        0.00  ours=   -2,262.06  diff= -2,262.06
+  84736305053 JONATA OLIVEIRA DA SILVA       ref=    6,229.97  ours=    4,069.97  diff= -2,160.00
+  37634925004 IVON RAMOS MIRANDA             ref=    4,909.78  ours=    2,989.78  diff= -1,920.00
+  03661672940 MARCELO BEZERRA                ref=        0.00  ours=   -1,869.19  diff= -1,869.19
+  85087572634 ADAUTO JOSE PEREIRA            ref=      -16.37  ours=   -1,783.98  diff= -1,767.61
+  01773622781 ERASMO PEREIRA MONTEIRO        ref=        0.00  ours=   -1,754.35  diff= -1,754.35
+  02653570041 NELSON FILIPE MARTINS DA SILVA ref=    5,409.82  ours=    3,775.76  diff= -1,634.06
+  90443306087 CARLOS RENATO PACHECO DA SILVA ref=    8,454.78  ours=    6,824.02  diff= -1,630.76
+  47331178253 FRANCIONE DE SOUZA LUCENA      ref=   -2,032.23  ours=     -567.36  diff= +1,464.87
+  77283759204 ANA LUIZA OLIVEIRA CAMELO      ref=     -965.45  ours=   -2,364.12  diff= -1,398.67
+  06109625663 FLAVIO PEREIRA DE SOUZA        ref=        0.00  ours=   -1,231.91  diff= -1,231.91
+  05731312958 FABIO PROVESI                  ref=       54.39  ours=   -1,135.93  diff= -1,190.32
+  51182084168 SILVIO VINICIUS PINHEIRO GOES  ref=      589.82  ours=    1,589.82  diff= +1,000.00
+  03139017081 PAULO AUGUSTO OLIVEIRA LIMA    ref=    6,178.11  ours=    5,218.11  diff=   -960.00
+  05676820640 WESLEY CARLOS AUGUSTO          ref=        0.00  ours=     -955.29  diff=   -955.29
+  06439531670 HELDER ARCHANJO FERREIRA       ref=      -74.83  ours=     -918.55  diff=   -843.72
+  01783625651 AMARAL RODRIGUES NUNES         ref=        0.00  ours=     -798.60  diff=   -798.60
+  17996820724 MATHEUS FERNANDES GUIMARAES    ref=    1,130.27  ours=    1,909.27  diff=   +779.00
+  38950693291 GERSON PEREIRA                 ref=   -1,825.93  ours=   -1,056.93  diff=   +769.00
+  15322365737 JULIA FRANCISCO MADUREIRA      ref=        0.00  ours=      676.18  diff=   +676.18
+  05337927973 RAFAEL CARNIEL DA SILVA        ref=     -953.82  ours=     -280.00  diff=   +673.82
+  02864195054 THUANE DE OLIVEIRA MILSONI     ref=      665.50  ours=       13.50  diff=   -652.00
+  82341478972 BRUNO EDUARDO DE SOUZA         ref=     -207.20  ours=     -844.20  diff=   -637.00
+  83501967691 WAGNER FERNANDES DA SILVA      ref=        0.00  ours=     -537.68  diff=   -537.68
+  68187483920 LUIS CARLOS BROERING           ref=      923.29  ours=      423.29  diff=   -500.00
+  38548259515 ENZIO CARVALHO DA MOTA         ref=    1,236.14  ours=      744.04  diff=   -492.10
+  16996346886 SANDRO CAPISTRANO              ref=    3,497.46  ours=    3,914.46  diff=   +417.00
+  83058133553 ADSON SANTOS DA SILVA          ref=     -219.09  ours=      195.12  diff=   +414.21
+  46850229800 RAFAEL ALMEIDA LOPES           ref=     -874.26  ours=   -1,281.92  diff=   -407.66
+  02474960902 ALESSANDRO RODRIGO PASTRELLI   ref=      349.51  ours=      -51.94  diff=   -401.45
+  02862032786 CRISTIANO ANESIO GOMES DO NASC ref=      943.97  ours=    1,306.57  diff=   +362.60
+  07024923610 RODRIGO CESAR DOS SANTOS       ref=     -337.40  ours=        0.00  diff=   +337.40
+  04442316929 NIVALDO THIAGO DA CRUZ SANTOS  ref=     -182.81  ours=     -512.84  diff=   -330.03
+  04280602344 FRANCISCO MICHAEL CASTRO FERNA ref=        0.00  ours=     -277.00  diff=   -277.00
+  02777503001 TIAGO BRANCO DE BARROS         ref=    1,932.06  ours=    2,168.86  diff=   +236.80
+  04347084102 FELIPE MORAES COSTA DE BRITTO  ref=   -4,849.26  ours=   -5,065.26  diff=   -216.00
+  10206563957 JACSSON MAYLON CASTRO CORREA   ref=        0.00  ours=      180.00  diff=   +180.00
+  69456313034 SANDRA CRISTINA ALVES MACHADO  ref=      186.04  ours=       20.64  diff=   -165.40
+  82877904091 ALEX SANDRO PEREIRA MARQUES    ref=      591.20  ours=      748.00  diff=   +156.80
+  29856268893 LUIZ GUSTAVO DI GIORGIO        ref=      677.20  ours=      825.90  diff=   +148.70
+  10521167957 MURILO DE ALMEIDA              ref=      116.50  ours=        0.00  diff=   -116.50
+  00846379945 OSMAN DOS SANTOS MORAIS JUNIOR ref=        0.00  ours=      -95.65  diff=    -95.65
+  84733977549 ALEXANDRE DOS SANTOS           ref=       88.00  ours=        0.00  diff=    -88.00
+  08418392983 ROBSON DOS SANTOS GUEDES       ref=      171.63  ours=      241.63  diff=    +70.00
+  02449603050 RENATA PALMA LEAL              ref=        0.00  ours=       70.00  diff=    +70.00
+  01730674500 MARCEL DA HORA CARVALHO        ref=     -154.54  ours=     -223.04  diff=    -68.50
+  34596010862 EDIBERTO GEORGE RELIQUIAS      ref=     -124.70  ours=      -59.71  diff=    +64.99
+  45154701836 KATIA RESENDE DA SILVA         ref=     -958.63  ours=     -903.13  diff=    +55.50
+  02027745203 ABNER ANDRADE CAVALCANTE       ref=   -6,474.24  ours=   -6,419.56  diff=    +54.68
+  10363402950 MARIA EDUARDA ARAGAO           ref=   -2,837.76  ours=   -2,885.86  diff=    -48.10
+  04661413199 TIAGO DE JESUS ARAUJO          ref=      150.00  ours=      102.00  diff=    -48.00
+  01419182927 ANTONIO MARCOS DE SOUZA        ref=        0.00  ours=       46.00  diff=    +46.00 [NOT IN REF]
+  07136772605 ANTONIO MARCOS DE SOUZA        ref=       46.00  ours=        0.00  diff=    -46.00
+  06576198922 LUDGERO HORACIO DE OLIVEIRA    ref=   -2,972.04  ours=   -3,007.04  diff=    -35.00
+  26953703857 ROBERTO ALIAGA                 ref=      215.15  ours=      181.95  diff=    -33.20
+  22136444972 ILMAR FONTES VIEIRA            ref=      150.20  ours=      182.00  diff=    +31.80
+  01050938232 CHARLYTON COSTA ANDRADE        ref=   15,205.83  ours=   15,181.26  diff=    -24.57
+  45120065830 LARISSA SANTOS DA SILVA        ref=      261.17  ours=      243.32  diff=    -17.85
+  11498112692 NEDSON LUIZ DURAES VELOSO      ref=      857.76  ours=      843.76  diff=    -14.00
+  36813601890 DOUGLAS ALEXANDRE BARBOSA      ref=      419.40  ours=      405.40  diff=    -14.00
+  65973500225 CARLOS NASCIMENTO NONATO JUNIO ref=    1,740.26  ours=    1,754.26  diff=    +14.00
+  72756284220 MARCO AURELIO DE ANDRADE MORAE ref=    4,488.77  ours=    4,474.77  diff=    -14.00
+  00975748998 LUCAS MARTINS MACAN            ref=    4,359.11  ours=    4,345.11  diff=    -14.00
+  94551804304 ADSON ARAUJO DA SILVA          ref=      360.89  ours=      346.89  diff=    -14.00
+  01356318665 MARCO AURELIO DE LIMA          ref=      552.74  ours=      566.74  diff=    +14.00
+  01677920599 RAFAEL AMORIM VELLO            ref=    6,072.91  ours=    6,058.91  diff=    -14.00
+  99532344004 RODRIGO VANZETTA               ref=     -333.00  ours=     -347.00  diff=    -14.00
+  01573995088 JULIANO MACHADO DE MIRANDA     ref=      733.00  ours=      743.00  diff=    +10.00
+  47502843604 RONALDO DE MATOS LELIS         ref=     -158.91  ours=     -168.77  diff=     -9.86
+  04434355708 LUCIANO JOSE DO AMARAL PEREIRA ref=    2,670.71  ours=    2,679.91  diff=     +9.20
+  00448428997 LUIS FELIPE COSTA              ref=      350.00  ours=      357.50  diff=     +7.50
+  16306431730 BRUNO FERREIRA DE SOUZA RODRIG ref=   42,721.82  ours=   42,728.82  diff=     +7.00
+  04025408325 NILSON RODRIGUES CARDOSO JUNIO ref=     -118.00  ours=     -111.00  diff=     +7.00
+  05504962706 RODRIGO SANTOS DA SILVA        ref=      252.56  ours=      245.56  diff=     -7.00
+  06792773310 GEORGE LUIS ROCHA FIGUEIREDO   ref=      258.60  ours=      265.60  diff=     +7.00
+  38880279858 FABIANA CAMILA BARBOSA DE MORA ref=      699.47  ours=      692.47  diff=     -7.00
+  00849381533 TIAGO FERNANDES SANTOS DE OLIV ref=       64.73  ours=       57.73  diff=     -7.00
+  10491624719 TIAGO DE OLIVEIRA PAIVA        ref=     -527.29  ours=     -534.29  diff=     -7.00
+  89395140259 RAQUEL PANTOJA SANTOS          ref=     -583.15  ours=     -590.15  diff=     -7.00
+  00965306186 JAIME ALVES DE ABREU SILVA     ref=    2,425.49  ours=    2,418.49  diff=     -7.00
+  83978054515 RAMON GOMES TEIXEIRA           ref=   -1,293.17  ours=   -1,300.17  diff=     -7.00
+  01553544692 DIEGO JOSE DE PAULO            ref=   -2,383.90  ours=   -2,390.90  diff=     -7.00
+  37258325875 JAQUELINE ONORIO DOS SANTOS AL ref=    1,338.54  ours=    1,331.54  diff=     -7.00
+  26687333836 TEOFILO TOLLENDAL PACHECO      ref=     -151.77  ours=     -144.77  diff=     +7.00
+  05144026958 CLAUDEMIR GREGOSKI RODRIGUES   ref=   -4,965.34  ours=   -4,958.34  diff=     +7.00
+  10254434894 MARCELO PEREIRA LIMA           ref=      -19.77  ours=      -12.77  diff=     +7.00
+  05168980945 PRISCILA GOTARDO PEREIRA       ref=       46.92  ours=       39.92  diff=     -7.00
+  36447007888 RENAN VICTORIO DE LIMA         ref=       41.54  ours=       34.54  diff=     -7.00
+  14084321613 STEPHANIE THAINARA DE OLIVEIRA ref=     -101.40  ours=     -108.40  diff=     -7.00
+  09867858816 CARLOS ROBERTO DE CARVALHO PER ref=       92.49  ours=       85.49  diff=     -7.00
+  05766838760 ANTONIO FERREIRA DE MENDONCA N ref=    2,744.22  ours=    2,737.22  diff=     -7.00
+  26513583802 LEANDRO FIGUEREDO BELCHIOR     ref=    1,232.72  ours=    1,239.72  diff=     +7.00
+  69116709004 DEISE SOARES DE CAMPOS         ref=   -4,063.51  ours=   -4,056.51  diff=     +7.00
+  03032275326 ANDRE ARANHA MEISTER           ref=     -202.21  ours=     -209.21  diff=     -7.00
+  61158852649 JOSE CLAUDIO RIBEIRO           ref=    3,367.89  ours=    3,360.89  diff=     -7.00
+  11178519740 GUILHERME MOTTA RIBEIRO SILVA  ref=     -560.36  ours=     -567.36  diff=     -7.00
+  11897381638 ANDRE LUIZ SANTANA             ref=      300.89  ours=      293.89  diff=     -7.00
+  00526143959 FABIO DIOGO BITTENCOURT        ref=     -646.74  ours=     -653.74  diff=     -7.00
+  12237490619 VICTOR SIGOLO PINHEIRO PIMENTA ref=    3,482.35  ours=    3,475.35  diff=     -7.00
+  07690263623 JOELSON FERREIRA DOS SANTOS    ref=      845.57  ours=      839.57  diff=     -6.00
+  01063690080 JORGE ANTONIO VARGAS DA SILVA  ref=      289.20  ours=      283.70  diff=     -5.50
+  00584427905 LEANDRO SOUSA                  ref=      187.08  ours=      190.08  diff=     +3.00
+  07198282440 THIEGO LEANDRO ALVES DE OLIVEI ref=      517.32  ours=      515.22  diff=     -2.10
+  11823866603 MARCOS VINICIUS DE SOUZA ALVES ref=       80.00  ours=       81.50  diff=     +1.50
+
+================================================================================
+SUMMARY: Which fields have the most divergences?
+--------------------------------------------------------------------------------
+  carga               :  11 divs, total gap R$     1,944.00
+  transf              :   6 divs, total gap R$     2,106.00
+  tarifa              :  57 divs, total gap R$       565.73
+  prestacao           :  71 divs, total gap R$   124,062.24
+  saldo_prest         : 118 divs, total gap R$   126,002.23
+  saldo_cartao        :   0 divs, total gap R$         0.00
+  saldo_final         : 118 divs, total gap R$   126,002.23

@@ -1,0 +1,137 @@
+components:
+  schemas:
+    Expense_1:
+      type: object
+      properties:
+        external_id:
+          type: string
+          example: b4a57242-2a5a-45cf-a544-9cbee4c8f0e7
+        expense_type_id:
+          type: integer
+          example: 268114
+        payment_method_id:
+          type: integer
+          example: "231"
+        paying_company_id:
+          type: integer
+          example: "199"
+        route_id:
+          type: integer
+          example: 999
+        receipt_url:
+          type: string
+          example: https://vexpenses.nyc3.cdn.digitaloceanspaces.com/local/receipts/1a2b3c.jpg
+        date:
+          type: string
+          format: date
+          example: "2016-12-19"
+    Expense_2:
+      type: object
+      properties:
+        title:
+          type: string
+          example: title
+        validate:
+          type: string
+          example: ""
+        observation:
+          type: string
+          example: observation
+
+    Expense_3:
+        type: object
+        properties:
+          reimbursable:
+            type: boolean
+            example: true
+          mileage:
+            type: number
+            example: 400.00
+          mileage_value:
+            type: number
+            example: "0.00"
+          original_currency_iso:
+            type: string
+            example: BRL
+          exchange_rate:
+            type: number
+            example: 9,99
+          converted_value:
+            type: number
+            example: 99,999
+          converted_currency_iso:
+            type: string
+            example: BRL
+    Expense:
+      allOf:
+        - type: object
+          properties:
+            id:
+              type: integer
+              example: 9999
+            user_id:
+              type: integer
+              example: 1234
+            report_id:
+              type: integer
+              example: 2558
+            device_id:
+              type: integer
+              example: 999
+            integration_id:
+              type: number
+              example: 999
+        - $ref: '#/components/schemas/Expense_1'
+
+        - type: object
+          properties:
+            value:
+              type: number
+              example: 120.56
+            # currency_id:
+            #   type: number
+            #   example: 20
+        - $ref: '#/components/schemas/Expense_2'
+        - type: object
+          properties:
+            rejected:
+              type: integer
+              example: 0
+            on:
+              type: boolean
+              example: true
+        - $ref: '#/components/schemas/Expense_3'
+        - type: object
+          properties:
+            created_at:
+              type: string
+              format: date-time
+              example: "2019-01-01 01:10:00"
+            updated_at:
+              type: string
+              format: date-time
+              example: "2019-01-01 01:10:00"
+    Expense_clear:
+      allOf:
+        - type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1234
+        - $ref: '#/components/schemas/Expense_1'
+        - type: object
+          properties:
+            value:
+              type: number
+              example: 120.56
+            report_id:
+              type: integer
+              example: 2558
+        - $ref: '#/components/schemas/Expense_2'
+        - $ref: '#/components/schemas/Expense_3'
+        - type: object
+          properties:
+            apportionment:
+              type: array
+              items:
+                $ref: '../components/apportionment-schemas.yaml#/components/schemas/Apportionment_Clear'

@@ -1,0 +1,470 @@
+
+================================================================================
+Month 1 QZ1: 1QZ JANEIRO 2026 - VEXPENSES.xlsx
+  Sheet: '1 QZ VEXPENSES 01_2026', header row: 6
+================================================================================
+  Header (row 6):
+    col 1 (xlsx 2): PORTADOR
+    col 2 (xlsx 3): CPF
+    col 3 (xlsx 4): STATUS COLAB
+    col 4 (xlsx 5): CENTRO CUSTO
+    col 5 (xlsx 6): COD CENTRO CUSTO
+    col 6 (xlsx 7): GESTOR
+    col 7 (xlsx 8): DIREÇÃO
+    col 8 (xlsx 9): SALDO REEMBOLSAR
+    col 9 (xlsx 10): SALDO FINAL
+    col 10 (xlsx 11): 1QZ DE DEZ 26
+    col 11 (xlsx 12): SALDO CARTAO
+    col 12 (xlsx 13): ADIANTAMENTO
+    col 13 (xlsx 14): CARGA PARCIAL
+    col 14 (xlsx 15): REEMBOLSO
+    col 15 (xlsx 16): CARGA FINAL SEM REEMBOLSO
+    col 16 (xlsx 17): CARGA  FINAL REEMBOLSO
+    col 17 (xlsx 18): STATUS DO CARTAO
+    col 18 (xlsx 19): OBS 
+
+  Data row 7:
+    col 1 (xlsx 2): ABNER ANDRADE CAVALCANTE
+    col 2 (xlsx 3): 02027745203
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF AM AC RR
+    col 5 (xlsx 6): 11030290001
+    col 6 (xlsx 7): ANGELICA SOARES
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): -3779.5100000000093
+    col 9 (xlsx 10): 0
+    col 10 (xlsx 11): 9840
+    col 11 (xlsx 12): 3
+    col 12 (xlsx 13): 0
+    col 13 (xlsx 14): 9837
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 9837
+    col 16 (xlsx 17): 9837
+    col 17 (xlsx 18): Cartão ativo
+
+  Data row 8:
+    col 1 (xlsx 2): RAFAEL AMORIM VELLO
+    col 2 (xlsx 3): 01677920599
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF NORTE OESTE BA
+    col 5 (xlsx 6): 11030260001
+    col 6 (xlsx 7): GLAUCIO GONÇALVES
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 328.69000000006054
+    col 10 (xlsx 11): 16000
+    col 11 (xlsx 12): 9
+    col 12 (xlsx 13): 6000
+    col 13 (xlsx 14): 9662.30999999994
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 9662.30999999994
+    col 16 (xlsx 17): 9662.30999999994
+    col 17 (xlsx 18): Cartão ativo
+
+  Data row 9:
+    col 1 (xlsx 2): JAEDER RODRIGUES JUNIOR
+    col 2 (xlsx 3): 07505987607
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF NORDESTE MG
+    col 5 (xlsx 6): 11030660001
+    col 6 (xlsx 7): HUGO ALEXANDRE
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): -1551.7199999999896
+    col 9 (xlsx 10): 0
+    col 10 (xlsx 11): 7000
+    col 11 (xlsx 12): 285.2
+    col 12 (xlsx 13): 0
+    col 13 (xlsx 14): 6714.8
+    col 14 (xlsx 15): 310.34399999999795
+    col 15 (xlsx 16): 6714.8
+    col 16 (xlsx 17): 7025.143999999998
+    col 17 (xlsx 18): Cartão ativo
+
+================================================================================
+Month 5 QZ1: CARGA 1 QZ MAIO 26 VEXPENSES EQS.xlsx
+  Sheet: 'Planilha1', header row: 6
+================================================================================
+  Header (row 6):
+    col 0 (xlsx 1): COLABORADOR
+    col 1 (xlsx 2): CPF
+    col 2 (xlsx 3): SITUAÇÃO
+    col 3 (xlsx 4): REGIONAL
+    col 4 (xlsx 5): CENTRO DE CUSTO
+    col 5 (xlsx 6): GESTOR
+    col 6 (xlsx 7): DIRETOR
+    col 7 (xlsx 8): SALDO REEMBOLSAR
+    col 8 (xlsx 9): SALDO FINAL
+    col 9 (xlsx 10): 1ª QZ
+    col 10 (xlsx 11): SALDO CARTAO
+    col 11 (xlsx 12): Adiantamento 
+    col 12 (xlsx 13): CARGA PARCIAL
+    col 13 (xlsx 14): REEMBOLSO
+    col 14 (xlsx 15): Carga Final 
+    col 15 (xlsx 16): obs
+    col 16 (xlsx 17): STATUS DO CARTÃO
+
+  Data row 7:
+    col 0 (xlsx 1): JONAS CAVALCANTI DE OLIVEIRA
+    col 1 (xlsx 2): 01696239478
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL NE
+    col 4 (xlsx 5): 3R PETROLEUM NE
+    col 5 (xlsx 6): GERSON OLIVEIRA
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): 0
+    col 8 (xlsx 9): 6945.160000000003
+    col 9 (xlsx 10): 1750
+    col 10 (xlsx 11): 15.21
+    col 12 (xlsx 13): -5210.370000000003
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 0
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 8:
+    col 0 (xlsx 1): RODRIGO CESAR DOS SANTOS
+    col 1 (xlsx 2): 07024923610
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL NE
+    col 4 (xlsx 5): CEF NORTE OESTE BA
+    col 5 (xlsx 6): GERSON OLIVEIRA
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): 0
+    col 8 (xlsx 9): 6626.040000000001
+    col 9 (xlsx 10): 700
+    col 10 (xlsx 11): 0
+    col 12 (xlsx 13): -5926.040000000001
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 0
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 9:
+    col 0 (xlsx 1): CAIO FRANCESCONI RIBEIRO
+    col 1 (xlsx 2): 08924586904
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL SC
+    col 4 (xlsx 5): TJ APOIO PR
+    col 5 (xlsx 6): LEANDRO MARCUSSO
+    col 6 (xlsx 7): EVERSON GAIDSTIECHI
+    col 7 (xlsx 8): 0
+    col 8 (xlsx 9): 6504.200000000004
+    col 9 (xlsx 10): 3900
+    col 10 (xlsx 11): 0
+    col 12 (xlsx 13): -2604.2000000000044
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 0
+    col 16 (xlsx 17): Cartão ativo
+
+================================================================================
+Month 5 QZ2: CARGA 2 QZ MAIO 26 VEXPENSES EQS.xlsx
+  Sheet: '2 QZ DE MAIO 26', header row: 4
+================================================================================
+  Header (row 4):
+    col 1 (xlsx 2): COLABORADOR
+    col 2 (xlsx 3): CPF
+    col 3 (xlsx 4): SITUAÇÃO
+    col 4 (xlsx 5): CENTRO DE CUSTO
+    col 5 (xlsx 6): GESTOR
+    col 6 (xlsx 7): DIRETOR
+    col 7 (xlsx 8): SALDO PENDENTE PARCIAL
+    col 8 (xlsx 9): CARGA 1 QZ
+    col 9 (xlsx 10): SALDO FINAL
+    col 10 (xlsx 11): 2ª QZ
+    col 11 (xlsx 12): SALDO CARTAO
+    col 12 (xlsx 13): Adiantamento 
+    col 13 (xlsx 14): CARGA PARCIAL
+    col 14 (xlsx 15): REEMBOLSO
+    col 15 (xlsx 16): Carga Final 
+    col 16 (xlsx 17): obs
+    col 17 (xlsx 18): STATUS DO CARTÃO
+
+  Data row 5:
+    col 1 (xlsx 2): ABNER ANDRADE CAVALCANTE
+    col 2 (xlsx 3): 02027745203
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF AM AC RR
+    col 5 (xlsx 6): ANGELICA SOARES
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): -533.4100000000815
+    col 8 (xlsx 9): 10323.505000000048
+    col 9 (xlsx 10): 0
+    col 10 (xlsx 11): 9840
+    col 11 (xlsx 12): 19.51
+    col 13 (xlsx 14): 9820.49
+    col 15 (xlsx 16): 9820.49
+    col 17 (xlsx 18): Cartão ativo
+
+  Data row 6:
+    col 1 (xlsx 2): ADAN LEONARDO SOUZA BATISTA
+    col 2 (xlsx 3): 01932662537
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): TELEFONICA BA
+    col 5 (xlsx 6): GERSON OLIVEIRA
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): 61.89999999999873
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 61.89999999999873
+    col 10 (xlsx 11): 1000
+    col 11 (xlsx 12): 1000
+    col 13 (xlsx 14): -61.89999999999873
+    col 15 (xlsx 16): 0
+    col 17 (xlsx 18): Cartão ativo
+
+  Data row 7:
+    col 1 (xlsx 2): ADAUTO JOSE PEREIRA
+    col 2 (xlsx 3): 85087572634
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF FACILITIES BH
+    col 5 (xlsx 6): HUGO ALEXANDRE
+    col 6 (xlsx 7): MARCOS CARIAS
+    col 7 (xlsx 8): 302.62000000000046
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 302.62000000000046
+    col 10 (xlsx 11): 500
+    col 11 (xlsx 12): 93.47
+    col 13 (xlsx 14): 103.90999999999954
+    col 15 (xlsx 16): 103.90999999999954
+    col 17 (xlsx 18): Cartão ativo
+
+================================================================================
+Month 6 QZ1: CARGA 1 QZ JUNHO 26 VEXPENSES EQS.xlsx
+  Sheet: '1 QZ JUNHO', header row: 6
+================================================================================
+  Header (row 6):
+    col 0 (xlsx 1): COLABORADOR
+    col 1 (xlsx 2): CPF
+    col 2 (xlsx 3): SITUAÇÃO
+    col 3 (xlsx 4): REGIONAL
+    col 4 (xlsx 5): CENTRO DE CUSTO
+    col 5 (xlsx 6): GESTOR
+    col 6 (xlsx 7): DIRETOR
+    col 7 (xlsx 8): SALDO REEMBOLSAR
+    col 8 (xlsx 9): SALDO FINAL
+    col 9 (xlsx 10): 1ª QZ
+    col 10 (xlsx 11): SALDO CARTAO
+    col 11 (xlsx 12): Adiantamento 
+    col 12 (xlsx 13): CARGA PARCIAL
+    col 13 (xlsx 14): REEMBOLSO
+    col 14 (xlsx 15): Carga Final 
+    col 15 (xlsx 16): obs
+    col 16 (xlsx 17): STATUS DO CARTÃO
+
+  Data row 7:
+    col 0 (xlsx 1): ABNER ANDRADE CAVALCANTE
+    col 1 (xlsx 2): 02027745203
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL CO
+    col 4 (xlsx 5): CEF AM AC RR
+    col 5 (xlsx 6): ANGELICA SOARES
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): 227.55000000013388
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 9840
+    col 10 (xlsx 11): 5
+    col 12 (xlsx 13): 9835
+    col 13 (xlsx 14): 136.53000000008032
+    col 14 (xlsx 15): 9948.775000000067
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 8:
+    col 0 (xlsx 1): ADAN LEONARDO SOUZA BATISTA
+    col 1 (xlsx 2): 01932662537
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL NE
+    col 4 (xlsx 5): TELEFONICA BA
+    col 5 (xlsx 6): GERSON OLIVEIRA
+    col 6 (xlsx 7): ROGERIO SCATAMBULO
+    col 7 (xlsx 8): 0
+    col 8 (xlsx 9): 601.409999999998
+    col 9 (xlsx 10): 1000
+    col 10 (xlsx 11): 3
+    col 12 (xlsx 13): 395.59000000000196
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 395.59000000000196
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 9:
+    col 0 (xlsx 1): ADAUTO JOSE PEREIRA
+    col 1 (xlsx 2): 85087572634
+    col 2 (xlsx 3): ATIVO
+    col 3 (xlsx 4): REGIONAL MG
+    col 4 (xlsx 5): CEF FACILITIES BH
+    col 5 (xlsx 6): HUGO ALEXANDRE
+    col 6 (xlsx 7): MARCOS CARIAS
+    col 7 (xlsx 8): 0
+    col 8 (xlsx 9): 116.83000000000015
+    col 9 (xlsx 10): 500
+    col 10 (xlsx 11): 1.1
+    col 12 (xlsx 13): 382.0699999999998
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 382.0699999999998
+    col 16 (xlsx 17): Cartão ativo
+
+================================================================================
+Month 2 QZ1: 1 QZN FEVEREIRO VEXPENSES 2026.xlsx
+  Sheet: '1 QZN FEV 2026', header row: 6
+================================================================================
+  Header (row 6):
+    col 1 (xlsx 2): PORTADOR
+    col 2 (xlsx 3): CPF
+    col 3 (xlsx 4): STATUS COLAB
+    col 4 (xlsx 5): CENTRO CUSTO
+    col 5 (xlsx 6): COD CENTRO CUSTO
+    col 6 (xlsx 7): GESTOR
+    col 7 (xlsx 8): DIREÇÃO
+    col 8 (xlsx 9): SALDO REEMBOLSAR
+    col 9 (xlsx 10): SALDO PENDENTE
+    col 10 (xlsx 11): 1QZ DE FEV 26
+    col 11 (xlsx 12): SALDO CARTAO
+    col 12 (xlsx 13): ADIANTAMENTO
+    col 13 (xlsx 14): CARGA PARCIAL
+    col 14 (xlsx 15): REEMBOLSO
+    col 15 (xlsx 16): CARGA FINAL
+    col 16 (xlsx 17): STATUS DO CARTAO
+    col 17 (xlsx 18): OBS 
+
+  Data row 7:
+    col 1 (xlsx 2): RAFAEL AMORIM VELLO
+    col 2 (xlsx 3): 01677920599
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF NORTE OESTE BA
+    col 5 (xlsx 6): 11030260001
+    col 6 (xlsx 7): GERSON OLIVEIRA
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 161.77999999996973
+    col 10 (xlsx 11): 16000
+    col 11 (xlsx 12): 1
+    col 12 (xlsx 13): 0
+    col 13 (xlsx 14): 15837.22000000003
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 15837.22000000003
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 8:
+    col 1 (xlsx 2): ABNER ANDRADE CAVALCANTE
+    col 2 (xlsx 3): 02027745203
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF AM AC RR
+    col 5 (xlsx 6): 11030290001
+    col 6 (xlsx 7): ANGELICA SOARES
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 359.40999999995
+    col 10 (xlsx 11): 9840
+    col 11 (xlsx 12): 0
+    col 12 (xlsx 13): 0
+    col 13 (xlsx 14): 9480.59000000005
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 9480.59000000005
+    col 16 (xlsx 17): Cartão ativo
+
+  Data row 9:
+    col 1 (xlsx 2): BRUNO FERREIRA DE SOUZA RODRIGUES
+    col 2 (xlsx 3): 16306431730
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): TELEFONICA RJ
+    col 5 (xlsx 6): 11061860001
+    col 6 (xlsx 7): ALLAN JEFFERSON
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): -3091.7900000000227
+    col 9 (xlsx 10): 0
+    col 10 (xlsx 11): 5000
+    col 11 (xlsx 12): 7
+    col 12 (xlsx 13): 0
+    col 13 (xlsx 14): 4993
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 4993
+    col 16 (xlsx 17): Cartão ativo
+
+================================================================================
+Month 3 QZ1: 1 QZ MARÇO VEXPENSES 2026 (5).xlsx
+  Sheet: 'QUINZENA MARÇO', header row: 6
+================================================================================
+  Header (row 6):
+    col 1 (xlsx 2): PORTADOR
+    col 2 (xlsx 3): CPF
+    col 3 (xlsx 4): STATUS COLAB
+    col 4 (xlsx 5): CENTRO CUSTO
+    col 5 (xlsx 6): COD CENTRO CUSTO
+    col 6 (xlsx 7): GESTOR
+    col 7 (xlsx 8): DIREÇÃO
+    col 8 (xlsx 9): SALDO REEMBOLSAR
+    col 9 (xlsx 10): SALDO PENDENTE COM CX REPR.
+    col 10 (xlsx 11): SALDO REEMBOLSAR SEM CX REPR.
+    col 11 (xlsx 12): SALDO PENDENTE SEM CX REPR.
+    col 12 (xlsx 13): 1QZ DE MARÇO 26
+    col 13 (xlsx 14): SALDO CARTAO
+    col 14 (xlsx 15): ADIANTAMENTO
+    col 15 (xlsx 16): CARGA PARCIAL
+    col 16 (xlsx 17): CARGA PARCIAL SEM CX REPROV.
+    col 17 (xlsx 18): REEMBOLSO
+    col 18 (xlsx 19): CARGA FINAL COM CX REPROV
+    col 19 (xlsx 20): CARGA FINAL SEM CX REPROV.
+    col 20 (xlsx 21): STATUS DO CARTAO
+    col 21 (xlsx 22): OBS 
+
+  Data row 7:
+    col 1 (xlsx 2): ABNER ANDRADE CAVALCANTE
+    col 2 (xlsx 3): 02027745203
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF AM AC RR
+    col 5 (xlsx 6): 11030290001
+    col 6 (xlsx 7): ANGELICA SOARES
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 0.7199999999720603
+    col 10 (xlsx 11): 0
+    col 11 (xlsx 12): 0.7199999999429565
+    col 12 (xlsx 13): 9840
+    col 13 (xlsx 14): 5
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): 9834.280000000028
+    col 16 (xlsx 17): 9834.280000000057
+    col 17 (xlsx 18): 0
+    col 18 (xlsx 19): 9834.280000000028
+    col 19 (xlsx 20): 9834.280000000028
+    col 20 (xlsx 21): Cartão ativo
+
+  Data row 8:
+    col 1 (xlsx 2): ADAN LEONARDO SOUZA BATISTA
+    col 2 (xlsx 3): 01932662537
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): TELEFONICA BA
+    col 5 (xlsx 6): 11061480001
+    col 6 (xlsx 7): GERSON OLIVEIRA
+    col 7 (xlsx 8): ROGERIO SCATAMBULO
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 761.8999999999987
+    col 10 (xlsx 11): 0
+    col 11 (xlsx 12): 761.8999999999987
+    col 12 (xlsx 13): 700
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): -61.89999999999873
+    col 16 (xlsx 17): -61.89999999999873
+    col 17 (xlsx 18): 0
+    col 18 (xlsx 19): 0
+    col 19 (xlsx 20): 0
+    col 20 (xlsx 21): Cartão ativo
+
+  Data row 9:
+    col 1 (xlsx 2): ADAUTO JOSE PEREIRA
+    col 2 (xlsx 3): 85087572634
+    col 3 (xlsx 4): ATIVO
+    col 4 (xlsx 5): CEF FACILITIES BH
+    col 5 (xlsx 6): 11030800001
+    col 6 (xlsx 7): HUGO ALEXANDRE
+    col 7 (xlsx 8): MARCOS CARIAS
+    col 8 (xlsx 9): 0
+    col 9 (xlsx 10): 500.00000000000045
+    col 10 (xlsx 11): 0
+    col 11 (xlsx 12): 500.00000000000034
+    col 12 (xlsx 13): 500
+    col 13 (xlsx 14): 0
+    col 14 (xlsx 15): 0
+    col 15 (xlsx 16): -4.547473508864641e-13
+    col 16 (xlsx 17): -3.410605131648481e-13
+    col 17 (xlsx 18): 0
+    col 18 (xlsx 19): 0
+    col 19 (xlsx 20): 0
+    col 20 (xlsx 21): Cartão ativo

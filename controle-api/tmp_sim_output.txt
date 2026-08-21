@@ -1,0 +1,134 @@
+﻿Loading reference BASE PREST...
+  Reference: 4437 reports, 71748 expenses, R$ 6,780,973.57
+  PAINEL: 765 total CPFs, 729 with CART├O VEXPENSES='SIM'
+
+Loading API data...
+  API (all, no filters): 105993 expenses, 7033 reports, R$ 13,313,456.84
+
+====================================================================================================
+Scenario                                  Reports  Expenses       Total R$  D Reports  D Expenses     D Value R$
+====================================================================================================
+Baseline (current regex)                     4496     72755   6,895,551.53        +59       +1007    +114,577.96
++ 'fartur' exclusion                         4495     72753   6,895,022.45        +58       +1005    +114,048.88
++ 'cartÒo corporativo' exclusion             4494     72742   6,894,152.86        +57        +994    +113,179.29
++ CART├O VEXPENSES='SIM' filter              6797    103304  12,027,579.76      +2360      +31556  +5,246,606.19
+All filters combined                         4481     72673   6,882,660.70        +44        +925    +101,687.13
+All + ITAU name exclusion                    4477     72509   6,871,673.00        +40        +761     +90,699.43
+
+====================================================================================================
+DETAILED: All filters combined
+====================================================================================================
+
+  API after filters: 4481 reports, 72673 expenses, R$ 6,882,660.70
+  Reference:         4437 reports, 71748 expenses, R$ 6,780,973.57
+
+  New reports (in API, not in ref): 57
+  Missing reports (in ref, not in API): 13
+  New expenses (in API, not in ref): 980
+  Missing expenses (in ref, not in API): 55
+  Value gap: R$ 101,687.13
+
+  --- New reports (in API, NOT in reference) ---
+    7511074  05/2025-EQUIPE FIXA METROPOLITANA    LEONARDO GONCALVES RIBEIR  CPF=85648809620   22 items  R$   3,456.89
+    7644642  CAIXA 05/2025                        ATILA SILVA DOS SANTOS     CPF=03535433061    6 items  R$     597.91
+    7664399  06/25 - EQUIPE FIXA METROPOLITANA    LEONARDO GONCALVES RIBEIR  CPF=85648809620   16 items  R$   3,016.92
+    7714250  CAIXA 05/2025                        JACKSON CAROLINO CARNEIRO  CPF=67094260334   10 items  R$   2,903.23
+    7714617  CAIXA 06/2025                        JACKSON CAROLINO CARNEIRO  CPF=67094260334   12 items  R$   1,662.03
+    7781541  CAIXA ITAU 06/2025                   BRUNO EDUARDO DE SOUZA     CPF=82341478972    3 items  R$     604.00
+    7813599  04/2025 MATERIAL METRO               LEONARDO GONCALVES RIBEIR  CPF=85648809620    4 items  R$     734.27
+    7814512  05/2025 MATERIAL METROPOLITANO       LEONARDO GONCALVES RIBEIR  CPF=85648809620    3 items  R$     168.40
+    7827913  07/2025 MATERIAL METROPOLITANA       LEONARDO GONCALVES RIBEIR  CPF=85648809620    2 items  R$     357.60
+    7828184  Caixa 06/2025                        ATILA SILVA DOS SANTOS     CPF=03535433061    3 items  R$     969.00
+    7841173  CAIXA 07/2025                        JACKSON CAROLINO CARNEIRO  CPF=67094260334   27 items  R$   4,257.09
+    7852099  ABRIL                                NELSON MOURA RIBEIRO       CPF=02424765545    8 items  R$     624.00
+    7852363  MAIO                                 NELSON MOURA RIBEIRO       CPF=02424765545   15 items  R$     984.90
+    7852406  JUNHO                                NELSON MOURA RIBEIRO       CPF=02424765545   22 items  R$   2,221.04
+    7852577  JULHO                                NELSON MOURA RIBEIRO       CPF=02424765545    2 items  R$     397.50
+    7852612  Notas parte 2                        NELSON MOURA RIBEIRO       CPF=02424765545    7 items  R$     466.68
+    7855420  06/2025 ESTACIONAMENTO               LEONARDO GONCALVES RIBEIR  CPF=85648809620    1 items  R$      52.00
+    7881919  CAIXA 07/2025                        CLAUDINEI VICENTE DE LIMA  CPF=91920795987   10 items  R$   1,974.46
+    7885949  07 /2025                             WESLEY CARLOS AUGUSTO      CPF=05676820640    8 items  R$     955.29
+    7998764  CAIXA 07/2025                        ATILA SILVA DOS SANTOS     CPF=03535433061    3 items  R$     747.23
+    8052453  INSPEÃıES RIO GRANDE DO SUL          ROBERTO ALIAGA             CPF=26953703857    1 items  R$      16.00
+    8079003  CAIXA 08/2025                        MARCELO BEZERRA            CPF=03661672940    7 items  R$   1,869.19
+    8087166  CAIXA 08/2025                        NIVALDO THIAGO DA CRUZ SA  CPF=04442316929    5 items  R$     295.03
+    8109363  DESPESAS M╩S DE JUNHO-2025           AILTON MENDES AGUILAR      CPF=06304071698   10 items  R$     576.45
+    8279816  ManutenþÒo Claro SC IAIDTC e SCFN63  ROBERTO ALIAGA             CPF=26953703857    2 items  R$      17.20
+    8310220  DESPESAS M╩S DE AGOSTO-2025          AILTON MENDES AGUILAR      CPF=06304071698   18 items  R$   1,419.06
+    8320041  CAIXA 09/2025                        NIVALDO THIAGO DA CRUZ SA  CPF=04442316929    1 items  R$      35.00
+    8561793  10/2025                              ERASMO PEREIRA MONTEIRO    CPF=01773622781   15 items  R$   1,754.35
+    8646669  Despesa mÛs de setembro-2025         AILTON MENDES AGUILAR      CPF=06304071698    5 items  R$     266.55
+    8912707  CAIXA 10/2-25                        CLAUDINEI VICENTE DE LIMA  CPF=91920795987   12 items  R$   1,958.62
+    8988966  11/2025 itau                         PATRICK FERNANDO GOULART   CPF=07214272946   49 items  R$   3,131.88
+    9008722  RELATËRIO ARENA                      HELDER ARCHANJO FERREIRA   CPF=06439531670   13 items  R$     843.72
+    9216912  12/2025 itau                         PATRICK FERNANDO GOULART   CPF=07214272946   52 items  R$   3,701.09
+    9366952  CAIXA 01/2026                        EMERSON LEITE DE BARROS    CPF=34168918807   20 items  R$   4,158.08
+    9382027  01/2026                              PATRICK FERNANDO GOULART   CPF=07214272946   18 items  R$   2,067.56
+    9823071  CAIXA 02/2026                        JOSE CARLOS BATISTA        CPF=26652452804   56 items  R$   4,664.19
+    9823077  CAIXA 03/2026                        JOSE CARLOS BATISTA        CPF=26652452804  100 items  R$   9,873.71
+    9981967  CAIXA 03/2026                        SANDRA CRISTINA ALVES MAC  CPF=69456313034    1 items  R$     165.40
+    10127760  CAIXA 03/2026                        BRUNO EDUARDO DE SOUZA     CPF=82341478972    1 items  R$      33.00
+    10133111  RELATORIO DOLAR 04/2026              OSMAN DOS SANTOS MORAIS J  CPF=00846379945    3 items  R$      95.65
+    10141872  MARÃO 2026                           ADAUTO JOSE PEREIRA        CPF=85087572634   23 items  R$   1,767.61
+    10372756  CAIXA 05/2026                        JOSE CARLOS BATISTA        CPF=26652452804  198 items  R$  12,238.22
+    10738875  JULHO/26                             WAGNER FERNANDES DA SILVA  CPF=83501967691   12 items  R$     537.68
+    10917583  Caixa 06/2026                        MURILO DE ALMEIDA          CPF=10521167957    3 items  R$     116.50
+    10920785  CAIXA 06/2026                        FABIO PROVESI              CPF=05731312958    8 items  R$   1,190.32
+    10938615  CAIXA 07/2026                        JOSE WILKESON OLIVEIRA SI  CPF=03393455354    1 items  R$      60.00
+    10977210  Caixa 07.2026                        Rafael Almeida Lopes       CPF=46850229800    4 items  R$     406.16
+    10984423  CAIXA 07/2026                        TIAGO DE JESUS ARAUJO      CPF=04661413199    1 items  R$      48.00
+    11080145  CAIXA 04/2026                        IVON RAMOS MIRANDA         CPF=37634925004    2 items  R$   1,920.00
+    11080309  CAIXA 04/2026                        JONATA OLIVEIRA DA SILVA   CPF=84736305053    5 items  R$   2,160.00
+    11080573  CAIXA 04/2026                        NELSON FILIPE MARTINS DA   CPF=02653570041    4 items  R$   1,640.00
+    11080690  CAIXA 04/2026                        PAULO AUGUSTO OLIVEIRA LI  CPF=03139017081    1 items  R$     960.00
+    11080905  CAIXA 04/2026                        PEDRO LUIS PIRES DOS SANT  CPF=60707461049    3 items  R$   2,660.00
+    11081001  CAIXA 04/2026                        RIQUELME DE OLIVEIRA E SI  CPF=86733028034    3 items  R$   2,272.00
+    11081343  CAIXA 04/2026                        RUDINEI MACHADO RODRIGUES  CPF=82753342091    3 items  R$   2,660.00
+    11081446  CAIXA 04/2026                        THUANE DE OLIVEIRA MILSON  CPF=02864195054    2 items  R$     652.00
+    11081495  CAIXA 04/2026                        VALDOIR NOGUEIRA ANTUNES   CPF=01949569039    3 items  R$   2,880.00
+
+  --- Missing reports (in reference, NOT in API) ---
+    7802955  CartÒo Vexpenses (CAIXA 06/2025)     [DESATIVADO] - JULIA FRAN  CPF=15322365737    4 items  R$     676.18
+    7853208  FATURA 07/2025                       [DESATIVADO] - RENATA PAL  CPF=02449603050    1 items  R$      70.00
+    8668668  CAIXA 09/2025                        CELSO ROGERIO DE OLIVEIRA  CPF=25946255827    1 items  R$      34.00
+    8747941  CAIXA 10/2025                        [DESATIVADO] - ALEXANDRE   CPF=04141907936    1 items  R$      30.00
+    8869646  FATURA 11/2025                       MATHEUS FERNANDES GUIMARA  CPF=17996820724    2 items  R$     800.00
+    8990379  FATURA 12/2025                       [DESATIVADO] - NEDSON LUI  CPF=11498112692    1 items  R$      40.00
+    9085420  CAIXA 11/2025                        [DESATIVADO] - ALEXANDRE   CPF=04141907936    2 items  R$      41.00
+    9086108  CAIXA 12/2025                        [DESATIVADO] - ALEXANDRE   CPF=04141907936    1 items  R$      17.00
+    9302713  CartÒo vexpenses 11/2025             [DESATIVADO] - PATRICK FE  CPF=07214272946    4 items  R$      50.80
+    9424902  FATURA 01/2026                       ALEX SANDRO PEREIRA MARQU  CPF=82877904091    8 items  R$     156.80
+    10467383  FATURA 06/2026 MANUAL                [DESATIVADO] - RODRIGO CE  CPF=07024923610    2 items  R$     337.40
+    10581527  VEXPENSES FATURA 03/2026             [DESATIVADO] - ILMAR FONT  CPF=22136444972    1 items  R$      31.80
+    11004121  CAIXA 05/2026                        CLEBER ELIAS DA SILVA JUN  CPF=17278189705    4 items  R$     399.09
+
+====================================================================================================
+Per-CPF divergence (All filters combined) ù top 20 by absolute gap
+====================================================================================================
+
+  Total CPFs with divergence: 61
+  CPF                   API R$       Ref R$       Gap R$
+  26652452804        82,023.57    55,247.45   +26,776.12
+  07214272946        29,064.52    16,689.06   +12,375.46
+  67094260334         8,822.35         0.00    +8,822.35
+  85648809620         7,786.08         0.00    +7,786.08
+  02424765545         4,694.12         0.00    +4,694.12
+  34168918807        58,215.97    54,057.89    +4,158.08
+  91920795987         7,524.60     3,591.52    +3,933.08
+  01949569039         8,766.00     5,886.00    +2,880.00
+  60707461049         2,660.00         0.00    +2,660.00
+  82753342091         4,536.00     1,876.00    +2,660.00
+  03535433061         2,314.14         0.00    +2,314.14
+  86733028034         3,312.00     1,040.00    +2,272.00
+  06304071698         2,262.06         0.00    +2,262.06
+  84736305053         5,428.00     3,268.00    +2,160.00
+  37634925004         6,112.00     4,192.00    +1,920.00
+  03661672940         1,869.19         0.00    +1,869.19
+  85087572634         3,293.85     1,526.24    +1,767.61
+  01773622781         1,754.35         0.00    +1,754.35
+  02653570041         6,256.00     4,616.00    +1,640.00
+  90443306087         8,080.98     6,450.22    +1,630.76
+
+  Total gap: R$ 101,687.12
+  Positive gaps (API > Ref): R$ 106,282.35
+  Negative gaps (API < Ref): R$ -4,595.23

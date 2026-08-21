@@ -1,0 +1,216 @@
+
+=== Row 1 ===
+  [0] (Col A): None
+  [1] (Col B): None
+  [2] (Col C): None
+  [3] (Col D): None
+  [4] (Col E): None
+  [5] (Col F): None
+  [6] (Col G): None
+  [7] (Col H): None
+  [8] (Col I): None
+  [9] (Col J): None
+  [10] (Col K): None
+  [11] (Col L): None
+  [12] (Col M): None
+  [13] (Col N): None
+  [14] (Col O): None
+  [15] (Col P): None
+  [16] (Col Q): None
+  [17] (Col R): None
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 2 ===
+  [0] (Col A): None
+  [1] (Col B): None
+  [2] (Col C): None
+  [3] (Col D): None
+  [4] (Col E): None
+  [5] (Col F): None
+  [6] (Col G): None
+  [7] (Col H): None
+  [8] (Col I): None
+  [9] (Col J): None
+  [10] (Col K): None
+  [11] (Col L): None
+  [12] (Col M): None
+  [13] (Col N): None
+  [14] (Col O): None
+  [15] (Col P): None
+  [16] (Col Q): None
+  [17] (Col R): None
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 3 ===
+  [0] (Col A): None
+  [1] (Col B): None
+  [2] (Col C): None
+  [3] (Col D): None
+  [4] (Col E): None
+  [5] (Col F): None
+  [6] (Col G): None
+  [7] (Col H): None
+  [8] (Col I): None
+  [9] (Col J): None
+  [10] (Col K): None
+  [11] (Col L): None
+  [12] (Col M): None
+  [13] (Col N): None
+  [14] (Col O): None
+  [15] (Col P): None
+  [16] (Col Q): None
+  [17] (Col R): None
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 4 ===
+  [0] (Col A): None
+  [1] (Col B): None
+  [2] (Col C): None
+  [3] (Col D): None
+  [4] (Col E): None
+  [5] (Col F): None
+  [6] (Col G): None
+  [7] (Col H): None
+  [8] (Col I): None
+  [9] (Col J): None
+  [10] (Col K): None
+  [11] (Col L): None
+  [12] (Col M): None
+  [13] (Col N): None
+  [14] (Col O): 0.2
+  [15] (Col P): None
+  [16] (Col Q): None
+  [17] (Col R): None
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 5 ===
+  [0] (Col A): None
+  [1] (Col B): None
+  [2] (Col C): None
+  [3] (Col D): None
+  [4] (Col E): None
+  [5] (Col F): None
+  [6] (Col G): None
+  [7] (Col H): None
+  [8] (Col I): -127326.51999999986
+  [9] (Col J): 235466.92000000007
+  [10] (Col K): 481100
+  [11] (Col L): 83158.15999999999
+  [12] (Col M): 21300
+  [13] (Col N): 0
+  [14] (Col O): 25096.05599999996
+  [15] (Col P): 277631.2300000002
+  [16] (Col Q): 302727.28599999985
+  [17] (Col R): None
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 6 ===
+  [0] (Col A): None
+  [1] (Col B): 'PORTADOR'
+  [2] (Col C): 'CPF'
+  [3] (Col D): 'STATUS COLAB'
+  [4] (Col E): 'CENTRO CUSTO'
+  [5] (Col F): 'COD CENTRO CUSTO'
+  [6] (Col G): 'GESTOR'
+  [7] (Col H): 'DIREÇÃO'
+  [8] (Col I): 'SALDO REEMBOLSAR'
+  [9] (Col J): 'SALDO FINAL'
+  [10] (Col K): '1QZ DE DEZ 26'
+  [11] (Col L): 'SALDO CARTAO'
+  [12] (Col M): 'ADIANTAMENTO'
+  [13] (Col N): 'CARGA PARCIAL'
+  [14] (Col O): 'REEMBOLSO'
+  [15] (Col P): 'CARGA FINAL SEM REEMBOLSO'
+  [16] (Col Q): 'CARGA  FINAL REEMBOLSO'
+  [17] (Col R): 'STATUS DO CARTAO'
+  [18] (Col S): 'OBS '
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 7 ===
+  [0] (Col A): None
+  [1] (Col B): 'ABNER ANDRADE CAVALCANTE'
+  [2] (Col C): '02027745203'
+  [3] (Col D): 'ATIVO'
+  [4] (Col E): 'CEF AM AC RR'
+  [5] (Col F): 11030290001
+  [6] (Col G): 'ANGELICA SOARES'
+  [7] (Col H): 'ROGERIO SCATAMBULO'
+  [8] (Col I): -3779.5100000000093
+  [9] (Col J): 0
+  [10] (Col K): 9840
+  [11] (Col L): 3
+  [12] (Col M): 0
+  [13] (Col N): 9837
+  [14] (Col O): 0
+  [15] (Col P): 9837
+  [16] (Col Q): 9837
+  [17] (Col R): 'Cartão ativo'
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
+
+=== Row 8 ===
+  [0] (Col A): None
+  [1] (Col B): 'RAFAEL AMORIM VELLO'
+  [2] (Col C): '01677920599'
+  [3] (Col D): 'ATIVO'
+  [4] (Col E): 'CEF NORTE OESTE BA'
+  [5] (Col F): 11030260001
+  [6] (Col G): 'GLAUCIO GONÇALVES'
+  [7] (Col H): 'ROGERIO SCATAMBULO'
+  [8] (Col I): 0
+  [9] (Col J): 328.69000000006054
+  [10] (Col K): 16000
+  [11] (Col L): 9
+  [12] (Col M): 6000
+  [13] (Col N): 9662.30999999994
+  [14] (Col O): 0
+  [15] (Col P): 9662.30999999994
+  [16] (Col Q): 9662.30999999994
+  [17] (Col R): 'Cartão ativo'
+  [18] (Col S): None
+  [19] (Col T): None
+  [20] (Col U): None
+  [21] (Col V): None
+  [22] (Col W): None
+  [23] (Col X): None
+  [24] (Col Y): None
