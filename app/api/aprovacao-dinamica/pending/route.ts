@@ -277,6 +277,7 @@ export async function GET(request: NextRequest) {
     // Build user_id → approval_flow_id mapping from team-members (paginated)
     const userFlowMap = new Map<number, number>();
     const flowNamesMap = new Map<number, string>();
+    const eqsMemberIds = new Set<number>();
     try {
       let page = 1;
       const tmSeenIds = new Set<number>();
@@ -293,6 +294,7 @@ export async function GET(request: NextRequest) {
           for (const m of members) {
             if (!tmSeenIds.has(m.id)) {
               tmSeenIds.add(m.id);
+              eqsMemberIds.add(m.id);
               if (m.approval_flow_id) {
                 userFlowMap.set(m.id, m.approval_flow_id);
               }
@@ -308,6 +310,13 @@ export async function GET(request: NextRequest) {
       }
     } catch (err) {
       console.log('[Pending] Error fetching team-members:', err);
+    }
+
+    // Filter reports to only include EQS team members
+    if (eqsMemberIds.size > 0) {
+      const beforeCount = allReports.length;
+      allReports = allReports.filter((r: any) => eqsMemberIds.has(r.user_id));
+      console.log(`[Pending] Filtered to EQS members: ${beforeCount} -> ${allReports.length} reports (${eqsMemberIds.size} EQS members)`);
     }
 
     // If approver_id is provided, find which flows/steps that user is an approver in
