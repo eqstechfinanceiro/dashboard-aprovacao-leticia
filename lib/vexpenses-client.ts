@@ -22,28 +22,10 @@ export function getApiHeaders(extra?: Record<string, string>): Record<string, st
   };
 }
 
-let cachedCookie: string | null = null;
-let cookieExpiresAt = 0;
-
-export async function getLaravelApiCookie(): Promise<string | null> {
-  if (cachedCookie && cookieExpiresAt > Date.now()) {
-    return cachedCookie;
-  }
-  try {
-    const { getLaravelCookieString } = await import('./laravel-token');
-    const cookie = await getLaravelCookieString();
-    if (cookie) {
-      cachedCookie = cookie;
-      cookieExpiresAt = Date.now() + 5 * 60 * 1000;
-      return cookie;
-    }
-  } catch {}
-  return null;
-}
-
 export async function getApiHeadersWithCookie(extra?: Record<string, string>): Promise<Record<string, string>> {
   const headers = getApiHeaders(extra);
-  const cookie = await getLaravelApiCookie();
+  const { getNextLaravelCookie } = await import('./laravel-token');
+  const cookie = await getNextLaravelCookie();
   if (cookie) {
     headers['Cookie'] = cookie;
   }
@@ -59,4 +41,50 @@ export async function vexpensesFetch(path: string, options?: RequestInit): Promi
     headers,
     cache: 'no-store',
   });
+}
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export async function vexpensesFetchWithRotation(
+  path: string,
+  options?: RequestInit,
+  maxRetries?: number
+): Promise<Response> {
+  const { getNextLaravelCookie, markTokenCooldown, getActiveTokenCount } = await import('./laravel-token');
+  const retries = maxRetries ?? 3;
+
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const cookie = await getNextLaravelCookie();
+    const headers = getApiHeaders(
+      options?.headers ? Object.fromEntries(Object.entries(options.headers)) : undefined
+    );
+    if (cookie) {
+      headers['Cookie'] = cookie;
+    }
+
+    const resp = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers,
+      cache: 'no-store',
+    });
+
+    if (resp.status !== 403) return resp;
+
+    if (cookie) {
+      markTokenCooldown(cookie);
+    }
+
+    const activeCount = await getActiveTokenCount();
+    if (activeCount > 0 && attempt < retries - 1) {
+      await sleep(500);
+      continue;
+    }
+
+    if (attempt < retries - 1) {
+      await sleep(Math.min(2000 * Math.pow(2, attempt), 8000));
+      continue;
+    }
+    return resp;
+  }
+  return new Response('{"error":"Max retries exceeded"}', { status: 403, headers: { 'Content-Type': 'application/json' } });
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
+import { vexpensesFetchWithRotation } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -32,49 +32,29 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const BATCH_SIZE = 2;
-    let consecutive403 = 0;
+    const BATCH_SIZE = 5;
 
     for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
       const batch = toFetch.slice(i, i + BATCH_SIZE);
       const promises = batch.map(async (id) => {
-        for (let attempt = 0; attempt < 3; attempt++) {
-          try {
-            const resp = await fetch(`${getApiUrl()}/v2/reports/${id}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`, {
-              headers: await getApiHeadersWithCookie(),
-              signal: AbortSignal.timeout(30000),
-              cache: 'no-store',
-            });
-            if (resp.ok) {
-              const data = await resp.json();
-              const expenses = data.data?.expenses?.data || [];
-              counts[id] = expenses.length;
-              countsCache.set(id, { count: expenses.length, ts: Date.now() });
-              consecutive403 = 0;
-              return;
-            }
-            if (resp.status === 403) {
-              consecutive403++;
-              const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
-              console.log(`[Expense Counts] 403 on report ${id}, attempt ${attempt + 1}, waiting ${backoff}ms`);
-              await sleep(backoff);
-              continue;
-            }
-            return;
-          } catch {
-            return;
+        try {
+          const resp = await vexpensesFetchWithRotation(
+            `/v2/reports/${id}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
+            { signal: AbortSignal.timeout(30000) },
+            3
+          );
+          if (resp.ok) {
+            const data = await resp.json();
+            const expenses = data.data?.expenses?.data || [];
+            counts[id] = expenses.length;
+            countsCache.set(id, { count: expenses.length, ts: Date.now() });
           }
-        }
+        } catch {}
       });
       await Promise.all(promises);
 
-      if (consecutive403 >= 4) {
-        console.log(`[Expense Counts] Too many 403s (${consecutive403}), stopping early`);
-        break;
-      }
-
       if (i + BATCH_SIZE < toFetch.length) {
-        await sleep(500);
+        await sleep(300);
       }
     }
 

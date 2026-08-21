@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureAuditTable, getAuditedReportIds } from '@/lib/audit-db';
 import { getLaravelCookieString } from '@/lib/laravel-token';
-import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
+import { getApiHeadersWithCookie, getApiUrl, vexpensesFetchWithRotation } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -206,11 +206,11 @@ export async function GET(request: NextRequest) {
       try {
         let page = 1;
         while (page <= 20) {
-          const response = await fetch(`${API_URL}/v2/reports/status/${status}?include=user,expenses&per_page=100&page=${page}`, {
-            headers: await getApiHeadersWithCookie(),
-            signal: AbortSignal.timeout(120000),
-            cache: 'no-store',
-          });
+          const response = await vexpensesFetchWithRotation(
+            `/v2/reports/status/${status}?include=user,expenses&per_page=100&page=${page}`,
+            { signal: AbortSignal.timeout(120000) },
+            3
+          );
 
           if (response.ok) {
             const data = await response.json();
@@ -247,11 +247,11 @@ export async function GET(request: NextRequest) {
       let page = 1;
       const staleSeenIds = new Set<number>();
       while (page <= 5) {
-        const response = await fetch(`${API_URL}/v2/reports/status/REPROVADO?per_page=100&page=${page}`, {
-          headers: await getApiHeadersWithCookie(),
-          signal: AbortSignal.timeout(30000),
-          cache: 'no-store',
-        });
+        const response = await vexpensesFetchWithRotation(
+          `/v2/reports/status/REPROVADO?per_page=100&page=${page}`,
+          { signal: AbortSignal.timeout(30000) },
+          3
+        );
         if (response.ok) {
           const data = await response.json();
           const reports = data.data || [];
@@ -281,11 +281,11 @@ export async function GET(request: NextRequest) {
       let page = 1;
       const tmSeenIds = new Set<number>();
       while (page <= 20) {
-        const tmResp = await fetch(`${API_URL}/v2/team-members?per_page=100&page=${page}`, {
-          headers: await getApiHeadersWithCookie(),
-          signal: AbortSignal.timeout(30000),
-          cache: 'no-store',
-        });
+        const tmResp = await vexpensesFetchWithRotation(
+          `/v2/team-members?per_page=100&page=${page}`,
+          { signal: AbortSignal.timeout(30000) },
+          3
+        );
         if (tmResp.ok) {
           const tmData = await tmResp.json();
           const members = tmData.data || [];
@@ -318,11 +318,11 @@ export async function GET(request: NextRequest) {
       hasApproverFilter = true;
     }
     try {
-      const flowsResp = await fetch(`${API_URL}/v2/approval-flows?include=steps`, {
-        headers: await getApiHeadersWithCookie(),
-        signal: AbortSignal.timeout(30000),
-        cache: 'no-store',
-      });
+      const flowsResp = await vexpensesFetchWithRotation(
+        `/v2/approval-flows?include=steps`,
+        { signal: AbortSignal.timeout(30000) },
+        3
+      );
       if (flowsResp.ok) {
         const flowsData = await flowsResp.json();
         const flows = flowsData.data || [];
@@ -400,48 +400,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Individual status verification: the v2 bulk /status/ENVIADO endpoint is stale
-    // and includes reports that are actually APROVADO or REPROVADO. The Excel-based
-    // filter above catches some, but not all (e.g., reports approved through paths
-    // the Excel doesn't capture). Do a lightweight individual status check for each
-    // remaining report to filter out any that are not truly ENVIADO.
-    {
-      const staleIndividual = new Set<number>();
-      const BATCH_SIZE = 10;
-      for (let i = 0; i < allReports.length; i += BATCH_SIZE) {
-        const batch = allReports.slice(i, i + BATCH_SIZE);
-        const results = await Promise.all(
-          batch.map(async (r: any) => {
-            try {
-              const resp = await fetch(`${API_URL}/v2/reports/${r.id}`, {
-                headers: await getApiHeadersWithCookie(),
-                signal: AbortSignal.timeout(15000),
-                cache: 'no-store',
-              });
-              if (resp.status === 403) {
-                console.log(`[Pending] 403 on individual status check for report ${r.id}, skipping`);
-                return { id: r.id, status: 'ENVIADO' };
-              }
-              if (!resp.ok) return { id: r.id, status: null };
-              const data = await resp.json();
-              return { id: r.id, status: data.data?.status || null };
-            } catch {
-              return { id: r.id, status: null };
-            }
-          })
-        );
-        for (const { id, status } of results) {
-          if (status && status !== 'ENVIADO') {
-            staleIndividual.add(id);
-          }
-        }
-      }
-      if (staleIndividual.size > 0) {
-        const beforeCount = allReports.length;
-        allReports = allReports.filter((r: any) => !staleIndividual.has(r.id));
-        console.log(`[Pending] Filtered ${beforeCount - allReports.length} stale reports via individual status check (not actually ENVIADO)`);
-      }
-    }
+    // NOTE: Individual status verification (265 API calls) was here and caused >60s load times.
+    // Removed — we rely on the REPROVADO bulk filter + approval-tracking data to catch stale reports.
+    // The approve route also checks individual status before approving, so this is safe to skip.
 
     // Build result with approval flow info
     let result = allReports.map((r: any) => {

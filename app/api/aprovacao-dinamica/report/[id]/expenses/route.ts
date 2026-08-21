@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getApiHeadersWithCookie, getApiUrl } from '@/lib/vexpenses-client';
+import { vexpensesFetchWithRotation, getApiUrl } from '@/lib/vexpenses-client';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -13,26 +13,11 @@ export async function GET(
 
     let response: Response | null = null;
 
-    for (let attempt = 0; attempt < 3; attempt++) {
-      response = await fetch(
-        `${getApiUrl()}/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
-        {
-          headers: await getApiHeadersWithCookie(),
-          signal: AbortSignal.timeout(120000),
-          cache: 'no-store',
-        }
-      );
-
-      if (response.ok) break;
-
-      if (response.status === 403 && attempt < 2) {
-        const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
-        console.log(`[Expenses] 403 on report ${reportId}, attempt ${attempt + 1}, retrying in ${backoff}ms`);
-        await new Promise(resolve => setTimeout(resolve, backoff));
-        continue;
-      }
-      break;
-    }
+    response = await vexpensesFetchWithRotation(
+      `/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
+      { signal: AbortSignal.timeout(120000) },
+      3
+    );
 
     if (!response || !response.ok) {
       const errorText = response ? await response.text() : 'No response';

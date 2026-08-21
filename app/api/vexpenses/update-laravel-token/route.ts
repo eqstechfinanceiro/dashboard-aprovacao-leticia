@@ -10,13 +10,20 @@ async function ensureTokenTable() {
   if (!sql) return;
   await sql`
     CREATE TABLE IF NOT EXISTS vexpenses_tokens (
-      id INT PRIMARY KEY DEFAULT 1,
+      id SERIAL PRIMARY KEY,
       laravel_token TEXT,
       laravel_session TEXT,
       xsrf_token TEXT,
+      source_label TEXT,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       expires_at TIMESTAMP WITH TIME ZONE
     )
+  `;
+  await sql`
+    ALTER TABLE vexpenses_tokens ADD COLUMN IF NOT EXISTS source_label TEXT
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_vexpenses_tokens_expires ON vexpenses_tokens(expires_at)
   `;
 }
 
@@ -31,6 +38,8 @@ export async function POST(request: NextRequest) {
     xsrf_token?: string;
     expires_at?: number;
     secret?: string;
+    source_label?: string;
+    token_id?: number;
   };
 
   try {
@@ -53,19 +62,43 @@ export async function POST(request: NextRequest) {
     ? new Date(body.expires_at * 1000).toISOString()
     : new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
 
-  await sql`
-    INSERT INTO vexpenses_tokens (id, laravel_token, laravel_session, xsrf_token, updated_at, expires_at)
-    VALUES (1, ${body.laravel_token}, ${body.laravel_session || null}, ${body.xsrf_token || null}, NOW(), ${expiresAt})
-    ON CONFLICT (id)
-    DO UPDATE SET laravel_token = EXCLUDED.laravel_token,
-                  laravel_session = EXCLUDED.laravel_session,
-                  xsrf_token = EXCLUDED.xsrf_token,
-                  updated_at = NOW(),
-                  expires_at = EXCLUDED.expires_at
-  `;
+  const sourceLabel = body.source_label || 'default';
+
+  if (body.token_id) {
+    await sql`
+      UPDATE vexpenses_tokens
+      SET laravel_token = ${body.laravel_token},
+          laravel_session = ${body.laravel_session || null},
+          xsrf_token = ${body.xsrf_token || null},
+          source_label = ${sourceLabel},
+          updated_at = NOW(),
+          expires_at = ${expiresAt}
+      WHERE id = ${body.token_id}
+    `;
+  } else {
+    const existing = await sql`
+      SELECT id FROM vexpenses_tokens WHERE source_label = ${sourceLabel} LIMIT 1
+    `;
+    if (existing && existing.length > 0) {
+      await sql`
+        UPDATE vexpenses_tokens
+        SET laravel_token = ${body.laravel_token},
+            laravel_session = ${body.laravel_session || null},
+            xsrf_token = ${body.xsrf_token || null},
+            updated_at = NOW(),
+            expires_at = ${expiresAt}
+        WHERE id = ${existing[0].id}
+      `;
+    } else {
+      await sql`
+        INSERT INTO vexpenses_tokens (laravel_token, laravel_session, xsrf_token, source_label, updated_at, expires_at)
+        VALUES (${body.laravel_token}, ${body.laravel_session || null}, ${body.xsrf_token || null}, ${sourceLabel}, NOW(), ${expiresAt})
+      `;
+    }
+  }
   clearLaravelTokenCache();
 
-  return NextResponse.json({ ok: true, expires_at: expiresAt });
+  return NextResponse.json({ ok: true, expires_at: expiresAt, source_label: sourceLabel });
 }
 
 export async function GET() {
@@ -76,22 +109,28 @@ export async function GET() {
   await ensureTokenTable();
 
   const rows = await sql`
-    SELECT laravel_token, laravel_session, updated_at, expires_at
+    SELECT id, source_label, updated_at, expires_at
     FROM vexpenses_tokens
-    WHERE id = 1
+    ORDER BY id
   `;
 
   if (!rows || rows.length === 0) {
-    return NextResponse.json({ has_token: false });
+    return NextResponse.json({ has_token: false, token_count: 0 });
   }
 
-  const row = rows[0] as any;
-  const isExpired = new Date(row.expires_at).getTime() < Date.now();
+  const now = Date.now();
+  const activeTokens = rows.filter((r: any) => new Date(r.expires_at).getTime() > now);
 
   return NextResponse.json({
-    has_token: !isExpired,
-    is_expired: isExpired,
-    updated_at: row.updated_at,
-    expires_at: row.expires_at,
+    has_token: activeTokens.length > 0,
+    token_count: rows.length,
+    active_count: activeTokens.length,
+    tokens: rows.map((r: any) => ({
+      id: r.id,
+      source_label: r.source_label,
+      updated_at: r.updated_at,
+      expires_at: r.expires_at,
+      is_expired: new Date(r.expires_at).getTime() < now,
+    })),
   });
 }
