@@ -4,13 +4,13 @@ ARG CACHE_BUST=1
 WORKDIR /app
 
 # Install build dependencies for native modules (canvas needs python3 + cairo/pango dev headers)
-RUN apk add --no-cache python3 make g++ pkgconf cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev
+RUN apk add --no-cache python3 make g++ pkgconfig cairo-dev pango-dev jpeg-dev giflib-dev pixman-dev
 
-COPY vexpenses-dashboard/package*.json ./vexpenses-dashboard/
-RUN cd vexpenses-dashboard && npm ci
+COPY package*.json ./
+RUN npm ci
 
-COPY vexpenses-dashboard ./vexpenses-dashboard
-RUN cd vexpenses-dashboard && npm run build
+COPY . .
+RUN npm run build
 
 FROM node:18-alpine AS runner
 
@@ -21,13 +21,13 @@ RUN apk add --no-cache cairo pango jpeg giflib pixman
 
 ENV NODE_ENV=production
 
-COPY --from=builder /app/vexpenses-dashboard/package*.json ./vexpenses-dashboard/
-COPY --from=builder /app/vexpenses-dashboard/node_modules ./vexpenses-dashboard/node_modules
-RUN cd vexpenses-dashboard && npm prune --production
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+RUN npm prune --production
 
-COPY --from=builder /app/vexpenses-dashboard/.next ./vexpenses-dashboard/.next
+COPY --from=builder /app/.next ./.next
 
-WORKDIR /app/vexpenses-dashboard
+WORKDIR /app
 
 EXPOSE 3000
 
