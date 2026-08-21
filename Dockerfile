@@ -1,4 +1,4 @@
-FROM node:18-alpine AS builder
+FROM node:18.20.8-alpine AS builder
 
 ARG CACHE_BUST=1
 WORKDIR /app
@@ -15,7 +15,7 @@ RUN find app -name "*.tsx" | sort > /tmp/tsx_files.txt || echo "find failed" > /
 RUN cat /tmp/tsx_files.txt
 RUN npm run build
 
-FROM node:18-alpine AS runner
+FROM node:18.20.8-alpine AS runner
 
 WORKDIR /app
 
