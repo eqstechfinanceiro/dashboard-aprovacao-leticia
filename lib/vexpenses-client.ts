@@ -10,8 +10,14 @@ export function getApiUrl() {
 export function getApiHeaders(extra?: Record<string, string>): Record<string, string> {
   return {
     'Authorization': API_KEY,
-    'Accept': 'application/json',
+    'Accept': 'application/json, text/plain, */*',
+    'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
     'User-Agent': BROWSER_UA,
+    'Origin': 'https://app.vexpenses.com',
+    'Referer': 'https://app.vexpenses.com/',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-site',
     ...extra,
   };
 }
