@@ -279,7 +279,7 @@ export default function AprovacaoDinamicaPage() {
   const [rejectingExpense, setRejectingExpense] = useState<string | null>(null);
   const [rejectObservation, setRejectObservation] = useState<Record<string, string>>({});
   const [rejectingReport, setRejectingReport] = useState<number | null>(null);
-  const [faturaModalReport, setFaturaModalReport] = useState<number | null>(null);
+  const [faturaModalOpen, setFaturaModalOpen] = useState(false);
   const [faturaValidations, setFaturaValidations] = useState<Record<number, Record<number, FaturaValidationRecord>>>({});
 
   useEffect(() => {
@@ -1024,14 +1024,13 @@ export default function AprovacaoDinamicaPage() {
       />
 
       <FaturaUploadModal
-        open={faturaModalReport !== null}
-        onClose={() => setFaturaModalReport(null)}
-        reportId={faturaModalReport || 0}
-        reportDescription={reports.find(r => r.id === faturaModalReport)?.description || ''}
+        open={faturaModalOpen}
+        onClose={() => setFaturaModalOpen(false)}
         validatedBy={user?.name || 'Sistema'}
         onValidationComplete={() => {
-          if (faturaModalReport) {
-            fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${faturaModalReport}`)
+          const reportIds = Object.keys(faturaValidations).map(Number);
+          for (const rid of reportIds) {
+            fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${rid}`)
               .then(res => res.json())
               .then(data => {
                 if (data.data && Array.isArray(data.data)) {
@@ -1042,7 +1041,7 @@ export default function AprovacaoDinamicaPage() {
                       vMap[v.expense_id] = v;
                     }
                   }
-                  setFaturaValidations(prev => ({ ...prev, [faturaModalReport]: vMap }));
+                  setFaturaValidations(prev => ({ ...prev, [rid]: vMap }));
                 }
               })
               .catch(err => console.error('Error refreshing fatura validations:', err));
@@ -1096,6 +1095,15 @@ export default function AprovacaoDinamicaPage() {
           >
             <ScrollText className="h-4 w-4" />
             Logs
+          </Button>
+          <Button
+            onClick={() => setFaturaModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="border-purple-300 text-purple-700 hover:bg-purple-100"
+          >
+            <CreditCard className="h-4 w-4" />
+            Validar Fatura
           </Button>
           <Button
             onClick={auditAllReports}
@@ -1567,15 +1575,6 @@ export default function AprovacaoDinamicaPage() {
                         <ScanLine className="h-4 w-4" />
                       )}
                       Auditar Tudo
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="border-purple-300 text-purple-700 hover:bg-purple-100"
-                      onClick={() => setFaturaModalReport(report.id)}
-                    >
-                      <CreditCard className="h-4 w-4" />
-                      Validar Fatura
                     </Button>
                     <a
                       href={`https://amp.vexpenses.com/relatorios/${report.id}`}

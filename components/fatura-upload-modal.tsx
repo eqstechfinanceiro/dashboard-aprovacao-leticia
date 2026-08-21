@@ -8,22 +8,32 @@ import { Button } from '@/components/ui/button';
 interface FaturaUploadModalProps {
   open: boolean;
   onClose: () => void;
-  reportId: number;
-  reportDescription: string;
   validatedBy: string;
   onValidationComplete: () => void;
 }
 
-interface ValidationResult {
+interface ReportSummary {
   report_id: number;
+  report_description: string;
+  user_name: string;
+  total_expenses: number;
+  validated: number;
+  mismatched: number;
+  not_found: number;
+}
+
+interface ValidationResult {
   filename: string;
   total_fatura_entries: number;
+  reports_validated: number;
   total_expenses: number;
   validated: number;
   mismatched: number;
   not_found: number;
   unmatched_fatura_count: number;
+  report_summaries: ReportSummary[];
   results: Array<{
+    report_id: number;
     expense_id: number;
     status: 'VALIDATED' | 'MISMATCH' | 'NOT_FOUND';
     fatura_filename: string;
@@ -33,6 +43,7 @@ interface ValidationResult {
     expense_value: number;
     difference: number;
   }>;
+  message?: string;
 }
 
 function formatCurrency(value: number): string {
@@ -42,8 +53,6 @@ function formatCurrency(value: number): string {
 export function FaturaUploadModal({
   open,
   onClose,
-  reportId,
-  reportDescription,
   validatedBy,
   onValidationComplete,
 }: FaturaUploadModalProps) {
@@ -66,7 +75,6 @@ export function FaturaUploadModal({
     try {
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('reportId', String(reportId));
       formData.append('validatedBy', validatedBy);
 
       const res = await fetch('/api/aprovacao-dinamica/fatura/validate', {
@@ -87,7 +95,7 @@ export function FaturaUploadModal({
     } finally {
       setUploading(false);
     }
-  }, [reportId, validatedBy, onValidationComplete]);
+  }, [validatedBy, onValidationComplete]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -121,7 +129,7 @@ export function FaturaUploadModal({
         </div>
 
         <p className="mb-4 text-sm text-gray-600">
-          Report: <strong>{reportDescription || `#${reportId}`}</strong>
+          Valide todas as despesas Itaú dos relatórios pendentes contra a fatura exportada do cartão corporativo.
         </p>
 
         {/* Upload Area */}
@@ -187,6 +195,13 @@ export function FaturaUploadModal({
         {/* Results */}
         {result && (
           <div className="space-y-4">
+            {/* Message if no reports */}
+            {result.message && (
+              <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-700">
+                {result.message}
+              </div>
+            )}
+
             {/* Summary */}
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-center">
@@ -213,59 +228,96 @@ export function FaturaUploadModal({
               <span>—</span>
               <span>{result.total_fatura_entries} entradas na fatura</span>
               <span>—</span>
-              <span>{result.total_expenses} despesas no relatório</span>
+              <span>{result.reports_validated} relatórios validados</span>
+              <span>—</span>
+              <span>{result.total_expenses} despesas</span>
               {result.unmatched_fatura_count > 0 && (
                 <>
                   <span>—</span>
-                  <span className="text-orange-600">{result.unmatched_fatura_count} entradas sem despesa correspondente</span>
+                  <span className="text-orange-600">{result.unmatched_fatura_count} entradas sem despesa</span>
                 </>
               )}
             </div>
 
+            {/* Report summaries */}
+            {result.report_summaries && result.report_summaries.length > 0 && (
+              <div className="rounded-lg border border-gray-200">
+                <div className="border-b border-gray-200 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-600">
+                  Relatórios validados
+                </div>
+                <div className="max-h-32 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-white">
+                      <tr>
+                        <th className="px-3 py-1.5 text-left font-medium text-gray-600">Relatório</th>
+                        <th className="px-3 py-1.5 text-left font-medium text-gray-600">Usuário</th>
+                        <th className="px-3 py-1.5 text-center font-medium text-gray-600">Despesas</th>
+                        <th className="px-3 py-1.5 text-center font-medium text-green-600">OK</th>
+                        <th className="px-3 py-1.5 text-center font-medium text-orange-600">Diverg.</th>
+                        <th className="px-3 py-1.5 text-center font-medium text-red-600">Sem</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.report_summaries.map((rs) => (
+                        <tr key={rs.report_id} className="border-t border-gray-100">
+                          <td className="px-3 py-1.5 text-gray-700">#{rs.report_id} {rs.report_description}</td>
+                          <td className="px-3 py-1.5 text-gray-600">{rs.user_name}</td>
+                          <td className="px-3 py-1.5 text-center text-gray-700">{rs.total_expenses}</td>
+                          <td className="px-3 py-1.5 text-center text-green-700 font-medium">{rs.validated}</td>
+                          <td className="px-3 py-1.5 text-center text-orange-700 font-medium">{rs.mismatched}</td>
+                          <td className="px-3 py-1.5 text-center text-red-700 font-medium">{rs.not_found}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Detailed results */}
-            <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200">
-              <table className="w-full text-xs">
-                <thead className="sticky top-0 bg-gray-50">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-medium text-gray-600">Despesa</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-600">Valor Despesa</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-600">Valor Fatura</th>
-                    <th className="px-3 py-2 text-right font-medium text-gray-600">Diferença</th>
-                    <th className="px-3 py-2 text-center font-medium text-gray-600">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.results.map((r, i) => (
-                    <tr key={i} className="border-t border-gray-100">
-                      <td className="px-3 py-2 text-gray-700">
-                        #{r.expense_id}
-                        {r.fatura_description && (
-                          <span className="block text-xs text-gray-400">{r.fatura_description}</span>
-                        )}
-                      </td>
-                      <td className="px-3 py-2 text-right text-gray-700">{formatCurrency(r.expense_value)}</td>
-                      <td className="px-3 py-2 text-right text-gray-700">
-                        {r.status === 'NOT_FOUND' ? '-' : formatCurrency(r.fatura_value)}
-                      </td>
-                      <td className="px-3 py-2 text-right text-gray-700">
-                        {r.status === 'NOT_FOUND' ? '-' : formatCurrency(r.difference)}
-                      </td>
-                      <td className="px-3 py-2 text-center">
-                        {r.status === 'VALIDATED' && (
-                          <Badge className="bg-green-100 text-green-700 text-xs">Validada</Badge>
-                        )}
-                        {r.status === 'MISMATCH' && (
-                          <Badge className="bg-orange-100 text-orange-700 text-xs">Divergente</Badge>
-                        )}
-                        {r.status === 'NOT_FOUND' && (
-                          <Badge className="bg-red-100 text-red-700 text-xs">Não encontrada</Badge>
-                        )}
-                      </td>
+            {result.results.length > 0 && (
+              <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200">
+                <table className="w-full text-xs">
+                  <thead className="sticky top-0 bg-gray-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Relatório</th>
+                      <th className="px-3 py-2 text-left font-medium text-gray-600">Despesa</th>
+                      <th className="px-3 py-2 text-right font-medium text-gray-600">Valor Despesa</th>
+                      <th className="px-3 py-2 text-right font-medium text-gray-600">Valor Fatura</th>
+                      <th className="px-3 py-2 text-center font-medium text-gray-600">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {result.results.map((r, i) => (
+                      <tr key={i} className="border-t border-gray-100">
+                        <td className="px-3 py-2 text-gray-600">#{r.report_id}</td>
+                        <td className="px-3 py-2 text-gray-700">
+                          #{r.expense_id}
+                          {r.fatura_description && (
+                            <span className="block text-xs text-gray-400">{r.fatura_description}</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-right text-gray-700">{formatCurrency(r.expense_value)}</td>
+                        <td className="px-3 py-2 text-right text-gray-700">
+                          {r.status === 'NOT_FOUND' ? '-' : formatCurrency(r.fatura_value)}
+                        </td>
+                        <td className="px-3 py-2 text-center">
+                          {r.status === 'VALIDATED' && (
+                            <Badge className="bg-green-100 text-green-700 text-xs">Validada</Badge>
+                          )}
+                          {r.status === 'MISMATCH' && (
+                            <Badge className="bg-orange-100 text-orange-700 text-xs">Divergente</Badge>
+                          )}
+                          {r.status === 'NOT_FOUND' && (
+                            <Badge className="bg-red-100 text-red-700 text-xs">Não encontrada</Badge>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex justify-end gap-2">
