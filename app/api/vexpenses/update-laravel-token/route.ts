@@ -64,8 +64,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
   }
 
-  await ensureTokenTable();
-
   const expiresAt = body.expires_at
     ? new Date(body.expires_at * 1000).toISOString()
     : new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString();
