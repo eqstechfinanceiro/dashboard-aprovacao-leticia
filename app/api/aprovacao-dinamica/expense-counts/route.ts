@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       const promises = batch.map(async (id) => {
         for (let attempt = 0; attempt < 3; attempt++) {
           try {
-            const resp = await fetch(`${getApiUrl()}/v2/reports/${id}?include=expenses`, {
+            const resp = await fetch(`${getApiUrl()}/v2/reports/${id}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`, {
               headers: getApiHeaders(),
               signal: AbortSignal.timeout(30000),
             });
@@ -55,7 +55,8 @@ export async function GET(request: NextRequest) {
             if (resp.status === 403) {
               consecutive403++;
               const backoff = Math.min(2000 * Math.pow(2, attempt), 10000);
-              console.log(`[Expense Counts] 403 on report ${id}, attempt ${attempt + 1}, waiting ${backoff}ms`);
+              const body = await resp.text().catch(() => 'no body');
+              console.log(`[Expense Counts] 403 on report ${id}, attempt ${attempt + 1}, waiting ${backoff}ms, body: ${body.slice(0, 200)}`);
               await sleep(backoff);
               continue;
             }
