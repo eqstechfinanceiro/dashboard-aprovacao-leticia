@@ -338,9 +338,43 @@ export default function AprovacaoDinamicaPage() {
         return r.json();
       });
       const auditPromise = loadAllSavedResults();
+      const bulkExpensesPromise = opts?.skipValidation
+        ? Promise.resolve(null)
+        : fetch('/api/aprovacao-dinamica/bulk-expenses').then(r => r.ok ? r.json() : null).catch(() => null);
+      const faturaStatusPromise = fetch('/api/aprovacao-dinamica/fatura/all-status').then(r => r.ok ? r.json() : null).catch(() => null);
 
       const data = await pendingPromise;
       await auditPromise;
+      const bulkExpensesData = await bulkExpensesPromise;
+
+      if (bulkExpensesData?.data) {
+        const expensesMap: Record<number, any[]> = {};
+        const counts: Record<number, number> = {};
+        for (const [rid, info] of Object.entries(bulkExpensesData.data)) {
+          const r = info as any;
+          expensesMap[Number(rid)] = r.expenses;
+          counts[Number(rid)] = r.expense_count;
+        }
+        setReportExpenses(expensesMap);
+        setExpenseCounts(counts);
+      }
+
+      const faturaStatusData = await faturaStatusPromise;
+      if (faturaStatusData?.data) {
+        const faturaMap: Record<number, Record<number, FaturaValidationRecord>> = {};
+        for (const [rid, records] of Object.entries(faturaStatusData.data)) {
+          const vMap: Record<number, FaturaValidationRecord> = {};
+          for (const v of records as FaturaValidationRecord[]) {
+            const existing = vMap[v.expense_id];
+            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
+              vMap[v.expense_id] = v;
+            }
+          }
+          faturaMap[Number(rid)] = vMap;
+        }
+        setFaturaValidations(faturaMap);
+      }
+
       const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
       setReports(filtered);
       // Use expense_count from pending response (avoids separate API call that gets 403'd by WAF)
@@ -353,10 +387,7 @@ export default function AprovacaoDinamicaPage() {
       if (Object.keys(counts).length > 0) {
         setExpenseCounts(counts);
       }
-      // Only fetch expense counts separately if pending response didn't include them
-      if (Object.keys(counts).length === 0) {
-        fetchExpenseCounts(data.data || []);
-      }
+      // Expense counts come from bulk expenses or pending response — no individual calls
       // Fetch existing approvals
       fetchApprovals(data.data || []);
       // Fetch NF validation batch summary only on first load or explicit refresh
@@ -448,14 +479,11 @@ export default function AprovacaoDinamicaPage() {
   }, [fetchPending, globalAuditing, auditingExpense]);
 
   const loadExpenses = async (reportId: number) => {
-    if (reportExpenses[reportId]) return;
-    setLoadingExpenses(reportId);
+    if (!reportExpenses[reportId]) {
+      console.warn(`[loadExpenses] No bulk expenses for report ${reportId}, skipping (no individual fetch)`);
+      return;
+    }
     try {
-      const res = await fetch(`/api/aprovacao-dinamica/report/${reportId}/expenses`);
-      if (!res.ok) throw new Error('Failed to fetch expenses');
-      const data = await res.json();
-      setReportExpenses(prev => ({ ...prev, [reportId]: data.data.expenses }));
-
       const savedRes = await fetch(`/api/aprovacao-dinamica/audit-results/${reportId}`);
       if (savedRes.ok) {
         const savedData = await savedRes.json();
@@ -467,29 +495,12 @@ export default function AprovacaoDinamicaPage() {
           setAuditResults(prev => ({ ...prev, [reportId]: resultsMap }));
           setAuditProgress(prev => ({
             ...prev,
-            [reportId]: { done: savedData.data.expenses.length, total: data.data.expenses.length },
+            [reportId]: { done: savedData.data.expenses.length, total: reportExpenses[reportId]?.length || 0 },
           }));
         }
       }
-
-      const faturaRes = await fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${reportId}`);
-      if (faturaRes.ok) {
-        const faturaData = await faturaRes.json();
-        if (faturaData.data && Array.isArray(faturaData.data)) {
-          const vMap: Record<number, FaturaValidationRecord> = {};
-          for (const v of faturaData.data as FaturaValidationRecord[]) {
-            const existing = vMap[v.expense_id];
-            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
-              vMap[v.expense_id] = v;
-            }
-          }
-          setFaturaValidations(prev => ({ ...prev, [reportId]: vMap }));
-        }
-      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading expenses');
-    } finally {
-      setLoadingExpenses(null);
+      console.error('Error loading audit results for report:', err);
     }
   };
 
@@ -572,36 +583,6 @@ export default function AprovacaoDinamicaPage() {
         setGlobalProgress({ current: r + 1, total: reports.length, reportDesc: report.description || `Report #${report.id}` });
 
         let expenses = reportExpenses[report.id];
-        if (!expenses) {
-          try {
-            const res = await fetch(`/api/aprovacao-dinamica/report/${report.id}/expenses`);
-            if (res.ok) {
-              const data = await res.json();
-              expenses = data.data.expenses;
-              setReportExpenses(prev => ({ ...prev, [report.id]: expenses! }));
-
-              const savedRes = await fetch(`/api/aprovacao-dinamica/audit-results/${report.id}`);
-              if (savedRes.ok) {
-                const savedData = await savedRes.json();
-                if (savedData.data?.expenses?.length > 0) {
-                  const resultsMap: Record<number, ExpenseAuditResult> = {};
-                  savedData.data.expenses.forEach((e: ExpenseAuditResult) => {
-                    resultsMap[e.expense_id] = e;
-                  });
-                  setAuditResults(prev => ({ ...prev, [report.id]: resultsMap }));
-                  setAuditProgress(prev => ({
-                    ...prev,
-                    [report.id]: { done: savedData.data.expenses.length, total: expenses!.length },
-                  }));
-                }
-              }
-            }
-          } catch (err) {
-            console.error(`Error loading expenses for report ${report.id}:`, err);
-            continue;
-          }
-        }
-
         if (!expenses || expenses.length === 0) continue;
 
         for (let i = 0; i < expenses.length; i++) {
@@ -622,6 +603,19 @@ export default function AprovacaoDinamicaPage() {
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  const isItauExpense = (expense: ReportExpense): boolean => {
+    const pm = expense.payment_method;
+    if (!pm) return false;
+    const desc = (pm.description || '').toLowerCase();
+    return desc.includes('itaú') || desc.includes('itau');
+  };
+
+  const reportHasItauExpenses = (reportId: number): boolean => {
+    const expenses = reportExpenses[reportId];
+    if (!expenses || expenses.length === 0) return false;
+    return expenses.some(isItauExpense);
+  };
 
   const isReportReadyToApprove = useCallback((reportId: number) => {
     const results = auditResults[reportId] || {};
@@ -1036,7 +1030,7 @@ export default function AprovacaoDinamicaPage() {
         onClose={() => setFaturaModalOpen(false)}
         validatedBy={user?.name || 'Sistema'}
         onValidationComplete={() => {
-          const reportIds = Object.keys(faturaValidations).map(Number);
+          const reportIds = visibleReports.map(r => r.id);
           for (const rid of reportIds) {
             fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${rid}`)
               .then(res => res.json())
@@ -1412,6 +1406,33 @@ export default function AprovacaoDinamicaPage() {
                         {auditedCount}/{expenseCounts[report.id]}
                       </Badge>
                     )}
+                    {(() => {
+                      if (!reportHasItauExpenses(report.id)) return null;
+                      const faturaMap = faturaValidations[report.id];
+                      if (!faturaMap) return null;
+                      const faturaRecords = Object.values(faturaMap);
+                      if (faturaRecords.length === 0) return null;
+                      const validated = faturaRecords.filter(v => v.status === 'VALIDATED').length;
+                      const mismatch = faturaRecords.filter(v => v.status === 'MISMATCH').length;
+                      const notFound = faturaRecords.filter(v => v.status === 'NOT_FOUND').length;
+                      const total = faturaRecords.length;
+                      const allValidated = validated === total;
+                      const hasIssues = mismatch > 0 || notFound > 0;
+                      const badgeClass = allValidated
+                        ? 'bg-green-100 text-green-800'
+                        : hasIssues
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-purple-100 text-purple-800';
+                      const icon = allValidated ? <CheckCircle className="mr-1 h-3 w-3" /> : hasIssues ? <AlertCircle className="mr-1 h-3 w-3" /> : <FileText className="mr-1 h-3 w-3" />;
+                      const title = `Fatura Itaú: ${validated} validadas, ${mismatch} divergentes, ${notFound} não encontradas (de ${total} despesas)`;
+                      return (
+                        <Badge className={`${badgeClass} text-xs`} title={title}>
+                          {icon}
+                          Fatura: {validated}/{total}
+                          {mismatch > 0 && ` (${mismatch} div)`}
+                        </Badge>
+                      );
+                    })()}
                     {(() => {
                       const vs = validationSummary[report.id];
                       if (!vs || 'error' in vs) return null;
@@ -1982,6 +2003,90 @@ export default function AprovacaoDinamicaPage() {
                     </div>
                   )}
 
+                  {/* Fatura Validation Summary — only for reports with Itaú expenses */}
+                  {!isLoadingExp && expenses.length > 0 && reportHasItauExpenses(report.id) && (() => {
+                    const faturaMap = faturaValidations[report.id];
+                    const validated: any[] = [];
+                    const mismatched: Array<{ expense: any; record: FaturaValidationRecord }> = [];
+                    const notFound: Array<{ expense: any; record: FaturaValidationRecord }> = [];
+                    const noValidation: any[] = [];
+                    const itauExpenses = expenses.filter(isItauExpense);
+                    for (const exp of itauExpenses) {
+                      const fv = faturaMap?.[exp.id] ?? faturaMap?.[exp.expense_id];
+                      if (!fv) {
+                        noValidation.push(exp);
+                      } else if (fv.status === 'VALIDATED') {
+                        validated.push(exp);
+                      } else if (fv.status === 'MISMATCH') {
+                        mismatched.push({ expense: exp, record: fv });
+                      } else if (fv.status === 'NOT_FOUND') {
+                        notFound.push({ expense: exp, record: fv });
+                      }
+                    }
+                    const total = itauExpenses.length;
+                    const hasAny = validated.length + mismatched.length + notFound.length + noValidation.length > 0;
+                    if (!hasAny || total === 0) return null;
+                    const allValidated = validated.length === total;
+                    return (
+                      <div className={`border-b px-4 py-3 ${allValidated ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className={`text-sm font-medium ${allValidated ? 'text-green-800' : 'text-orange-800'}`}>
+                            Fatura Itaú:
+                          </p>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
+                            <CheckCircle className="h-3 w-3" /> {validated.length} OK
+                          </span>
+                          {mismatched.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700">
+                              <AlertCircle className="h-3 w-3" /> {mismatched.length} divergentes
+                            </span>
+                          )}
+                          {notFound.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
+                              <XCircle className="h-3 w-3" /> {notFound.length} não encontradas
+                            </span>
+                          )}
+                          {noValidation.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500">
+                              <FileText className="h-3 w-3" /> {noValidation.length} sem validação
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-400">de {total} despesas</span>
+                        </div>
+                        {(mismatched.length > 0 || notFound.length > 0) && (
+                          <div className="space-y-1.5">
+                            {mismatched.map(({ expense, record }) => (
+                              <div key={expense.id} className="flex items-center gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 font-medium text-orange-700">
+                                  <AlertCircle className="h-3 w-3" /> Divergente
+                                </span>
+                                <span className="font-medium text-gray-700">{expense.title}</span>
+                                <span className="text-gray-500">R$ {parseFloat(expense.value).toFixed(2)}</span>
+                                <span className="text-gray-400">→ Fatura: R$ {Number(record.fatura_value).toFixed(2)}</span>
+                                <span className="font-medium text-orange-800">Dif: R$ {Number(record.difference).toFixed(2)}</span>
+                                {record.fatura_description && (
+                                  <span className="text-gray-400 italic" title={record.fatura_description}>
+                                    ({record.fatura_description.length > 30 ? record.fatura_description.slice(0, 30) + '...' : record.fatura_description})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {notFound.map(({ expense, record }) => (
+                              <div key={expense.id} className="flex items-center gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2 py-0.5 font-medium text-red-700">
+                                  <XCircle className="h-3 w-3" /> Não encontrada
+                                </span>
+                                <span className="font-medium text-gray-700">{expense.title}</span>
+                                <span className="text-gray-500">R$ {parseFloat(expense.value).toFixed(2)}</span>
+                                <span className="text-gray-400">{expense.date}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Expenses as dynamic cards */}
                   {!isLoadingExp && expenses.length > 0 && (
                     <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2 lg:grid-cols-3">
@@ -2037,8 +2142,16 @@ export default function AprovacaoDinamicaPage() {
 
                               <div className="flex flex-col items-end gap-1">
                                 {(() => {
-                                  const fatura = faturaValidations[report.id]?.[expense.expense_id];
-                                  if (!fatura) return null;
+                                  if (!isItauExpense(expense)) return null;
+                                  const fatura = faturaValidations[report.id]?.[expense.id] ?? faturaValidations[report.id]?.[expense.expense_id];
+                                  if (!fatura) {
+                                    return (
+                                      <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-xs font-medium text-gray-400" title="Esta despesa ainda não foi validada contra nenhuma fatura">
+                                        <FileText className="h-3 w-3" />
+                                        Sem validação
+                                      </div>
+                                    );
+                                  }
                                   if (fatura.status === 'VALIDATED') {
                                     return (
                                       <div className="flex items-center gap-1 rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700" title={`Validado contra ${fatura.fatura_filename} em ${fatura.validated_at ? new Date(fatura.validated_at).toLocaleString('pt-BR') : '-'}`}>
@@ -2049,7 +2162,7 @@ export default function AprovacaoDinamicaPage() {
                                   }
                                   if (fatura.status === 'MISMATCH') {
                                     return (
-                                      <div className="flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700" title={`Divergência: R$ ${fatura.difference.toFixed(2)} — ${fatura.fatura_filename}`}>
+                                      <div className="flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700" title={`Divergência: R$ ${Number(fatura.difference).toFixed(2)} — ${fatura.fatura_filename}`}>
                                         <AlertCircle className="h-3 w-3" />
                                         Fatura Divergente
                                       </div>
@@ -2091,7 +2204,8 @@ export default function AprovacaoDinamicaPage() {
                               )}
 
                               {(() => {
-                                const fatura = faturaValidations[report.id]?.[expense.expense_id];
+                                if (!isItauExpense(expense)) return null;
+                                const fatura = faturaValidations[report.id]?.[expense.id] ?? faturaValidations[report.id]?.[expense.expense_id];
                                 if (!fatura || fatura.status === 'NOT_FOUND') return null;
                                 return (
                                   <div className="rounded border border-purple-200 bg-purple-50 p-1.5">
@@ -2102,9 +2216,9 @@ export default function AprovacaoDinamicaPage() {
                                       {fatura.fatura_description && <span>• {fatura.fatura_description}</span>}
                                     </div>
                                     <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-purple-700">
-                                      <span>Fatura: R$ {fatura.fatura_value.toFixed(2)}</span>
-                                      <span>• Despesa: R$ {fatura.expense_value.toFixed(2)}</span>
-                                      {fatura.difference !== 0 && <span className="font-medium text-orange-700">• Diferença: R$ {fatura.difference.toFixed(2)}</span>}
+                                      <span>Fatura: R$ {Number(fatura.fatura_value).toFixed(2)}</span>
+                                      <span>• Despesa: R$ {Number(fatura.expense_value).toFixed(2)}</span>
+                                      {Number(fatura.difference) !== 0 && <span className="font-medium text-orange-700">• Diferença: R$ {Number(fatura.difference).toFixed(2)}</span>}
                                     </div>
                                     {fatura.validated_at && (
                                       <p className="mt-0.5 text-xs text-purple-400">
@@ -2119,7 +2233,7 @@ export default function AprovacaoDinamicaPage() {
                               {/* Audit Result Details */}
                               {expAudit && (
                                 <div className="mt-2 space-y-1.5">
-                                  {expAudit.divergences.length > 0 && (
+                                  {expAudit.divergences?.length > 0 && (
                                     <div className="rounded border border-orange-200 bg-orange-50 p-1.5">
                                       <p className="text-xs font-medium text-orange-800">Divergências:</p>
                                       {expAudit.divergences.map((d, i) => (
@@ -2128,7 +2242,7 @@ export default function AprovacaoDinamicaPage() {
                                     </div>
                                   )}
 
-                                  {expAudit.rules_triggered.length > 0 && (
+                                  {expAudit.rules_triggered?.length > 0 && (
                                     <div className="rounded border border-gray-200 bg-gray-50 p-1.5">
                                       <p className="text-xs font-medium text-gray-700">Regras:</p>
                                       {expAudit.rules_triggered.map((r, i) => (

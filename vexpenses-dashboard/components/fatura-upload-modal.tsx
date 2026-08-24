@@ -16,6 +16,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<any[] | null>(null);
+  const [summary, setSummary] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -26,6 +27,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
     if (selected) {
       setFile(selected);
       setResults(null);
+      setSummary(null);
       setError(null);
     }
   };
@@ -35,6 +37,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
     setLoading(true);
     setError(null);
     setResults(null);
+    setSummary(null);
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -52,6 +55,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
 
       const data = await res.json();
       setResults(data.results || []);
+      setSummary(data.summary || null);
       onValidationComplete();
     } catch (err: any) {
       setError(err.message || 'Erro ao validar fatura');
@@ -63,6 +67,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
   const handleClose = () => {
     setFile(null);
     setResults(null);
+    setSummary(null);
     setError(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
     onClose();
@@ -121,6 +126,20 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
             </Button>
           </div>
 
+          {summary && (
+            <div className="rounded border border-blue-200 bg-blue-50 p-3 text-sm">
+              <div className="flex flex-wrap gap-4">
+                <span className="font-medium text-blue-900">Resumo:</span>
+                <span className="text-green-700">✓ {summary.validated} validadas</span>
+                <span className="text-orange-700">⚠ {summary.mismatch} divergentes</span>
+                <span className="text-red-700">✗ {summary.notFound} não encontradas</span>
+                <span className="text-gray-600">Total: {summary.totalExpenses} despesas</span>
+                <span className="text-gray-600">Fatura: {summary.totalFaturaRows} linhas</span>
+                {summary.durationMs && <span className="text-gray-400">({(summary.durationMs / 1000).toFixed(1)}s)</span>}
+              </div>
+            </div>
+          )}
+
           {results && results.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-gray-700">Resultados ({results.length})</h3>
@@ -128,6 +147,7 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
                 <table className="w-full text-xs">
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
+                      <th className="p-2 text-left">Report</th>
                       <th className="p-2 text-left">Despesa</th>
                       <th className="p-2 text-left">Fatura</th>
                       <th className="p-2 text-right">Valor Despesa</th>
@@ -138,8 +158,9 @@ export function FaturaUploadModal({ open, onClose, validatedBy, onValidationComp
                   <tbody>
                     {results.map((r, i) => (
                       <tr key={i} className="border-t border-gray-100">
+                        <td className="p-2">{r.report_id}</td>
                         <td className="p-2">{r.expense_id}</td>
-                        <td className="p-2">{r.fatura_filename}</td>
+                        <td className="p-2">{r.fatura_description || r.fatura_filename}</td>
                         <td className="p-2 text-right">R$ {r.expense_value?.toFixed(2)}</td>
                         <td className="p-2 text-right">R$ {r.fatura_value?.toFixed(2)}</td>
                         <td className="p-2 text-center">

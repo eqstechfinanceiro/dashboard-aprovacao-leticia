@@ -18,7 +18,7 @@ const BROWSER_HEADERS: Record<string, string> = {
 };
 
 // TTL constants
-const TTL = {
+export const TTL = {
   REPORTS_ENVIADO: 15 * 60 * 1000,      // 15 min
   REPORTS_REPROVADO: 60 * 60 * 1000,    // 1 hour
   TEAM_MEMBERS: 24 * 60 * 60 * 1000,    // 24 hours
@@ -475,13 +475,28 @@ export async function getReportExpenses(reportId: number): Promise<TimingResult<
     TTL.REPORT_EXPENSES,
     async () => {
       const response = await vexpensesApiFetch(
-        `/v2/reports/${reportId}/expenses?per_page=100`,
+        `/v2/reports/${reportId}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
         { signal: AbortSignal.timeout(30000) },
         3
       );
       if (!response.ok) return [];
       const data = await response.json();
-      return data.data || [];
+      const report = data.data;
+      if (!report) return [];
+      const expenses = report.expenses?.data || [];
+      return expenses.map((e: any) => ({
+        id: e.id,
+        expense_id: e.expense_id,
+        title: e.title,
+        value: parseFloat(e.value) || 0,
+        date: e.date,
+        observation: e.observation,
+        receipt_url: e.reicept_url || e.receipt_url || '',
+        rejected: e.rejected,
+        expense_type: e.expense_type?.data || null,
+        costs_center: e.costs_center?.data || null,
+        payment_method: e.payment_method?.data || null,
+      }));
     },
     'reports'
   );
