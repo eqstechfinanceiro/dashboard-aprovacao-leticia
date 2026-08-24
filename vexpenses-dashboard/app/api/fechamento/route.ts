@@ -110,11 +110,14 @@ function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function getFirstNameLastName(fullName: string): { firstName: string; lastName: string } {
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] || '';
-  const lastName = parts.length > 1 ? parts[parts.length - 1] : firstName;
-  return { firstName, lastName };
+// Prepositions/articles that should be ignored when matching name parts
+const NAME_STOPWORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'as', 'os']);
+
+// Extract all significant name parts (excluding prepositions/articles)
+// e.g. "Everson Esteves dos Santos" -> ["everson", "esteves", "santos"]
+function getSignificantNameParts(fullName: string): string[] {
+  const parts = fullName.trim().toLowerCase().split(/\s+/);
+  return parts.filter(p => p.length > 1 && !NAME_STOPWORDS.has(p));
 }
 
 // Parse report name to extract month/year (e.g. "CAIXA 10/2025" -> {ano: 2025, mes: 'OUTUBRO'})
@@ -193,32 +196,21 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Fetch EXTRATO from Neon DB (extrato_movimentacao)
+    // Use ALL significant name parts to avoid mixing users with same first/last name
     let extratoRows: ExtratoRow[] = [];
     if (sql) {
       try {
-        const { firstName, lastName } = getFirstNameLastName(colaboradorName);
-        const rows = await sql`
-          SELECT
-            data::text as data,
-            hora,
-            codigo_transacao,
-            usuario,
-            tipo,
-            descricao,
-            valor,
-            is_snapshot
-          FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstName + '%'})
-            AND unaccent(usuario) ILIKE unaccent(${'%' + lastName + '%'})
-            AND is_snapshot = false
-          ORDER BY data ASC, hora ASC
-        `;
-        extratoRows = rows as ExtratoRow[];
-
-        // Fallback: if no rows found with first+last name, try just the first name
-        // (the extrato may have a shorter version of the name)
-        if (extratoRows.length === 0) {
-          const fallbackRows = await sql`
+        const significantParts = getSignificantNameParts(colaboradorName);
+        // Strategy 1: Require ALL significant name parts to match
+        // e.g. "Everson Esteves dos Santos" -> WHERE usuario ILIKE '%everson%' AND ILIKE '%esteves%' AND ILIKE '%santos%'
+        if (significantParts.length >= 2) {
+          // Build dynamic WHERE with all parts — use tagged template with AND conditions
+          // We can't easily do dynamic AND with neon tagged templates, so we fetch a superset
+          // and filter in JS. But for 2-3 parts, we can construct the query.
+          // Actually, neon supports building queries with .append() or we can use raw SQL.
+          // Simplest: fetch by first part, then filter in JS by all parts.
+          const firstPart = significantParts[0];
+          const candidateRows = await sql`
             SELECT
               data::text as data,
               hora,
@@ -229,41 +221,71 @@ export async function GET(request: NextRequest) {
               valor,
               is_snapshot
             FROM extrato_movimentacao
-            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstName + '%'})
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstPart + '%'})
               AND is_snapshot = false
             ORDER BY data ASC, hora ASC
           `;
-          if (fallbackRows.length > 0) {
-            console.log(`[Fechamento] Extrato fallback by first name "${firstName}" returned ${fallbackRows.length} rows for ${colaboradorName}`);
-            extratoRows = fallbackRows as ExtratoRow[];
-          }
-        }
+          // Filter: require ALL significant parts to be present in usuario
+          const normalizedParts = significantParts.map(p => p.toLowerCase());
+          extratoRows = (candidateRows as ExtratoRow[]).filter(row => {
+            const usuarioLower = (row.usuario || '').toLowerCase();
+            return normalizedParts.every(p => usuarioLower.includes(p));
+          });
 
-        // Second fallback: try first 2 words of the name
-        if (extratoRows.length === 0) {
-          const nameParts = colaboradorName.trim().split(/\s+/);
-          if (nameParts.length >= 2) {
-            const firstTwo = nameParts.slice(0, 2).join(' ');
-            const fallback2Rows = await sql`
-              SELECT
-                data::text as data,
-                hora,
-                codigo_transacao,
-                usuario,
-                tipo,
-                descricao,
-                valor,
-                is_snapshot
-              FROM extrato_movimentacao
-              WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstTwo + '%'})
-                AND is_snapshot = false
-              ORDER BY data ASC, hora ASC
-            `;
-            if (fallback2Rows.length > 0) {
-              console.log(`[Fechamento] Extrato fallback by first 2 words "${firstTwo}" returned ${fallback2Rows.length} rows for ${colaboradorName}`);
-              extratoRows = fallback2Rows as ExtratoRow[];
+          // Verify uniqueness: if multiple distinct usuario names matched, log a warning
+          if (extratoRows.length > 0) {
+            const distinctUsers = new Set(extratoRows.map(r => r.usuario?.toLowerCase().trim()));
+            if (distinctUsers.size > 1) {
+              console.warn(`[Fechamento] Multiple users matched for "${colaboradorName}" (parts: ${significantParts.join(', ')}): ${[...distinctUsers].join(', ')}. Using exact match.`);
+              // Try exact normalized match first
+              const targetNormalized = normalizeName(colaboradorName);
+              const exactMatches = extratoRows.filter(r => normalizeName(r.usuario || '') === targetNormalized);
+              if (exactMatches.length > 0) {
+                extratoRows = exactMatches;
+              } else {
+                // Fall back to the most similar user name
+                const targetParts = new Set(normalizedParts);
+                const userScores = new Map<string, number>();
+                for (const r of extratoRows) {
+                  const u = (r.usuario || '').toLowerCase().trim();
+                  const uParts = new Set(getSignificantNameParts(r.usuario || ''));
+                  let score = 0;
+                  for (const p of targetParts) {
+                    if (uParts.has(p)) score++;
+                  }
+                  userScores.set(u, Math.max(userScores.get(u) || 0, score));
+                }
+                let bestUser = '';
+                let bestScore = 0;
+                for (const [u, s] of userScores) {
+                  if (s > bestScore) { bestScore = s; bestUser = u; }
+                }
+                if (bestUser) {
+                  console.warn(`[Fechamento] Selected best match: "${bestUser}" (score: ${bestScore}/${significantParts.length})`);
+                  extratoRows = extratoRows.filter(r => (r.usuario || '').toLowerCase().trim() === bestUser);
+                }
+              }
             }
           }
+        } else {
+          // Only one significant part — use it but warn about potential ambiguity
+          const onlyPart = significantParts[0] || colaboradorName.trim().split(/\s+/)[0];
+          const rows = await sql`
+            SELECT
+              data::text as data,
+              hora,
+              codigo_transacao,
+              usuario,
+              tipo,
+              descricao,
+              valor,
+              is_snapshot
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + onlyPart + '%'})
+              AND is_snapshot = false
+            ORDER BY data ASC, hora ASC
+          `;
+          extratoRows = rows as ExtratoRow[];
         }
       } catch (dbErr) {
         console.error('[Fechamento] Error querying extrato_movimentacao:', dbErr);
@@ -432,31 +454,53 @@ export async function GET(request: NextRequest) {
       .reduce((s, p) => s + p.valor_total, 0);
 
     // 8. Try to get saldo cartão from last extrato snapshot
+    // Use same robust matching as extrato: require all significant name parts
     let saldoCartao = 0;
     if (sql) {
       try {
-        const { firstName: fn, lastName: ln } = getFirstNameLastName(colaboradorName);
-        let snapshotRows = await sql`
-          SELECT valor
-          FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
-            AND unaccent(usuario) ILIKE unaccent(${'%' + ln + '%'})
-            AND is_snapshot = true
-          ORDER BY data DESC
-          LIMIT 1
-        `;
-        if (snapshotRows.length === 0) {
-          snapshotRows = await sql`
+        const significantParts = getSignificantNameParts(colaboradorName);
+        if (significantParts.length >= 2) {
+          const firstPart = significantParts[0];
+          const candidateSnapshots = await sql`
+            SELECT valor, usuario
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstPart + '%'})
+              AND is_snapshot = true
+            ORDER BY data DESC
+          `;
+          const normalizedParts = significantParts.map(p => p.toLowerCase());
+          const filteredSnapshots = (candidateSnapshots as any[]).filter(row => {
+            const usuarioLower = (row.usuario || '').toLowerCase();
+            return normalizedParts.every(p => usuarioLower.includes(p));
+          });
+          // If multiple users matched, pick exact or best match
+          if (filteredSnapshots.length > 0) {
+            const distinctUsers = new Set(filteredSnapshots.map(r => (r.usuario || '').toLowerCase().trim()));
+            if (distinctUsers.size > 1) {
+              const targetNormalized = normalizeName(colaboradorName);
+              const exact = filteredSnapshots.filter(r => normalizeName(r.usuario || '') === targetNormalized);
+              if (exact.length > 0) {
+                saldoCartao = Number(exact[0].valor) || 0;
+              } else {
+                saldoCartao = Number(filteredSnapshots[0].valor) || 0;
+              }
+            } else {
+              saldoCartao = Number(filteredSnapshots[0].valor) || 0;
+            }
+          }
+        } else {
+          const onlyPart = significantParts[0] || colaboradorName.trim().split(/\s+/)[0];
+          const snapshotRows = await sql`
             SELECT valor
             FROM extrato_movimentacao
-            WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + onlyPart + '%'})
               AND is_snapshot = true
             ORDER BY data DESC
             LIMIT 1
           `;
-        }
-        if (snapshotRows.length > 0) {
-          saldoCartao = Number((snapshotRows[0] as any).valor) || 0;
+          if (snapshotRows.length > 0) {
+            saldoCartao = Number((snapshotRows[0] as any).valor) || 0;
+          }
         }
       } catch (e) {
         console.error('[Fechamento] Error fetching saldo cartao snapshot:', e);
