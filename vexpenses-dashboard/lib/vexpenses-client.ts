@@ -128,9 +128,12 @@ export async function vexpensesFetchWithRotation(
       return response;
     } catch (error: any) {
       lastError = error;
+      const isQueueFull = error.message?.includes('Queue full');
       console.log(`[VExpenses Client] Error on attempt ${attempt + 1}/${maxRetries} for ${path}: ${error.message}`);
       if (attempt < maxRetries - 1) {
-        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        // Longer backoff for Queue full errors to let the rate limiter drain
+        const delay = isQueueFull ? 5000 * (attempt + 1) : 1000 * (attempt + 1);
+        await new Promise(r => setTimeout(r, delay));
         continue;
       }
     }

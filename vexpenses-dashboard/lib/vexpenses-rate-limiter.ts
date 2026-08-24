@@ -104,7 +104,8 @@ class RateLimiter {
 }
 
 // Singleton — uma única fila para toda a aplicação
-export const vexpensesRateLimiter = new RateLimiter(5, 50);
+// 5 req/s, queue up to 500 items (enough for ~269 reports + overhead)
+export const vexpensesRateLimiter = new RateLimiter(5, 500);
 
 // Helper para usar com fetch
 export async function rateLimitedFetch(
