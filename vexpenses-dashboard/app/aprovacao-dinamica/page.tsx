@@ -330,7 +330,11 @@ export default function AprovacaoDinamicaPage() {
       const approverParam = approverFilter ? `&approver_id=${approverFilter}` : '';
       const stepParam = stepOneOnly ? '&step=1' : '';
       const pendingPromise = fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`).then(r => {
-        if (!r.ok) throw new Error('Failed to fetch pending reports');
+        if (r.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Sessão expirada. Redirecionando para login...');
+        }
+        if (!r.ok) throw new Error(`Failed to fetch pending reports (HTTP ${r.status})`);
         return r.json();
       });
       const auditPromise = loadAllSavedResults();
@@ -1271,9 +1275,14 @@ export default function AprovacaoDinamicaPage() {
           <div className="flex items-center gap-2 text-red-800">
             <AlertCircle className="h-5 w-5" />
             <span className="text-sm font-medium">{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
-              ×
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={() => fetchPending()} className="text-xs px-3 py-1 rounded-md bg-red-100 hover:bg-red-200 text-red-700 font-medium">
+                Tentar novamente
+              </button>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+                ×
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1312,7 +1321,7 @@ export default function AprovacaoDinamicaPage() {
         </Card>
       )}
 
-      {!loading && reports.length === 0 && (
+      {!loading && !error && reports.length === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <Bot className="h-12 w-12 text-gray-300" />

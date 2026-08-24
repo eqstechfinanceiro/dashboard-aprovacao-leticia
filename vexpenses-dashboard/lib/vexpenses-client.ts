@@ -1,4 +1,8 @@
-import { getNextLaravelCookie, markTokenCooldown, clearLaravelTokenCache } from './laravel-token';
+import { vexpensesRateLimiter } from './vexpenses-rate-limiter';
+import { getNextValidCookie, markTokenCooldownById, clearTokenCache } from './vexpenses-token-validator';
+
+// Legacy compat re-exports for code still using laravel-token
+export { getLaravelCookieString, markTokenCooldown, clearLaravelTokenCache, isLaravelTokenExpired, getActiveTokenCount } from './laravel-token';
 
 export function getApiUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
@@ -41,9 +45,6 @@ export async function getApiHeadersWithCookie(extraHeaders?: Record<string, stri
   return headers;
 }
 
-async function getLaravelCookieStringWithRotation(): Promise<string | null> {
-  return await getNextLaravelCookie();
-}
 
 export async function vexpensesFetchWithRotation(
   path: string,
@@ -70,7 +71,7 @@ export async function vexpensesFetchWithRotation(
         headers['Authorization'] = apiKey;
       }
     } else if (isV3) {
-      const cookie = await getNextLaravelCookie();
+      const cookie = await getNextValidCookie();
       if (cookie) {
         headers['Cookie'] = cookie;
         const xsrf = extractXsrfTokenFromCookie(cookie);
@@ -83,7 +84,7 @@ export async function vexpensesFetchWithRotation(
       if (apiKey) {
         headers['Authorization'] = apiKey;
       }
-      const cookie = await getNextLaravelCookie();
+      const cookie = await getNextValidCookie();
       if (cookie) {
         headers['Cookie'] = cookie;
         const xsrf = extractXsrfTokenFromCookie(cookie);
@@ -94,18 +95,18 @@ export async function vexpensesFetchWithRotation(
     }
 
     try {
-      const response = await fetch(url, {
-        ...options,
-        headers,
-        cache: 'no-store',
-      });
+      const response = await vexpensesRateLimiter.enqueue(
+        () => fetch(url, { ...options, headers, cache: 'no-store' }),
+        5 // default priority
+      );
 
       if (response.status === 429) {
         console.log(`[VExpenses Client] 429 on attempt ${attempt + 1}/${maxRetries} for ${path}`);
+        vexpensesRateLimiter.pause(60_000);
         const cookieHeader = headers['Cookie'];
-        if (cookieHeader) markTokenCooldown(cookieHeader);
+        if (cookieHeader) markTokenCooldownById(cookieHeader);
         if (attempt < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+          await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
           continue;
         }
       }
@@ -113,10 +114,13 @@ export async function vexpensesFetchWithRotation(
       if (response.status === 401 || response.status === 403) {
         console.log(`[VExpenses Client] ${response.status} on attempt ${attempt + 1}/${maxRetries} for ${path}`);
         const cookieHeader = headers['Cookie'];
-        if (cookieHeader) markTokenCooldown(cookieHeader);
-        clearLaravelTokenCache();
+        if (cookieHeader) markTokenCooldownById(cookieHeader);
+        // Only clear token cache for v3/non-v2 (auth issue, not WAF)
+        if (isV3 || (!isV2 && !isV3)) {
+          clearTokenCache();
+        }
         if (attempt < maxRetries - 1) {
-          await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+          await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
           continue;
         }
       }

@@ -1,367 +1,49 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureAuditTable, getAuditedReportIds } from '@/lib/audit-db';
-import { getLaravelCookieString } from '@/lib/laravel-token';
-import { getApiHeadersWithCookie, getApiUrl, vexpensesFetchWithRotation } from '@/lib/vexpenses-client';
+import { getReportsEnviado, getReportsReprovado, getTeamMembers, getApprovalFlows, getApprovalTracking } from '@/lib/vexpenses-data';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
 
-const API_URL = getApiUrl();
-const APP_URL = 'https://app.vexpenses.com';
-
-const PENDING_STATUSES = ['ENVIADO'];
-
-const BROWSER_HEADERS = {
-  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
-  'Origin': 'https://app.vexpenses.com',
-  'Referer': 'https://app.vexpenses.com/admin/relatorio-acompanhamento-aprovacao',
-};
-
-function extractCookiesFromResponse(resp: Response, baseCookies: string): string {
-  const setCookieHeaders = resp.headers.getSetCookie?.() || [];
-  if (setCookieHeaders.length === 0) return baseCookies;
-  const cookieMap = new Map<string, string>();
-  for (const c of baseCookies.split(';')) {
-    const trimmed = c.trim();
-    if (trimmed) {
-      const eqIdx = trimmed.indexOf('=');
-      if (eqIdx > 0) cookieMap.set(trimmed.substring(0, eqIdx), trimmed);
-    }
-  }
-  for (const sc of setCookieHeaders) {
-    const cookiePart = sc.split(';')[0].trim();
-    if (cookiePart) {
-      const eqIdx = cookiePart.indexOf('=');
-      if (eqIdx > 0) cookieMap.set(cookiePart.substring(0, eqIdx), cookiePart);
-    }
-  }
-  return Array.from(cookieMap.values()).join('; ');
-}
-
-async function fetchApprovalTrackingSteps(): Promise<{ steps: Map<number, number>; rejected: Set<number>; approvedLastAction: Set<number> }> {
-  const baseCookies = await getLaravelCookieString();
-  if (!baseCookies) {
-    console.log('[Pending] No Laravel token available, skipping approval-tracking');
-    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-  }
-
-  let sessionCookies = baseCookies;
-
-  // Step 1: GET admin page to extract CSRF token
-  const pageResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao`, {
-    headers: { ...BROWSER_HEADERS, 'Cookie': sessionCookies },
-    redirect: 'manual',
-    signal: AbortSignal.timeout(30000),
-  });
-  sessionCookies = extractCookiesFromResponse(pageResp, sessionCookies);
-
-  let html: string;
-  if (pageResp.status >= 300 && pageResp.status < 400) {
-    const location = pageResp.headers.get('location');
-    if (!location) throw new Error('Admin page redirect without location');
-    const redirectUrl = location.startsWith('http') ? location : `${APP_URL}${location}`;
-    if (redirectUrl.includes('/login')) {
-      console.log('[Pending] Laravel token expired (login redirect on admin page)');
-      return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-    }
-    const retryResp = await fetch(redirectUrl, {
-      headers: { ...BROWSER_HEADERS, 'Cookie': sessionCookies },
-      redirect: 'manual',
-      signal: AbortSignal.timeout(30000),
-    });
-    sessionCookies = extractCookiesFromResponse(retryResp, sessionCookies);
-    html = await retryResp.text();
-  } else if (pageResp.ok) {
-    html = await pageResp.text();
-  } else {
-    console.log('[Pending] Admin page returned', pageResp.status);
-    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-  }
-
-  const csrfMatch = html.match(/name=["']_token["'].*?value=["']([^"']+)["']/);
-  if (!csrfMatch) {
-    console.log('[Pending] Could not extract CSRF token');
-    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-  }
-  const csrfToken = csrfMatch[1];
-
-  // Step 2: POST to Excel endpoint
-  const now = new Date();
-  const startDate = '01/01/2025';
-  const endDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
-
-  const formData = new URLSearchParams();
-  formData.append('_token', csrfToken);
-  formData.append('status[]', 'ENVIADO');
-  formData.append('startDate', startDate);
-  formData.append('endDate', endDate);
-
-  const excelResp = await fetch(`${APP_URL}/admin/relatorio-acompanhamento-aprovacao/excel`, {
-    method: 'POST',
-    headers: { ...BROWSER_HEADERS, 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': sessionCookies },
-    body: formData.toString(),
-    redirect: 'manual',
-    signal: AbortSignal.timeout(120000),
-  });
-
-  let arrayBuffer: ArrayBuffer;
-  if (excelResp.status >= 300 && excelResp.status < 400) {
-    const location = excelResp.headers.get('location');
-    if (!location) throw new Error('Excel redirect without location');
-    const redirectUrl = location.startsWith('http') ? location : `${APP_URL}${location}`;
-    const redirectCookies = extractCookiesFromResponse(excelResp, sessionCookies);
-    const retryResp = await fetch(redirectUrl, {
-      method: 'POST',
-      headers: { ...BROWSER_HEADERS, 'Content-Type': 'application/x-www-form-urlencoded', 'Cookie': redirectCookies },
-      body: formData.toString(),
-      redirect: 'manual',
-      signal: AbortSignal.timeout(120000),
-    });
-    if (!retryResp.ok) {
-      console.log('[Pending] Excel endpoint (after redirect) returned', retryResp.status);
-      return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-    }
-    arrayBuffer = await retryResp.arrayBuffer();
-  } else if (excelResp.ok) {
-    arrayBuffer = await excelResp.arrayBuffer();
-  } else {
-    console.log('[Pending] Excel endpoint returned', excelResp.status);
-    return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-  }
-
-  // Step 3: Parse Excel with SheetJS
-  const XLSX = await import('xlsx');
-  const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const rows: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
-
-  if (rows.length < 2) return { steps: new Map(), rejected: new Set(), approvedLastAction: new Set() };
-
-  // Step 4: Group by reportId, find last action, determine waitingStep
-  const reportsMap = new Map<string, any[]>();
-  for (let i = 1; i < rows.length; i++) {
-    const row = rows[i];
-    if (!row[0]) continue;
-    const reportId = String(row[0]);
-    if (!reportsMap.has(reportId)) reportsMap.set(reportId, []);
-    reportsMap.get(reportId)!.push(row);
-  }
-
-  const waitingStepMap = new Map<number, number>();
-  for (const [reportId, reportRows] of reportsMap) {
-    const lastRow = reportRows[reportRows.length - 1];
-    const action = String(lastRow[5] || '');
-    const step = lastRow[7] ? parseInt(String(lastRow[7]), 10) : null;
-
-    let waitingStep = 1;
-    if (action === 'Aprovado' && step !== null) {
-      waitingStep = step + 1;
-    } else if (action === 'Enviado') {
-      waitingStep = 1;
-    } else if (action === 'Reaberto') {
-      waitingStep = 0;
-    }
-
-    waitingStepMap.set(parseInt(reportId, 10), waitingStep);
-  }
-
-  const rejectedIds = new Set<number>();
-  const approvedLastAction = new Set<number>();
-  for (const [reportId, reportRows] of reportsMap) {
-    const lastRow = reportRows[reportRows.length - 1];
-    const action = String(lastRow[5] || '');
-    if (action === 'Reprovado' || action === 'Reprovado pelo administrador') {
-      rejectedIds.add(parseInt(reportId, 10));
-    } else if (action === 'Aprovado') {
-      approvedLastAction.add(parseInt(reportId, 10));
-    }
-  }
-
-  console.log(`[Pending] Approval-tracking: ${waitingStepMap.size} reports parsed, ${rejectedIds.size} rejected, ${approvedLastAction.size} approved-last-action`);
-  return { steps: waitingStepMap, rejected: rejectedIds, approvedLastAction };
-}
-
 export async function GET(request: NextRequest) {
+  const totalStart = Date.now();
   try {
     await ensureAuditTable();
 
     const { searchParams } = new URL(request.url);
     const includeAudit = searchParams.get('include_audit') === 'true';
     const approverId = searchParams.get('approver_id');
-    const stepFilter = searchParams.get('step'); // '1' = only step 1 (awaiting first approval)
+    const stepFilter = searchParams.get('step');
 
-    // Fetch approval-tracking data (from admin Excel) for real waitingStep per report
-    const trackingData = await fetchApprovalTrackingSteps();
-    const waitingStepMap = trackingData.steps;
-    const rejectedIds = trackingData.rejected;
-    const approvedLastActionIds = trackingData.approvedLastAction;
-
-    // Fetch reports, REPROVADO, team-members, and approval-flows in parallel
-    const [allReports, staleFromOtherStatuses, teamMemberData, approvalFlowsData] = await Promise.all([
-      // 1. Fetch pending reports (paginated)
-      (async () => {
-        const reports: any[] = [];
-        const seenIds = new Set<number>();
-        for (const status of PENDING_STATUSES) {
-          try {
-            let page = 1;
-            while (page <= 20) {
-              const response = await vexpensesFetchWithRotation(
-                `/v2/reports/status/${status}?include=user&per_page=100&page=${page}`,
-                { signal: AbortSignal.timeout(120000) },
-                3
-              );
-              if (response.ok) {
-                const data = await response.json();
-                const batch = data.data || [];
-                let newCount = 0;
-                for (const r of batch) {
-                  if (!seenIds.has(r.id)) {
-                    seenIds.add(r.id);
-                    reports.push(r);
-                    newCount++;
-                  }
-                }
-                console.log(`[Pending] Fetched ${batch.length} reports for status ${status} (page ${page}), ${newCount} new unique. Total so far: ${reports.length}`);
-                if (batch.length === 100 && newCount === 100) { page++; continue; }
-                if (newCount === 0 || batch.length === 0) break;
-                if (batch.length < 100) break;
-                page++;
-              } else {
-                console.log(`[Pending] Status ${response.status} for reports/status/${status}`);
-                break;
-              }
-            }
-          } catch (err) {
-            console.log(`[Pending] Error fetching status ${status}:`, err);
-          }
-        }
-        console.log(`[Pending] Total unique reports: ${reports.length}`);
-        return reports;
-      })(),
-
-      // 2. Fetch REPROVADO reports for stale check
-      (async () => {
-        const staleIds = new Set<number>();
-        try {
-          let page = 1;
-          const staleSeenIds = new Set<number>();
-          while (page <= 5) {
-            const response = await vexpensesFetchWithRotation(
-              `/v2/reports/status/REPROVADO?per_page=100&page=${page}`,
-              { signal: AbortSignal.timeout(30000) },
-              3
-            );
-            if (response.ok) {
-              const data = await response.json();
-              const reports = data.data || [];
-              let newCount = 0;
-              for (const r of reports) {
-                if (!staleSeenIds.has(r.id)) {
-                  staleSeenIds.add(r.id);
-                  staleIds.add(r.id);
-                  newCount++;
-                }
-              }
-              console.log(`[Pending] Fetched ${reports.length} REPROVADO reports (page ${page}), ${newCount} new unique`);
-              if (newCount === 0 || reports.length === 0) break;
-              page++;
-            } else {
-              break;
-            }
-          }
-        } catch (err) {
-          console.log('[Pending] Error fetching REPROVADO for stale check:', err);
-        }
-        return staleIds;
-      })(),
-
-      // 3. Fetch team-members (memberIds + flowMap in one pass)
-      (async () => {
-        const memberIds = new Set<number>();
-        const flowMap = new Map<number, number>();
-        try {
-          let page = 1;
-          const tmSeenIds = new Set<number>();
-          while (page <= 20) {
-            const tmResp = await vexpensesFetchWithRotation(
-              `/v2/team-members?per_page=100&page=${page}`,
-              { signal: AbortSignal.timeout(30000) },
-              3
-            );
-            if (tmResp.ok) {
-              const tmData = await tmResp.json();
-              const members = tmData.data || [];
-              let newCount = 0;
-              for (const m of members) {
-                if (!tmSeenIds.has(m.id)) {
-                  tmSeenIds.add(m.id);
-                  memberIds.add(m.id);
-                  if (m.approval_flow_id) {
-                    flowMap.set(m.id, m.approval_flow_id);
-                  }
-                  newCount++;
-                }
-              }
-              console.log(`[Pending] Fetched ${members.length} team-members (page ${page}), ${newCount} new unique`);
-              if (newCount === 0 || members.length === 0) break;
-              page++;
-            } else {
-              break;
-            }
-          }
-        } catch (err) {
-          console.log('[Pending] Error fetching team-members:', err);
-        }
-        return { memberIds, flowMap };
-      })(),
-
-      // 4. Fetch approval flows (names + step approvers in one call)
-      (async () => {
-        const namesMap = new Map<number, string>();
-        const stepApprovers = new Map<number, Map<number, Set<number>>>();
-        try {
-          const flowsResp = await vexpensesFetchWithRotation(
-            `/v2/approval-flows?include=steps`,
-            { signal: AbortSignal.timeout(30000) },
-            3
-          );
-          if (flowsResp.ok) {
-            const flowsData = await flowsResp.json();
-            const flows = flowsData.data || [];
-            for (const flow of flows) {
-              namesMap.set(flow.id, flow.description || `Flow ${flow.id}`);
-              const steps = flow.steps?.data || flow.steps || [];
-              const stepMap = new Map<number, Set<number>>();
-              for (const step of steps) {
-                const stepOrder = step.order || 1;
-                const approverSet = new Set<number>();
-                const groups = step.groups?.data || step.groups || [];
-                for (const g of groups) {
-                  const approvers = g.approvers || [];
-                  for (const a of approvers) {
-                    approverSet.add(parseInt(a, 10));
-                  }
-                }
-                stepMap.set(stepOrder, approverSet);
-              }
-              stepApprovers.set(flow.id, stepMap);
-            }
-          }
-        } catch (err) {
-          console.log('[Pending] Error fetching approval flows:', err);
-        }
-        return { namesMap, stepApprovers };
-      })(),
+    // Fetch all data in parallel via the unified data layer (with cache)
+    const [reportsResult, reprovadoResult, teamMembersResult, flowsResult, trackingResult] = await Promise.all([
+      getReportsEnviado(),
+      getReportsReprovado(),
+      getTeamMembers(),
+      getApprovalFlows(),
+      getApprovalTracking(),
     ]);
 
-    const eqsMemberIds = teamMemberData.memberIds;
-    const userFlowMap = teamMemberData.flowMap;
-    const flowNamesMap = approvalFlowsData.namesMap;
-    const flowStepApprovers = approvalFlowsData.stepApprovers;
+    console.log(`[Pending] Data layer timings: reports=${reportsResult.durationMs}ms, reprovado=${reprovadoResult.durationMs}ms, team=${teamMembersResult.durationMs}ms, flows=${flowsResult.durationMs}ms, tracking=${trackingResult.durationMs}ms`);
+
+    let allReports = reportsResult.data;
+    const staleFromOtherStatuses = new Set(reprovadoResult.data);
+    const eqsMemberIds = new Set(teamMembersResult.data.memberIds);
+    const userFlowMap = new Map(teamMembersResult.data.flowMap);
+    const flowNamesMap = new Map(flowsResult.data.namesMap);
+    const flowStepApprovers = new Map<number, Map<number, Set<number>>>();
+    for (const [flowId, stepList] of flowsResult.data.stepApprovers) {
+      const stepMap = new Map<number, Set<number>>();
+      for (const [stepOrder, approvers] of stepList) {
+        stepMap.set(stepOrder, new Set(approvers));
+      }
+      flowStepApprovers.set(flowId, stepMap);
+    }
+    const waitingStepMap = new Map(trackingResult.data.waitingStepMap);
+    const rejectedIds = new Set(trackingResult.data.rejectedIds);
+    const approvedLastActionIds = new Set(trackingResult.data.approvedLastActionIds);
+
+    const fromCache = reportsResult.fromCache || trackingResult.fromCache;
 
     // Filter reports to only include EQS team members
     if (eqsMemberIds.size > 0) {
@@ -477,6 +159,8 @@ export async function GET(request: NextRequest) {
       success: true,
       data: result,
       total: result.length,
+      from_cache: fromCache,
+      timing_ms: Date.now() - totalStart,
     });
   } catch (error) {
     console.error('[Aprovacao Dinamica] Error fetching pending:', error);

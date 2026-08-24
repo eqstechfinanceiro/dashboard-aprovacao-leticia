@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose';
 import { AUTH_COOKIE, HREF_TO_MODULE } from '@/lib/auth';
 
 const PUBLIC_PATHS = ['/login', '/change-password', '/auto-login'];
-const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login'];
+const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login', '/api/health'];
 
 function getSecret(): Uint8Array {
   const secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
