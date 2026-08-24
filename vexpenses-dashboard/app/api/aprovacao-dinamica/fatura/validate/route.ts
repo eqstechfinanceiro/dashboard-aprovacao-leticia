@@ -22,6 +22,38 @@ function isItauExpense(expense: any): boolean {
   return desc.includes('itaú') || desc.includes('itau');
 }
 
+function parseFaturaPeriod(filename: string): { periodStart: Date; periodEnd: Date } | null {
+  // Pattern: fatura_PURCH_DD_MM_YYYY.csv or any filename with DD_MM_YYYY
+  const match = filename.match(/(\d{2})_(\d{2})_(\d{4})/);
+  if (!match) return null;
+  const day = parseInt(match[1]);
+  const month = parseInt(match[2]);
+  const year = parseInt(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+
+  const exportDate = new Date(year, month - 1, day);
+  // Fatura covers the previous ~31 days (billing cycle)
+  const periodEnd = exportDate;
+  const periodStart = new Date(exportDate);
+  periodStart.setDate(periodStart.getDate() - 31);
+
+  console.log(`[Fatura Validate] Filename "${filename}" → export ${day}/${month}/${year}, billing period: ${periodStart.toLocaleDateString('pt-BR')} to ${periodEnd.toLocaleDateString('pt-BR')}`);
+  return { periodStart, periodEnd };
+}
+
+function isExpenseInPeriod(expenseDate: string, period: { periodStart: Date; periodEnd: Date }): boolean {
+  if (!expenseDate) return false;
+  let d: Date | null = new Date(expenseDate);
+  if (isNaN(d.getTime())) {
+    // Try dd/mm/yyyy
+    const m = expenseDate.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return false;
+    d = new Date(parseInt(m[3]), parseInt(m[2]) - 1, parseInt(m[1]));
+  }
+  if (isNaN(d.getTime())) return false;
+  return d >= period.periodStart && d <= period.periodEnd;
+}
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   try {
@@ -86,9 +118,23 @@ export async function POST(request: NextRequest) {
     let mismatchCount = 0;
     let notFoundCount = 0;
 
+    const faturaPeriod = parseFaturaPeriod(file.name);
+    if (faturaPeriod) {
+      console.log(`[Fatura Validate] Filtering expenses to billing period (export month - 1 cycle)`);
+    }
+
     for (const report of itauReports) {
       const expenses = report.expenses?.data || [];
-      const itauExpenses = expenses.filter(isItauExpense);
+      let itauExpenses = expenses.filter(isItauExpense);
+
+      // Filter to billing period if we could parse it from the filename
+      if (faturaPeriod) {
+        const before = itauExpenses.length;
+        itauExpenses = itauExpenses.filter((e: any) => isExpenseInPeriod(e.date, faturaPeriod));
+        if (before !== itauExpenses.length) {
+          console.log(`[Fatura Validate] Report ${report.id}: ${before} → ${itauExpenses.length} expenses after period filter`);
+        }
+      }
 
       for (const expense of itauExpenses) {
         const expenseData = {

@@ -448,23 +448,6 @@ export default function AprovacaoDinamicaPage() {
     }
   }, []);
 
-  const fetchExpenseCounts = useCallback(async (reportList: PendingReport[]) => {
-    if (reportList.length === 0) return;
-    setLoadingCounts(true);
-    try {
-      const ids = reportList.map(r => r.id).join(',');
-      const res = await fetch(`/api/aprovacao-dinamica/expense-counts?ids=${ids}`);
-      if (res.ok) {
-        const data = await res.json();
-        setExpenseCounts(data.data || {});
-      }
-    } catch (err) {
-      console.error('Error fetching expense counts:', err);
-    } finally {
-      setLoadingCounts(false);
-    }
-  }, []);
-
   useEffect(() => {
     fetchPending();
   }, [fetchPending]);

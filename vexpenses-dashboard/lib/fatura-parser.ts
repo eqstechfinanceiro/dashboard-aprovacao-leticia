@@ -142,7 +142,7 @@ export function matchExpenseToFatura(
   expense: { value: number; date: string; title: string; observation?: string },
   faturaRows: FaturaRow[],
   toleranceDays: number = 3,
-  valueTolerance: number = 5.00
+  valueTolerance: number = 0.01
 ): MatchResult {
   let bestMatch: FaturaRow | null = null;
   let bestScore = 0;
