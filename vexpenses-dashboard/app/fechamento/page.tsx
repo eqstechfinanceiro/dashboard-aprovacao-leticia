@@ -159,6 +159,7 @@ export default function FechamentoPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [syncProgress, setSyncProgress] = useState<{ step: string; current: number; total: number; percent: number } | null>(null);
 
   // Fetch team members on mount
   React.useEffect(() => {
@@ -167,7 +168,23 @@ export default function FechamentoPage() {
         const res = await fetch('/api/vexpenses/team-members');
         if (res.ok) {
           const json = await res.json();
-          setTeamMembers(json.data || []);
+          const rawMembers: TeamMember[] = json.data || [];
+          // Deduplicate by CPF (and name as fallback) — VExpenses API may return
+          // the same person with different IDs (e.g. old vs new account)
+          const seen = new Set<string>();
+          const deduped: TeamMember[] = [];
+          for (const m of rawMembers) {
+            const cpfKey = m.cpf ? String(m.cpf).padStart(11, '0') : '';
+            const nameKey = m.name.trim().toLowerCase();
+            const key = cpfKey || nameKey;
+            if (key && !seen.has(key)) {
+              seen.add(key);
+              deduped.push(m);
+            } else if (!key) {
+              deduped.push(m);
+            }
+          }
+          setTeamMembers(deduped);
         }
       } catch (e) {
         console.error('Error fetching team members:', e);
@@ -229,33 +246,71 @@ export default function FechamentoPage() {
     }
   }, []);
 
-  // Sync data from VExpenses API
+  // Sync data from VExpenses API (SSE stream for progress)
   const handleSync = useCallback(async () => {
     if (!selectedUserId || syncing) return;
     setSyncing(true);
     setSyncMessage(null);
+    setSyncProgress({ step: 'Iniciando...', current: 0, total: 1, percent: 0 });
     try {
       const res = await fetch(`/api/fechamento/sync?userId=${selectedUserId}`, {
         method: 'POST',
       });
+
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Erro ao sincronizar');
       }
-      const json = await res.json();
-      setSyncedAt(json.syncedAt);
-      let msg = `Sincronizado: ${json.reportsSynced} relatórios, ${json.expensesSynced} despesas`;
-      if (json.extratoSynced > 0) {
-        msg += `, ${json.extratoSynced} extrato`;
+
+      const reader = res.body?.getReader();
+      if (!reader) throw new Error('Stream não disponível');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finalResult: any = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+        buffer = lines.pop() || '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6);
+          try {
+            const evt = JSON.parse(jsonStr);
+            if (evt.error) {
+              throw new Error(evt.error);
+            }
+            if (evt.done) {
+              finalResult = evt;
+            } else {
+              setSyncProgress(evt);
+            }
+          } catch (parseErr) {
+            // ignore parse errors for partial lines
+          }
+        }
       }
-      if (json.extratoError) {
-        msg += ` | Aviso extrato: ${json.extratoError}`;
+
+      if (finalResult) {
+        setSyncedAt(finalResult.syncedAt);
+        let msg = `Sincronizado: ${finalResult.reportsSynced} relatórios, ${finalResult.expensesSynced} despesas`;
+        if (finalResult.extratoSynced > 0) {
+          msg += `, ${finalResult.extratoSynced} extrato`;
+        }
+        if (finalResult.extratoError) {
+          msg += ` | Aviso extrato: ${finalResult.extratoError}`;
+        }
+        setSyncMessage(msg);
+        setSyncProgress(null);
+        // Re-fetch fechamento data after sync
+        await fetchFechamento(selectedUserId);
       }
-      setSyncMessage(msg);
-      // Re-fetch fechamento data after sync
-      await fetchFechamento(selectedUserId);
     } catch (e: any) {
       setSyncMessage(`Erro: ${e.message}`);
+      setSyncProgress(null);
     } finally {
       setSyncing(false);
     }
@@ -726,6 +781,24 @@ export default function FechamentoPage() {
                   {syncMessage}
                 </span>
               )}
+            </div>
+          )}
+          {/* Sync progress bar */}
+          {syncing && syncProgress && (
+            <div className="mt-3 space-y-1">
+              <div className="flex items-center justify-between text-xs text-gray-600">
+                <span className="flex items-center gap-1.5">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  {syncProgress.step}
+                </span>
+                <span className="font-medium">{syncProgress.percent}%</span>
+              </div>
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
+                  style={{ width: `${syncProgress.percent}%` }}
+                />
+              </div>
             </div>
           )}
         </CardContent>

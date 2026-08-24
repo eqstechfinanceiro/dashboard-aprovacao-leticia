@@ -214,6 +214,57 @@ export async function GET(request: NextRequest) {
           ORDER BY data ASC, hora ASC
         `;
         extratoRows = rows as ExtratoRow[];
+
+        // Fallback: if no rows found with first+last name, try just the first name
+        // (the extrato may have a shorter version of the name)
+        if (extratoRows.length === 0) {
+          const fallbackRows = await sql`
+            SELECT
+              data::text as data,
+              hora,
+              codigo_transacao,
+              usuario,
+              tipo,
+              descricao,
+              valor,
+              is_snapshot
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstName + '%'})
+              AND is_snapshot = false
+            ORDER BY data ASC, hora ASC
+          `;
+          if (fallbackRows.length > 0) {
+            console.log(`[Fechamento] Extrato fallback by first name "${firstName}" returned ${fallbackRows.length} rows for ${colaboradorName}`);
+            extratoRows = fallbackRows as ExtratoRow[];
+          }
+        }
+
+        // Second fallback: try first 2 words of the name
+        if (extratoRows.length === 0) {
+          const nameParts = colaboradorName.trim().split(/\s+/);
+          if (nameParts.length >= 2) {
+            const firstTwo = nameParts.slice(0, 2).join(' ');
+            const fallback2Rows = await sql`
+              SELECT
+                data::text as data,
+                hora,
+                codigo_transacao,
+                usuario,
+                tipo,
+                descricao,
+                valor,
+                is_snapshot
+              FROM extrato_movimentacao
+              WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstTwo + '%'})
+                AND is_snapshot = false
+              ORDER BY data ASC, hora ASC
+            `;
+            if (fallback2Rows.length > 0) {
+              console.log(`[Fechamento] Extrato fallback by first 2 words "${firstTwo}" returned ${fallback2Rows.length} rows for ${colaboradorName}`);
+              extratoRows = fallback2Rows as ExtratoRow[];
+            }
+          }
+        }
       } catch (dbErr) {
         console.error('[Fechamento] Error querying extrato_movimentacao:', dbErr);
       }
@@ -385,7 +436,7 @@ export async function GET(request: NextRequest) {
     if (sql) {
       try {
         const { firstName: fn, lastName: ln } = getFirstNameLastName(colaboradorName);
-        const snapshotRows = await sql`
+        let snapshotRows = await sql`
           SELECT valor
           FROM extrato_movimentacao
           WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
@@ -394,6 +445,16 @@ export async function GET(request: NextRequest) {
           ORDER BY data DESC
           LIMIT 1
         `;
+        if (snapshotRows.length === 0) {
+          snapshotRows = await sql`
+            SELECT valor
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
+              AND is_snapshot = true
+            ORDER BY data DESC
+            LIMIT 1
+          `;
+        }
         if (snapshotRows.length > 0) {
           saldoCartao = Number((snapshotRows[0] as any).valor) || 0;
         }
