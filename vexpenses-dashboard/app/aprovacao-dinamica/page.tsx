@@ -293,115 +293,6 @@ export default function AprovacaoDinamicaPage() {
     auditResultsRef.current = auditResults;
   }, [auditResults]);
 
-  const loadAllSavedResults = useCallback(async () => {
-    try {
-      const res = await fetch('/api/aprovacao-dinamica/audit-all-results');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data.data) return;
-
-      const resultsMap: Record<number, Record<number, ExpenseAuditResult>> = {};
-      const progressMap: Record<number, { done: number; total: number }> = {};
-
-      for (const [reportIdStr, expenses] of Object.entries(data.data)) {
-        const reportId = parseInt(reportIdStr);
-        const expResults: Record<number, ExpenseAuditResult> = {};
-        (expenses as any[]).forEach(e => {
-          expResults[e.expense_id] = e;
-        });
-        resultsMap[reportId] = expResults;
-        progressMap[reportId] = { done: (expenses as any[]).length, total: 0 };
-      }
-
-      setAuditResults(resultsMap);
-      setAuditProgress(progressMap);
-
-      const auditedIds = new Set(Object.keys(resultsMap).map(Number));
-      setReports(prev => prev.map(r => auditedIds.has(r.id) ? { ...r, audited: true } : r));
-    } catch (err) {
-      console.error('Error loading saved results:', err);
-    }
-  }, []);
-
-  const fetchPending = useCallback(async (opts?: { skipValidation?: boolean }) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const approverParam = approverFilter ? `&approver_id=${approverFilter}` : '';
-      const stepParam = stepOneOnly ? '&step=1' : '';
-      const pendingPromise = fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`).then(r => {
-        if (r.status === 401) {
-          window.location.href = '/login';
-          throw new Error('Sessão expirada. Redirecionando para login...');
-        }
-        if (!r.ok) throw new Error(`Failed to fetch pending reports (HTTP ${r.status})`);
-        return r.json();
-      });
-      const auditPromise = loadAllSavedResults();
-      const bulkExpensesPromise = opts?.skipValidation
-        ? Promise.resolve(null)
-        : fetch('/api/aprovacao-dinamica/bulk-expenses').then(r => r.ok ? r.json() : null).catch(() => null);
-      const faturaStatusPromise = fetch('/api/aprovacao-dinamica/fatura/all-status').then(r => r.ok ? r.json() : null).catch(() => null);
-
-      const data = await pendingPromise;
-      await auditPromise;
-      const bulkExpensesData = await bulkExpensesPromise;
-
-      if (bulkExpensesData?.data) {
-        const expensesMap: Record<number, any[]> = {};
-        const counts: Record<number, number> = {};
-        for (const [rid, info] of Object.entries(bulkExpensesData.data)) {
-          const r = info as any;
-          expensesMap[Number(rid)] = r.expenses;
-          counts[Number(rid)] = r.expense_count;
-        }
-        setReportExpenses(expensesMap);
-        setExpenseCounts(counts);
-      }
-
-      const faturaStatusData = await faturaStatusPromise;
-      if (faturaStatusData?.data) {
-        const faturaMap: Record<number, Record<number, FaturaValidationRecord>> = {};
-        for (const [rid, records] of Object.entries(faturaStatusData.data)) {
-          const vMap: Record<number, FaturaValidationRecord> = {};
-          for (const v of records as FaturaValidationRecord[]) {
-            const existing = vMap[v.expense_id];
-            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
-              vMap[v.expense_id] = v;
-            }
-          }
-          faturaMap[Number(rid)] = vMap;
-        }
-        setFaturaValidations(faturaMap);
-      }
-
-      const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
-      setReports(filtered);
-      // Use expense_count from pending response (avoids separate API call that gets 403'd by WAF)
-      const counts: Record<number, number> = {};
-      for (const r of (data.data || []) as PendingReport[]) {
-        if (r.expense_count !== undefined && r.expense_count > 0) {
-          counts[r.id] = r.expense_count;
-        }
-      }
-      if (Object.keys(counts).length > 0) {
-        setExpenseCounts(counts);
-      }
-      // Expense counts come from bulk expenses or pending response — no individual calls
-      // Fetch existing approvals
-      fetchApprovals(data.data || []);
-      // Fetch NF validation batch summary only on first load or explicit refresh
-      if (!opts?.skipValidation && !validationBatchFetchedRef.current) {
-        validationBatchFetchedRef.current = true;
-        fetchValidationBatch(data.data || []);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  }, [loadAllSavedResults, approverFilter, stepOneOnly]);
-
   const fetchValidationBatch = useCallback(async (reportList: PendingReport[]) => {
     if (reportList.length === 0) return;
     try {
@@ -434,19 +325,123 @@ export default function AprovacaoDinamicaPage() {
     }
   }, [validationDetails, loadingValidationDetails]);
 
-  const fetchApprovals = useCallback(async (reportList: PendingReport[]) => {
-    if (reportList.length === 0) return;
+  const fetchPending = useCallback(async (opts?: { skipValidation?: boolean }) => {
+    setLoading(true);
+    setError(null);
     try {
-      const ids = reportList.map(r => r.id).join(',');
-      const res = await fetch(`/api/aprovacao-dinamica/approvals?report_ids=${ids}`);
-      if (res.ok) {
+      const approverParam = approverFilter ? `&approver_id=${approverFilter}` : '';
+      const stepParam = stepOneOnly ? '&step=1' : '';
+
+      if (opts?.skipValidation) {
+        // Light refresh (60s auto-refresh): only fetch pending reports
+        const res = await fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`);
+        if (res.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        if (!res.ok) throw new Error(`Failed to fetch pending reports (HTTP ${res.status})`);
         const data = await res.json();
-        setReportApprovals(data.data || {});
+        const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+        setReports(filtered);
+        return;
+      }
+
+      // Full load: fetch init (reports + audit + fatura + approvals) + bulk-expenses in parallel
+      const initParams = new URLSearchParams();
+      if (approverFilter) initParams.set('approver_id', approverFilter);
+      if (stepOneOnly) initParams.set('step', '1');
+
+      const initPromise = fetch(`/api/aprovacao-dinamica/init?${initParams.toString()}`).then(r => {
+        if (r.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Sessão expirada. Redirecionando para login...');
+        }
+        if (!r.ok) throw new Error(`Failed to fetch init data (HTTP ${r.status})`);
+        return r.json();
+      });
+      const bulkExpensesPromise = fetch('/api/aprovacao-dinamica/bulk-expenses')
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null);
+
+      const initData = await initPromise;
+      const d = initData.data || {};
+
+      // Process reports
+      const filtered: PendingReport[] = (d.reports || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+      setReports(filtered);
+
+      // Process audit results
+      if (d.auditResults) {
+        const resultsMap: Record<number, Record<number, ExpenseAuditResult>> = {};
+        const progressMap: Record<number, { done: number; total: number }> = {};
+        for (const [reportIdStr, expenses] of Object.entries(d.auditResults)) {
+          const reportId = parseInt(reportIdStr);
+          const expResults: Record<number, ExpenseAuditResult> = {};
+          (expenses as any[]).forEach(e => {
+            expResults[e.expense_id] = e;
+          });
+          resultsMap[reportId] = expResults;
+          progressMap[reportId] = { done: (expenses as any[]).length, total: 0 };
+        }
+        setAuditResults(resultsMap);
+        setAuditProgress(progressMap);
+      }
+
+      // Process fatura validations
+      if (d.faturaValidations) {
+        const faturaMap: Record<number, Record<number, FaturaValidationRecord>> = {};
+        for (const [rid, records] of Object.entries(d.faturaValidations)) {
+          const vMap: Record<number, FaturaValidationRecord> = {};
+          for (const v of records as FaturaValidationRecord[]) {
+            const existing = vMap[v.expense_id];
+            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
+              vMap[v.expense_id] = v;
+            }
+          }
+          faturaMap[Number(rid)] = vMap;
+        }
+        setFaturaValidations(faturaMap);
+      }
+
+      // Process approvals
+      setReportApprovals(d.approvals || {});
+
+      // Process expense counts from reports
+      const counts: Record<number, number> = {};
+      for (const r of filtered) {
+        if (r.expense_count !== undefined && r.expense_count > 0) {
+          counts[r.id] = r.expense_count;
+        }
+      }
+      if (Object.keys(counts).length > 0) {
+        setExpenseCounts(counts);
+      }
+
+      // Process bulk expenses (separate call to VExpenses API)
+      const bulkExpensesData = await bulkExpensesPromise;
+      if (bulkExpensesData?.data) {
+        const expensesMap: Record<number, any[]> = {};
+        const bulkCounts: Record<number, number> = {};
+        for (const [rid, info] of Object.entries(bulkExpensesData.data)) {
+          const r = info as any;
+          expensesMap[Number(rid)] = r.expenses;
+          bulkCounts[Number(rid)] = r.expense_count;
+        }
+        setReportExpenses(expensesMap);
+        setExpenseCounts(prev => ({ ...bulkCounts, ...prev }));
+      }
+
+      // Fetch NF validation batch only on first load
+      if (!validationBatchFetchedRef.current) {
+        validationBatchFetchedRef.current = true;
+        fetchValidationBatch(filtered);
       }
     } catch (err) {
-      console.error('Error fetching approvals:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [approverFilter, stepOneOnly]);
 
   useEffect(() => {
     fetchPending();
