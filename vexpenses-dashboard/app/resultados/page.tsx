@@ -532,37 +532,66 @@ export default function ResultadosPage() {
           <div>
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Resumo de Duplicidades</CardTitle>
+                <CardTitle className="text-base">Histórico de Fechamentos</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent>
                 {fechamentosFiltrados.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-4">Nenhum fechamento encontrado</p>
                 ) : (
-                fechamentosFiltrados.map(f => (
-                  <div key={f.id} className="flex items-center justify-between p-3 rounded-lg border">
-                    <div className="flex items-center gap-3">
-                      <div className={`h-2 w-2 rounded-full ${f.aprovadoPelaApp ? 'bg-green-500' : 'bg-red-500'}`} />
-                      <div>
-                        <p className="text-sm font-medium">{f.responsavel}</p>
-                        <p className="text-xs text-muted-foreground">{f.data}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground">Duplicados</p>
-                        <p className="font-semibold text-orange-500">{f.itensDuplicados}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground">Valor</p>
-                        <p className="font-semibold">{formatCurrency(f.valorDuplicado)}</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-muted-foreground">Rep. IA</p>
-                        <p className="font-semibold text-red-500">{f.despesasReprovadasIA}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="text-left py-2 px-3 font-medium text-muted-foreground">Data</th>
+                        <th className="text-left py-2 px-3 font-medium text-muted-foreground">Responsável</th>
+                        <th className="text-center py-2 px-3 font-medium text-muted-foreground">Status</th>
+                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">Duplicados</th>
+                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Duplicado</th>
+                        <th className="text-right py-2 px-3 font-medium text-muted-foreground">Reprovados IA</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {fechamentosFiltrados.map(f => (
+                        <tr key={f.id} className="border-b hover:bg-muted/50">
+                          <td className="py-2.5 px-3 text-muted-foreground whitespace-nowrap">{f.data}</td>
+                          <td className="py-2.5 px-3 font-medium">{f.responsavel}</td>
+                          <td className="py-2.5 px-3 text-center">
+                            {f.aprovadoPelaApp ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                                <CheckCircle className="h-3.5 w-3.5" /> Aprovado
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                                <Clock className="h-3.5 w-3.5" /> Automático
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            {f.itensDuplicados > 0 ? (
+                              <span className="font-semibold text-orange-500">{f.itensDuplicados}</span>
+                            ) : (
+                              <span className="text-muted-foreground">0</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-mono">
+                            {f.valorDuplicado > 0 ? (
+                              <span className="font-semibold">{formatCurrency(f.valorDuplicado)}</span>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-3 text-right">
+                            {f.despesasReprovadasIA > 0 ? (
+                              <span className="font-semibold text-red-500">{f.despesasReprovadasIA}</span>
+                            ) : (
+                              <span className="text-muted-foreground">0</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
                 )}
               </CardContent>
             </Card>
