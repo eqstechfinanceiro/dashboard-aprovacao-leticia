@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,25 +40,6 @@ import {
 } from 'recharts';
 
 export const dynamic = 'force-dynamic';
-
-const MOCK_BADGE = (
-  <Badge variant="destructive" className="text-[10px] px-1.5 py-0.5 ml-2 whitespace-nowrap">
-    MOCK
-  </Badge>
-);
-
-function MockCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`relative ${className}`}>
-      <div className="absolute -top-2 -right-2 z-10">
-        <Badge variant="destructive" className="text-[10px] px-2 py-0.5 shadow-md">
-          DADOS MOCKADOS
-        </Badge>
-      </div>
-      {children}
-    </div>
-  );
-}
 
 const COLORS = {
   primary: '#3b82f6',
@@ -102,35 +83,6 @@ interface ConferenciaNota {
   data: string;
 }
 
-const mockNotas: NotaLancada[] = [
-  { id: '1', titulo: 'Nota Fiscal 001 - Material de Escritório', tipo: 'mercadoria', valor: 1250.50, tempoSegundos: 45, feitaPeloBot: true, data: '2026-08-24' },
-  { id: '2', titulo: 'Nota Fiscal 002 - Serviço de Limpeza', tipo: 'servico', valor: 890.00, tempoSegundos: 120, feitaPeloBot: false, data: '2026-08-24' },
-  { id: '3', titulo: 'Nota Fiscal 003 - Combustível', tipo: 'agil', valor: 320.75, tempoSegundos: 30, feitaPeloBot: true, data: '2026-08-24' },
-  { id: '4', titulo: 'Nota Fiscal 004 - Peças de Reposição', tipo: 'mercadoria', valor: 2100.00, tempoSegundos: 90, feitaPeloBot: false, data: '2026-08-24' },
-  { id: '5', titulo: 'Nota Fiscal 005 - Consultoria Técnica', tipo: 'servico', valor: 3500.00, tempoSegundos: 60, feitaPeloBot: true, data: '2026-08-24' },
-  { id: '6', titulo: 'Nota Fiscal 006 - Material Elétrico', tipo: 'mercadoria', valor: 680.30, tempoSegundos: 35, feitaPeloBot: true, data: '2026-08-24' },
-  { id: '7', titulo: 'Nota Fiscal 007 - Manutenção Predial', tipo: 'servico', valor: 1500.00, tempoSegundos: 75, feitaPeloBot: false, data: '2026-08-24' },
-  { id: '8', titulo: 'Nota Fiscal 008 - Despesas Ágeis', tipo: 'agil', valor: 150.00, tempoSegundos: 20, feitaPeloBot: true, data: '2026-08-24' },
-  { id: '9', titulo: 'Nota Fiscal 009 - Equipamentos', tipo: 'mercadoria', valor: 4200.00, tempoSegundos: 110, feitaPeloBot: false, data: '2026-08-24' },
-  { id: '10', titulo: 'Nota Fiscal 010 - Serviço de TI', tipo: 'servico', valor: 2200.00, tempoSegundos: 50, feitaPeloBot: true, data: '2026-08-24' },
-];
-
-const mockFechamentos: FechamentoCaixa[] = [
-  { id: '1', responsavel: 'Letícia', data: '2026-08-24', aprovadoPelaApp: true, despesasReprovadasIA: 3, itensDuplicados: 2, valorDuplicado: 450.00 },
-  { id: '2', responsavel: 'Beatriz', data: '2026-08-24', aprovadoPelaApp: true, despesasReprovadasIA: 1, itensDuplicados: 0, valorDuplicado: 0 },
-  { id: '3', responsavel: 'Letícia', data: '2026-08-23', aprovadoPelaApp: false, despesasReprovadasIA: 5, itensDuplicados: 4, valorDuplicado: 1200.00 },
-  { id: '4', responsavel: 'Carlos', data: '2026-08-23', aprovadoPelaApp: true, despesasReprovadasIA: 2, itensDuplicados: 1, valorDuplicado: 180.00 },
-  { id: '5', responsavel: 'Beatriz', data: '2026-08-22', aprovadoPelaApp: true, despesasReprovadasIA: 0, itensDuplicados: 3, valorDuplicado: 670.00 },
-];
-
-const mockConferencias: ConferenciaNota[] = [
-  { id: '1', titulo: 'NF 1234 - Serviço classificado como mercadoria', tipo: 'servico', erro: 'tipo_errado', valor: 890.00, data: '2026-08-24' },
-  { id: '2', titulo: 'NF 1235 - Mercadoria classificada como serviço', tipo: 'mercadoria', erro: 'tipo_errado', valor: 1250.50, data: '2026-08-24' },
-  { id: '3', titulo: 'NF 1236 - Serviço com valor divergente', tipo: 'servico', erro: 'valor_errado', valor: 2100.00, data: '2026-08-23' },
-  { id: '4', titulo: 'NF 1237 - Mercadoria com fornecedor incorreto', tipo: 'mercadoria', erro: 'fornecedor_errado', valor: 680.30, data: '2026-08-23' },
-  { id: '5', titulo: 'NF 1238 - Serviço classificado errado', tipo: 'servico', erro: 'tipo_errado', valor: 3500.00, data: '2026-08-22' },
-];
-
 function formatCurrency(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
@@ -161,20 +113,38 @@ const erroLabel: Record<string, string> = {
 };
 
 export default function ResultadosPage() {
-  const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('hoje');
+  const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes');
   const [refreshing, setRefreshing] = useState(false);
+  const [notas, setNotas] = useState<NotaLancada[]>([]);
+  const [fechamentos, setFechamentos] = useState<FechamentoCaixa[]>([]);
+  const [conferencias, setConferencias] = useState<ConferenciaNota[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const notasFiltradas = useMemo(() => {
-    return mockNotas;
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/resultados?periodo=${periodo}`);
+      if (!res.ok) throw new Error('Erro ao buscar dados');
+      const data = await res.json();
+      setNotas(data.notas || []);
+      setFechamentos(data.fechamentos || []);
+      setConferencias(data.conferencias || []);
+    } catch (err: any) {
+      setError(err.message || 'Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
   }, [periodo]);
 
-  const fechamentosFiltrados = useMemo(() => {
-    return mockFechamentos;
-  }, [periodo]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  const conferenciasFiltradas = useMemo(() => {
-    return mockConferencias;
-  }, [periodo]);
+  const notasFiltradas = notas;
+  const fechamentosFiltrados = fechamentos;
+  const conferenciasFiltradas = conferencias;
 
   // === Entrada de Notas ===
   const totalNotas = notasFiltradas.length;
@@ -208,11 +178,18 @@ export default function ResultadosPage() {
   const totalValorDuplicado = fechamentosFiltrados.reduce((s, f) => s + f.valorDuplicado, 0);
   const totalDespesasReprovadasIA = fechamentosFiltrados.reduce((s, f) => s + f.despesasReprovadasIA, 0);
 
-  const fechamentosPorDia = [
-    { dia: '22/08', aprovados: 1, reprovados: 0 },
-    { dia: '23/08', aprovados: 1, reprovados: 1 },
-    { dia: '24/08', aprovados: 2, reprovados: 0 },
-  ];
+  const fechamentosPorDia = useMemo(() => {
+    const porData: Record<string, { aprovados: number; reprovados: number }> = {};
+    for (const f of fechamentosFiltrados) {
+      const dia = f.data;
+      if (!porData[dia]) porData[dia] = { aprovados: 0, reprovados: 0 };
+      if (f.aprovadoPelaApp) porData[dia].aprovados++;
+      else porData[dia].reprovados++;
+    }
+    return Object.entries(porData)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([dia, v]) => ({ dia: dia.split('-').slice(1).join('/'), ...v }));
+  }, [fechamentosFiltrados]);
 
   // === Conferências ===
   const totalConferencias = conferenciasFiltradas.length;
@@ -226,9 +203,10 @@ export default function ResultadosPage() {
     { name: 'Fornecedor Errado', value: conferenciasFiltradas.filter(c => c.erro === 'fornecedor_errado').length, cor: '#8b5cf6' },
   ];
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
+    await fetchData();
+    setRefreshing(false);
   };
 
   return (
@@ -264,7 +242,22 @@ export default function ResultadosPage() {
         </div>
       </div>
 
+      {/* Loading / Error */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
+          <span className="ml-2 text-muted-foreground">Carregando dados...</span>
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center justify-center py-12 text-red-500">
+          <AlertTriangle className="h-5 w-5 mr-2" />
+          <span>Erro: {error}</span>
+        </div>
+      )}
+
       {/* === SEÇÃO 1: ENTRADA DE NOTAS === */}
+      {!loading && !error && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-blue-500" />
@@ -272,7 +265,7 @@ export default function ResultadosPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Notas Lançadas</CardTitle>
@@ -287,9 +280,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Tempo Total</CardTitle>
@@ -302,9 +295,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
@@ -317,9 +310,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Feitas pelo Bot</CardTitle>
@@ -327,19 +320,19 @@ export default function ResultadosPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {((notasBot / totalNotas) * 100).toFixed(0)}%
+                  {totalNotas > 0 ? ((notasBot / totalNotas) * 100).toFixed(0) : 0}%
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {notasBot} de {totalNotas} notas
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
 
         {/* Gráficos Entrada de Notas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Notas por Hora (Bot vs Manual)</CardTitle>
@@ -358,9 +351,9 @@ export default function ResultadosPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Distribuição por Tipo</CardTitle>
@@ -386,11 +379,11 @@ export default function ResultadosPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
 
         {/* Tabela de Notas Recentes */}
-        <MockCard>
+        <div>
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Notas Lançadas Recentemente</CardTitle>
@@ -408,7 +401,12 @@ export default function ResultadosPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {notasFiltradas.map(nota => (
+                    {notasFiltradas.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-4 text-center text-muted-foreground">Nenhuma nota encontrada</td>
+                      </tr>
+                    ) : (
+                    notasFiltradas.map(nota => (
                       <tr key={nota.id} className="border-b hover:bg-muted/50">
                         <td className="py-2 px-3">{nota.titulo}</td>
                         <td className="py-2 px-3">
@@ -427,16 +425,19 @@ export default function ResultadosPage() {
                           )}
                         </td>
                       </tr>
-                    ))}
+                    ))
+                    )}
                   </tbody>
                 </table>
               </div>
             </CardContent>
           </Card>
-        </MockCard>
+        </div>
       </div>
+      )}
 
       {/* === SEÇÃO 2: GESTÃO DE CAIXA === */}
+      {!loading && !error && (
       <div className="space-y-4 pt-4">
         <div className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-purple-500" />
@@ -444,7 +445,7 @@ export default function ResultadosPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Fechamentos Feitos</CardTitle>
@@ -457,9 +458,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Itens Duplicados</CardTitle>
@@ -472,9 +473,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Caixas Aprovados (App)</CardTitle>
@@ -483,13 +484,13 @@ export default function ResultadosPage() {
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{fechamentosAprovadosApp}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {((fechamentosAprovadosApp / totalFechamentos) * 100).toFixed(0)}% do total
+                  {totalFechamentos > 0 ? ((fechamentosAprovadosApp / totalFechamentos) * 100).toFixed(0) : 0}% do total
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Despesas Reprovadas (IA)</CardTitle>
@@ -502,12 +503,12 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
 
         {/* Gráficos Gestão de Caixa */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Fechamentos por Dia</CardTitle>
@@ -526,15 +527,18 @@ export default function ResultadosPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Resumo de Duplicidades</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {fechamentosFiltrados.map(f => (
+                {fechamentosFiltrados.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">Nenhum fechamento encontrado</p>
+                ) : (
+                fechamentosFiltrados.map(f => (
                   <div key={f.id} className="flex items-center justify-between p-3 rounded-lg border">
                     <div className="flex items-center gap-3">
                       <div className={`h-2 w-2 rounded-full ${f.aprovadoPelaApp ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -558,14 +562,17 @@ export default function ResultadosPage() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))
+                )}
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
       </div>
+      )}
 
       {/* === SEÇÃO 3: CONFERÊNCIAS === */}
+      {!loading && !error && (
       <div className="space-y-4 pt-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-orange-500" />
@@ -573,7 +580,7 @@ export default function ResultadosPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Notas Erradas (Serviço)</CardTitle>
@@ -586,9 +593,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Notas Erradas (Mercadoria)</CardTitle>
@@ -601,9 +608,9 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Valor Total em Erro</CardTitle>
@@ -616,12 +623,12 @@ export default function ResultadosPage() {
                 </p>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
 
         {/* Gráficos Conferências */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Erros por Tipo</CardTitle>
@@ -647,16 +654,19 @@ export default function ResultadosPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
 
-          <MockCard>
+          <div>
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Notas com Erro - Detalhes</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2 max-h-[250px] overflow-y-auto">
-                  {conferenciasFiltradas.map(conf => (
+                  {conferenciasFiltradas.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Nenhuma conferência encontrada</p>
+                  ) : (
+                  conferenciasFiltradas.map(conf => (
                     <div key={conf.id} className="flex items-start justify-between p-3 rounded-lg border gap-3">
                       <div className="flex items-start gap-2 min-w-0 flex-1">
                         {conf.tipo === 'servico' ? (
@@ -675,19 +685,21 @@ export default function ResultadosPage() {
                         <p className="text-sm font-semibold text-red-500">{formatCurrency(conf.valor)}</p>
                       </div>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </MockCard>
+          </div>
         </div>
       </div>
+      )}
 
       {/* Footer info */}
       <div className="flex items-center justify-center gap-2 pt-4 text-xs text-muted-foreground">
         <AlertTriangle className="h-3 w-3" />
         <span>
-          Cards marcados como <Badge variant="destructive" className="text-[10px] px-1 py-0">DADOS MOCKADOS</Badge> contêm dados temporários e serão substituídos por dados reais.
+          Dados em tempo real — alimentados pelas tabelas <code>resultados_notas</code>, <code>resultados_fechamentos</code> e <code>resultados_conferencias</code>.
         </span>
       </div>
     </div>
