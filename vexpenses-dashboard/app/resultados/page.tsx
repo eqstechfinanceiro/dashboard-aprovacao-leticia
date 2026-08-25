@@ -57,11 +57,29 @@ const PIE_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 interface NotaLancada {
   id: string;
   titulo: string;
-  tipo: 'mercadoria' | 'servico' | 'agil';
+  tipo: 'mercadoria' | 'servico' | 'agil' | 'devolucao';
   valor: number;
   tempoSegundos: number;
   feitaPeloBot: boolean;
   data: string;
+  hora: string | null;
+  empresa?: string;
+  usuario?: string;
+  fornecedorNome?: string;
+  numeroNota?: string;
+  especieDoc?: string;
+}
+
+interface NotaPorDiaEmpresa {
+  data: string;
+  empresa: string;
+  total: number;
+}
+
+interface FiltrosData {
+  empresas: string[];
+  usuarios: string[];
+  meses: string[];
 }
 
 interface FechamentoCaixa {
@@ -104,6 +122,7 @@ const tipoLabel: Record<string, string> = {
   mercadoria: 'Mercadoria',
   servico: 'Serviço',
   agil: 'Ágil',
+  devolucao: 'Devolução',
 };
 
 const erroLabel: Record<string, string> = {
@@ -112,12 +131,35 @@ const erroLabel: Record<string, string> = {
   fornecedor_errado: 'Fornecedor Errado',
 };
 
+const MESES_NOME: Record<string, string> = {
+  '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
+  '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
+  '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro',
+};
+
+function mesLabel(mes: string): string {
+  const [ano, num] = mes.split('-');
+  return `${MESES_NOME[num] || num}/${ano}`;
+}
+
 export default function ResultadosPage() {
   const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes');
   const [refreshing, setRefreshing] = useState(false);
   const [notas, setNotas] = useState<NotaLancada[]>([]);
   const [fechamentos, setFechamentos] = useState<FechamentoCaixa[]>([]);
   const [conferencias, setConferencias] = useState<ConferenciaNota[]>([]);
+  const [notasPorDiaEmpresa, setNotasPorDiaEmpresa] = useState<NotaPorDiaEmpresa[]>([]);
+  const [filtrosData, setFiltrosData] = useState<FiltrosData>({ empresas: [], usuarios: [], meses: [] });
+  const [empresaSel, setEmpresaSel] = useState('all');
+  const [usuarioSel, setUsuarioSel] = useState('all');
+  const [mesSel, setMesSel] = useState('all');
+  const [chartType, setChartType] = useState<'bar' | 'line'>('line');
+  const [tipoSel, setTipoSel] = useState('all');
+  const [totalNotas, setTotalNotas] = useState(0);
+  const [tempoTotalNotas, setTempoTotalNotas] = useState(0);
+  const [tempoMedioNotas, setTempoMedioNotas] = useState(0);
+  const [notasBotApi, setNotasBotApi] = useState(0);
+  const [valorTotalApi, setValorTotalApi] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -125,18 +167,30 @@ export default function ResultadosPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/resultados?periodo=${periodo}`);
+      const params = new URLSearchParams({ periodo });
+      if (empresaSel !== 'all') params.set('empresa', empresaSel);
+      if (usuarioSel !== 'all') params.set('usuario', usuarioSel);
+      if (mesSel !== 'all') params.set('mes', mesSel);
+      if (tipoSel !== 'all') params.set('tipo', tipoSel);
+      const res = await fetch(`/api/resultados?${params.toString()}`);
       if (!res.ok) throw new Error('Erro ao buscar dados');
       const data = await res.json();
       setNotas(data.notas || []);
       setFechamentos(data.fechamentos || []);
       setConferencias(data.conferencias || []);
+      setNotasPorDiaEmpresa(data.notasPorDiaEmpresa || []);
+      setFiltrosData(data.filtros || { empresas: [], usuarios: [], meses: [] });
+      setTotalNotas(data.totalNotas || 0);
+      setTempoTotalNotas(data.tempoTotalNotas || 0);
+      setTempoMedioNotas(data.tempoMedioNotas || 0);
+      setNotasBotApi(data.notasBot || 0);
+      setValorTotalApi(data.valorTotalNotas || 0);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
-  }, [periodo]);
+  }, [periodo, empresaSel, usuarioSel, mesSel, tipoSel]);
 
   useEffect(() => {
     fetchData();
@@ -147,29 +201,42 @@ export default function ResultadosPage() {
   const conferenciasFiltradas = conferencias;
 
   // === Entrada de Notas ===
-  const totalNotas = notasFiltradas.length;
-  const notasBot = notasFiltradas.filter(n => n.feitaPeloBot).length;
+  // totalNotas, tempoTotalNotas, tempoMedioNotas, notasBot, valorTotal come from API (full count, not limited to 500)
+  const notasBot = notasBotApi;
   const notasManual = totalNotas - notasBot;
-  const valorTotalNotas = notasFiltradas.reduce((s, n) => s + n.valor, 0);
-  const tempoTotalNotas = notasFiltradas.reduce((s, n) => s + n.tempoSegundos, 0);
-  const tempoMedio = totalNotas > 0 ? tempoTotalNotas / totalNotas : 0;
+  const valorTotalNotas = valorTotalApi;
+  const pctBot = totalNotas > 0 ? (notasBot / totalNotas) * 100 : 0;
 
   const notasPorTipo = [
     { name: 'Mercadoria', value: notasFiltradas.filter(n => n.tipo === 'mercadoria').length, cor: '#3b82f6' },
     { name: 'Serviço', value: notasFiltradas.filter(n => n.tipo === 'servico').length, cor: '#22c55e' },
-    { name: 'Ágil', value: notasFiltradas.filter(n => n.tipo === 'agil').length, cor: '#f59e0b' },
-  ];
+    { name: 'Devolução', value: notasFiltradas.filter(n => n.tipo === 'devolucao').length, cor: '#ef4444' },
+  ].filter(t => t.value > 0);
 
-  const notasPorHora = [
-    { hora: '08h', bot: 2, manual: 1 },
-    { hora: '09h', bot: 3, manual: 2 },
-    { hora: '10h', bot: 1, manual: 1 },
-    { hora: '11h', bot: 2, manual: 0 },
-    { hora: '12h', bot: 0, manual: 1 },
-    { hora: '14h', bot: 3, manual: 1 },
-    { hora: '15h', bot: 1, manual: 2 },
-    { hora: '16h', bot: 2, manual: 1 },
-  ];
+  // Notas por dia x empresa (para gráfico de linhas)
+  const notasPorDiaEmpresaData = useMemo(() => {
+    const porData: Record<string, Record<string, number>> = {};
+    const empresasSet = new Set<string>();
+    for (const r of notasPorDiaEmpresa) {
+      if (!porData[r.data]) porData[r.data] = {};
+      porData[r.data][r.empresa] = r.total;
+      empresasSet.add(r.empresa);
+    }
+    const datas = Object.keys(porData).sort();
+    const empresas = [...empresasSet].sort();
+    return {
+      data: datas.map(d => ({
+        data: d.split('-').slice(1).join('/'),
+        ...empresas.reduce((acc, e) => ({ ...acc, [e]: porData[d][e] || 0 }), {}),
+      })),
+      empresas,
+    };
+  }, [notasPorDiaEmpresa]);
+
+  const EMPRESA_COLORS: Record<string, string> = {
+    EQS: '#3b82f6',
+    BRATEC: '#22c55e',
+  };
 
   // === Gestão de Caixa ===
   const totalFechamentos = fechamentosFiltrados.length;
@@ -220,7 +287,7 @@ export default function ResultadosPage() {
             <p className="text-sm text-muted-foreground">Métricas de produtividade e qualidade</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="flex rounded-lg border border-border overflow-hidden">
             {(['hoje', 'semana', 'mes'] as const).map(p => (
               <button
@@ -236,6 +303,46 @@ export default function ResultadosPage() {
               </button>
             ))}
           </div>
+          <select
+            value={mesSel}
+            onChange={(e) => setMesSel(e.target.value)}
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background"
+          >
+            <option value="all">Todos os meses</option>
+            {filtrosData.meses.map(m => (
+              <option key={m} value={m}>{mesLabel(m)}</option>
+            ))}
+          </select>
+          <select
+            value={empresaSel}
+            onChange={(e) => setEmpresaSel(e.target.value)}
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background"
+          >
+            <option value="all">Todas empresas</option>
+            {filtrosData.empresas.map(e => (
+              <option key={e} value={e}>{e}</option>
+            ))}
+          </select>
+          <select
+            value={usuarioSel}
+            onChange={(e) => setUsuarioSel(e.target.value)}
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background"
+          >
+            <option value="all">Todos usuários</option>
+            {filtrosData.usuarios.map(u => (
+              <option key={u} value={u}>{u}</option>
+            ))}
+          </select>
+          <select
+            value={tipoSel}
+            onChange={(e) => setTipoSel(e.target.value)}
+            className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background"
+          >
+            <option value="all">Todos os tipos</option>
+            <option value="mercadoria">Mercadoria</option>
+            <option value="servico">Serviço</option>
+            <option value="devolucao">Devolução</option>
+          </select>
           <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
             <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
@@ -272,7 +379,7 @@ export default function ResultadosPage() {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{totalNotas}</div>
+                <div className="text-2xl font-bold">{totalNotas.toLocaleString('pt-BR')}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   <span className="text-green-600">{notasBot} pelo bot</span>
                   {' · '}
@@ -289,9 +396,9 @@ export default function ResultadosPage() {
                 <Clock className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{formatTime(tempoTotalNotas)}</div>
+                <div className="text-2xl font-bold">{formatTime(Math.round(tempoTotalNotas))}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Média: {formatTime(Math.round(tempoMedio))} por nota
+                  Média: {formatTime(Math.round(tempoMedioNotas))} por nota
                 </p>
               </CardContent>
             </Card>
@@ -320,7 +427,7 @@ export default function ResultadosPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">
-                  {totalNotas > 0 ? ((notasBot / totalNotas) * 100).toFixed(0) : 0}%
+                  {pctBot > 0 ? pctBot.toFixed(0) : 0}%
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {notasBot} de {totalNotas} notas
@@ -332,23 +439,63 @@ export default function ResultadosPage() {
 
         {/* Gráficos Entrada de Notas */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
+          <div className="lg:col-span-2">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Notas por Hora (Bot vs Manual)</CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-base">Notas por Dia por Empresa</CardTitle>
+                <div className="flex rounded-lg border border-border overflow-hidden">
+                  <button
+                    onClick={() => setChartType('line')}
+                    className={`px-3 py-1 text-xs font-medium ${chartType === 'line' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+                  >Linha</button>
+                  <button
+                    onClick={() => setChartType('bar')}
+                    className={`px-3 py-1 text-xs font-medium ${chartType === 'bar' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+                  >Barra</button>
+                </div>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={notasPorHora}>
-                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-                    <XAxis dataKey="hora" className="text-xs" />
-                    <YAxis className="text-xs" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="bot" name="Bot" fill={COLORS.success} radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="manual" name="Manual" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                {notasPorDiaEmpresaData.data.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    {chartType === 'line' ? (
+                      <LineChart data={notasPorDiaEmpresaData.data}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="data" className="text-xs" />
+                        <YAxis className="text-xs" />
+                        <Tooltip />
+                        <Legend />
+                        {notasPorDiaEmpresaData.empresas.map(empresa => (
+                          <Line
+                            key={empresa}
+                            type="monotone"
+                            dataKey={empresa}
+                            stroke={EMPRESA_COLORS[empresa] || COLORS.purple}
+                            strokeWidth={2}
+                            dot={{ r: 3 }}
+                          />
+                        ))}
+                      </LineChart>
+                    ) : (
+                      <BarChart data={notasPorDiaEmpresaData.data}>
+                        <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                        <XAxis dataKey="data" className="text-xs" />
+                        <YAxis className="text-xs" />
+                        <Tooltip />
+                        <Legend />
+                        {notasPorDiaEmpresaData.empresas.map(empresa => (
+                          <Bar
+                            key={empresa}
+                            dataKey={empresa}
+                            fill={EMPRESA_COLORS[empresa] || COLORS.purple}
+                            radius={[4, 4, 0, 0]}
+                          />
+                        ))}
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-8">Sem dados para exibir</p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -387,6 +534,7 @@ export default function ResultadosPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Notas Lançadas Recentemente</CardTitle>
+              <span className="text-xs text-muted-foreground">{notasFiltradas.length} notas (máx. 500)</span>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
@@ -394,29 +542,35 @@ export default function ResultadosPage() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-2 px-3 font-medium text-muted-foreground">Nota</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Empresa</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Fornecedor</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Usuário</th>
                       <th className="text-left py-2 px-3 font-medium text-muted-foreground">Tipo</th>
                       <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor</th>
-                      <th className="text-right py-2 px-3 font-medium text-muted-foreground">Tempo</th>
                       <th className="text-center py-2 px-3 font-medium text-muted-foreground">Bot</th>
                     </tr>
                   </thead>
                   <tbody>
                     {notasFiltradas.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-4 text-center text-muted-foreground">Nenhuma nota encontrada</td>
+                        <td colSpan={7} className="py-4 text-center text-muted-foreground">Nenhuma nota encontrada</td>
                       </tr>
                     ) : (
                     notasFiltradas.map(nota => (
                       <tr key={nota.id} className="border-b hover:bg-muted/50">
-                        <td className="py-2 px-3">{nota.titulo}</td>
+                        <td className="py-2 px-3 text-xs">{nota.numeroNota || nota.titulo}</td>
+                        <td className="py-2 px-3">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${nota.empresa === 'EQS' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{nota.empresa || '—'}</span>
+                        </td>
+                        <td className="py-2 px-3 text-xs text-muted-foreground max-w-[200px] truncate">{nota.fornecedorNome || '—'}</td>
+                        <td className="py-2 px-3 text-xs">{nota.usuario || '—'}</td>
                         <td className="py-2 px-3">
                           <div className="flex items-center gap-1.5">
-                            {tipoIcon[nota.tipo]}
-                            <span>{tipoLabel[nota.tipo]}</span>
+                            {tipoIcon[nota.tipo] || <Package className="h-4 w-4 text-gray-400" />}
+                            <span className="text-xs">{tipoLabel[nota.tipo] || nota.tipo}</span>
                           </div>
                         </td>
-                        <td className="py-2 px-3 text-right font-mono">{formatCurrency(nota.valor)}</td>
-                        <td className="py-2 px-3 text-right text-muted-foreground">{formatTime(nota.tempoSegundos)}</td>
+                        <td className="py-2 px-3 text-right font-mono text-xs">{formatCurrency(nota.valor)}</td>
                         <td className="py-2 px-3 text-center">
                           {nota.feitaPeloBot ? (
                             <Bot className="h-4 w-4 text-green-500 mx-auto" />
