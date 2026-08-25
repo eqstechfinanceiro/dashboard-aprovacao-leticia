@@ -73,6 +73,18 @@ export async function GET(request: NextRequest) {
     `);
     const totalNotasData = totalNotasResult.rows[0];
 
+    // Count by tipo (full count, not limited to 500)
+    const tiposResult = await sql.query(`
+      SELECT tipo, COUNT(*) as total
+      FROM resultados_notas
+      WHERE ${notasWhere}
+      GROUP BY tipo
+    `);
+    const tiposCount: Record<string, number> = {};
+    for (const r of tiposResult.rows) {
+      tiposCount[r.tipo] = Number(r.total);
+    }
+
     // Fechamentos and conferencias still use periodo-based filter
     const fechamentos = await sql`
       SELECT id, responsavel, data, aprovado_pela_app, despesas_reprovadas_ia,
@@ -110,6 +122,7 @@ export async function GET(request: NextRequest) {
       tempoMedioNotas: Number(totalNotasData.tempo_medio || 0),
       notasBot: Number(totalNotasData.bot_count || 0),
       valorTotalNotas: Number(totalNotasData.valor_total || 0),
+      tiposCount,
       notas: notas.map((n: any) => ({
         id: String(n.id),
         titulo: n.titulo,

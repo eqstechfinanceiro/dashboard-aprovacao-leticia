@@ -160,6 +160,7 @@ export default function ResultadosPage() {
   const [tempoMedioNotas, setTempoMedioNotas] = useState(0);
   const [notasBotApi, setNotasBotApi] = useState(0);
   const [valorTotalApi, setValorTotalApi] = useState(0);
+  const [tiposCount, setTiposCount] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -185,6 +186,7 @@ export default function ResultadosPage() {
       setTempoMedioNotas(data.tempoMedioNotas || 0);
       setNotasBotApi(data.notasBot || 0);
       setValorTotalApi(data.valorTotalNotas || 0);
+      setTiposCount(data.tiposCount || {});
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
     } finally {
@@ -208,9 +210,9 @@ export default function ResultadosPage() {
   const pctBot = totalNotas > 0 ? (notasBot / totalNotas) * 100 : 0;
 
   const notasPorTipo = [
-    { name: 'Mercadoria', value: notasFiltradas.filter(n => n.tipo === 'mercadoria').length, cor: '#3b82f6' },
-    { name: 'Serviço', value: notasFiltradas.filter(n => n.tipo === 'servico').length, cor: '#22c55e' },
-    { name: 'Devolução', value: notasFiltradas.filter(n => n.tipo === 'devolucao').length, cor: '#ef4444' },
+    { name: 'Mercadoria', value: tiposCount['mercadoria'] || 0, cor: '#3b82f6' },
+    { name: 'Serviço', value: tiposCount['servico'] || 0, cor: '#22c55e' },
+    { name: 'Devolução', value: tiposCount['devolucao'] || 0, cor: '#ef4444' },
   ].filter(t => t.value > 0);
 
   // Notas por dia x empresa (para gráfico de linhas)

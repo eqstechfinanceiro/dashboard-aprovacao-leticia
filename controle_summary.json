@@ -1,0 +1,29 @@
+{
+  "base_prest": {
+    "total_rows": 77203,
+    "unique_ids": 77203,
+    "sample_ids": [
+      "78880915",
+      "87380014",
+      "75125915",
+      "85307918",
+      "68649521",
+      "73026137",
+      "62085268",
+      "63609231",
+      "68307427",
+      "78087070"
+    ]
+  },
+  "quinzenas": {
+    "total_rows": 13415,
+    "aug_q1_rows": 311,
+    "aug_q1_total": 344400,
+    "aug_q2_rows": 306,
+    "aug_q2_total": 340000
+  },
+  "painel_prestacoes": {
+    "total_pessoas": 199,
+    "soma_total": 660560.44
+  }
+}

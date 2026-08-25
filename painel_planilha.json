@@ -1,0 +1,6180 @@
+{
+  "totals": {
+    "carga": 9238234.45,
+    "transferencia": -1343739.72,
+    "tarifa": -60868.74,
+    "prestacao": 7345089.210000002,
+    "saldo": 488536.7799999982
+  },
+  "pessoas": 771,
+  "data": {
+    "02027745203": {
+      "nome": "ABNER ANDRADE CAVALCANTE",
+      "carga": 280393.66,
+      "transferencia": -61887.9,
+      "tarifa": -1589.0,
+      "prestacao": 218431.0,
+      "saldo": -1514.24000000014
+    },
+    "01932662537": {
+      "nome": "ADAN LEONARDO SOUZA BATISTA",
+      "carga": 10382.39,
+      "transferencia": -612.0,
+      "tarifa": -56.0,
+      "prestacao": 9302.81,
+      "saldo": 411.58
+    },
+    "85087572634": {
+      "nome": "ADAUTO JOSE PEREIRA",
+      "carga": 2343.99,
+      "transferencia": -302.12,
+      "tarifa": -42.0,
+      "prestacao": 1526.24,
+      "saldo": 473.630000000001
+    },
+    "06223031980": {
+      "nome": "ADEMARCIO DUARTE LOPES",
+      "carga": 32681.36,
+      "transferencia": -6631.41,
+      "tarifa": -98.0,
+      "prestacao": 27060.49,
+      "saldo": -1108.54
+    },
+    "60843403004": {
+      "nome": "ADILSON ANTONIO JACINTO",
+      "carga": 5928.0,
+      "transferencia": -90.0,
+      "tarifa": -65.19,
+      "prestacao": 1280.0,
+      "saldo": 4492.81
+    },
+    "67324398049": {
+      "nome": "ADILSON MELLO DE CAMARGO",
+      "carga": 7827.76,
+      "transferencia": -9.63,
+      "tarifa": -126.0,
+      "prestacao": 7208.63,
+      "saldo": 483.5
+    },
+    "02730895795": {
+      "nome": "ADILSON RODRIGUES FERREIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "28604876898": {
+      "nome": "ADIVAR ANTONIO DA SILVA JUNIOR",
+      "carga": 3897.53,
+      "transferencia": -2233.13,
+      "tarifa": -7.0,
+      "prestacao": 1532.88,
+      "saldo": 124.52
+    },
+    "02410875467": {
+      "nome": "ADMILSON DA SILVA FARIAS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04769973993": {
+      "nome": "ADMILSON DOS SANTOS GALAN",
+      "carga": 42503.61,
+      "transferencia": -517.2,
+      "tarifa": -392.0,
+      "prestacao": 38362.67,
+      "saldo": 3231.73999999995
+    },
+    "10279969490": {
+      "nome": "ADRIANA DA CONCEICAO PEREIRA DE MELO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02801403989": {
+      "nome": "ADRIANE CARON",
+      "carga": 1008.0,
+      "transferencia": -504.0,
+      "tarifa": -7.0,
+      "prestacao": 537.0,
+      "saldo": -40.0
+    },
+    "65085825004": {
+      "nome": "ADRIANO BORGES TEIXEIRA",
+      "carga": 204.33,
+      "transferencia": -204.33,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "08813588607": {
+      "nome": "ADRIANO FRANCISCO DE PAULA",
+      "carga": 487.58,
+      "transferencia": 0.0,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 480.58
+    },
+    "94551804304": {
+      "nome": "ADSON ARAUJO DA SILVA",
+      "carga": 41855.87,
+      "transferencia": -89.76,
+      "tarifa": -371.0,
+      "prestacao": 40453.97,
+      "saldo": 941.13999999997
+    },
+    "83058133553": {
+      "nome": "ADSON SANTOS DA SILVA",
+      "carga": 10516.48,
+      "transferencia": -314.67,
+      "tarifa": -70.0,
+      "prestacao": 9353.9,
+      "saldo": 777.909999999998
+    },
+    "04982917906": {
+      "nome": "AFONSO FIORELLO CARVALHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06911519624": {
+      "nome": "AGNO CHRISTIAN DE LIMA TELES",
+      "carga": 20038.16,
+      "transferencia": -74.99,
+      "tarifa": -202.0,
+      "prestacao": 21637.5,
+      "saldo": -1876.33000000001
+    },
+    "60572957149": {
+      "nome": "AGUINA FERNANDES DE OLIVEIRA",
+      "carga": 6019.0,
+      "transferencia": -1106.0,
+      "tarifa": -63.0,
+      "prestacao": 4653.02,
+      "saldo": 196.98
+    },
+    "17965993015": {
+      "nome": "AIDES JOSE MACHADO FILHO",
+      "carga": 2954.0,
+      "transferencia": 0.0,
+      "tarifa": -14.0,
+      "prestacao": 1643.23,
+      "saldo": 1296.77
+    },
+    "06304071698": {
+      "nome": "AILTON MENDES AGUILAR",
+      "carga": 166.12,
+      "transferencia": -166.12,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03071605994": {
+      "nome": "ALAERTE JACINTO JUNIOR",
+      "carga": 5267.74,
+      "transferencia": -68.11,
+      "tarifa": -42.0,
+      "prestacao": 4592.23,
+      "saldo": 565.400000000001
+    },
+    "02862461989": {
+      "nome": "ALAN RICARDO CESTONARO DASSI",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07722232469": {
+      "nome": "ALAN RODRIGO SILVA ANDRADE",
+      "carga": 8911.92,
+      "transferencia": -45.92,
+      "tarifa": -105.0,
+      "prestacao": 7517.22,
+      "saldo": 1243.78
+    },
+    "94567050487": {
+      "nome": "ALAN WAGNER MEDEIROS DE SOUZA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02299450076": {
+      "nome": "ALEKSANDER GONCALVES DE ALMEIDA",
+      "carga": 10493.0,
+      "transferencia": -1.0,
+      "tarifa": -125.86,
+      "prestacao": 6320.0,
+      "saldo": 4046.14
+    },
+    "27494577858": {
+      "nome": "ALESSANDRO DE OLIVEIRA AZEVEDO",
+      "carga": 81540.82,
+      "transferencia": -1378.38,
+      "tarifa": -301.0,
+      "prestacao": 78108.56,
+      "saldo": 1752.87999999999
+    },
+    "02474960902": {
+      "nome": "ALESSANDRO RODRIGO PASTRELLI",
+      "carga": 12058.0,
+      "transferencia": -315.0,
+      "tarifa": -133.0,
+      "prestacao": 10860.49,
+      "saldo": 749.510000000004
+    },
+    "75728923020": {
+      "nome": "ALEX CARVALHO DOS SANTOS",
+      "carga": 12303.01,
+      "transferencia": -0.01,
+      "tarifa": -144.9,
+      "prestacao": 5200.0,
+      "saldo": 6958.1
+    },
+    "97237400010": {
+      "nome": "ALEX DOS SANTOS",
+      "carga": 667.67,
+      "transferencia": -641.6,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 26.0699999999999
+    },
+    "82877904091": {
+      "nome": "ALEX SANDRO PEREIRA MARQUES",
+      "carga": 3671.31,
+      "transferencia": -146.81,
+      "tarifa": -95.6,
+      "prestacao": 2732.36,
+      "saldo": 696.540000000003
+    },
+    "10021879907": {
+      "nome": "ALEX SANDRO RAMBO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "63194252020": {
+      "nome": "ALEXANDRE DA SILVEIRA GROSS",
+      "carga": 12002.54,
+      "transferencia": -4596.68,
+      "tarifa": -41.5,
+      "prestacao": 6205.69,
+      "saldo": 1158.67
+    },
+    "04964265676": {
+      "nome": "ALEXANDRE DE SOUSA BRITO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "84733977549": {
+      "nome": "ALEXANDRE DOS SANTOS",
+      "carga": 100.0,
+      "transferencia": -12.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 88.0
+    },
+    "00383390729": {
+      "nome": "ALEXANDRE MACHADO DA CONCEICAO",
+      "carga": 4149.0,
+      "transferencia": -4149.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "92079008072": {
+      "nome": "ALEXANDRE PIRES DE JESUS",
+      "carga": 15335.05,
+      "transferencia": -3087.59,
+      "tarifa": -101.26,
+      "prestacao": 10777.97,
+      "saldo": 1368.23
+    },
+    "10429372906": {
+      "nome": "ALEXSANDRO RAULINO DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "80888984049": {
+      "nome": "ALEXSANDRO SANTOS DA CONCEICAO",
+      "carga": 500.0,
+      "transferencia": -103.0,
+      "tarifa": -7.0,
+      "prestacao": 380.0,
+      "saldo": 10.0
+    },
+    "99335220000": {
+      "nome": "ALIRIO THOMAZ VALENTIM",
+      "carga": 3174.0,
+      "transferencia": -1000.0,
+      "tarifa": -21.0,
+      "prestacao": 0.0,
+      "saldo": 2153.0
+    },
+    "37377394803": {
+      "nome": "ALISON FERREIRA DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07338782962": {
+      "nome": "ALISSON RODRIGO RAMBO",
+      "carga": 1380.0,
+      "transferencia": -1260.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 120.0
+    },
+    "10132301911": {
+      "nome": "ALLAN CRISTIAN DA CUNHA",
+      "carga": 264.42,
+      "transferencia": -40.0,
+      "tarifa": -7.0,
+      "prestacao": 167.42,
+      "saldo": 50.0
+    },
+    "09688866717": {
+      "nome": "ALLAN JEFFERSON BRANCO RODRIGUES",
+      "carga": 8551.89,
+      "transferencia": -1628.76,
+      "tarifa": -98.0,
+      "prestacao": 4754.17,
+      "saldo": 2070.96
+    },
+    "49991787020": {
+      "nome": "ALMIR DA SILVA SOARES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "80616232004": {
+      "nome": "ALMIR SILVA DA ROSA",
+      "carga": 7869.67,
+      "transferencia": -91.6,
+      "tarifa": -28.0,
+      "prestacao": 7749.87,
+      "saldo": 0.199999999999818
+    },
+    "01969938900": {
+      "nome": "ALTAIR BERTOL",
+      "carga": 3113.4,
+      "transferencia": -315.59,
+      "tarifa": -21.0,
+      "prestacao": 1463.15,
+      "saldo": 1313.66
+    },
+    "71318758130": {
+      "nome": "ALVARO RAMON PRIMERA CASTILLO",
+      "carga": 200.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 45.0,
+      "saldo": 155.0
+    },
+    "07809466690": {
+      "nome": "AMANDA CRISTINA DA SILVA",
+      "carga": 5714.11,
+      "transferencia": -184.24,
+      "tarifa": -119.0,
+      "prestacao": 4700.87,
+      "saldo": 709.999999999999
+    },
+    "01783625651": {
+      "nome": "AMARAL RODRIGUES NUNES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "60023937220": {
+      "nome": "ANA CRISTINA FREIRE HOLANDA",
+      "carga": 90954.69,
+      "transferencia": -32006.69,
+      "tarifa": -448.0,
+      "prestacao": 56186.56,
+      "saldo": 2313.43999999997
+    },
+    "77283759204": {
+      "nome": "ANA LUIZA OLIVEIRA CAMELO",
+      "carga": 1497.0,
+      "transferencia": -700.0,
+      "tarifa": -7.0,
+      "prestacao": 1755.45,
+      "saldo": -965.45
+    },
+    "00053957040": {
+      "nome": "ANDERSON BICA PEREZ",
+      "carga": 11301.53,
+      "transferencia": -1082.65,
+      "tarifa": -245.0,
+      "prestacao": 10889.88,
+      "saldo": -916.000000000002
+    },
+    "02553373961": {
+      "nome": "ANDERSON FERNANDES DE ALMEIDA",
+      "carga": 1866.72,
+      "transferencia": -145.04,
+      "tarifa": -14.0,
+      "prestacao": 1921.11,
+      "saldo": -213.43
+    },
+    "06534220911": {
+      "nome": "ANDERSON GOMES",
+      "carga": 1948.0,
+      "transferencia": -21.35,
+      "tarifa": 0.0,
+      "prestacao": 1606.54,
+      "saldo": 320.11
+    },
+    "91959381091": {
+      "nome": "ANDERSON LUIS GONCALVES",
+      "carga": 6786.0,
+      "transferencia": -778.0,
+      "tarifa": -52.5,
+      "prestacao": 1920.0,
+      "saldo": 4035.5
+    },
+    "13495952845": {
+      "nome": "ANDERSON MARTINS",
+      "carga": 100.0,
+      "transferencia": -67.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 33.0
+    },
+    "04935033665": {
+      "nome": "ANDERSON MARTINS ELIZEU",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "83901442987": {
+      "nome": "ANDERSON MIGUEL PIEKARSKI",
+      "carga": 300.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 227.92,
+      "saldo": 72.08
+    },
+    "07822591975": {
+      "nome": "ANDERSON RICARDO VIEIRA",
+      "carga": 4840.78,
+      "transferencia": -424.4,
+      "tarifa": 0.0,
+      "prestacao": 4147.33,
+      "saldo": 269.050000000002
+    },
+    "03032275326": {
+      "nome": "ANDRE ARANHA MEISTER",
+      "carga": 55108.95,
+      "transferencia": -9891.7,
+      "tarifa": -217.0,
+      "prestacao": 45197.89,
+      "saldo": -197.640000000021
+    },
+    "57575410244": {
+      "nome": "ANDRE CHAVES LIMA",
+      "carga": 9586.0,
+      "transferencia": -4.0,
+      "tarifa": -112.0,
+      "prestacao": 9470.0,
+      "saldo": 0.0
+    },
+    "01783593008": {
+      "nome": "ANDRE DE MOURA ESCOBAR",
+      "carga": 28.33,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 28.33
+    },
+    "56391285004": {
+      "nome": "ANDRE LUIS DOS SANTOS SILVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "14565908719": {
+      "nome": "ANDRE LUIS FINATTI AUGUSTO",
+      "carga": 4611.64,
+      "transferencia": -2413.64,
+      "tarifa": -21.0,
+      "prestacao": 2279.58,
+      "saldo": -102.58
+    },
+    "71139532200": {
+      "nome": "ANDRE LUIZ COSTA CHAVES",
+      "carga": 224.9,
+      "transferencia": -210.2,
+      "tarifa": 0.0,
+      "prestacao": 14.7,
+      "saldo": 1.77635683940025e-14
+    },
+    "98603434034": {
+      "nome": "ANDRE LUIZ DOS SANTOS OLIVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11897381638": {
+      "nome": "ANDRE LUIZ SANTANA",
+      "carga": 77632.87,
+      "transferencia": -85.49,
+      "tarifa": -609.75,
+      "prestacao": 68761.73,
+      "saldo": 8175.89999999995
+    },
+    "98603566020": {
+      "nome": "ANDRE PINHEIRO BALOTIN",
+      "carga": 17383.82,
+      "transferencia": -8716.41,
+      "tarifa": -49.0,
+      "prestacao": 6167.43,
+      "saldo": 2450.98
+    },
+    "12682517633": {
+      "nome": "ANDRE VALERIO DE PAIVA",
+      "carga": 2912.37,
+      "transferencia": -323.82,
+      "tarifa": -46.43,
+      "prestacao": 1361.21,
+      "saldo": 1180.91
+    },
+    "06931043765": {
+      "nome": "ANDREA ANTUNES GOMES",
+      "carga": 385.16,
+      "transferencia": -192.58,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 192.58
+    },
+    "33162718805": {
+      "nome": "ANDRESA INDIRA SANTANA AGGIO",
+      "carga": 21033.64,
+      "transferencia": -813.77,
+      "tarifa": 0.0,
+      "prestacao": 18273.61,
+      "saldo": 1946.26
+    },
+    "02873491019": {
+      "nome": "ANELISE MENDONCA DE AVILA",
+      "carga": 4555.0,
+      "transferencia": 0.0,
+      "tarifa": -54.69,
+      "prestacao": 1391.77,
+      "saldo": 3108.54
+    },
+    "34857901846": {
+      "nome": "ANGELICA APARECIDA DOS SANTOS",
+      "carga": 15859.74,
+      "transferencia": -861.47,
+      "tarifa": -112.0,
+      "prestacao": 13997.74,
+      "saldo": 888.530000000001
+    },
+    "05728217516": {
+      "nome": "ANGELICA SAMPAIO SOUSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07643300712": {
+      "nome": "ANGELICA SOARES AMARANTE SILVA",
+      "carga": 54664.47,
+      "transferencia": -40907.42,
+      "tarifa": -132.66,
+      "prestacao": 13805.76,
+      "saldo": -181.369999999997
+    },
+    "37799797991": {
+      "nome": "ANSELMO VENTURI",
+      "carga": 3048.03,
+      "transferencia": -820.0,
+      "tarifa": -14.0,
+      "prestacao": 2174.03,
+      "saldo": 39.9999999999995
+    },
+    "26992280600": {
+      "nome": "ANTONIO DE PADUA LEITE",
+      "carga": 2201.34,
+      "transferencia": -107.49,
+      "tarifa": -63.0,
+      "prestacao": 2100.35,
+      "saldo": -69.4999999999995
+    },
+    "05766838760": {
+      "nome": "ANTONIO FERREIRA DE MENDONCA NETO",
+      "carga": 45005.48,
+      "transferencia": -1712.9,
+      "tarifa": -210.0,
+      "prestacao": 35338.36,
+      "saldo": 7744.21999999999
+    },
+    "08326260401": {
+      "nome": "ANTONIO JOSE PEREIRA DA SILVA",
+      "carga": 26484.77,
+      "transferencia": -1278.77,
+      "tarifa": -203.0,
+      "prestacao": 23357.92,
+      "saldo": 1645.07999999998
+    },
+    "04836584990": {
+      "nome": "ANTONIO MARCOS CAMARGO",
+      "carga": 19036.84,
+      "transferencia": -612.61,
+      "tarifa": -7.0,
+      "prestacao": 18413.91,
+      "saldo": 3.32000000000335
+    },
+    "07136772605": {
+      "nome": "ANTONIO MARCOS DE SOUZA",
+      "carga": 507.0,
+      "transferencia": -371.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 136.0
+    },
+    "01170402232": {
+      "nome": "ARLEY HENRIQUE DE SOUZA LUZ",
+      "carga": 41324.8,
+      "transferencia": -138.0,
+      "tarifa": -315.0,
+      "prestacao": 39922.76,
+      "saldo": 949.039999999979
+    },
+    "80873367049": {
+      "nome": "ARNALDO VARGAS NETO",
+      "carga": 14182.0,
+      "transferencia": 0.0,
+      "tarifa": -156.51,
+      "prestacao": 8606.0,
+      "saldo": 5419.49
+    },
+    "12877857603": {
+      "nome": "ARTHUR GOMES DE PAULO",
+      "carga": 6264.83,
+      "transferencia": -463.23,
+      "tarifa": -63.0,
+      "prestacao": 4884.58,
+      "saldo": 854.020000000002
+    },
+    "13921847621": {
+      "nome": "ARTHUR SANTOS DE OLIVEIRA",
+      "carga": 10475.62,
+      "transferencia": -496.83,
+      "tarifa": -130.74,
+      "prestacao": 9803.4,
+      "saldo": 44.6499999999996
+    },
+    "90155661272": {
+      "nome": "ARTUR DIAS DOS SANTOS",
+      "carga": 22797.65,
+      "transferencia": -5014.65,
+      "tarifa": -133.0,
+      "prestacao": 17173.83,
+      "saldo": 476.169999999991
+    },
+    "07105914971": {
+      "nome": "ARTUR JACO PAGANI DE SOUZA",
+      "carga": 2760.48,
+      "transferencia": -333.18,
+      "tarifa": 0.0,
+      "prestacao": 2231.8,
+      "saldo": 195.5
+    },
+    "03975647400": {
+      "nome": "ATILA LOPES DE MOURA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03535433061": {
+      "nome": "ATILA SILVA DOS SANTOS",
+      "carga": 216.8,
+      "transferencia": -216.8,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "32060157900": {
+      "nome": "AURO MOREIRA PEDROSO",
+      "carga": 7801.76,
+      "transferencia": -2042.42,
+      "tarifa": 0.0,
+      "prestacao": 5072.28,
+      "saldo": 687.059999999999
+    },
+    "35575473880": {
+      "nome": "BEATRIZ SILVA DE SIQUEIRA",
+      "carga": 28691.43,
+      "transferencia": -6.43,
+      "tarifa": -252.0,
+      "prestacao": 27812.79,
+      "saldo": 620.210000000003
+    },
+    "00046347054": {
+      "nome": "BEN HUR MENDES OLIVEIRA",
+      "carga": 1288.39,
+      "transferencia": -7.04,
+      "tarifa": -7.0,
+      "prestacao": 611.6,
+      "saldo": 662.75
+    },
+    "07747008406": {
+      "nome": "BRUNA LAIS AZEVEDO CUNHA",
+      "carga": 9897.27,
+      "transferencia": -1224.07,
+      "tarifa": -37.02,
+      "prestacao": 9204.72,
+      "saldo": -568.540000000003
+    },
+    "13459423625": {
+      "nome": "BRUNA LAIS DOS SANTOS PESSOA",
+      "carga": 5145.19,
+      "transferencia": -950.0,
+      "tarifa": -15.73,
+      "prestacao": 3379.46,
+      "saldo": 800.000000000001
+    },
+    "04252409160": {
+      "nome": "BRUNO DE SOUZA PACHECO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "82341478972": {
+      "nome": "BRUNO EDUARDO DE SOUZA",
+      "carga": 3965.1,
+      "transferencia": -3065.1,
+      "tarifa": 0.0,
+      "prestacao": 207.2,
+      "saldo": 692.8
+    },
+    "35076785860": {
+      "nome": "BRUNO EDUARDO SOLANO",
+      "carga": 654.88,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 210.66,
+      "saldo": 444.22
+    },
+    "16306431730": {
+      "nome": "BRUNO FERREIRA DE SOUZA RODRIGUES",
+      "carga": 98200.41,
+      "transferencia": -551.01,
+      "tarifa": -707.0,
+      "prestacao": 54219.8500000001,
+      "saldo": 42722.55
+    },
+    "01543078079": {
+      "nome": "BRUNO LINHARES RODRIGUES",
+      "carga": 8508.45,
+      "transferencia": -8508.45,
+      "tarifa": 0.0,
+      "prestacao": 898.12,
+      "saldo": -898.120000000002
+    },
+    "02535272016": {
+      "nome": "BRUNO LOPES DE CAMARGO",
+      "carga": 970.0,
+      "transferencia": 0.0,
+      "tarifa": -15.5,
+      "prestacao": 0.0,
+      "saldo": 954.5
+    },
+    "86425544015": {
+      "nome": "BRUNO NUNES EBERLE",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11992259755": {
+      "nome": "BRUNO OLIVEIRA DIAS",
+      "carga": 58456.38,
+      "transferencia": -15702.11,
+      "tarifa": -91.0,
+      "prestacao": 37430.98,
+      "saldo": 5232.28999999998
+    },
+    "85299839049": {
+      "nome": "BRUNO VILLA VEIGA",
+      "carga": 2308.0,
+      "transferencia": 0.0,
+      "tarifa": -21.0,
+      "prestacao": 0.0,
+      "saldo": 2287.0
+    },
+    "08924586904": {
+      "nome": "CAIO FRANCESCONI RIBEIRO",
+      "carga": 14755.27,
+      "transferencia": -859.3,
+      "tarifa": -210.0,
+      "prestacao": 10490.79,
+      "saldo": 3195.18
+    },
+    "07053418952": {
+      "nome": "CAIOS VINICIUS NUNES BROERING",
+      "carga": 57043.58,
+      "transferencia": -52334.53,
+      "tarifa": -64.14,
+      "prestacao": 3242.92,
+      "saldo": 1401.99000000001
+    },
+    "13927782980": {
+      "nome": "CAMILA DE FRANCA FARIA",
+      "carga": 600.0,
+      "transferencia": -600.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "85076538553": {
+      "nome": "CAMILA DE OLIVEIRA VELOSO",
+      "carga": 2163.39,
+      "transferencia": -450.7,
+      "tarifa": 0.0,
+      "prestacao": 1630.39,
+      "saldo": 82.2999999999997
+    },
+    "08822644948": {
+      "nome": "CAMILA DOS SANTOS DO LIVRAMENTO",
+      "carga": 1000.0,
+      "transferencia": -466.03,
+      "tarifa": 0.0,
+      "prestacao": 533.97,
+      "saldo": 0.0
+    },
+    "20005473896": {
+      "nome": "CARLOS ALEXANDRE GIGI",
+      "carga": 2528.01,
+      "transferencia": -400.0,
+      "tarifa": 0.0,
+      "prestacao": 1928.01,
+      "saldo": 200.0
+    },
+    "72656204968": {
+      "nome": "CARLOS EDUARDO CAVALHEIRO",
+      "carga": 750.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 738.16,
+      "saldo": 11.84
+    },
+    "22730778829": {
+      "nome": "CARLOS EDUARDO SCATAMBULO",
+      "carga": 63827.02,
+      "transferencia": -78.35,
+      "tarifa": -532.0,
+      "prestacao": 63400.3700000002,
+      "saldo": -183.700000000164
+    },
+    "94080739087": {
+      "nome": "CARLOS FERNANDO ATAIDES NOGUEIRA",
+      "carga": 300.0,
+      "transferencia": -0.72,
+      "tarifa": -4.28,
+      "prestacao": 295.0,
+      "saldo": 0.0
+    },
+    "00598396004": {
+      "nome": "CARLOS FERNANDO PAINES SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "82741980004": {
+      "nome": "CARLOS FRANCISCO GODOY",
+      "carga": 1293.88,
+      "transferencia": -37.5,
+      "tarifa": -14.5,
+      "prestacao": 1041.88,
+      "saldo": 200.0
+    },
+    "30336341920": {
+      "nome": "CARLOS GONZAGA ARAGAO",
+      "carga": 42666.65,
+      "transferencia": -55.19,
+      "tarifa": -329.0,
+      "prestacao": 38307.0,
+      "saldo": 3975.45999999998
+    },
+    "96018682087": {
+      "nome": "CARLOS HENRIQUE VARGAS DOS SANTOS",
+      "carga": 664.9,
+      "transferencia": -517.9,
+      "tarifa": -7.0,
+      "prestacao": 177.0,
+      "saldo": -37.0
+    },
+    "94193568091": {
+      "nome": "CARLOS MOACIR FONTOURA MENDONCA",
+      "carga": 140.42,
+      "transferencia": -20.42,
+      "tarifa": 0.0,
+      "prestacao": 120.0,
+      "saldo": 0.0
+    },
+    "65973500225": {
+      "nome": "CARLOS NASCIMENTO NONATO JUNIOR",
+      "carga": 98905.99,
+      "transferencia": -5000.0,
+      "tarifa": -721.0,
+      "prestacao": 89198.99,
+      "saldo": 3986.0
+    },
+    "90443306087": {
+      "nome": "CARLOS RENATO PACHECO DA SILVA",
+      "carga": 21292.56,
+      "transferencia": -781.08,
+      "tarifa": -182.0,
+      "prestacao": 16602.2,
+      "saldo": 3727.28
+    },
+    "09867858816": {
+      "nome": "CARLOS ROBERTO DE CARVALHO PERES",
+      "carga": 27589.84,
+      "transferencia": 0.0,
+      "tarifa": -269.71,
+      "prestacao": 27192.86,
+      "saldo": 127.27
+    },
+    "07258477942": {
+      "nome": "CAROLINE DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02296429262": {
+      "nome": "CASSIO HENRIQUE ALBUQUERQUE DA SILVA",
+      "carga": 1598.03,
+      "transferencia": -59.42,
+      "tarifa": -21.0,
+      "prestacao": 1546.31,
+      "saldo": -28.7000000000005
+    },
+    "12712136640": {
+      "nome": "CELIO GONCALVES DE OLIVEIRA JUNIOR",
+      "carga": 2906.93,
+      "transferencia": -654.0,
+      "tarifa": -21.0,
+      "prestacao": 2020.93,
+      "saldo": 211.0
+    },
+    "25946255827": {
+      "nome": "CELSO ROGERIO DE OLIVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 34.0,
+      "saldo": -34.0
+    },
+    "94742740297": {
+      "nome": "CHARLES MACIEL CAVALHEIRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "12547938790": {
+      "nome": "CHARLES NEVES MATTIUZZI",
+      "carga": 51501.84,
+      "transferencia": -4442.53,
+      "tarifa": -343.0,
+      "prestacao": 47401.37,
+      "saldo": -685.060000000027
+    },
+    "01050938232": {
+      "nome": "CHARLYTON COSTA ANDRADE",
+      "carga": 88332.21,
+      "transferencia": -16600.0,
+      "tarifa": -839.54,
+      "prestacao": 62154.9,
+      "saldo": 8737.77
+    },
+    "86881094000": {
+      "nome": "CHRISTIAN ARAUJO DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "85433500268": {
+      "nome": "CINTIA DOS SANTOS RABELO",
+      "carga": 10260.0,
+      "transferencia": -500.0,
+      "tarifa": -110.96,
+      "prestacao": 9603.42,
+      "saldo": 45.6200000000044
+    },
+    "05144026958": {
+      "nome": "CLAUDEMIR GREGOSKI RODRIGUES",
+      "carga": 24144.27,
+      "transferencia": -2190.0,
+      "tarifa": -112.0,
+      "prestacao": 23663.37,
+      "saldo": -1821.1
+    },
+    "75609444004": {
+      "nome": "CLAUDEMIR MOREIRA",
+      "carga": 15613.03,
+      "transferencia": -6356.68,
+      "tarifa": -21.0,
+      "prestacao": 8912.51,
+      "saldo": 322.839999999997
+    },
+    "10433881844": {
+      "nome": "CLAUDINEI AMARAL",
+      "carga": 30521.43,
+      "transferencia": -3602.44,
+      "tarifa": -77.0,
+      "prestacao": 27100.02,
+      "saldo": -258.029999999999
+    },
+    "91920795987": {
+      "nome": "CLAUDINEI VICENTE DE LIMA",
+      "carga": 4136.44,
+      "transferencia": -343.32,
+      "tarifa": 0.0,
+      "prestacao": 3664.69,
+      "saldo": 128.430000000001
+    },
+    "93457235953": {
+      "nome": "CLAUDIO DONIZETE DA SILVA",
+      "carga": 13411.98,
+      "transferencia": -473.48,
+      "tarifa": -28.0,
+      "prestacao": 12689.97,
+      "saldo": 220.530000000001
+    },
+    "48775037068": {
+      "nome": "CLAUDIO LUIZ COSTA BAUER",
+      "carga": 980.0,
+      "transferencia": -147.9,
+      "tarifa": -21.0,
+      "prestacao": 850.45,
+      "saldo": -39.3500000000003
+    },
+    "02705722955": {
+      "nome": "CLAUDIO RENALDI NUNES",
+      "carga": 18196.49,
+      "transferencia": -3244.79,
+      "tarifa": -14.0,
+      "prestacao": 14426.7,
+      "saldo": 511.000000000002
+    },
+    "02928835954": {
+      "nome": "CLAYTON DE OLIVEIRA",
+      "carga": 2733.1,
+      "transferencia": -811.55,
+      "tarifa": -31.25,
+      "prestacao": 1646.55,
+      "saldo": 243.75
+    },
+    "17278189705": {
+      "nome": "CLEBER ELIAS DA SILVA JUNIOR",
+      "carga": 5650.0,
+      "transferencia": 0.0,
+      "tarifa": -35.0,
+      "prestacao": 1827.77,
+      "saldo": 3787.23
+    },
+    "84743603404": {
+      "nome": "CLEBER RICARDO NASCIMENTO SILVA",
+      "carga": 5903.26,
+      "transferencia": -7.26,
+      "tarifa": -56.0,
+      "prestacao": 7503.95,
+      "saldo": -1663.95
+    },
+    "05864921947": {
+      "nome": "CLEBERSON APARECIDO BORGES DOS SANTOS",
+      "carga": 16383.52,
+      "transferencia": -418.29,
+      "tarifa": 0.0,
+      "prestacao": 16236.9299999999,
+      "saldo": -271.699999999939
+    },
+    "01929647638": {
+      "nome": "CLEITON DA SILVA MONTALVAO",
+      "carga": 5506.0,
+      "transferencia": -356.0,
+      "tarifa": -38.0,
+      "prestacao": 4628.28,
+      "saldo": 483.720000000001
+    },
+    "01065504039": {
+      "nome": "CLEITON TAVARES JARDIM",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11056318937": {
+      "nome": "CLEOMAR DE SOUZA RODRIGUES",
+      "carga": 3460.63,
+      "transferencia": -845.0,
+      "tarifa": 0.0,
+      "prestacao": 2995.63,
+      "saldo": -380.0
+    },
+    "79715508987": {
+      "nome": "CLEOMIRIO FERREIRA DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05456615959": {
+      "nome": "CLERITON BACILA DOS SANTOS",
+      "carga": 27913.6,
+      "transferencia": -7746.15,
+      "tarifa": -154.0,
+      "prestacao": 18872.06,
+      "saldo": 1141.39
+    },
+    "08609699919": {
+      "nome": "CLEVERSON PAULOUSKI",
+      "carga": 976.47,
+      "transferencia": -162.6,
+      "tarifa": 0.0,
+      "prestacao": 613.87,
+      "saldo": 200.0
+    },
+    "01302377604": {
+      "nome": "CLOVIS RICARDO PALHARES E CORDEIRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04445188603": {
+      "nome": "CREMILSON JESUS FRANCA",
+      "carga": 1779.0,
+      "transferencia": -181.0,
+      "tarifa": -28.0,
+      "prestacao": 1127.17,
+      "saldo": 442.83
+    },
+    "03363725906": {
+      "nome": "CREOL APARECIDO DOS SANTOS",
+      "carga": 1290.33,
+      "transferencia": -106.4,
+      "tarifa": -84.0,
+      "prestacao": 1003.14,
+      "saldo": 96.7899999999998
+    },
+    "92931901091": {
+      "nome": "CRISTIAN MARCELO DE OLIVEIRA DOS SANTOS",
+      "carga": 5265.41,
+      "transferencia": -1234.8,
+      "tarifa": 0.0,
+      "prestacao": 4030.61,
+      "saldo": 0.0
+    },
+    "70022036148": {
+      "nome": "CRISTIANE PEREIRA DE MELO",
+      "carga": 6126.89,
+      "transferencia": -2182.89,
+      "tarifa": -84.0,
+      "prestacao": 3877.29,
+      "saldo": -17.2899999999986
+    },
+    "02862032786": {
+      "nome": "CRISTIANO ANESIO GOMES DO NASCIMENTO",
+      "carga": 16752.03,
+      "transferencia": -22.0,
+      "tarifa": -154.0,
+      "prestacao": 16077.82,
+      "saldo": 498.21000000001
+    },
+    "88761711004": {
+      "nome": "CRISTIANO BELMONTE MARTINS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "99062208649": {
+      "nome": "CRISTIANO DA SILVA VALADARES",
+      "carga": 6576.8,
+      "transferencia": -485.8,
+      "tarifa": -91.0,
+      "prestacao": 5767.98,
+      "saldo": 232.020000000001
+    },
+    "03684120910": {
+      "nome": "DANIEL CANTUARIO DA SILVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "94288259053": {
+      "nome": "DANIEL DA SILVA LOPES",
+      "carga": 31271.26,
+      "transferencia": -28277.48,
+      "tarifa": -28.0,
+      "prestacao": 2725.43,
+      "saldo": 240.349999999999
+    },
+    "30116167874": {
+      "nome": "DANIEL DUARTE ALVES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05036681681": {
+      "nome": "DANIEL PORFIRIO DE SOUSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "08496764605": {
+      "nome": "DANIEL RIBEIRO DE CASTRO",
+      "carga": 2716.82,
+      "transferencia": -378.66,
+      "tarifa": -28.0,
+      "prestacao": 2800.02,
+      "saldo": -489.86
+    },
+    "97592439549": {
+      "nome": "DANIEL SANTOS DE ASSUNCAO",
+      "carga": 47112.04,
+      "transferencia": -100.44,
+      "tarifa": -427.0,
+      "prestacao": 46090.84,
+      "saldo": 493.75999999998
+    },
+    "01066881030": {
+      "nome": "DANIELA CARVALHO STAHLER",
+      "carga": 2717.89,
+      "transferencia": -14.22,
+      "tarifa": -7.0,
+      "prestacao": 2562.77,
+      "saldo": 133.899999999999
+    },
+    "06285125970": {
+      "nome": "DANILO ZANATTA LUCIANO",
+      "carga": 2497.88,
+      "transferencia": -1055.3,
+      "tarifa": 0.0,
+      "prestacao": 1430.58,
+      "saldo": 11.9999999999968
+    },
+    "42778115900": {
+      "nome": "DARCI CASARA",
+      "carga": 17.79,
+      "transferencia": -17.79,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02288889055": {
+      "nome": "DARLAN SPIER PAZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02344854002": {
+      "nome": "DAVID DA SILVA PEREIRA",
+      "carga": 7377.84,
+      "transferencia": -90.42,
+      "tarifa": -81.5,
+      "prestacao": 3519.52,
+      "saldo": 3686.4
+    },
+    "04817177900": {
+      "nome": "DAVID DE OLIVEIRA FRIGERIO",
+      "carga": 43379.08,
+      "transferencia": -1184.02,
+      "tarifa": -371.0,
+      "prestacao": 39983.28,
+      "saldo": 1840.77999999998
+    },
+    "21641472863": {
+      "nome": "DAVID VICHI DE BRITO",
+      "carga": 16667.85,
+      "transferencia": -900.0,
+      "tarifa": -49.0,
+      "prestacao": 15004.6,
+      "saldo": 714.250000000004
+    },
+    "85225720030": {
+      "nome": "DEBORA ARAUJO FIGUEIREDO",
+      "carga": 13359.0,
+      "transferencia": -74.99,
+      "tarifa": -133.0,
+      "prestacao": 12707.64,
+      "saldo": 443.369999999995
+    },
+    "69116709004": {
+      "nome": "DEISE SOARES DE CAMPOS",
+      "carga": 15254.26,
+      "transferencia": -3033.0,
+      "tarifa": -42.0,
+      "prestacao": 13204.78,
+      "saldo": -1025.51999999999
+    },
+    "05289382666": {
+      "nome": "DELVANO AILTON DA SILVA",
+      "carga": 2216.15,
+      "transferencia": -76.2,
+      "tarifa": -3.76,
+      "prestacao": 1648.29,
+      "saldo": 487.9
+    },
+    "63818302049": {
+      "nome": "DEMETRIUS LOPES GIANGROSSI",
+      "carga": 4320.83,
+      "transferencia": -3.07,
+      "tarifa": -147.78,
+      "prestacao": 2464.29,
+      "saldo": 1705.69
+    },
+    "04859818903": {
+      "nome": "DENILSO DIDONE",
+      "carga": 4418.56,
+      "transferencia": -1348.7,
+      "tarifa": 0.0,
+      "prestacao": 3065.06,
+      "saldo": 4.79999999999973
+    },
+    "01819308030": {
+      "nome": "DENILSON PERRIM NAVARRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06637541435": {
+      "nome": "DENIS FERREIRA DA SILVA",
+      "carga": 2661.98,
+      "transferencia": -400.0,
+      "tarifa": 0.0,
+      "prestacao": 2061.98,
+      "saldo": 200.0
+    },
+    "08921985670": {
+      "nome": "DENIVALDO GONCALVES MIRANDA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00049250256": {
+      "nome": "DHIEGO RIBEIRO DINIZ",
+      "carga": 30423.0,
+      "transferencia": -267.95,
+      "tarifa": -273.0,
+      "prestacao": 28770.2,
+      "saldo": 1111.85
+    },
+    "09407167631": {
+      "nome": "DIEGO DE ALCANTARA MOTA MENDES",
+      "carga": 10351.98,
+      "transferencia": -1102.7,
+      "tarifa": -70.0,
+      "prestacao": 7300.07,
+      "saldo": 1879.21
+    },
+    "05769658550": {
+      "nome": "DIEGO DOS SANTOS DE JESUS",
+      "carga": 6620.17,
+      "transferencia": -551.19,
+      "tarifa": -56.0,
+      "prestacao": 5453.17,
+      "saldo": 559.809999999999
+    },
+    "06172885421": {
+      "nome": "DIEGO GONZAGA DA SILVA",
+      "carga": 2309.0,
+      "transferencia": -18.0,
+      "tarifa": -21.0,
+      "prestacao": 2177.39,
+      "saldo": 92.6099999999997
+    },
+    "05597823906": {
+      "nome": "DIEGO GRIME DE MELO",
+      "carga": 1082.06,
+      "transferencia": -30.87,
+      "tarifa": -42.0,
+      "prestacao": 859.86,
+      "saldo": 149.33
+    },
+    "01553544692": {
+      "nome": "DIEGO JOSE DE PAULO",
+      "carga": 16321.48,
+      "transferencia": -97.48,
+      "tarifa": -161.0,
+      "prestacao": 15903.9,
+      "saldo": 159.099999999999
+    },
+    "02034144031": {
+      "nome": "DIONATAN PATRICK SOUZA DIAS",
+      "carga": 5902.5,
+      "transferencia": -1787.06,
+      "tarifa": -21.0,
+      "prestacao": 3214.44,
+      "saldo": 880.0
+    },
+    "04590667908": {
+      "nome": "DIONIKSON MACARIO AGUIAR",
+      "carga": 2130.01,
+      "transferencia": -240.14,
+      "tarifa": -7.0,
+      "prestacao": 1586.67,
+      "saldo": 296.2
+    },
+    "07683851990": {
+      "nome": "DIORGENES PICONI SAPATEIRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11422891844": {
+      "nome": "DIVAN ALVES DE AMORIM",
+      "carga": 20305.33,
+      "transferencia": -2296.5,
+      "tarifa": 0.0,
+      "prestacao": 17690.83,
+      "saldo": 317.999999999996
+    },
+    "00508936616": {
+      "nome": "DIVANIA RITA DE SOUSA ASSIS FREITAS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "85025399068": {
+      "nome": "DJENIFER GABRIELE AVILA FREDERICH",
+      "carga": 16448.54,
+      "transferencia": -1249.12,
+      "tarifa": -63.0,
+      "prestacao": 14822.67,
+      "saldo": 313.750000000005
+    },
+    "08196835906": {
+      "nome": "DJONATAN JULIO GORGES VENTURI",
+      "carga": 8294.27,
+      "transferencia": -1187.41,
+      "tarifa": -7.0,
+      "prestacao": 7180.65999999999,
+      "saldo": -80.799999999992
+    },
+    "11454991631": {
+      "nome": "DMITRI MORAIS DA SILVA",
+      "carga": 876.62,
+      "transferencia": -186.74,
+      "tarifa": -7.0,
+      "prestacao": 124.0,
+      "saldo": 558.88
+    },
+    "00851999077": {
+      "nome": "DOMINIQUE SILVA DE SOUZA",
+      "carga": 1586.73,
+      "transferencia": -553.16,
+      "tarifa": 0.0,
+      "prestacao": 357.27,
+      "saldo": 676.3
+    },
+    "36813601890": {
+      "nome": "DOUGLAS ALEXANDRE BARBOSA",
+      "carga": 8572.1,
+      "transferencia": -951.15,
+      "tarifa": -49.0,
+      "prestacao": 7152.55,
+      "saldo": 419.4
+    },
+    "52897958200": {
+      "nome": "DOUGLAS BRITO FERREIRA",
+      "carga": 398.28,
+      "transferencia": -96.28,
+      "tarifa": 0.0,
+      "prestacao": 242.0,
+      "saldo": 60.0
+    },
+    "03241621030": {
+      "nome": "DOUGLAS BRUCK MACHADO",
+      "carga": 2199.7,
+      "transferencia": -497.0,
+      "tarifa": -91.0,
+      "prestacao": 1411.7,
+      "saldo": 200.0
+    },
+    "07651500938": {
+      "nome": "DOUGLAS DA SILVA LAUXEN",
+      "carga": 700.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 557.05,
+      "saldo": 142.95
+    },
+    "08492402989": {
+      "nome": "DOUGLAS TIAGO DE OLIVEIRA",
+      "carga": 17942.7,
+      "transferencia": -5617.91,
+      "tarifa": 0.0,
+      "prestacao": 11540.85,
+      "saldo": 783.940000000001
+    },
+    "08072851969": {
+      "nome": "DOUGLAS VENTURA SILVEIRA",
+      "carga": 3823.0,
+      "transferencia": -453.0,
+      "tarifa": -42.0,
+      "prestacao": 3223.09,
+      "saldo": 104.909999999999
+    },
+    "08784554932": {
+      "nome": "DOUGLAS WESLEN CARDOSO DOS SANTOS",
+      "carga": 2352.54,
+      "transferencia": -140.36,
+      "tarifa": -14.0,
+      "prestacao": 1118.28,
+      "saldo": 1079.9
+    },
+    "05746466980": {
+      "nome": "DYONES ONOFRE HORACIO DE OLIVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03985382638": {
+      "nome": "EDER AUGUSTO DE ARAUJO CARVALHO",
+      "carga": 21329.68,
+      "transferencia": -1327.68,
+      "tarifa": -182.0,
+      "prestacao": 19287.17,
+      "saldo": 532.829999999991
+    },
+    "03040370952": {
+      "nome": "EDER MEDICI",
+      "carga": 554.74,
+      "transferencia": -100.0,
+      "tarifa": 0.0,
+      "prestacao": 354.74,
+      "saldo": 100.0
+    },
+    "92057900010": {
+      "nome": "EDERSON GUIZOLFI PEREIRA",
+      "carga": 7431.6,
+      "transferencia": -5.8,
+      "tarifa": -77.0,
+      "prestacao": 8372.84999999999,
+      "saldo": -1024.04999999999
+    },
+    "04614285988": {
+      "nome": "EDERSON LUIS BARROS DA ROSA",
+      "carga": 3738.07,
+      "transferencia": -176.66,
+      "tarifa": 0.0,
+      "prestacao": 3624.48000000001,
+      "saldo": -63.0700000000047
+    },
+    "01777100046": {
+      "nome": "EDERSON STRELOW",
+      "carga": 5538.0,
+      "transferencia": -759.97,
+      "tarifa": -28.0,
+      "prestacao": 4752.32999999999,
+      "saldo": -2.29999999999472
+    },
+    "00312735057": {
+      "nome": "EDEVALDO DUTRA GONCALVES",
+      "carga": 3842.7,
+      "transferencia": -38.1,
+      "tarifa": -63.0,
+      "prestacao": 2826.30000000001,
+      "saldo": 915.299999999992
+    },
+    "34596010862": {
+      "nome": "EDIBERTO GEORGE RELIQUIAS",
+      "carga": 5599.73,
+      "transferencia": -4632.77,
+      "tarifa": -14.0,
+      "prestacao": 909.66,
+      "saldo": 43.2999999999998
+    },
+    "70741247453": {
+      "nome": "EDILENE CRISTIANA DA SILVA ZIMMERMANN",
+      "carga": 1447.84,
+      "transferencia": -149.62,
+      "tarifa": 0.0,
+      "prestacao": 1019.25,
+      "saldo": 278.97
+    },
+    "82277206172": {
+      "nome": "EDINALDO LEAL DE SOUZA",
+      "carga": 10658.04,
+      "transferencia": -624.04,
+      "tarifa": -84.0,
+      "prestacao": 7713.04,
+      "saldo": 2236.96
+    },
+    "37896893860": {
+      "nome": "EDIPO SANTOS BARRETO",
+      "carga": 18322.28,
+      "transferencia": -5529.02,
+      "tarifa": -38.35,
+      "prestacao": 12383.52,
+      "saldo": 371.390000000005
+    },
+    "77522532000": {
+      "nome": "EDISON FERREIRA GONCALVES",
+      "carga": 11587.85,
+      "transferencia": -2698.95,
+      "tarifa": -123.5,
+      "prestacao": 8562.39,
+      "saldo": 203.01
+    },
+    "31118068807": {
+      "nome": "EDJUNIO FERNANDES DE SANTANA",
+      "carga": 8831.0,
+      "transferencia": 0.0,
+      "tarifa": -93.29,
+      "prestacao": 5116.0,
+      "saldo": 3621.71
+    },
+    "06311884607": {
+      "nome": "EDMAR FERREIRA CARDOSO",
+      "carga": 3675.86,
+      "transferencia": -17.32,
+      "tarifa": -42.55,
+      "prestacao": 2651.44,
+      "saldo": 964.550000000001
+    },
+    "06559830900": {
+      "nome": "EDMAR RODRIGUES MOTA",
+      "carga": 521.7,
+      "transferencia": -22.35,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 492.35
+    },
+    "48353639491": {
+      "nome": "EDNALDO DE ALMEIDA SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "29022227855": {
+      "nome": "EDNEI SANTOS SANTANA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05765681719": {
+      "nome": "EDSON CALIXTO THOMAZ",
+      "carga": 20524.16,
+      "transferencia": -80.16,
+      "tarifa": -154.0,
+      "prestacao": 18565.1,
+      "saldo": 1724.9
+    },
+    "92958028020": {
+      "nome": "EDSON DA SILVA DELLINGHAUSEN",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "17183885860": {
+      "nome": "EDSON ROBERTO SPULDARI",
+      "carga": 2235.82,
+      "transferencia": -616.65,
+      "tarifa": -7.0,
+      "prestacao": 312.02,
+      "saldo": 1300.15
+    },
+    "62063774072": {
+      "nome": "EDSON VEIGA SILVEIRA",
+      "carga": 56276.82,
+      "transferencia": -38069.82,
+      "tarifa": -217.0,
+      "prestacao": 17318.04,
+      "saldo": 671.96000000001
+    },
+    "03398821235": {
+      "nome": "EDUARDA CONCEICAO DE ALMEIDA",
+      "carga": 14459.0,
+      "transferencia": -1000.0,
+      "tarifa": -129.0,
+      "prestacao": 13119.91,
+      "saldo": 210.090000000006
+    },
+    "02960685946": {
+      "nome": "EDUARDO ANDREY VENSON SILVA",
+      "carga": 59533.22,
+      "transferencia": -39.78,
+      "tarifa": -392.0,
+      "prestacao": 51870.1200000001,
+      "saldo": 7231.31999999993
+    },
+    "04050867095": {
+      "nome": "EDUARDO FRAGA DOS REIS",
+      "carga": 2820.28,
+      "transferencia": -250.0,
+      "tarifa": -14.0,
+      "prestacao": 1886.34,
+      "saldo": 669.94
+    },
+    "07283564900": {
+      "nome": "EDUARDO HENRIQUE BONIN",
+      "carga": 3413.95,
+      "transferencia": -1465.45,
+      "tarifa": 0.0,
+      "prestacao": 1921.95,
+      "saldo": 26.5499999999993
+    },
+    "91270529072": {
+      "nome": "EDUARDO SANTOS",
+      "carga": 60033.09,
+      "transferencia": -45055.25,
+      "tarifa": -96.38,
+      "prestacao": 15785.72,
+      "saldo": -904.259999999987
+    },
+    "00461757923": {
+      "nome": "ELIANDRO BRUNING",
+      "carga": 14736.82,
+      "transferencia": -3284.8,
+      "tarifa": 0.0,
+      "prestacao": 10837.45,
+      "saldo": 614.569999999998
+    },
+    "00153240288": {
+      "nome": "ELIANDRO CUNHA DO NASCIMENTO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04300235961": {
+      "nome": "ELIESER DE OLIVEIRA VICENTE",
+      "carga": 1163.55,
+      "transferencia": -582.61,
+      "tarifa": 0.0,
+      "prestacao": 580.94,
+      "saldo": 0.0
+    },
+    "97424277200": {
+      "nome": "ELIEZER MOREIRA SILVA JUNIOR",
+      "carga": 284.48,
+      "transferencia": -36.69,
+      "tarifa": 0.0,
+      "prestacao": 203.35,
+      "saldo": 44.44
+    },
+    "10012810711": {
+      "nome": "ELIFAS FERRAZ DA PENHA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04538502944": {
+      "nome": "ELIO PEREIRA NETO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "36656091865": {
+      "nome": "ELISA SILVA SCHNEIDER",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04503975307": {
+      "nome": "ELIZANE KEZIA SILVA DE SOUSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "65681053920": {
+      "nome": "ELOI JOSE DE FIGUEIREDO NETO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "88930092934": {
+      "nome": "ELSON CARLOS SIMAO",
+      "carga": 3402.4,
+      "transferencia": -0.4,
+      "tarifa": -42.0,
+      "prestacao": 3125.2,
+      "saldo": 234.8
+    },
+    "29722576852": {
+      "nome": "EMERSON CHOUBI PRADO",
+      "carga": 1213.53,
+      "transferencia": 0.0,
+      "tarifa": -12.0,
+      "prestacao": 0.0,
+      "saldo": 1201.53
+    },
+    "34168918807": {
+      "nome": "EMERSON LEITE DE BARROS",
+      "carga": 67499.68,
+      "transferencia": -3930.15,
+      "tarifa": -513.81,
+      "prestacao": 61829.3699999999,
+      "saldo": 1226.35000000007
+    },
+    "02080870017": {
+      "nome": "EMERSON ROMARIO ROMERO MARTINS",
+      "carga": 1554.0,
+      "transferencia": -144.0,
+      "tarifa": -70.0,
+      "prestacao": 1100.0,
+      "saldo": 240.0
+    },
+    "01962886069": {
+      "nome": "ENIOIR NOGUEIRA ANTUNES",
+      "carga": 16330.0,
+      "transferencia": 0.0,
+      "tarifa": -176.28,
+      "prestacao": 9410.0,
+      "saldo": 6743.72
+    },
+    "38548259515": {
+      "nome": "ENZIO CARVALHO DA MOTA",
+      "carga": 52519.9,
+      "transferencia": -297.3,
+      "tarifa": -231.0,
+      "prestacao": 48114.62,
+      "saldo": 3876.97999999997
+    },
+    "01773622781": {
+      "nome": "ERASMO PEREIRA MONTEIRO",
+      "carga": 4.33,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 4.33
+    },
+    "00011945265": {
+      "nome": "ERICO BRUNO DA SILVA MATOS",
+      "carga": 1559.8,
+      "transferencia": -462.54,
+      "tarifa": -21.0,
+      "prestacao": 99.5,
+      "saldo": 976.76
+    },
+    "29157549850": {
+      "nome": "ERICSON PINHEIRO DOS SANTOS",
+      "carga": 7105.36,
+      "transferencia": -430.53,
+      "tarifa": -35.0,
+      "prestacao": 5249.83,
+      "saldo": 1390.0
+    },
+    "73661724215": {
+      "nome": "ERIVAN RODRIGUES GOMES",
+      "carga": 1825.57,
+      "transferencia": -182.3,
+      "tarifa": 0.0,
+      "prestacao": 1188.61,
+      "saldo": 454.66
+    },
+    "02817685954": {
+      "nome": "EVERSON CESAR GAIDSTIECHI",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01755089090": {
+      "nome": "EVERSON ESTEVES DOS SANTOS",
+      "carga": 11602.0,
+      "transferencia": -4000.0,
+      "tarifa": -42.0,
+      "prestacao": 5252.03,
+      "saldo": 2307.97
+    },
+    "91688205004": {
+      "nome": "EVERTON CAMARGO DE LOURETO",
+      "carga": 58762.76,
+      "transferencia": -11.76,
+      "tarifa": -490.0,
+      "prestacao": 53483.6400000001,
+      "saldo": 4777.35999999988
+    },
+    "02083958063": {
+      "nome": "EVERTON REIS DO NASCIMENTO",
+      "carga": 2991.5,
+      "transferencia": 0.0,
+      "tarifa": -31.5,
+      "prestacao": 2000.0,
+      "saldo": 960.0
+    },
+    "38880279858": {
+      "nome": "FABIANA CAMILA BARBOSA DE MORAES LIMA",
+      "carga": 32588.38,
+      "transferencia": -8964.0,
+      "tarifa": -162.62,
+      "prestacao": 21704.86,
+      "saldo": 1756.9
+    },
+    "00295085096": {
+      "nome": "FABIANO LITTER",
+      "carga": 65.97,
+      "transferencia": -65.97,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "17576573805": {
+      "nome": "FABIANO SPADONI",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02679643909": {
+      "nome": "FABIO APARECIDO DE SOUSA PEREIRA",
+      "carga": 7329.34,
+      "transferencia": -3346.14,
+      "tarifa": -77.0,
+      "prestacao": 2253.86,
+      "saldo": 1652.34
+    },
+    "31275798888": {
+      "nome": "FABIO DA CONCEICAO LIMA",
+      "carga": 6117.24,
+      "transferencia": -164.97,
+      "tarifa": -77.0,
+      "prestacao": 1312.96,
+      "saldo": 4562.31
+    },
+    "00526143959": {
+      "nome": "FABIO DIOGO BITTENCOURT",
+      "carga": 69382.67,
+      "transferencia": -1734.67,
+      "tarifa": -518.0,
+      "prestacao": 67776.74,
+      "saldo": -646.740000000049
+    },
+    "39297665829": {
+      "nome": "FABIO HENRIQUE PECORARI CRUZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05492458981": {
+      "nome": "FABIO MARTINS BORGES",
+      "carga": 3711.42,
+      "transferencia": -362.33,
+      "tarifa": -77.0,
+      "prestacao": 3215.96999999999,
+      "saldo": 56.1200000000053
+    },
+    "08374307714": {
+      "nome": "FABIO NOGUEIRA PEIXOTO",
+      "carga": 9547.2,
+      "transferencia": -5519.2,
+      "tarifa": -28.0,
+      "prestacao": 4052.38,
+      "saldo": -52.3799999999987
+    },
+    "05731312958": {
+      "nome": "FABIO PROVESI",
+      "carga": 27287.88,
+      "transferencia": -6172.72,
+      "tarifa": -147.0,
+      "prestacao": 21125.27,
+      "saldo": -157.10999999999
+    },
+    "03581044919": {
+      "nome": "FABIO RAFAEL RIBEIRO",
+      "carga": 95.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 79.1,
+      "saldo": 15.9
+    },
+    "06311481910": {
+      "nome": "FABIO RODRIGUES JUREVICZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09410182700": {
+      "nome": "FABRICIO SANTOS DA COSTA",
+      "carga": 153.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 153.0
+    },
+    "08940522680": {
+      "nome": "FAUSTO SOARES DE MATOS",
+      "carga": 744.0,
+      "transferencia": -3.0,
+      "tarifa": -21.0,
+      "prestacao": 273.0,
+      "saldo": 447.0
+    },
+    "73574031491": {
+      "nome": "FELIPE JOSE DE ALBUQUERQUE OLIVEIRA",
+      "carga": 54989.61,
+      "transferencia": -1499.85,
+      "tarifa": -350.0,
+      "prestacao": 52970.2,
+      "saldo": 169.55999999999
+    },
+    "03724780931": {
+      "nome": "FELIPE MELILLO FONTAN",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04347084102": {
+      "nome": "FELIPE MORAES COSTA DE BRITTO",
+      "carga": 42899.41,
+      "transferencia": -6083.14,
+      "tarifa": -345.97,
+      "prestacao": 36350.28,
+      "saldo": 120.019999999982
+    },
+    "09081639919": {
+      "nome": "FELIPE RAFAEL SUMBAK DE MATOS",
+      "carga": 733.5,
+      "transferencia": -100.0,
+      "tarifa": -28.0,
+      "prestacao": 528.5,
+      "saldo": 77.0
+    },
+    "05419022966": {
+      "nome": "FERNANDA ARAGAO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03377983112": {
+      "nome": "FERNANDO RODRIGUES DUARTE",
+      "carga": 84983.76,
+      "transferencia": -3536.01,
+      "tarifa": -749.0,
+      "prestacao": 74082.75,
+      "saldo": 6615.99999999997
+    },
+    "10664298710": {
+      "nome": "FILIPE MENEZES KLING",
+      "carga": 3371.0,
+      "transferencia": 0.0,
+      "tarifa": -7.0,
+      "prestacao": 1364.0,
+      "saldo": 2000.0
+    },
+    "09416352799": {
+      "nome": "FLAVIO DOS SANTOS FERREIRA",
+      "carga": 13100.6,
+      "transferencia": -6393.6,
+      "tarifa": -77.0,
+      "prestacao": 9502.48,
+      "saldo": -2872.48
+    },
+    "01767960107": {
+      "nome": "FLAVIO FERNANDES DOS REIS LIMA",
+      "carga": 89092.47,
+      "transferencia": -46796.0,
+      "tarifa": -329.0,
+      "prestacao": 38698.62,
+      "saldo": 3268.84999999997
+    },
+    "82871396000": {
+      "nome": "FLAVIO HENRIQUE ALVES ROMERO",
+      "carga": 1660.0,
+      "transferencia": -38.0,
+      "tarifa": -42.0,
+      "prestacao": 310.0,
+      "saldo": 1270.0
+    },
+    "02057950999": {
+      "nome": "FLAVIO PATRICIO DA LUZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06109625663": {
+      "nome": "FLAVIO PEREIRA DE SOUZA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09276240446": {
+      "nome": "FRANCIELLY FELIX CAVALCANTE DE ANDRADE",
+      "carga": 73462.16,
+      "transferencia": -11211.23,
+      "tarifa": -420.0,
+      "prestacao": 59834.88,
+      "saldo": 1996.04999999999
+    },
+    "10206025467": {
+      "nome": "FRANCIMARIO BEZERRA DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07021071400": {
+      "nome": "FRANCINILDO JACKSON DE ALMEIDA ARAUJO",
+      "carga": 15214.19,
+      "transferencia": -368.19,
+      "tarifa": -133.0,
+      "prestacao": 13366.33,
+      "saldo": 1346.67
+    },
+    "47331178253": {
+      "nome": "FRANCIONE DE SOUZA LUCENA",
+      "carga": 18634.83,
+      "transferencia": -1639.91,
+      "tarifa": -70.0,
+      "prestacao": 16506.65,
+      "saldo": 418.27
+    },
+    "04163355359": {
+      "nome": "FRANCISCA VALERIA LIMA PORTELA",
+      "carga": 117.88,
+      "transferencia": -58.94,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 58.94
+    },
+    "05197099771": {
+      "nome": "FRANCISCO CARLOS GULLO DI MARCO",
+      "carga": 2400.0,
+      "transferencia": -29.0,
+      "tarifa": -21.0,
+      "prestacao": 2470.69,
+      "saldo": -120.69
+    },
+    "16930002372": {
+      "nome": "FRANCISCO ERICO FRANCA DE SOUSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04280602344": {
+      "nome": "FRANCISCO MICHAEL CASTRO FERNANDES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00549575758": {
+      "nome": "FRANCISCO REINALDO DE ALCANTARA SILVA",
+      "carga": 310.0,
+      "transferencia": -36.8,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 273.2
+    },
+    "00058507035": {
+      "nome": "FRANCISCO RICARDO DOS SANTOS",
+      "carga": 8.9,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 8.9
+    },
+    "79248160387": {
+      "nome": "FRANCISCO VALDENIR DE SOUSA",
+      "carga": 568.1,
+      "transferencia": -90.0,
+      "tarifa": -14.0,
+      "prestacao": 204.7,
+      "saldo": 259.4
+    },
+    "04377268783": {
+      "nome": "FRANCO ANDREY FREIRE DOS SANTOS",
+      "carga": 15622.09,
+      "transferencia": -3927.94,
+      "tarifa": -84.0,
+      "prestacao": 14090.21,
+      "saldo": -2480.05999999999
+    },
+    "34757123850": {
+      "nome": "FRANCO CARLOS DALLACQUA",
+      "carga": 6890.0,
+      "transferencia": 0.0,
+      "tarifa": -77.0,
+      "prestacao": 7329.52,
+      "saldo": -516.519999999999
+    },
+    "97290076087": {
+      "nome": "FREDERICO PEDROSO FERNANDES",
+      "carga": 4674.4,
+      "transferencia": -1485.31,
+      "tarifa": -1.5,
+      "prestacao": 3187.59,
+      "saldo": 0.0
+    },
+    "01222428903": {
+      "nome": "GABRIEL CABRAL DA SILVA",
+      "carga": 534.0,
+      "transferencia": -119.1,
+      "tarifa": -35.0,
+      "prestacao": 203.9,
+      "saldo": 176.0
+    },
+    "07961072977": {
+      "nome": "GABRIEL EGGER",
+      "carga": 1269.8,
+      "transferencia": -133.8,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 1136.0
+    },
+    "09983432935": {
+      "nome": "GABRIEL HENRIQUE DALL AGNOL",
+      "carga": 5138.79,
+      "transferencia": -437.96,
+      "tarifa": -35.0,
+      "prestacao": 4050.57,
+      "saldo": 615.26
+    },
+    "09871329970": {
+      "nome": "GABRIEL MONTANI FERREIRA",
+      "carga": 10069.15,
+      "transferencia": -427.04,
+      "tarifa": 0.0,
+      "prestacao": 9620.41000000001,
+      "saldo": 21.6999999999935
+    },
+    "09073743958": {
+      "nome": "GABRIELA DALLA VECHIA MONTEIRO",
+      "carga": 7000.0,
+      "transferencia": -3500.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 3500.0
+    },
+    "08042929579": {
+      "nome": "GABRIELA SOARES MAXIMO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "96795115020": {
+      "nome": "GEFERSON FLORIANO PRICHULA",
+      "carga": 505.48,
+      "transferencia": -478.96,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 26.52
+    },
+    "00714806501": {
+      "nome": "GENISSON DE PAIVA FERREIRA",
+      "carga": 6000.37,
+      "transferencia": -63.45,
+      "tarifa": -119.0,
+      "prestacao": 3807.67,
+      "saldo": 2010.25
+    },
+    "06792773310": {
+      "nome": "GEORGE LUIS ROCHA FIGUEIREDO",
+      "carga": 24602.0,
+      "transferencia": -5011.0,
+      "tarifa": -161.0,
+      "prestacao": 19171.4,
+      "saldo": 258.599999999995
+    },
+    "01045928348": {
+      "nome": "GERRY ARYAGUINO FERNANDES DE SOUSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "58021353287": {
+      "nome": "GERSON ALMEIDA DE ANDRADE",
+      "carga": 2650.0,
+      "transferencia": 0.0,
+      "tarifa": -36.13,
+      "prestacao": 2704.32,
+      "saldo": -90.4499999999998
+    },
+    "78003652553": {
+      "nome": "GERSON OLIVEIRA DE CARVALHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "38950693291": {
+      "nome": "GERSON PEREIRA",
+      "carga": 8732.77,
+      "transferencia": -1006.48,
+      "tarifa": -189.0,
+      "prestacao": 8840.2,
+      "saldo": -1302.91
+    },
+    "43089240068": {
+      "nome": "GILBERTO DE ALMEIDA",
+      "carga": 8458.5,
+      "transferencia": -80.0,
+      "tarifa": -24.1,
+      "prestacao": 4296.0,
+      "saldo": 4058.4
+    },
+    "02225827079": {
+      "nome": "GILIAN DIAS DA SILVA BORGES",
+      "carga": 121.99,
+      "transferencia": -24.99,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 90.0
+    },
+    "05290622675": {
+      "nome": "GILMAR DUARTE LACERDA",
+      "carga": 1000.0,
+      "transferencia": -500.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 500.0
+    },
+    "98635425049": {
+      "nome": "GILSON CRISTIANO FLORES BRUM",
+      "carga": 200.0,
+      "transferencia": -200.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "27675675894": {
+      "nome": "GILSON DOS SANTOS PIAUILINO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "15226997833": {
+      "nome": "GIOVANI DONNANTUONI",
+      "carga": 1752.22,
+      "transferencia": -752.22,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 993.0
+    },
+    "42391813805": {
+      "nome": "GIOVANNA SIDOTI MARQUES ROLLO",
+      "carga": 2666.67,
+      "transferencia": -1172.67,
+      "tarifa": -14.0,
+      "prestacao": 1152.67,
+      "saldo": 327.33
+    },
+    "93227965968": {
+      "nome": "GISELE CRISTINE DE SOUZA",
+      "carga": 1610.52,
+      "transferencia": -158.45,
+      "tarifa": -14.0,
+      "prestacao": 1302.9,
+      "saldo": 135.17
+    },
+    "02426123931": {
+      "nome": "GIULLIANNO CHARLES DE SOUZA PEREIRA",
+      "carga": 250.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 139.0,
+      "saldo": 111.0
+    },
+    "10310899699": {
+      "nome": "GIULLIANO FILIPE DE ALMEIDA",
+      "carga": 500.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 99.9,
+      "saldo": 400.1
+    },
+    "11625454457": {
+      "nome": "GLAUBER RODRIGUES DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "96357193615": {
+      "nome": "GLAUBERTY CANDIDO COELHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06945595633": {
+      "nome": "GLAUCIO GONCALVES DE OLIVEIRA",
+      "carga": 15275.41,
+      "transferencia": -11175.33,
+      "tarifa": -28.0,
+      "prestacao": 7602.4,
+      "saldo": -3530.32
+    },
+    "00799913510": {
+      "nome": "GLEIDE CONCEICAO NASCIMENTO ALVES",
+      "carga": 7990.0,
+      "transferencia": 0.0,
+      "tarifa": -51.48,
+      "prestacao": 3747.49,
+      "saldo": 4191.03
+    },
+    "14829137711": {
+      "nome": "GUILHERME BATISTA DA SILVA",
+      "carga": 4437.84,
+      "transferencia": -2.84,
+      "tarifa": -35.0,
+      "prestacao": 4850.1,
+      "saldo": -450.099999999999
+    },
+    "85798304000": {
+      "nome": "GUILHERME DE MATTOS NASCIMENTO ROSA",
+      "carga": 13817.0,
+      "transferencia": 0.0,
+      "tarifa": -157.56,
+      "prestacao": 9646.0,
+      "saldo": 4013.44
+    },
+    "10489127959": {
+      "nome": "GUILHERME DOS SANTOS GOMES",
+      "carga": 400.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 366.2,
+      "saldo": 33.8
+    },
+    "04879971901": {
+      "nome": "GUILHERME FELIPPE DE MEDEIROS",
+      "carga": 2184.83,
+      "transferencia": -1692.74,
+      "tarifa": 0.0,
+      "prestacao": 492.09,
+      "saldo": 0.0
+    },
+    "41997553813": {
+      "nome": "GUILHERME FERREIRA DA SILVA",
+      "carga": 48363.23,
+      "transferencia": -219.23,
+      "tarifa": -371.0,
+      "prestacao": 49101.7300000001,
+      "saldo": -1328.73000000006
+    },
+    "07568146936": {
+      "nome": "GUILHERME FORTKAMP PROENCA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "44519188806": {
+      "nome": "GUILHERME MATEUS VAZ DOS SANTOS",
+      "carga": 6503.0,
+      "transferencia": 0.0,
+      "tarifa": -105.44,
+      "prestacao": 6151.54,
+      "saldo": 246.02
+    },
+    "11178519740": {
+      "nome": "GUILHERME MOTTA RIBEIRO SILVA",
+      "carga": 43823.78,
+      "transferencia": -679.11,
+      "tarifa": -293.0,
+      "prestacao": 43093.85,
+      "saldo": -242.180000000051
+    },
+    "05113856096": {
+      "nome": "GUSTAVO GONCALVES DA SILVA",
+      "carga": 1406.45,
+      "transferencia": -78.37,
+      "tarifa": 0.0,
+      "prestacao": 1372.08,
+      "saldo": -44.0
+    },
+    "10531222926": {
+      "nome": "GUSTAVO RODRIGUES FARIA",
+      "carga": 14607.4,
+      "transferencia": -813.44,
+      "tarifa": -210.0,
+      "prestacao": 10424.36,
+      "saldo": 3159.6
+    },
+    "03066906086": {
+      "nome": "HEDER SILVA CAMPODONICO",
+      "carga": 2342.0,
+      "transferencia": -2042.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 300.0
+    },
+    "00448960001": {
+      "nome": "HEITOR MAURMANN LEITAO",
+      "carga": 1635.17,
+      "transferencia": -104.82,
+      "tarifa": -7.0,
+      "prestacao": 534.92,
+      "saldo": 988.43
+    },
+    "34571027591": {
+      "nome": "HEITOR RIBEIRO DE FREITAS OLIVEIRA",
+      "carga": 6017.31,
+      "transferencia": -1022.31,
+      "tarifa": -35.0,
+      "prestacao": 5395.26,
+      "saldo": -435.259999999998
+    },
+    "06439531670": {
+      "nome": "HELDER ARCHANJO FERREIRA",
+      "carga": 5644.73,
+      "transferencia": -25.73,
+      "tarifa": -98.0,
+      "prestacao": 5450.33,
+      "saldo": 70.6699999999992
+    },
+    "37562230862": {
+      "nome": "HELDER USTULIN",
+      "carga": 12535.74,
+      "transferencia": -5496.16,
+      "tarifa": -56.49,
+      "prestacao": 4020.8,
+      "saldo": 2962.29
+    },
+    "10420741607": {
+      "nome": "HENRIQUE ALMEIDA LAIGNIER",
+      "carga": 1000.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 443.58,
+      "saldo": 556.42
+    },
+    "02158033029": {
+      "nome": "HERICA CRISTINY MESQUITA SANTOS FERNANDES",
+      "carga": 4377.19,
+      "transferencia": -170.0,
+      "tarifa": -26.11,
+      "prestacao": 3488.68,
+      "saldo": 692.400000000001
+    },
+    "67192793353": {
+      "nome": "HERLANDSON BRUNO CARNEIRO MATIAS",
+      "carga": 690.88,
+      "transferencia": -595.44,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 95.4400000000001
+    },
+    "09547476661": {
+      "nome": "HIAGOR JUNIO SANTOS GOMES",
+      "carga": 1000.0,
+      "transferencia": -1000.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09199781930": {
+      "nome": "HIGOR KELVYN SILVA AMORIM",
+      "carga": 18603.96,
+      "transferencia": -3602.74,
+      "tarifa": -98.0,
+      "prestacao": 14752.08,
+      "saldo": 151.139999999983
+    },
+    "33832720871": {
+      "nome": "HIGOR LUIZ CERQUEIRA",
+      "carga": 2451.0,
+      "transferencia": -93.0,
+      "tarifa": -35.0,
+      "prestacao": 0.0,
+      "saldo": 2323.0
+    },
+    "07646535630": {
+      "nome": "HUGO ALEXANDRE DE SOUSA",
+      "carga": 9952.14,
+      "transferencia": -5943.37,
+      "tarifa": -40.78,
+      "prestacao": 4743.87,
+      "saldo": -775.880000000001
+    },
+    "13514820686": {
+      "nome": "HUGO AZEVEDO SANTOS",
+      "carga": 9303.13,
+      "transferencia": -150.0,
+      "tarifa": -152.6,
+      "prestacao": 8909.44,
+      "saldo": 91.0899999999983
+    },
+    "03031202902": {
+      "nome": "HUGO DELLA JUSTINA",
+      "carga": 13931.99,
+      "transferencia": -1521.5,
+      "tarifa": -105.0,
+      "prestacao": 12454.23,
+      "saldo": -148.739999999994
+    },
+    "04370282918": {
+      "nome": "HUGO NUNES DA SILVA",
+      "carga": 528.24,
+      "transferencia": -3.0,
+      "tarifa": -35.0,
+      "prestacao": 300.12,
+      "saldo": 190.12
+    },
+    "01565661338": {
+      "nome": "ICARO MEDEIROS SILVA",
+      "carga": 12727.29,
+      "transferencia": -3339.85,
+      "tarifa": -70.0,
+      "prestacao": 8317.44,
+      "saldo": 1000.0
+    },
+    "85389161068": {
+      "nome": "IGOR LOPES VARGAS",
+      "carga": 135.0,
+      "transferencia": -135.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "22136444972": {
+      "nome": "ILMAR FONTES VIEIRA",
+      "carga": 3784.84,
+      "transferencia": -79.73,
+      "tarifa": -63.31,
+      "prestacao": 3491.6,
+      "saldo": 150.2
+    },
+    "80632955015": {
+      "nome": "INEBAM RODRIGUES PORTO NETO",
+      "carga": 2587.53,
+      "transferencia": -1053.69,
+      "tarifa": -28.0,
+      "prestacao": 1437.64,
+      "saldo": 68.2000000000003
+    },
+    "05986947576": {
+      "nome": "ISABELE CRISTINE OLIVEIRA DA SILVA",
+      "carga": 2791.76,
+      "transferencia": -1000.0,
+      "tarifa": 0.0,
+      "prestacao": 1291.76,
+      "saldo": 500.0
+    },
+    "04083479965": {
+      "nome": "ISAIAS DA SILVA",
+      "carga": 19288.77,
+      "transferencia": -1497.41,
+      "tarifa": -161.0,
+      "prestacao": 17686.84,
+      "saldo": -56.4800000000032
+    },
+    "00432546081": {
+      "nome": "ISAQUE HENRIQUE BARPP TITONI",
+      "carga": 1986.4,
+      "transferencia": -160.4,
+      "tarifa": -56.0,
+      "prestacao": 1854.0,
+      "saldo": -84.0
+    },
+    "84002867072": {
+      "nome": "ISMAEL WEBER",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01561326569": {
+      "nome": "ITAMAR SOUZA LOPES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "08994818766": {
+      "nome": "IURI ANDERSON PORTO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "12068745976": {
+      "nome": "IVO LUCIANO DA SILVA WAGNER JUNIOR",
+      "carga": 4760.55,
+      "transferencia": -1672.6,
+      "tarifa": -7.0,
+      "prestacao": 2582.95,
+      "saldo": 498.0
+    },
+    "37634925004": {
+      "nome": "IVON RAMOS MIRANDA",
+      "carga": 10260.0,
+      "transferencia": 0.0,
+      "tarifa": -109.53,
+      "prestacao": 8032.0,
+      "saldo": 2118.47
+    },
+    "67094260334": {
+      "nome": "JACKSON CAROLINO CARNEIRO",
+      "carga": 1500.0,
+      "transferencia": -1500.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01456786288": {
+      "nome": "JACKSON NATAN RODRIGUES DA SILVA",
+      "carga": 4552.15,
+      "transferencia": -1451.0,
+      "tarifa": -14.0,
+      "prestacao": 3027.15,
+      "saldo": 60.0
+    },
+    "10206563957": {
+      "nome": "JACSSON MAYLON CASTRO CORREA",
+      "carga": 16983.79,
+      "transferencia": -3447.0,
+      "tarifa": 0.0,
+      "prestacao": 13402.49,
+      "saldo": 134.300000000005
+    },
+    "09176097609": {
+      "nome": "JADERSON ARAUJO FERREIRA",
+      "carga": 392.54,
+      "transferencia": -35.54,
+      "tarifa": -7.0,
+      "prestacao": 350.0,
+      "saldo": 0.0
+    },
+    "07505987607": {
+      "nome": "JAEDER RODRIGUES JUNIOR",
+      "carga": 138229.13,
+      "transferencia": -6082.6,
+      "tarifa": -966.0,
+      "prestacao": 128898.95,
+      "saldo": 2281.58000000006
+    },
+    "00041171071": {
+      "nome": "JAFER DA FONTOURA AHMAD",
+      "carga": 52566.72,
+      "transferencia": -5902.0,
+      "tarifa": -189.0,
+      "prestacao": 46382.54,
+      "saldo": 93.1799999999494
+    },
+    "00965306186": {
+      "nome": "JAIME ALVES DE ABREU SILVA",
+      "carga": 29775.69,
+      "transferencia": -1538.14,
+      "tarifa": -266.0,
+      "prestacao": 28684.58,
+      "saldo": -713.029999999995
+    },
+    "60377348953": {
+      "nome": "JAIR ASSIS DA SILVA",
+      "carga": 14183.06,
+      "transferencia": -1899.28,
+      "tarifa": -21.0,
+      "prestacao": 11584.53,
+      "saldo": 678.25
+    },
+    "01310014264": {
+      "nome": "JAQUELINE LEVATI PEREIRA",
+      "carga": 24381.5,
+      "transferencia": 0.0,
+      "tarifa": -277.86,
+      "prestacao": 24781.36,
+      "saldo": -677.719999999994
+    },
+    "37258325875": {
+      "nome": "JAQUELINE ONORIO DOS SANTOS ALVES",
+      "carga": 6855.1,
+      "transferencia": -37.64,
+      "tarifa": -56.0,
+      "prestacao": 7965.95,
+      "saldo": -1204.49
+    },
+    "44012861549": {
+      "nome": "JAZEMIR DE SANTANA MARQUES",
+      "carga": 12058.8,
+      "transferencia": -367.8,
+      "tarifa": -238.0,
+      "prestacao": 12464.84,
+      "saldo": -1011.84
+    },
+    "00645883948": {
+      "nome": "JEAN FABIO OLIVERIO",
+      "carga": 572.38,
+      "transferencia": 0.0,
+      "tarifa": -7.0,
+      "prestacao": 106.85,
+      "saldo": 458.53
+    },
+    "86232967020": {
+      "nome": "JEAN LUCAS DA LUZ FERREIRA",
+      "carga": 970.0,
+      "transferencia": -0.5,
+      "tarifa": -11.5,
+      "prestacao": 0.0,
+      "saldo": 958.0
+    },
+    "08935547905": {
+      "nome": "JEFERSON ADRIANO WERNER",
+      "carga": 14285.49,
+      "transferencia": -811.91,
+      "tarifa": 0.0,
+      "prestacao": 13105.78,
+      "saldo": 367.800000000005
+    },
+    "00420351043": {
+      "nome": "JEFERSON LUZ FIGUEIREDO",
+      "carga": 664.8,
+      "transferencia": -452.59,
+      "tarifa": 0.0,
+      "prestacao": 212.21,
+      "saldo": 0.0
+    },
+    "96610247072": {
+      "nome": "JEFERSON MELO BOPSIN",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07060404902": {
+      "nome": "JEFERSON ZAMPRONIO DA SILVA",
+      "carga": 19469.46,
+      "transferencia": -2316.59,
+      "tarifa": 0.0,
+      "prestacao": 17040.85,
+      "saldo": 112.020000000008
+    },
+    "78940346904": {
+      "nome": "JEFFERSON DA SILVA",
+      "carga": 2440.13,
+      "transferencia": -368.96,
+      "tarifa": -28.0,
+      "prestacao": 1745.37,
+      "saldo": 297.8
+    },
+    "08103183776": {
+      "nome": "JEFFERSON NAZARENO SILVA FREITAS",
+      "carga": 15532.43,
+      "transferencia": -50.09,
+      "tarifa": -182.0,
+      "prestacao": 15443.93,
+      "saldo": -143.589999999993
+    },
+    "10137575483": {
+      "nome": "JESSICA DE MIRANDA MEDEIROS FELICIANO",
+      "carga": 64619.45,
+      "transferencia": -879.5,
+      "tarifa": -493.63,
+      "prestacao": 63605.93,
+      "saldo": -359.609999999964
+    },
+    "07972796955": {
+      "nome": "JHEFERSON DIASSIS",
+      "carga": 22190.57,
+      "transferencia": -1863.87,
+      "tarifa": -7.0,
+      "prestacao": 19979.53,
+      "saldo": 340.170000000009
+    },
+    "11764705661": {
+      "nome": "JOAO AGOSTINHO DA COSTA REIS",
+      "carga": 2065.26,
+      "transferencia": -274.26,
+      "tarifa": -21.0,
+      "prestacao": 1807.64,
+      "saldo": -37.6399999999996
+    },
+    "10588522996": {
+      "nome": "JOAO ALEXANDRE LIMA",
+      "carga": 16114.72,
+      "transferencia": -2059.75,
+      "tarifa": -28.0,
+      "prestacao": 14031.96,
+      "saldo": -4.98999999999796
+    },
+    "03096905363": {
+      "nome": "JOAO COSTA DE LIMA FILHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "88367550978": {
+      "nome": "JOAO DA SILVA VIANA",
+      "carga": 495.6,
+      "transferencia": -18.8,
+      "tarifa": -28.0,
+      "prestacao": 324.4,
+      "saldo": 124.4
+    },
+    "12050443617": {
+      "nome": "JOAO ELIAS ESTOCHER LEAL",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11169127916": {
+      "nome": "JOAO FELIPE BAGATIM DIAS PADILHA",
+      "carga": 50.0,
+      "transferencia": -50.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09796227789": {
+      "nome": "JOAO MARCELO MARTINS DA SILVA BARBOSA",
+      "carga": 91.98,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 91.98
+    },
+    "89386809087": {
+      "nome": "JOCAFER DUTRA DE LIMA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07690263623": {
+      "nome": "JOELSON FERREIRA DOS SANTOS",
+      "carga": 53172.66,
+      "transferencia": -924.4,
+      "tarifa": -449.09,
+      "prestacao": 50475.56,
+      "saldo": 1323.60999999996
+    },
+    "03528389907": {
+      "nome": "JOELSON JUNIOR MARTINS DE GOES",
+      "carga": 7935.52,
+      "transferencia": -901.66,
+      "tarifa": -122.18,
+      "prestacao": 6439.87,
+      "saldo": 471.810000000002
+    },
+    "01696239478": {
+      "nome": "JONAS CAVALCANTI DE OLIVEIRA",
+      "carga": 43838.63,
+      "transferencia": -6500.0,
+      "tarifa": -369.56,
+      "prestacao": 33173.17,
+      "saldo": 3795.90000000002
+    },
+    "69010544915": {
+      "nome": "JONAS PAULO DE MATOS",
+      "carga": 365.2,
+      "transferencia": -182.6,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 182.6
+    },
+    "84736305053": {
+      "nome": "JONATA OLIVEIRA DA SILVA",
+      "carga": 12387.68,
+      "transferencia": -1050.0,
+      "tarifa": -131.71,
+      "prestacao": 6468.0,
+      "saldo": 4737.97
+    },
+    "06576357907": {
+      "nome": "JONATAS DA ROSA DE OLIVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00546854001": {
+      "nome": "JONES ALEXANDRE DIAS CARVALHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02344139214": {
+      "nome": "JORDAN DA SILVA ROCHA VIDAL",
+      "carga": 17075.3,
+      "transferencia": 0.0,
+      "tarifa": -133.0,
+      "prestacao": 4623.32,
+      "saldo": 12318.98
+    },
+    "01063690080": {
+      "nome": "JORGE ANTONIO VARGAS DA SILVA",
+      "carga": 7392.02,
+      "transferencia": -550.0,
+      "tarifa": -86.9,
+      "prestacao": 6215.92,
+      "saldo": 539.200000000003
+    },
+    "49825410000": {
+      "nome": "JORGE AUGUSTO DA SILVA E SILVA",
+      "carga": 1076.0,
+      "transferencia": -14.5,
+      "tarifa": -11.5,
+      "prestacao": 0.0,
+      "saldo": 1050.0
+    },
+    "08247635992": {
+      "nome": "JORGE LUIZ MOREIRA CARDOSO",
+      "carga": 3746.54,
+      "transferencia": -686.48,
+      "tarifa": -14.0,
+      "prestacao": 3041.78,
+      "saldo": 4.28000000000111
+    },
+    "44997574600": {
+      "nome": "JORGE NEGRI NETO",
+      "carga": 32128.45,
+      "transferencia": -177.45,
+      "tarifa": -315.0,
+      "prestacao": 35974.76,
+      "saldo": -4338.76
+    },
+    "26652452804": {
+      "nome": "JOSE CARLOS BATISTA",
+      "carga": 84709.15,
+      "transferencia": -1029.77,
+      "tarifa": -640.0,
+      "prestacao": 88665.45,
+      "saldo": -5626.06999999998
+    },
+    "90539176915": {
+      "nome": "JOSE CARLOS FERREIRA DE MEDEIROS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "61158852649": {
+      "nome": "JOSE CLAUDIO RIBEIRO",
+      "carga": 60292.94,
+      "transferencia": -37.08,
+      "tarifa": -469.0,
+      "prestacao": 59041.0500000001,
+      "saldo": 745.809999999947
+    },
+    "52431541215": {
+      "nome": "JOSE CLEBER BECKMAN CORDEIRO",
+      "carga": 9163.35,
+      "transferencia": -43.2,
+      "tarifa": -131.55,
+      "prestacao": 5270.55,
+      "saldo": 3718.05
+    },
+    "78296277972": {
+      "nome": "JOSE DO PRADO ROSA",
+      "carga": 1836.68,
+      "transferencia": -382.28,
+      "tarifa": -70.0,
+      "prestacao": 1218.3,
+      "saldo": 166.1
+    },
+    "27335364191": {
+      "nome": "JOSE EUSTAQUIO DE SOUZA",
+      "carga": 21021.0,
+      "transferencia": -1006.0,
+      "tarifa": -175.0,
+      "prestacao": 20178.51,
+      "saldo": -338.510000000013
+    },
+    "55889913115": {
+      "nome": "JOSE JONAS FURLANETTO",
+      "carga": 15561.19,
+      "transferencia": -1051.34,
+      "tarifa": -168.0,
+      "prestacao": 13819.93,
+      "saldo": 521.920000000002
+    },
+    "69071934004": {
+      "nome": "JOSE MARCOS PEREIRA VAZ",
+      "carga": 4123.95,
+      "transferencia": -952.78,
+      "tarifa": -49.0,
+      "prestacao": 2714.84,
+      "saldo": 407.330000000001
+    },
+    "55278612053": {
+      "nome": "JOSE NEI DOS SANTOS DUTRA",
+      "carga": 250.0,
+      "transferencia": -200.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 50.0
+    },
+    "69808112900": {
+      "nome": "JOSE NILDA DA CUNHA",
+      "carga": 587.96,
+      "transferencia": -213.2,
+      "tarifa": -7.0,
+      "prestacao": 364.06,
+      "saldo": 3.70000000000005
+    },
+    "86016172049": {
+      "nome": "JOSE ROGERIO DA SILVEIRA CARDOSO JUNIOR",
+      "carga": 19519.4,
+      "transferencia": -8.2,
+      "tarifa": -224.0,
+      "prestacao": 23846.2,
+      "saldo": -4559.0
+    },
+    "31179509072": {
+      "nome": "JOSE VALDOIR LEITE",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06323566346": {
+      "nome": "JOSE VICTOR ARAUJO FELIX",
+      "carga": 4293.0,
+      "transferencia": -26.86,
+      "tarifa": -91.0,
+      "prestacao": 3343.71,
+      "saldo": 831.43
+    },
+    "03393455354": {
+      "nome": "JOSE WILKESON OLIVEIRA SILVA",
+      "carga": 7626.87,
+      "transferencia": -251.78,
+      "tarifa": -84.16,
+      "prestacao": 6990.73,
+      "saldo": 300.2
+    },
+    "71944885234": {
+      "nome": "JOSEANE DA SILVA SOUZA",
+      "carga": 10272.93,
+      "transferencia": -6.33,
+      "tarifa": -14.0,
+      "prestacao": 9593.33,
+      "saldo": 659.27
+    },
+    "51027941249": {
+      "nome": "JUAN CARLOS PANTOJA AMANAJAS",
+      "carga": 59994.94,
+      "transferencia": -6909.94,
+      "tarifa": -399.0,
+      "prestacao": 51765.0,
+      "saldo": 920.999999999993
+    },
+    "05878081954": {
+      "nome": "JUAN FANGIO LUCAS DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "45666792172": {
+      "nome": "JUDSON JOSE BATISTA MARINHO",
+      "carga": 12164.0,
+      "transferencia": -2.0,
+      "tarifa": -119.0,
+      "prestacao": 9630.16,
+      "saldo": 2412.84
+    },
+    "15322365737": {
+      "nome": "JULIA FRANCISCO MADUREIRA",
+      "carga": 1643.87,
+      "transferencia": -500.0,
+      "tarifa": 0.0,
+      "prestacao": 1143.87,
+      "saldo": 0.0
+    },
+    "09428255947": {
+      "nome": "JULIA SCHURHAUS PERETTI",
+      "carga": 11454.23,
+      "transferencia": -731.75,
+      "tarifa": -38.43,
+      "prestacao": 10313.08,
+      "saldo": 370.969999999999
+    },
+    "03910036902": {
+      "nome": "JULIANA RIBEIRO RAMOS",
+      "carga": 2059.26,
+      "transferencia": 0.0,
+      "tarifa": -28.0,
+      "prestacao": 1986.9,
+      "saldo": 44.3600000000004
+    },
+    "03286260908": {
+      "nome": "JULIANO CORDEIRO DOS SANTOS",
+      "carga": 424.89,
+      "transferencia": -17.89,
+      "tarifa": -7.0,
+      "prestacao": 465.49,
+      "saldo": -65.49
+    },
+    "01573995088": {
+      "nome": "JULIANO MACHADO DE MIRANDA",
+      "carga": 754.0,
+      "transferencia": -7.0,
+      "tarifa": -13.0,
+      "prestacao": 0.0,
+      "saldo": 734.0
+    },
+    "02519963107": {
+      "nome": "JULIANO MACIEL MELGARE",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "10649064941": {
+      "nome": "JULIANO MESSIAS MOREIRA DE LIMA",
+      "carga": 495.0,
+      "transferencia": -100.0,
+      "tarifa": 0.0,
+      "prestacao": 200.0,
+      "saldo": 195.0
+    },
+    "96760265068": {
+      "nome": "JULIANO SALBEGO ROSBACK",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02265549967": {
+      "nome": "JULIO CESAR ALVES DA ROCHA",
+      "carga": 7248.6,
+      "transferencia": -16.6,
+      "tarifa": -217.0,
+      "prestacao": 7589.0,
+      "saldo": -574.0
+    },
+    "12236354738": {
+      "nome": "JULIO CESAR ARAUJO VIEIRA",
+      "carga": 2300.0,
+      "transferencia": 0.0,
+      "tarifa": -28.0,
+      "prestacao": 2351.83,
+      "saldo": -79.8299999999999
+    },
+    "05430536954": {
+      "nome": "JULIO CESAR DE SOUZA",
+      "carga": 2461.48,
+      "transferencia": -1129.26,
+      "tarifa": 0.0,
+      "prestacao": 1132.22,
+      "saldo": 200.0
+    },
+    "10054353670": {
+      "nome": "JUNIO VICENTE BARBOSA",
+      "carga": 15185.79,
+      "transferencia": -1125.61,
+      "tarifa": -132.0,
+      "prestacao": 14700.87,
+      "saldo": -772.689999999995
+    },
+    "09246793790": {
+      "nome": "JUSTINO NOGUEIRA PEIXOTO JUNIOR",
+      "carga": 24798.26,
+      "transferencia": -16094.94,
+      "tarifa": -42.0,
+      "prestacao": 5529.96,
+      "saldo": 3131.36
+    },
+    "01485775043": {
+      "nome": "KATIA FERNANDA DA ROSA HAHN",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "45154701836": {
+      "nome": "KATIA RESENDE DA SILVA",
+      "carga": 8813.88,
+      "transferencia": -4.73,
+      "tarifa": -164.54,
+      "prestacao": 7688.53,
+      "saldo": 956.079999999999
+    },
+    "02770558064": {
+      "nome": "KELVIN WILLIAN DE SOUZA CARDOSO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02061809260": {
+      "nome": "KEVIN WILLIAMS COUTINHO BEZERRA PENA",
+      "carga": 9308.85,
+      "transferencia": -71.99,
+      "tarifa": -14.0,
+      "prestacao": 1810.88,
+      "saldo": 7411.98
+    },
+    "48210811053": {
+      "nome": "KLEBER SILVA DA SILVA",
+      "carga": 3243.58,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 2743.58,
+      "saldo": 500.0
+    },
+    "05259206410": {
+      "nome": "KLEITON DE ALMEIDA TORRES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "58763376091": {
+      "nome": "LAERCIO SOARES CANABARRO",
+      "carga": 5045.11,
+      "transferencia": -3775.85,
+      "tarifa": -7.0,
+      "prestacao": 1161.06,
+      "saldo": 101.2
+    },
+    "05136678909": {
+      "nome": "LAIS SOARES QUARESMA",
+      "carga": 8478.31,
+      "transferencia": -224.31,
+      "tarifa": -84.0,
+      "prestacao": 6935.57,
+      "saldo": 1234.43
+    },
+    "89247485215": {
+      "nome": "LARISSA MOTA GAIA ALBUQUERQUE",
+      "carga": 24171.08,
+      "transferencia": -22681.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 1490.08
+    },
+    "45120065830": {
+      "nome": "LARISSA SANTOS DA SILVA",
+      "carga": 8300.91,
+      "transferencia": -20.08,
+      "tarifa": -112.0,
+      "prestacao": 7168.83,
+      "saldo": 1000.0
+    },
+    "05672070728": {
+      "nome": "LAURO FURTADO NETO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02586212908": {
+      "nome": "LEANDRO APARECIDO JAQUES",
+      "carga": 908.3,
+      "transferencia": -364.32,
+      "tarifa": 0.0,
+      "prestacao": 424.48,
+      "saldo": 119.5
+    },
+    "36020922839": {
+      "nome": "LEANDRO APARECIDO PEREIRA DA SILVA STEFANINI",
+      "carga": 9043.98,
+      "transferencia": -404.0,
+      "tarifa": -55.9,
+      "prestacao": 8126.82000000002,
+      "saldo": 457.259999999987
+    },
+    "92841147053": {
+      "nome": "LEANDRO AUGUSTO KOHL",
+      "carga": 8953.17,
+      "transferencia": -1202.04,
+      "tarifa": -154.0,
+      "prestacao": 5049.16,
+      "saldo": 2547.97
+    },
+    "09072032640": {
+      "nome": "LEANDRO DE MENEZES ASSUNCAO",
+      "carga": 12001.46,
+      "transferencia": -193.7,
+      "tarifa": -149.43,
+      "prestacao": 11080.24,
+      "saldo": 578.09
+    },
+    "12926259611": {
+      "nome": "LEANDRO DE PAULA ASSIS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03461295914": {
+      "nome": "LEANDRO DE QUADROS",
+      "carga": 15385.0,
+      "transferencia": -15288.6,
+      "tarifa": 0.0,
+      "prestacao": 96.4,
+      "saldo": -3.69482222595252e-13
+    },
+    "28997488821": {
+      "nome": "LEANDRO EGAS",
+      "carga": 32.5,
+      "transferencia": -16.25,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 16.25
+    },
+    "26513583802": {
+      "nome": "LEANDRO FIGUEREDO BELCHIOR",
+      "carga": 15032.45,
+      "transferencia": -1.68,
+      "tarifa": -126.0,
+      "prestacao": 12348.68,
+      "saldo": 2556.09000000001
+    },
+    "13126691790": {
+      "nome": "LEANDRO GUSMAO MUNIZ",
+      "carga": 27864.56,
+      "transferencia": -2117.61,
+      "tarifa": -252.05,
+      "prestacao": 28341.64,
+      "saldo": -2846.74000000001
+    },
+    "01857561902": {
+      "nome": "LEANDRO MARCUSSO",
+      "carga": 1785.64,
+      "transferencia": -450.7,
+      "tarifa": -14.0,
+      "prestacao": 1191.03,
+      "saldo": 129.91
+    },
+    "08325368730": {
+      "nome": "LEANDRO PINTO NUNES",
+      "carga": 23810.56,
+      "transferencia": -10537.31,
+      "tarifa": -98.0,
+      "prestacao": 10041.33,
+      "saldo": 3133.92
+    },
+    "00584427905": {
+      "nome": "LEANDRO SOUSA",
+      "carga": 18177.34,
+      "transferencia": -15245.77,
+      "tarifa": -34.0,
+      "prestacao": 1884.49,
+      "saldo": 1013.08
+    },
+    "13975476770": {
+      "nome": "LEANDRO TONANI",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09594992700": {
+      "nome": "LEONARDO ALVES JACINTO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "98018566020": {
+      "nome": "LEONARDO DE MEDEIROS MARTINS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "85648809620": {
+      "nome": "LEONARDO GONCALVES RIBEIRO FILHO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03374811647": {
+      "nome": "LEONARDO MURATORI ATHAYDE",
+      "carga": 23235.33,
+      "transferencia": -3748.33,
+      "tarifa": -154.0,
+      "prestacao": 19333.0,
+      "saldo": 0.0
+    },
+    "05892698440": {
+      "nome": "LEONARDO ORESTES SOARES",
+      "carga": 14040.45,
+      "transferencia": -611.14,
+      "tarifa": -140.0,
+      "prestacao": 13192.64,
+      "saldo": 96.6700000000037
+    },
+    "99322765020": {
+      "nome": "LEONARDO SCHNEIDER AVILA",
+      "carga": 3495.0,
+      "transferencia": -135.6,
+      "tarifa": -77.0,
+      "prestacao": 3183.4,
+      "saldo": 98.9999999999995
+    },
+    "04594409180": {
+      "nome": "LEONARDO SIMOES DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "10053877969": {
+      "nome": "LETICIA ANGENITA SCHEIMANN BAUER",
+      "carga": 50.33,
+      "transferencia": -14.33,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 36.0
+    },
+    "86415689053": {
+      "nome": "LILIAN SANTOS DA SILVA",
+      "carga": 15622.15,
+      "transferencia": -2344.58,
+      "tarifa": -42.0,
+      "prestacao": 13220.57,
+      "saldo": 14.9999999999982
+    },
+    "00752874047": {
+      "nome": "LISANDRO DA SILVA LOURENCO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "71249702020": {
+      "nome": "LOI BATISTA ANTUNES SARAIVA",
+      "carga": 3465.04,
+      "transferencia": -617.46,
+      "tarifa": 0.0,
+      "prestacao": 1700.28,
+      "saldo": 1147.3
+    },
+    "88079406049": {
+      "nome": "LUAN DOS SANTOS LACERDA",
+      "carga": 6560.0,
+      "transferencia": 0.0,
+      "tarifa": -80.7,
+      "prestacao": 740.0,
+      "saldo": 5739.3
+    },
+    "08030478437": {
+      "nome": "LUAN THIAGO DA SILVA",
+      "carga": 20793.02,
+      "transferencia": -1000.0,
+      "tarifa": 0.0,
+      "prestacao": 19699.14,
+      "saldo": 93.8799999999974
+    },
+    "07461612980": {
+      "nome": "LUCAS ALECSANDER RIBEIRO",
+      "carga": 1300.0,
+      "transferencia": 0.0,
+      "tarifa": -4.59,
+      "prestacao": 1295.4,
+      "saldo": 0.0100000000002183
+    },
+    "08781221924": {
+      "nome": "LUCAS CARVALHO DE SOUZA",
+      "carga": 10764.3,
+      "transferencia": -847.31,
+      "tarifa": 0.0,
+      "prestacao": 9753.45,
+      "saldo": 163.539999999995
+    },
+    "06972029252": {
+      "nome": "LUCAS DANIEL DE SOUSA ARAUJO",
+      "carga": 26346.26,
+      "transferencia": -767.26,
+      "tarifa": -182.0,
+      "prestacao": 25551.32,
+      "saldo": -154.32
+    },
+    "08204909977": {
+      "nome": "LUCAS DE PAULA SILVA",
+      "carga": 12564.19,
+      "transferencia": -1814.36,
+      "tarifa": -119.0,
+      "prestacao": 10120.53,
+      "saldo": 510.300000000003
+    },
+    "03520117002": {
+      "nome": "LUCAS DIOVANI CASTRO BERNARDO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "10977673618": {
+      "nome": "LUCAS HENRIQUE ALVES DE OLIVEIRA",
+      "carga": 5048.24,
+      "transferencia": -1.48,
+      "tarifa": -58.03,
+      "prestacao": 4114.08,
+      "saldo": 874.650000000001
+    },
+    "10652119964": {
+      "nome": "LUCAS HENRIQUE CORREA DOS SANTOS",
+      "carga": 5132.39,
+      "transferencia": -3737.5,
+      "tarifa": -7.0,
+      "prestacao": 1357.14,
+      "saldo": 30.7499999999989
+    },
+    "45211709861": {
+      "nome": "LUCAS HENRIQUE PINHO",
+      "carga": 2040.76,
+      "transferencia": -60.77,
+      "tarifa": 0.0,
+      "prestacao": 1911.19,
+      "saldo": 68.8
+    },
+    "00975748998": {
+      "nome": "LUCAS MARTINS MACAN",
+      "carga": 98007.73,
+      "transferencia": -3728.26,
+      "tarifa": -717.49,
+      "prestacao": 90790.35,
+      "saldo": 2771.62999999998
+    },
+    "11128978601": {
+      "nome": "LUCAS PEREIRA GONCALVES",
+      "carga": 8683.25,
+      "transferencia": -35.36,
+      "tarifa": -70.0,
+      "prestacao": 6872.52,
+      "saldo": 1705.37
+    },
+    "04013986175": {
+      "nome": "LUCAS RODRIGUES DE MOURA GALVAO",
+      "carga": 35697.14,
+      "transferencia": -6039.16,
+      "tarifa": -252.0,
+      "prestacao": 24453.53,
+      "saldo": 4952.45
+    },
+    "47514649816": {
+      "nome": "LUCAS TAVARES GARCIA",
+      "carga": 800.0,
+      "transferencia": 0.0,
+      "tarifa": -4.91,
+      "prestacao": 0.0,
+      "saldo": 795.09
+    },
+    "05188228939": {
+      "nome": "LUCIANA APARECIDA SIMAO DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "11489828923": {
+      "nome": "LUCIANO DA SILVA DE PAULA",
+      "carga": 1015.02,
+      "transferencia": -41.0,
+      "tarifa": -17.0,
+      "prestacao": 827.6,
+      "saldo": 129.42
+    },
+    "03443300952": {
+      "nome": "LUCIANO JOSE DA CUNHA",
+      "carga": 629.0,
+      "transferencia": -50.0,
+      "tarifa": 0.0,
+      "prestacao": 454.5,
+      "saldo": 124.5
+    },
+    "04434355708": {
+      "nome": "LUCIANO JOSE DO AMARAL PEREIRA",
+      "carga": 63941.5,
+      "transferencia": -7.77,
+      "tarifa": -525.0,
+      "prestacao": 63263.4600000002,
+      "saldo": 145.269999999844
+    },
+    "06576198922": {
+      "nome": "LUDGERO HORACIO DE OLIVEIRA",
+      "carga": 101039.79,
+      "transferencia": -7933.16,
+      "tarifa": -368.2,
+      "prestacao": 89708.3,
+      "saldo": 3030.13
+    },
+    "68187483920": {
+      "nome": "LUIS CARLOS BROERING",
+      "carga": 3113.86,
+      "transferencia": -1577.86,
+      "tarifa": -21.0,
+      "prestacao": 577.78,
+      "saldo": 937.22
+    },
+    "00845117530": {
+      "nome": "LUIS CARLOS GARCIA SANTOS",
+      "carga": 2181.83,
+      "transferencia": -81.83,
+      "tarifa": -1.5,
+      "prestacao": 2018.17,
+      "saldo": 80.3300000000002
+    },
+    "00448428997": {
+      "nome": "LUIS FELIPE COSTA",
+      "carga": 6000.0,
+      "transferencia": -7.0,
+      "tarifa": -113.68,
+      "prestacao": 5508.42,
+      "saldo": 370.900000000001
+    },
+    "06837861999": {
+      "nome": "LUIS FELIPE RAYMUNDO GARCIA",
+      "carga": 1909.71,
+      "transferencia": -49.99,
+      "tarifa": -98.0,
+      "prestacao": 1601.16,
+      "saldo": 160.559999999999
+    },
+    "02728013055": {
+      "nome": "LUIS HENRIQUE DA SILVA BUHL",
+      "carga": 15724.01,
+      "transferencia": -1219.7,
+      "tarifa": -147.69,
+      "prestacao": 11718.3,
+      "saldo": 2638.32
+    },
+    "72357355972": {
+      "nome": "LUIZ ANTONIO DE SOUZA JUNIOR",
+      "carga": 1500.0,
+      "transferencia": -654.88,
+      "tarifa": -7.0,
+      "prestacao": 836.29,
+      "saldo": 1.82999999999993
+    },
+    "74190920959": {
+      "nome": "LUIZ CARLOS NETO",
+      "carga": 1091.57,
+      "transferencia": -26.08,
+      "tarifa": -7.0,
+      "prestacao": 958.49,
+      "saldo": 100.0
+    },
+    "34100118899": {
+      "nome": "LUIZ CLAUDIO DOS SANTOS",
+      "carga": 58.3,
+      "transferencia": -29.15,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 29.15
+    },
+    "08587992945": {
+      "nome": "LUIZ EDUARDO SANTANA DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03898579980": {
+      "nome": "LUIZ FERNANDO CAVALHEIRO",
+      "carga": 15999.93,
+      "transferencia": -5346.01,
+      "tarifa": 0.0,
+      "prestacao": 10904.32,
+      "saldo": -250.399999999985
+    },
+    "29856268893": {
+      "nome": "LUIZ GUSTAVO DI GIORGIO",
+      "carga": 9331.81,
+      "transferencia": -3.51,
+      "tarifa": -98.0,
+      "prestacao": 9722.9,
+      "saldo": -492.600000000002
+    },
+    "59228830620": {
+      "nome": "LUIZ HUMBERTO LEMES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02678045129": {
+      "nome": "LUIZ PAULO SILVA SOUSA JUNIOR",
+      "carga": 8394.98,
+      "transferencia": -10.68,
+      "tarifa": -147.0,
+      "prestacao": 7430.96,
+      "saldo": 806.340000000004
+    },
+    "88999378187": {
+      "nome": "LUZINETH DA COSTA MARINHO",
+      "carga": 1889.0,
+      "transferencia": -5.0,
+      "tarifa": -14.0,
+      "prestacao": 1860.8,
+      "saldo": 9.19999999999982
+    },
+    "59772280906": {
+      "nome": "MANOEL QUIRINO NETO",
+      "carga": 3158.39,
+      "transferencia": -2586.64,
+      "tarifa": 0.0,
+      "prestacao": 658.75,
+      "saldo": -87.0
+    },
+    "01730674500": {
+      "nome": "MARCEL DA HORA CARVALHO",
+      "carga": 43400.75,
+      "transferencia": -1728.18,
+      "tarifa": -416.47,
+      "prestacao": 38462.5,
+      "saldo": 2793.59999999996
+    },
+    "29011288823": {
+      "nome": "MARCEL GOMES DE OLIVEIRA",
+      "carga": 13974.32,
+      "transferencia": -87.32,
+      "tarifa": -154.0,
+      "prestacao": 12645.59,
+      "saldo": 1087.41000000001
+    },
+    "00827902212": {
+      "nome": "MARCELA CARVALHO LEITAO",
+      "carga": 15974.0,
+      "transferencia": -6517.0,
+      "tarifa": -77.0,
+      "prestacao": 3017.63,
+      "saldo": 6362.37
+    },
+    "03661672940": {
+      "nome": "MARCELO BEZERRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "71116346087": {
+      "nome": "MARCELO BRIG CAMPINA",
+      "carga": 180.0,
+      "transferencia": 0.0,
+      "tarifa": -4.5,
+      "prestacao": 0.0,
+      "saldo": 175.5
+    },
+    "00062036980": {
+      "nome": "MARCELO CALIXTRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "69153825004": {
+      "nome": "MARCELO CARVALHO DA SILVA",
+      "carga": 791.1,
+      "transferencia": -291.1,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 500.0
+    },
+    "02587708052": {
+      "nome": "MARCELO DE ANDRADE CALVETTI",
+      "carga": 20448.44,
+      "transferencia": -580.78,
+      "tarifa": -261.66,
+      "prestacao": 20872.95,
+      "saldo": -1266.95
+    },
+    "05375810654": {
+      "nome": "MARCELO DE SOUZA DALA VEDOVA",
+      "carga": 7455.55,
+      "transferencia": -15.55,
+      "tarifa": -77.0,
+      "prestacao": 7659.24,
+      "saldo": -296.239999999999
+    },
+    "01315181940": {
+      "nome": "MARCELO DOS SANTOS SECCO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "95073272153": {
+      "nome": "MARCELO GIMENEZ ARGEMON",
+      "carga": 44341.84,
+      "transferencia": -129.17,
+      "tarifa": -287.0,
+      "prestacao": 42934.75,
+      "saldo": 990.92000000002
+    },
+    "11082292710": {
+      "nome": "MARCELO JUNIOR DE AZEVEDO TEIXEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "40191128864": {
+      "nome": "MARCELO MARCHI DURIGON JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "10254434894": {
+      "nome": "MARCELO PEREIRA LIMA",
+      "carga": 6633.62,
+      "transferencia": -491.17,
+      "tarifa": -49.0,
+      "prestacao": 5886.32,
+      "saldo": 207.13
+    },
+    "07673610400": {
+      "nome": "MARCELO VINICIUS GOUVEA",
+      "carga": 8596.19,
+      "transferencia": -84.19,
+      "tarifa": -70.0,
+      "prestacao": 5105.39,
+      "saldo": 3336.61
+    },
+    "48577596087": {
+      "nome": "MARCELO WELTER",
+      "carga": 1700.0,
+      "transferencia": -2.0,
+      "tarifa": -28.0,
+      "prestacao": 1785.92,
+      "saldo": -115.92
+    },
+    "27375810877": {
+      "nome": "MARCIA CRISTINA DA CUNHA SCATAMBULO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07318362780": {
+      "nome": "MARCIO BOUZAS FERREIRA",
+      "carga": 13223.35,
+      "transferencia": -47.1,
+      "tarifa": -175.0,
+      "prestacao": 12920.55,
+      "saldo": 80.7000000000025
+    },
+    "17427326822": {
+      "nome": "MARCIO CAMPOS RIBEIRO",
+      "carga": 18930.77,
+      "transferencia": -2295.93,
+      "tarifa": -107.26,
+      "prestacao": 15267.56,
+      "saldo": 1260.02000000001
+    },
+    "98717251087": {
+      "nome": "MARCIO CORREA DA SILVA",
+      "carga": 3162.85,
+      "transferencia": -394.57,
+      "tarifa": -14.0,
+      "prestacao": 2554.28,
+      "saldo": 199.999999999999
+    },
+    "02524841936": {
+      "nome": "MARCIO DA COSTA JOAO",
+      "carga": 3511.32,
+      "transferencia": -935.18,
+      "tarifa": 0.0,
+      "prestacao": 2076.14,
+      "saldo": 500.0
+    },
+    "99413736049": {
+      "nome": "MARCIO EZEQUIEL MARQUES DA SILVEIRA",
+      "carga": 2308.0,
+      "transferencia": 0.0,
+      "tarifa": -21.0,
+      "prestacao": 0.0,
+      "saldo": 2287.0
+    },
+    "00549705392": {
+      "nome": "MARCIO FERNANDES DE ARAUJO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "96212993068": {
+      "nome": "MARCIO ROBERTO DA SILVA",
+      "carga": 2442.83,
+      "transferencia": -991.83,
+      "tarifa": -21.0,
+      "prestacao": 2013.17,
+      "saldo": -583.17
+    },
+    "72756284220": {
+      "nome": "MARCO AURELIO DE ANDRADE MORAES",
+      "carga": 59350.01,
+      "transferencia": -9.93,
+      "tarifa": -448.0,
+      "prestacao": 58528.25,
+      "saldo": 363.829999999987
+    },
+    "01356318665": {
+      "nome": "MARCO AURELIO DE LIMA",
+      "carga": 63851.32,
+      "transferencia": -472.33,
+      "tarifa": -533.1,
+      "prestacao": 63517.96,
+      "saldo": -672.069999999949
+    },
+    "86880918034": {
+      "nome": "MARCOS ALESSANDRO SILVA GOMES",
+      "carga": 13355.05,
+      "transferencia": -350.0,
+      "tarifa": -147.41,
+      "prestacao": 7798.0,
+      "saldo": 5059.64
+    },
+    "76071545668": {
+      "nome": "MARCOS AURELIO CARIAS ASSIS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "97607240063": {
+      "nome": "MARCOS LUIZ SCHULTZ",
+      "carga": 6405.79,
+      "transferencia": -1925.8,
+      "tarifa": -21.0,
+      "prestacao": 5325.09,
+      "saldo": -866.1
+    },
+    "04938920956": {
+      "nome": "MARCOS RAIMUNDO DA COSTA",
+      "carga": 434.5,
+      "transferencia": -118.5,
+      "tarifa": -14.0,
+      "prestacao": 294.0,
+      "saldo": 8.0
+    },
+    "97135631900": {
+      "nome": "MARCOS SEGER",
+      "carga": 20010.15,
+      "transferencia": -2589.37,
+      "tarifa": -175.0,
+      "prestacao": 16143.44,
+      "saldo": 1102.34
+    },
+    "11823866603": {
+      "nome": "MARCOS VINICIUS DE SOUZA ALVES",
+      "carga": 2716.46,
+      "transferencia": 0.0,
+      "tarifa": -16.5,
+      "prestacao": 2279.96,
+      "saldo": 420.0
+    },
+    "31832240894": {
+      "nome": "MARCOS YOSHIMASSA MURAKAMI",
+      "carga": 290.9,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 291.0,
+      "saldo": -0.10000000000008
+    },
+    "02519880155": {
+      "nome": "MARIA CRISTINA DE OLIVEIRA NEVES",
+      "carga": 4592.07,
+      "transferencia": -2889.41,
+      "tarifa": -7.0,
+      "prestacao": 1695.66,
+      "saldo": 0.0
+    },
+    "10363402950": {
+      "nome": "MARIA EDUARDA ARAGAO",
+      "carga": 35915.83,
+      "transferencia": -2039.35,
+      "tarifa": -245.0,
+      "prestacao": 33169.24,
+      "saldo": 462.239999999976
+    },
+    "08359020132": {
+      "nome": "MARINA CORTES BOIA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "65975499020": {
+      "nome": "MARIO ANTONIO BRITO GUIMARAES",
+      "carga": 2308.0,
+      "transferencia": 0.0,
+      "tarifa": -21.0,
+      "prestacao": 0.0,
+      "saldo": 2287.0
+    },
+    "92772048268": {
+      "nome": "MARIO MARQUES SOARES",
+      "carga": 34742.79,
+      "transferencia": -8064.84,
+      "tarifa": -210.0,
+      "prestacao": 24898.9,
+      "saldo": 1569.05
+    },
+    "02644012473": {
+      "nome": "MARIO SERGIO DE MENEZES MARQUES BORGES",
+      "carga": 2135.59,
+      "transferencia": -32.59,
+      "tarifa": -63.0,
+      "prestacao": 1056.59,
+      "saldo": 983.41
+    },
+    "07774700986": {
+      "nome": "MARLON ARAUJO",
+      "carga": 6079.05,
+      "transferencia": -1000.0,
+      "tarifa": 0.0,
+      "prestacao": 5007.35,
+      "saldo": 71.7000000000007
+    },
+    "01304856674": {
+      "nome": "MATEUS DE CARVALHO BERTOL",
+      "carga": 5442.74,
+      "transferencia": -625.2,
+      "tarifa": -35.0,
+      "prestacao": 3543.87,
+      "saldo": 1238.67
+    },
+    "09675608960": {
+      "nome": "MATEUS FLOR GUESSER",
+      "carga": 5755.38,
+      "transferencia": -285.2,
+      "tarifa": -28.0,
+      "prestacao": 2374.42,
+      "saldo": 3067.76
+    },
+    "10997447923": {
+      "nome": "MATHEUS CORDEIRO DE SOUZA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "17996820724": {
+      "nome": "MATHEUS FERNANDES GUIMARAES",
+      "carga": 44058.01,
+      "transferencia": -20.01,
+      "tarifa": -385.0,
+      "prestacao": 43138.08,
+      "saldo": 514.919999999984
+    },
+    "11401604609": {
+      "nome": "MATHEUS LEANDRO BARROSO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "82107130000": {
+      "nome": "MAURICIO CACERES",
+      "carga": 2134.52,
+      "transferencia": -3.52,
+      "tarifa": -21.0,
+      "prestacao": 1527.34,
+      "saldo": 582.66
+    },
+    "74426591015": {
+      "nome": "MAURICIO DA SILVEIRA GUIMARAES",
+      "carga": 50.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 50.0
+    },
+    "98394282091": {
+      "nome": "MAURICIO JOSE CARDOSO",
+      "carga": 2287.44,
+      "transferencia": -483.4,
+      "tarifa": 0.0,
+      "prestacao": 1762.73,
+      "saldo": 41.3099999999997
+    },
+    "03021129013": {
+      "nome": "MAURICIO SIMOES FARIAS JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01816236098": {
+      "nome": "MAURICIO TRINDADE DE CAMARGO",
+      "carga": 2084.28,
+      "transferencia": -827.9,
+      "tarifa": -28.0,
+      "prestacao": 1023.38,
+      "saldo": 205.0
+    },
+    "89317599672": {
+      "nome": "MAURO DE OLIVEIRA CERINO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07559357725": {
+      "nome": "MAURO FERREIRA DIAS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "90573625972": {
+      "nome": "MAURO PEDRO SAUGO",
+      "carga": 860.21,
+      "transferencia": -100.0,
+      "tarifa": 0.0,
+      "prestacao": 760.2,
+      "saldo": 0.00999999999999091
+    },
+    "00103505199": {
+      "nome": "MAYKON JEAN RIBEIRO FERREIRA",
+      "carga": 1607.44,
+      "transferencia": -253.76,
+      "tarifa": -14.0,
+      "prestacao": 1265.26,
+      "saldo": 74.4200000000001
+    },
+    "02079878077": {
+      "nome": "MELSO CEZAR DA SILVA NETO",
+      "carga": 19284.37,
+      "transferencia": -1822.8,
+      "tarifa": -130.63,
+      "prestacao": 17904.35,
+      "saldo": -573.41
+    },
+    "03819768408": {
+      "nome": "MESSIAS MAIA LIMA",
+      "carga": 1200.0,
+      "transferencia": -1200.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "82883556091": {
+      "nome": "MICHAEL ELIEZER VIEIRA MARTINS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "37425574837": {
+      "nome": "MICHAEL RODRIGUES SANTOS",
+      "carga": 52054.59,
+      "transferencia": -7.76,
+      "tarifa": -455.0,
+      "prestacao": 50223.2499999999,
+      "saldo": 1368.58000000014
+    },
+    "06271222994": {
+      "nome": "MICHEL DOS SANTOS VENANCIO",
+      "carga": 1932.89,
+      "transferencia": -661.14,
+      "tarifa": 0.0,
+      "prestacao": 1271.75,
+      "saldo": 0.0
+    },
+    "01419704648": {
+      "nome": "MICHEL RODRIGUES FIALHO",
+      "carga": 8956.99,
+      "transferencia": -9.99,
+      "tarifa": -77.0,
+      "prestacao": 7403.99,
+      "saldo": 1466.01
+    },
+    "70457883200": {
+      "nome": "MICHEL VINHORTE DE SOUZA",
+      "carga": 1888.77,
+      "transferencia": -17.1,
+      "tarifa": -21.0,
+      "prestacao": 417.1,
+      "saldo": 1433.57
+    },
+    "95053719004": {
+      "nome": "MIGUEL JOAO DINIS MOTA",
+      "carga": 3349.52,
+      "transferencia": -678.88,
+      "tarifa": -35.0,
+      "prestacao": 2590.34,
+      "saldo": 45.3000000000011
+    },
+    "03021570852": {
+      "nome": "MILTON BRASIL CAVALCANTE",
+      "carga": 1889.75,
+      "transferencia": -398.75,
+      "tarifa": -21.0,
+      "prestacao": 928.97,
+      "saldo": 541.03
+    },
+    "05100355581": {
+      "nome": "MILTON FERREIRA DAS NEVES JUNIOR",
+      "carga": 16264.41,
+      "transferencia": -7.03,
+      "tarifa": -112.0,
+      "prestacao": 15183.06,
+      "saldo": 962.320000000002
+    },
+    "00819451088": {
+      "nome": "MILTON FLECK PITROWSKI",
+      "carga": 7.35,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 7.35
+    },
+    "68746458204": {
+      "nome": "MOISES DOS SANTOS CABRAL",
+      "carga": 27595.53,
+      "transferencia": -1030.36,
+      "tarifa": -70.0,
+      "prestacao": 27520.23,
+      "saldo": -1025.06
+    },
+    "05522199679": {
+      "nome": "MONICA DE MORAIS BARROS RABELO",
+      "carga": 1015.4,
+      "transferencia": -52.6,
+      "tarifa": -35.0,
+      "prestacao": 680.4,
+      "saldo": 247.4
+    },
+    "10521167957": {
+      "nome": "MURILO DE ALMEIDA",
+      "carga": 7780.44,
+      "transferencia": -1014.03,
+      "tarifa": -1.5,
+      "prestacao": 6476.31,
+      "saldo": 288.6
+    },
+    "11498112692": {
+      "nome": "NEDSON LUIZ DURAES VELOSO",
+      "carga": 14650.83,
+      "transferencia": -2154.05,
+      "tarifa": -112.0,
+      "prestacao": 11527.02,
+      "saldo": 857.760000000006
+    },
+    "02653570041": {
+      "nome": "NELSON FILIPE MARTINS DA SILVA",
+      "carga": 12473.58,
+      "transferencia": -178.0,
+      "tarifa": -169.91,
+      "prestacao": 7896.0,
+      "saldo": 4229.67
+    },
+    "02424765545": {
+      "nome": "NELSON MOURA RIBEIRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "31668267349": {
+      "nome": "NERTAN DE CASTRO MAIA",
+      "carga": 798.97,
+      "transferencia": -238.58,
+      "tarifa": 0.0,
+      "prestacao": 441.1,
+      "saldo": 119.29
+    },
+    "04885659957": {
+      "nome": "NEUDO SAMPIETRO",
+      "carga": 5036.9,
+      "transferencia": -341.52,
+      "tarifa": -28.0,
+      "prestacao": 4150.61,
+      "saldo": 516.77
+    },
+    "01987370090": {
+      "nome": "NICOLAS BAIRROS VIDA",
+      "carga": 192.0,
+      "transferencia": 0.0,
+      "tarifa": -3.1,
+      "prestacao": 0.0,
+      "saldo": 188.9
+    },
+    "88876063234": {
+      "nome": "NILSON FERREIRA DAMASCENO",
+      "carga": 126.16,
+      "transferencia": -48.77,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 77.39
+    },
+    "04025408325": {
+      "nome": "NILSON RODRIGUES CARDOSO JUNIOR",
+      "carga": 30170.95,
+      "transferencia": -7316.99,
+      "tarifa": -168.0,
+      "prestacao": 22803.96,
+      "saldo": -118.000000000011
+    },
+    "01316544206": {
+      "nome": "NILSON SILVA DOS SANTOS JUNIOR",
+      "carga": 38230.0,
+      "transferencia": -4000.0,
+      "tarifa": -229.05,
+      "prestacao": 15273.9,
+      "saldo": 18727.05
+    },
+    "50546120091": {
+      "nome": "NILTON CARLOS DA SILVEIRA JULIO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02834447977": {
+      "nome": "NILTON FARIAS JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "63424770000": {
+      "nome": "NILTON SANTOS DA SILVA",
+      "carga": 4974.82,
+      "transferencia": -1360.81,
+      "tarifa": 0.0,
+      "prestacao": 3614.01,
+      "saldo": 0.0
+    },
+    "04442316929": {
+      "nome": "NIVALDO THIAGO DA CRUZ SANTOS",
+      "carga": 1257.89,
+      "transferencia": -132.0,
+      "tarifa": -49.0,
+      "prestacao": 869.7,
+      "saldo": 207.19
+    },
+    "94330301091": {
+      "nome": "NOLO EDUARDO AZEVEDO ORESTES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "79794157953": {
+      "nome": "NORMAN CRANI PORTELLA",
+      "carga": 16373.91,
+      "transferencia": -6832.31,
+      "tarifa": 0.0,
+      "prestacao": 9882.74999999999,
+      "saldo": -341.149999999996
+    },
+    "84219122915": {
+      "nome": "ODAIR CIRCO SOARES",
+      "carga": 17536.49,
+      "transferencia": -1316.53,
+      "tarifa": -98.0,
+      "prestacao": 17054.58,
+      "saldo": -932.61999999999
+    },
+    "25075562850": {
+      "nome": "ORESTE BARBOSA DA SILVA JUNIOR",
+      "carga": 91188.98,
+      "transferencia": -3836.83,
+      "tarifa": -345.1,
+      "prestacao": 87639.0900000005,
+      "saldo": -632.040000000517
+    },
+    "03067535960": {
+      "nome": "OSCAR DOMINGO PALARO",
+      "carga": 24019.71,
+      "transferencia": -1020.82,
+      "tarifa": 0.0,
+      "prestacao": 22981.57,
+      "saldo": 17.3200000000143
+    },
+    "00846379945": {
+      "nome": "OSMAN DOS SANTOS MORAIS JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "13228746976": {
+      "nome": "PABLO VICTOR VELINSKI",
+      "carga": 70.0,
+      "transferencia": -33.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 37.0
+    },
+    "11340265796": {
+      "nome": "PALOMA CARLOS SPINOLA",
+      "carga": 2014.43,
+      "transferencia": -91.98,
+      "tarifa": 0.0,
+      "prestacao": 1822.45,
+      "saldo": 99.9999999999998
+    },
+    "03445951969": {
+      "nome": "PAOLA CAROLINI BARBOSA",
+      "carga": 2988.22,
+      "transferencia": -16.4,
+      "tarifa": -14.0,
+      "prestacao": 2457.82,
+      "saldo": 500.0
+    },
+    "06456801923": {
+      "nome": "PATRICK ANTONIEVICZ ALVES",
+      "carga": 31210.71,
+      "transferencia": -8713.15,
+      "tarifa": -21.0,
+      "prestacao": 22496.84,
+      "saldo": -20.2800000000025
+    },
+    "01752547969": {
+      "nome": "PATRICK DAUSSEN",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07214272946": {
+      "nome": "PATRICK FERNANDO GOULART ALVES",
+      "carga": 19261.67,
+      "transferencia": -2189.94,
+      "tarifa": -70.0,
+      "prestacao": 16689.06,
+      "saldo": 312.670000000006
+    },
+    "03995115985": {
+      "nome": "PAULA REBELO DAMINELLI",
+      "carga": 350.0,
+      "transferencia": 0.0,
+      "tarifa": -1.5,
+      "prestacao": 325.34,
+      "saldo": 23.16
+    },
+    "04179369907": {
+      "nome": "PAULO ALEXANDRE DE AMORIM",
+      "carga": 12117.39,
+      "transferencia": -1200.0,
+      "tarifa": 0.0,
+      "prestacao": 10417.39,
+      "saldo": 500.000000000004
+    },
+    "03139017081": {
+      "nome": "PAULO AUGUSTO OLIVEIRA LIMA",
+      "carga": 8188.0,
+      "transferencia": 0.0,
+      "tarifa": -93.57,
+      "prestacao": 2572.0,
+      "saldo": 5522.43
+    },
+    "11634696611": {
+      "nome": "PAULO DE FREITAS PEREIRA",
+      "carga": 5111.88,
+      "transferencia": -43.3,
+      "tarifa": -69.32,
+      "prestacao": 4610.71,
+      "saldo": 388.549999999999
+    },
+    "12890409821": {
+      "nome": "PAULO EDUARDO AUGUSTO DE BRITO",
+      "carga": 210.0,
+      "transferencia": -120.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 90.0
+    },
+    "04408668044": {
+      "nome": "PAULO HENRIQUE SOARES BAZZO",
+      "carga": 2870.0,
+      "transferencia": -1200.0,
+      "tarifa": -20.0,
+      "prestacao": 0.0,
+      "saldo": 1650.0
+    },
+    "00147552621": {
+      "nome": "PAULO MARQUES TAVARES",
+      "carga": 5689.49,
+      "transferencia": -1157.26,
+      "tarifa": -28.0,
+      "prestacao": 4144.67,
+      "saldo": 359.560000000001
+    },
+    "45159599053": {
+      "nome": "PAULO NILTON COSTA MOREIRA",
+      "carga": 64283.34,
+      "transferencia": -4748.89,
+      "tarifa": -637.0,
+      "prestacao": 56598.72,
+      "saldo": 2298.72999999997
+    },
+    "72747072053": {
+      "nome": "PAULO OLDAIR CUNHA PINTO",
+      "carga": 4900.0,
+      "transferencia": -610.0,
+      "tarifa": -56.2,
+      "prestacao": 3580.0,
+      "saldo": 653.8
+    },
+    "77924908153": {
+      "nome": "PAULO RICARDO WAETGE BELOTTI",
+      "carga": 5916.39,
+      "transferencia": -558.39,
+      "tarifa": -63.0,
+      "prestacao": 4741.59,
+      "saldo": 553.410000000002
+    },
+    "85769185015": {
+      "nome": "PAULO TIAGO SANTOS DA SILVA",
+      "carga": 1845.29,
+      "transferencia": -486.63,
+      "tarifa": -4.5,
+      "prestacao": 1176.39,
+      "saldo": 177.77
+    },
+    "61328323358": {
+      "nome": "PEDRO ALBERTO AMBROSIO ROCHA",
+      "carga": 1408.0,
+      "transferencia": -17.71,
+      "tarifa": 0.0,
+      "prestacao": 1380.29,
+      "saldo": 10.0
+    },
+    "42694515215": {
+      "nome": "PEDRO DO NASCIMENTO FARO",
+      "carga": 311.94,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 61.94,
+      "saldo": 250.0
+    },
+    "60707461049": {
+      "nome": "PEDRO LUIS PIRES DOS SANTOS",
+      "carga": 7368.0,
+      "transferencia": 0.0,
+      "tarifa": -73.04,
+      "prestacao": 4220.0,
+      "saldo": 3074.96
+    },
+    "07851945925": {
+      "nome": "PETTERSON ROBSON BATISTA E SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "91388686953": {
+      "nome": "PITER ROBSON DA SILVA",
+      "carga": 1196.49,
+      "transferencia": -100.0,
+      "tarifa": 0.0,
+      "prestacao": 983.39,
+      "saldo": 113.1
+    },
+    "05168980945": {
+      "nome": "PRISCILA GOTARDO PEREIRA",
+      "carga": 9285.34,
+      "transferencia": -70.2,
+      "tarifa": -98.0,
+      "prestacao": 8786.62,
+      "saldo": 330.519999999997
+    },
+    "67645984015": {
+      "nome": "RADAMES SANTOS DA SILVA MACHADO",
+      "carga": 2308.0,
+      "transferencia": 0.0,
+      "tarifa": -21.0,
+      "prestacao": 0.0,
+      "saldo": 2287.0
+    },
+    "46850229800": {
+      "nome": "RAFAEL ALMEIDA LOPES",
+      "carga": 6644.45,
+      "transferencia": 0.0,
+      "tarifa": -43.58,
+      "prestacao": 6148.06,
+      "saldo": 452.81
+    },
+    "01360500340": {
+      "nome": "RAFAEL ALVES BRANDAO",
+      "carga": 6876.58,
+      "transferencia": -1737.58,
+      "tarifa": -49.0,
+      "prestacao": 5605.91,
+      "saldo": -515.910000000001
+    },
+    "01677920599": {
+      "nome": "RAFAEL AMORIM VELLO",
+      "carga": 348082.58,
+      "transferencia": -40622.0,
+      "tarifa": -2173.58,
+      "prestacao": 300286.87,
+      "saldo": 5000.12999999995
+    },
+    "05337927973": {
+      "nome": "RAFAEL CARNIEL DA SILVA",
+      "carga": 12014.77,
+      "transferencia": -1190.41,
+      "tarifa": -7.0,
+      "prestacao": 10716.18,
+      "saldo": 101.180000000002
+    },
+    "08214541964": {
+      "nome": "RAFAEL DORNELLES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00207639051": {
+      "nome": "RAFAEL MEIRELES DA SILVEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "92949428053": {
+      "nome": "RAFAEL MENESES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "03710085900": {
+      "nome": "RAFAEL NATAL LACHI",
+      "carga": 16712.41,
+      "transferencia": -925.05,
+      "tarifa": -28.0,
+      "prestacao": 15420.11,
+      "saldo": 339.250000000002
+    },
+    "11914988671": {
+      "nome": "RAFAEL PORTO ALVES DA CRUZ",
+      "carga": 9636.41,
+      "transferencia": -30.16,
+      "tarifa": -203.0,
+      "prestacao": 8588.56,
+      "saldo": 814.690000000002
+    },
+    "06149576485": {
+      "nome": "RAFAEL RAMOS DAS NEVES",
+      "carga": 2290.0,
+      "transferencia": 0.0,
+      "tarifa": -21.0,
+      "prestacao": 819.0,
+      "saldo": 1450.0
+    },
+    "35160538879": {
+      "nome": "RAFAEL ROCHA MOURA",
+      "carga": 1126.43,
+      "transferencia": -261.45,
+      "tarifa": 0.0,
+      "prestacao": 833.63,
+      "saldo": 31.3500000000001
+    },
+    "11292367733": {
+      "nome": "RAFAEL SAMPAIO DE SA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00635358077": {
+      "nome": "RAFAEL SILVA DA FONSECA",
+      "carga": 8384.87,
+      "transferencia": -3310.58,
+      "tarifa": -63.0,
+      "prestacao": 3615.44,
+      "saldo": 1395.85
+    },
+    "64964167372": {
+      "nome": "RAFAELA OLIVEIRA RODRIGUES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "83978054515": {
+      "nome": "RAMON GOMES TEIXEIRA",
+      "carga": 17782.06,
+      "transferencia": -318.73,
+      "tarifa": -231.0,
+      "prestacao": 19674.68,
+      "saldo": -2442.35
+    },
+    "06092178443": {
+      "nome": "RAMONY AVYSSON GOMES DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "36081296857": {
+      "nome": "RANIERI HIKARU YAMASHITA RAMOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "89395140259": {
+      "nome": "RAQUEL PANTOJA SANTOS",
+      "carga": 15870.67,
+      "transferencia": -89.31,
+      "tarifa": -140.0,
+      "prestacao": 16006.34,
+      "saldo": -364.979999999998
+    },
+    "03288831902": {
+      "nome": "RAUL ADRIANO DOS SANTOS",
+      "carga": 12459.3,
+      "transferencia": -1135.76,
+      "tarifa": -63.0,
+      "prestacao": 10035.77,
+      "saldo": 1224.77000000001
+    },
+    "77348443249": {
+      "nome": "RAYMUNDO FABIO PINHEIRO DE SOUZA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "36447007888": {
+      "nome": "RENAN VICTORIO DE LIMA",
+      "carga": 12056.8,
+      "transferencia": -500.0,
+      "tarifa": -116.35,
+      "prestacao": 8778.78,
+      "saldo": 2661.67
+    },
+    "02449603050": {
+      "nome": "RENATA PALMA LEAL",
+      "carga": 586.64,
+      "transferencia": -516.64,
+      "tarifa": 0.0,
+      "prestacao": 70.0,
+      "saldo": 0.0
+    },
+    "97162485634": {
+      "nome": "RENATO PARREIRAS",
+      "carga": 11588.97,
+      "transferencia": -8.97,
+      "tarifa": -175.0,
+      "prestacao": 11196.05,
+      "saldo": 208.950000000004
+    },
+    "06232824962": {
+      "nome": "RENATO PEREIRA DA SILVA",
+      "carga": 157.0,
+      "transferencia": -10.0,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 140.0
+    },
+    "09353381959": {
+      "nome": "RICARDO DORNELES NEITZKE",
+      "carga": 448.12,
+      "transferencia": -206.12,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 235.0
+    },
+    "27668763830": {
+      "nome": "RICARDO MURCIA GARCIA FILHO",
+      "carga": 43924.11,
+      "transferencia": -2199.8,
+      "tarifa": -154.0,
+      "prestacao": 43124.9,
+      "saldo": -1554.59000000003
+    },
+    "08997474774": {
+      "nome": "RICARDO NASCIMENTO LUIZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00539580040": {
+      "nome": "RICARDO ZORZETTO",
+      "carga": 28764.72,
+      "transferencia": -4287.67,
+      "tarifa": -66.96,
+      "prestacao": 23994.79,
+      "saldo": 415.300000000003
+    },
+    "86733028034": {
+      "nome": "RIQUELME DE OLIVEIRA E SILVA",
+      "carga": 9592.0,
+      "transferencia": -180.0,
+      "tarifa": -123.86,
+      "prestacao": 5232.0,
+      "saldo": 4056.14
+    },
+    "03937438106": {
+      "nome": "ROBERT RUFINO DE SOUZA CAETANO",
+      "carga": 30869.4,
+      "transferencia": -9.2,
+      "tarifa": -259.0,
+      "prestacao": 21209.85,
+      "saldo": 9391.35000000001
+    },
+    "26953703857": {
+      "nome": "ROBERTO ALIAGA",
+      "carga": 2139.82,
+      "transferencia": -755.23,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 1384.59
+    },
+    "81480261068": {
+      "nome": "ROBERTO DOMINGUES PEREIRA",
+      "carga": 24436.06,
+      "transferencia": -3091.71,
+      "tarifa": -140.0,
+      "prestacao": 21122.0000000001,
+      "saldo": 82.3499999999294
+    },
+    "99489520063": {
+      "nome": "ROBSON DA LUZ DA SILVA",
+      "carga": 564.0,
+      "transferencia": -6.0,
+      "tarifa": -28.0,
+      "prestacao": 184.4,
+      "saldo": 345.6
+    },
+    "08418392983": {
+      "nome": "ROBSON DOS SANTOS GUEDES",
+      "carga": 5748.9,
+      "transferencia": -1571.34,
+      "tarifa": -21.0,
+      "prestacao": 3881.93,
+      "saldo": 274.63
+    },
+    "05236669936": {
+      "nome": "ROBSON FURTADO",
+      "carga": 1264.98,
+      "transferencia": -108.2,
+      "tarifa": 0.0,
+      "prestacao": 937.53,
+      "saldo": 219.25
+    },
+    "90533453534": {
+      "nome": "ROBSON RIOS CARIBE",
+      "carga": 32.34,
+      "transferencia": -32.34,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02481128052": {
+      "nome": "RODRIGO ALFAMA FURTADO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02845828918": {
+      "nome": "RODRIGO BALESTRIN",
+      "carga": 2762.78,
+      "transferencia": -536.29,
+      "tarifa": 0.0,
+      "prestacao": 2226.49,
+      "saldo": 0.0
+    },
+    "27104988807": {
+      "nome": "RODRIGO BOLDO",
+      "carga": 40640.32,
+      "transferencia": -5.4,
+      "tarifa": -420.0,
+      "prestacao": 38155.18,
+      "saldo": 2059.74000000001
+    },
+    "02481372980": {
+      "nome": "RODRIGO BORGES MIOTTA",
+      "carga": 1901.0,
+      "transferencia": -500.0,
+      "tarifa": -21.0,
+      "prestacao": 969.6,
+      "saldo": 410.4
+    },
+    "00656424060": {
+      "nome": "RODRIGO CANDIDO DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07024923610": {
+      "nome": "RODRIGO CESAR DOS SANTOS",
+      "carga": 38976.59,
+      "transferencia": -3788.59,
+      "tarifa": -301.0,
+      "prestacao": 35224.4,
+      "saldo": -337.400000000001
+    },
+    "03583938925": {
+      "nome": "RODRIGO DE SOUZA ROSA",
+      "carga": 4697.38,
+      "transferencia": -603.89,
+      "tarifa": -7.0,
+      "prestacao": 4244.69,
+      "saldo": -158.200000000005
+    },
+    "03059202940": {
+      "nome": "RODRIGO FRANCISCO CORREA",
+      "carga": 10937.82,
+      "transferencia": -1148.15,
+      "tarifa": -49.0,
+      "prestacao": 9883.43,
+      "saldo": -142.760000000002
+    },
+    "34459886847": {
+      "nome": "RODRIGO FRANCISCO DE SOUSA",
+      "carga": 6043.45,
+      "transferencia": 0.0,
+      "tarifa": -127.56,
+      "prestacao": 5635.82,
+      "saldo": 280.07
+    },
+    "03348917956": {
+      "nome": "RODRIGO JOSE DE PAULA",
+      "carga": 2155.98,
+      "transferencia": -250.84,
+      "tarifa": -38.0,
+      "prestacao": 1691.5,
+      "saldo": 175.64
+    },
+    "98808559068": {
+      "nome": "RODRIGO MACHADO MOTTA",
+      "carga": 1966.65,
+      "transferencia": -246.0,
+      "tarifa": -35.0,
+      "prestacao": 1298.64,
+      "saldo": 387.01
+    },
+    "09465764752": {
+      "nome": "RODRIGO PIMENTEL FARIA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "65590015391": {
+      "nome": "RODRIGO RIOS VELOSO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05664820969": {
+      "nome": "RODRIGO ROBERTO DE SOUZA",
+      "carga": 26408.26,
+      "transferencia": -2.38,
+      "tarifa": -7.0,
+      "prestacao": 25509.6,
+      "saldo": 889.279999999995
+    },
+    "02062513941": {
+      "nome": "RODRIGO ROQUE",
+      "carga": 1052.2,
+      "transferencia": -502.6,
+      "tarifa": -7.0,
+      "prestacao": 42.6,
+      "saldo": 500.0
+    },
+    "05504962706": {
+      "nome": "RODRIGO SANTOS DA SILVA",
+      "carga": 13772.46,
+      "transferencia": -290.72,
+      "tarifa": -98.0,
+      "prestacao": 11597.44,
+      "saldo": 1786.30000000001
+    },
+    "99532344004": {
+      "nome": "RODRIGO VANZETTA",
+      "carga": 61858.01,
+      "transferencia": -19.01,
+      "tarifa": -490.0,
+      "prestacao": 60790.4100000001,
+      "saldo": 558.589999999938
+    },
+    "92160344320": {
+      "nome": "ROGERIO COSTA PRADO",
+      "carga": 30812.0,
+      "transferencia": -5506.0,
+      "tarifa": -189.0,
+      "prestacao": 24218.37,
+      "saldo": 898.629999999994
+    },
+    "89591640030": {
+      "nome": "ROGERIO GOMES DE OLIVEIRA",
+      "carga": 18541.56,
+      "transferencia": -5.56,
+      "tarifa": -133.0,
+      "prestacao": 18161.66,
+      "saldo": 241.340000000004
+    },
+    "14355734803": {
+      "nome": "ROGERIO MACARIO PINTO",
+      "carga": 4805.0,
+      "transferencia": 0.0,
+      "tarifa": -42.0,
+      "prestacao": 2806.1,
+      "saldo": 1956.9
+    },
+    "00287599744": {
+      "nome": "ROGERIO RODRIGUES ARAUJO",
+      "carga": 3357.31,
+      "transferencia": -1480.0,
+      "tarifa": 0.0,
+      "prestacao": 1063.64,
+      "saldo": 813.67
+    },
+    "27000085886": {
+      "nome": "ROGERIO SCATAMBULO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "05762523950": {
+      "nome": "RONALDO DE CARVALHO",
+      "carga": 3667.85,
+      "transferencia": -2105.08,
+      "tarifa": -13.31,
+      "prestacao": 1169.28,
+      "saldo": 380.18
+    },
+    "47502843604": {
+      "nome": "RONALDO DE MATOS LELIS",
+      "carga": 12257.98,
+      "transferencia": -188.98,
+      "tarifa": -231.0,
+      "prestacao": 12142.35,
+      "saldo": -304.349999999993
+    },
+    "82465711504": {
+      "nome": "RONALDO NEIVA DA SILVA PACHECO",
+      "carga": 2686.52,
+      "transferencia": -2686.52,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "29758827855": {
+      "nome": "RONALDO RUFINO SANTANA",
+      "carga": 84955.86,
+      "transferencia": -1855.68,
+      "tarifa": -241.17,
+      "prestacao": 82203.6499999999,
+      "saldo": 655.360000000073
+    },
+    "83649603691": {
+      "nome": "RONIO JOSE ROSA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "02701688345": {
+      "nome": "RUBENS BELO HERBSTER",
+      "carga": 26092.1,
+      "transferencia": 0.0,
+      "tarifa": -196.0,
+      "prestacao": 28443.75,
+      "saldo": -2547.65
+    },
+    "82753342091": {
+      "nome": "RUDINEI MACHADO RODRIGUES",
+      "carga": 11604.0,
+      "transferencia": -530.0,
+      "tarifa": -126.5,
+      "prestacao": 7416.0,
+      "saldo": 3531.5
+    },
+    "04284848917": {
+      "nome": "SAMUEL ALVES PINTO",
+      "carga": 295.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 283.5,
+      "saldo": 11.5
+    },
+    "14845816792": {
+      "nome": "SAMUEL LEAL DE SOUZA",
+      "carga": 5472.91,
+      "transferencia": -993.48,
+      "tarifa": -56.0,
+      "prestacao": 4416.91,
+      "saldo": 6.51999999999953
+    },
+    "69456313034": {
+      "nome": "SANDRA CRISTINA ALVES MACHADO",
+      "carga": 7292.1,
+      "transferencia": -193.57,
+      "tarifa": -84.0,
+      "prestacao": 6828.49,
+      "saldo": 186.040000000001
+    },
+    "87379317920": {
+      "nome": "SANDRO ADRIANO PRIMO",
+      "carga": 128.91,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 128.91
+    },
+    "78021324953": {
+      "nome": "SANDRO BARRETO DE SOUZA",
+      "carga": 77058.13,
+      "transferencia": -208.77,
+      "tarifa": -595.0,
+      "prestacao": 76139.82,
+      "saldo": 114.539999999979
+    },
+    "16996346886": {
+      "nome": "SANDRO CAPISTRANO",
+      "carga": 53792.09,
+      "transferencia": -2036.96,
+      "tarifa": -232.58,
+      "prestacao": 47993.22,
+      "saldo": 3529.32999999999
+    },
+    "62525646991": {
+      "nome": "SANDRO LUIZ NASCIMENTO",
+      "carga": 1248.6,
+      "transferencia": -1124.3,
+      "tarifa": 0.0,
+      "prestacao": 372.9,
+      "saldo": -248.6
+    },
+    "02988581428": {
+      "nome": "SANDRO QUITERIO LOPES DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "49637513809": {
+      "nome": "SARA ARAGAO DA SILVA BARBOSA",
+      "carga": 20441.59,
+      "transferencia": -1118.44,
+      "tarifa": -196.0,
+      "prestacao": 20145.54,
+      "saldo": -1018.39000000001
+    },
+    "31040091806": {
+      "nome": "SAULO ARAUJO DE PAULA",
+      "carga": 79313.6,
+      "transferencia": -11087.12,
+      "tarifa": -539.0,
+      "prestacao": 66815.51,
+      "saldo": 871.969999999972
+    },
+    "02063139342": {
+      "nome": "SERGIO ESTEVAM DEBIAZI",
+      "carga": 879.62,
+      "transferencia": -117.6,
+      "tarifa": -14.0,
+      "prestacao": 448.02,
+      "saldo": 300.0
+    },
+    "04471244981": {
+      "nome": "SERGIO LUIS DA COSTA",
+      "carga": 3098.13,
+      "transferencia": -8.82,
+      "tarifa": -7.0,
+      "prestacao": 3082.31,
+      "saldo": 0.0
+    },
+    "65084039668": {
+      "nome": "SERGIO MACHADO VALENTE",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06015233265": {
+      "nome": "SHELDA CRISTINE LIMA TRINDADE",
+      "carga": 17138.25,
+      "transferencia": -84.17,
+      "tarifa": -24.71,
+      "prestacao": 17029.37,
+      "saldo": 0.0
+    },
+    "02224415931": {
+      "nome": "SIDNEI FRANCISCO DA SILVA",
+      "carga": 4115.2,
+      "transferencia": 0.0,
+      "tarifa": -16.08,
+      "prestacao": 3097.68,
+      "saldo": 1001.44
+    },
+    "02710155940": {
+      "nome": "SIDNEI MACHADO",
+      "carga": 19115.6,
+      "transferencia": -2049.3,
+      "tarifa": -35.0,
+      "prestacao": 16956.3,
+      "saldo": 74.9999999999854
+    },
+    "02706762950": {
+      "nome": "SILMARA CHAVES",
+      "carga": 18187.08,
+      "transferencia": -1236.58,
+      "tarifa": -196.0,
+      "prestacao": 21482.57,
+      "saldo": -4728.07000000001
+    },
+    "95798706087": {
+      "nome": "SILVALE DA SILVA",
+      "carga": 1400.0,
+      "transferencia": -9.0,
+      "tarifa": -21.0,
+      "prestacao": 1983.5,
+      "saldo": -613.5
+    },
+    "07634898910": {
+      "nome": "SILVIO ODELI FILHO",
+      "carga": 3253.06,
+      "transferencia": -1267.89,
+      "tarifa": 0.0,
+      "prestacao": 2015.87,
+      "saldo": -30.7000000000003
+    },
+    "51182084168": {
+      "nome": "SILVIO VINICIUS PINHEIRO GOES",
+      "carga": 126479.52,
+      "transferencia": -90862.52,
+      "tarifa": -287.0,
+      "prestacao": 34740.18,
+      "saldo": 589.82
+    },
+    "14084321613": {
+      "nome": "STEPHANIE THAINARA DE OLIVEIRA ROCHA DA COSTA",
+      "carga": 28483.8,
+      "transferencia": -1442.68,
+      "tarifa": -161.0,
+      "prestacao": 26708.22,
+      "saldo": 171.899999999991
+    },
+    "85627178000": {
+      "nome": "TAINAN DA SILVA VELLOSO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "17074849707": {
+      "nome": "TANDARA MARIA DO VALES PEREIRA ALVES",
+      "carga": 15678.58,
+      "transferencia": -6.62,
+      "tarifa": -113.23,
+      "prestacao": 17805.31,
+      "saldo": -2246.58
+    },
+    "26687333836": {
+      "nome": "TEOFILO TOLLENDAL PACHECO",
+      "carga": 10148.88,
+      "transferencia": -81.88,
+      "tarifa": -91.0,
+      "prestacao": 10650.78,
+      "saldo": -674.779999999997
+    },
+    "67752721387": {
+      "nome": "TERCILA DA SILVA LOPES",
+      "carga": 18859.73,
+      "transferencia": -1764.03,
+      "tarifa": -196.0,
+      "prestacao": 13000.0,
+      "saldo": 3899.7
+    },
+    "30941372880": {
+      "nome": "THALITA MANCILIO DIAS GONDIM",
+      "carga": 9788.65,
+      "transferencia": -1013.87,
+      "tarifa": -49.0,
+      "prestacao": 8429.47,
+      "saldo": 296.310000000003
+    },
+    "01657444139": {
+      "nome": "THIAGO BENITES VIEIRA",
+      "carga": 5361.57,
+      "transferencia": -2106.57,
+      "tarifa": -35.0,
+      "prestacao": 3167.52,
+      "saldo": 52.4799999999996
+    },
+    "11590627733": {
+      "nome": "THIAGO DE MEDEIROS VANZELER",
+      "carga": 41101.12,
+      "transferencia": -559.12,
+      "tarifa": -406.0,
+      "prestacao": 42527.8800000001,
+      "saldo": -2391.88000000006
+    },
+    "03159859096": {
+      "nome": "THIAGO DUARTE VARGAS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "33927651800": {
+      "nome": "THIAGO LEANDRO DOS SANTOS",
+      "carga": 9949.66,
+      "transferencia": -164.33,
+      "tarifa": -161.0,
+      "prestacao": 8681.32,
+      "saldo": 943.010000000002
+    },
+    "01017484937": {
+      "nome": "THIAGO NEVES DE FREITAS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06478105490": {
+      "nome": "THIAGO PEREIRA DE LIMA",
+      "carga": 15462.33,
+      "transferencia": -331.2,
+      "tarifa": -133.0,
+      "prestacao": 14193.96,
+      "saldo": 804.17
+    },
+    "47111830865": {
+      "nome": "THIAGO SEPULVEDA CUNHA",
+      "carga": 2994.22,
+      "transferencia": 0.0,
+      "tarifa": -48.63,
+      "prestacao": 2600.09,
+      "saldo": 345.5
+    },
+    "07198282440": {
+      "nome": "THIEGO LEANDRO ALVES DE OLIVEIRA",
+      "carga": 50066.47,
+      "transferencia": -8.79,
+      "tarifa": -472.0,
+      "prestacao": 48900.54,
+      "saldo": 685.139999999985
+    },
+    "02864195054": {
+      "nome": "THUANE DE OLIVEIRA MILSONI",
+      "carga": 1569.28,
+      "transferencia": 0.0,
+      "tarifa": -26.09,
+      "prestacao": 1352.0,
+      "saldo": 191.19
+    },
+    "00937761958": {
+      "nome": "TIAGO ALVES PINTO",
+      "carga": 1522.92,
+      "transferencia": -96.43,
+      "tarifa": 0.0,
+      "prestacao": 1426.49,
+      "saldo": 0.0
+    },
+    "01599752042": {
+      "nome": "TIAGO BEZERRA CAMARGO",
+      "carga": 1604.98,
+      "transferencia": -337.47,
+      "tarifa": 0.0,
+      "prestacao": 1267.51,
+      "saldo": 0.0
+    },
+    "02777503001": {
+      "nome": "TIAGO BRANCO DE BARROS",
+      "carga": 13003.08,
+      "transferencia": -5.71,
+      "tarifa": -195.91,
+      "prestacao": 11724.01,
+      "saldo": 1077.45
+    },
+    "00738724076": {
+      "nome": "TIAGO DE FREITAS KAISER",
+      "carga": 2100.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 2100.0
+    },
+    "04661413199": {
+      "nome": "TIAGO DE JESUS ARAUJO",
+      "carga": 5172.01,
+      "transferencia": -597.0,
+      "tarifa": -31.0,
+      "prestacao": 3794.01,
+      "saldo": 750.0
+    },
+    "10491624719": {
+      "nome": "TIAGO DE OLIVEIRA PAIVA",
+      "carga": 12141.52,
+      "transferencia": -822.52,
+      "tarifa": -119.0,
+      "prestacao": 11727.29,
+      "saldo": -527.289999999997
+    },
+    "00849381533": {
+      "nome": "TIAGO FERNANDES SANTOS DE OLIVEIRA",
+      "carga": 16206.13,
+      "transferencia": -228.86,
+      "tarifa": -252.0,
+      "prestacao": 15628.97,
+      "saldo": 96.3000000000029
+    },
+    "03207571026": {
+      "nome": "TIAGO LUIZ MARTINS",
+      "carga": 129.3,
+      "transferencia": -86.2,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 43.1
+    },
+    "05934450905": {
+      "nome": "TIAGO SIQUEIRA CAMARGO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "08448920503": {
+      "nome": "TIAGO TAVARES BARRETO",
+      "carga": 11715.0,
+      "transferencia": -2878.85,
+      "tarifa": -56.0,
+      "prestacao": 8600.7,
+      "saldo": 179.449999999999
+    },
+    "01253419035": {
+      "nome": "TOBIAS DA CRUZ",
+      "carga": 196.0,
+      "transferencia": -69.0,
+      "tarifa": -7.0,
+      "prestacao": 113.77,
+      "saldo": 6.23
+    },
+    "09175419602": {
+      "nome": "TONY RAMOS VENANCIO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "12609931670": {
+      "nome": "TULIO VELOSO HONORATO",
+      "carga": 21757.93,
+      "transferencia": -1506.93,
+      "tarifa": -161.0,
+      "prestacao": 21233.88,
+      "saldo": -1143.88
+    },
+    "74548565949": {
+      "nome": "UBIRAJARA DE ARAUJO TEIXEIRA",
+      "carga": 22502.59,
+      "transferencia": -985.92,
+      "tarifa": -168.0,
+      "prestacao": 19904.25,
+      "saldo": 1444.42
+    },
+    "10354623621": {
+      "nome": "UELITON CANDIDO",
+      "carga": 4178.96,
+      "transferencia": -1382.23,
+      "tarifa": -30.9,
+      "prestacao": 2738.73,
+      "saldo": 27.1000000000035
+    },
+    "03686605597": {
+      "nome": "UELITON SANTANA SANTOS",
+      "carga": 5284.61,
+      "transferencia": -95.6,
+      "tarifa": -5.58,
+      "prestacao": 5078.11,
+      "saldo": 105.320000000004
+    },
+    "07986081619": {
+      "nome": "UESIO DA SILVA SIMOES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01595939644": {
+      "nome": "ULISSES FERREIRA DE OLIVEIRA",
+      "carga": 42175.32,
+      "transferencia": -6734.62,
+      "tarifa": -245.0,
+      "prestacao": 34981.83,
+      "saldo": 213.869999999981
+    },
+    "00753788926": {
+      "nome": "VALDEMIR ANTONIO CORREA JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "81480784591": {
+      "nome": "VALDEMIR SOUSA DE OLIVEIRA",
+      "carga": 14004.0,
+      "transferencia": -3500.0,
+      "tarifa": -84.0,
+      "prestacao": 9116.33,
+      "saldo": 1303.67
+    },
+    "00917477243": {
+      "nome": "VALDIR COUTINHO DOS SANTOS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "48089869904": {
+      "nome": "VALDIR LEONARDO VOIGT",
+      "carga": 6903.44,
+      "transferencia": -1518.84,
+      "tarifa": -63.0,
+      "prestacao": 4623.8,
+      "saldo": 697.8
+    },
+    "01949569039": {
+      "nome": "VALDOIR NOGUEIRA ANTUNES",
+      "carga": 18775.28,
+      "transferencia": -1050.0,
+      "tarifa": -197.59,
+      "prestacao": 11646.0,
+      "saldo": 5881.69
+    },
+    "21704495822": {
+      "nome": "VALTER HUGO SILVERIO DA SILVA FACHINETTI",
+      "carga": 31035.09,
+      "transferencia": -4940.59,
+      "tarifa": -217.0,
+      "prestacao": 25616.64,
+      "saldo": 260.859999999997
+    },
+    "51234890020": {
+      "nome": "VANDERLEI ANTONIO ORSATTO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "37695259810": {
+      "nome": "VANDERLEI DE SOUZA NORONHA JUNIOR",
+      "carga": 5304.7,
+      "transferencia": -5.22,
+      "tarifa": -77.0,
+      "prestacao": 4397.58,
+      "saldo": 824.899999999999
+    },
+    "21262405840": {
+      "nome": "VANDERLEI DOS SANTOS",
+      "carga": 3117.32,
+      "transferencia": -70.09,
+      "tarifa": -7.0,
+      "prestacao": 0.0,
+      "saldo": 3040.23
+    },
+    "06496973407": {
+      "nome": "VICTOR HUGO MONTEIRO FREIRE",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01512027022": {
+      "nome": "VICTOR LEONARDO LIMA DA CRUZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09265596996": {
+      "nome": "VICTOR MIGUEL PALARO",
+      "carga": 18129.35,
+      "transferencia": -1050.03,
+      "tarifa": -27.0,
+      "prestacao": 15549.44,
+      "saldo": 1502.88000000001
+    },
+    "12237490619": {
+      "nome": "VICTOR SIGOLO PINHEIRO PIMENTA",
+      "carga": 64665.5,
+      "transferencia": -259.37,
+      "tarifa": -511.0,
+      "prestacao": 63489.9100000001,
+      "saldo": 405.219999999928
+    },
+    "01146308280": {
+      "nome": "VICTORIA SOEIRO DE BARROS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00845486144": {
+      "nome": "VINICIUS CARDOSO LOCATELLY FERREIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "09785002969": {
+      "nome": "VINICIUS PEIXOTO BONETTI",
+      "carga": 610.02,
+      "transferencia": -110.02,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 500.0
+    },
+    "08304679981": {
+      "nome": "VYCTOR HUGO IRINEU VIEIRA",
+      "carga": 375.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 375.0
+    },
+    "15554620736": {
+      "nome": "WAGNER CAROLINO ALVES FILHO",
+      "carga": 3762.49,
+      "transferencia": -628.79,
+      "tarifa": -14.0,
+      "prestacao": 3195.49,
+      "saldo": -75.7900000000004
+    },
+    "94512043004": {
+      "nome": "WAGNER DOS SANTOS PEREIRA",
+      "carga": 9381.54,
+      "transferencia": -954.68,
+      "tarifa": 0.0,
+      "prestacao": 8138.96,
+      "saldo": 287.900000000001
+    },
+    "83501967691": {
+      "nome": "WAGNER FERNANDES DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "00413687031": {
+      "nome": "WAGNER RAFAEL GERHARDT",
+      "carga": 568.02,
+      "transferencia": -368.02,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 200.0
+    },
+    "99114160030": {
+      "nome": "WALTER DE CAMPOS NUNES NETO",
+      "carga": 127650.22,
+      "transferencia": -121383.79,
+      "tarifa": -5.93,
+      "prestacao": 6168.07,
+      "saldo": 92.429999999993
+    },
+    "04042182291": {
+      "nome": "WALTER LUIZ DE OLIVEIRA BRAGA",
+      "carga": 7564.73,
+      "transferencia": -180.14,
+      "tarifa": -70.0,
+      "prestacao": 7044.26,
+      "saldo": 270.329999999999
+    },
+    "10820966444": {
+      "nome": "WANDEILSON EMIDIO MARTINS PEREIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "91415586691": {
+      "nome": "WEDER MARTINS",
+      "carga": 6835.8,
+      "transferencia": 0.0,
+      "tarifa": -56.0,
+      "prestacao": 5236.08,
+      "saldo": 1543.72
+    },
+    "04352219657": {
+      "nome": "WELERSON PUFF RODRIGUES",
+      "carga": 31475.19,
+      "transferencia": -1541.34,
+      "tarifa": -245.0,
+      "prestacao": 28298.85,
+      "saldo": 1389.99999999999
+    },
+    "75968304200": {
+      "nome": "WELISON DINALDO FERREIRA DAMASCENO",
+      "carga": 440.46,
+      "transferencia": -127.09,
+      "tarifa": 0.0,
+      "prestacao": 397.37,
+      "saldo": -84.0
+    },
+    "04747951954": {
+      "nome": "WELLINGTON ARION TAVARES",
+      "carga": 13416.01,
+      "transferencia": -1583.96,
+      "tarifa": -42.0,
+      "prestacao": 11824.05,
+      "saldo": -34.0000000000036
+    },
+    "02322131946": {
+      "nome": "WELLINGTON BATTISTON",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04403012035": {
+      "nome": "WELLINGTON SILVA DE AGUIAR",
+      "carga": 5576.24,
+      "transferencia": -688.54,
+      "tarifa": -77.0,
+      "prestacao": 4325.99,
+      "saldo": 484.710000000002
+    },
+    "04935010029": {
+      "nome": "WELLITON ROBERTO OLIVEIRA DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "91443130982": {
+      "nome": "WELTON GERALDO WROBLEWSKI",
+      "carga": 12711.0,
+      "transferencia": -1145.72,
+      "tarifa": 0.0,
+      "prestacao": 11210.48,
+      "saldo": 354.800000000012
+    },
+    "02055553143": {
+      "nome": "WERYKSON ISRAEL DE BEM PIRES",
+      "carga": 2713.0,
+      "transferencia": -6.0,
+      "tarifa": -21.0,
+      "prestacao": 1274.76,
+      "saldo": 1411.24
+    },
+    "05676820640": {
+      "nome": "WESLEY CARLOS AUGUSTO",
+      "carga": 38.6,
+      "transferencia": -38.6,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "87813416015": {
+      "nome": "WESLLEY GABRIEL DA SILVA CARDOSO",
+      "carga": 45365.18,
+      "transferencia": -9.12,
+      "tarifa": -392.0,
+      "prestacao": 43806.76,
+      "saldo": 1157.3
+    },
+    "09080606456": {
+      "nome": "WILKINSON KECIO SILVA BARBOSA",
+      "carga": 4459.88,
+      "transferencia": -460.09,
+      "tarifa": 0.0,
+      "prestacao": 3799.79,
+      "saldo": 200.0
+    },
+    "87451433072": {
+      "nome": "WILLIAM ANTONIO MARTELET STEFANO",
+      "carga": 1776.39,
+      "transferencia": -387.17,
+      "tarifa": 0.0,
+      "prestacao": 1429.18,
+      "saldo": -39.9599999999998
+    },
+    "02013700008": {
+      "nome": "WILLIAM NORONHA TEIXEIRA",
+      "carga": 7600.74,
+      "transferencia": -1985.74,
+      "tarifa": -70.0,
+      "prestacao": 5348.0,
+      "saldo": 197.0
+    },
+    "95417400068": {
+      "nome": "WILLIAM SANTANA NUNES",
+      "carga": 5466.72,
+      "transferencia": -136.18,
+      "tarifa": 0.0,
+      "prestacao": 5063.79,
+      "saldo": 266.749999999999
+    },
+    "06665220907": {
+      "nome": "WILLIAN CARLOS RODRIGUES VIEIRA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06274547983": {
+      "nome": "WILSON JOAQUIM DE CAMPOS",
+      "carga": 3269.22,
+      "transferencia": -170.03,
+      "tarifa": -7.0,
+      "prestacao": 3051.49,
+      "saldo": 40.7000000000007
+    },
+    "46736328187": {
+      "nome": "WILSON LUIZ CABRAL",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "04028795621": {
+      "nome": "WINDER DE SOUZA PIRES",
+      "carga": 2077.86,
+      "transferencia": -1475.25,
+      "tarifa": 0.0,
+      "prestacao": 577.86,
+      "saldo": 24.7500000000001
+    },
+    "94488185991": {
+      "nome": "ZELIO CELITO NUNES JUNIOR",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "51393565204": {
+      "nome": "CRISTIANO MOTTA LOUREIRO",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "06632708552": {
+      "nome": "MARCOS MACIEL DOS SANTOS QUEIROZ",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "80151930104": {
+      "nome": "MARIO RENATO SILVEIRA BORGES",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "07189293906": {
+      "nome": "GUILHERME JOSE DA SILVA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "80044654200": {
+      "nome": "FRANK LAURO CASTELO BRANCO DOS REIS",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    },
+    "01077000006": {
+      "nome": "EZEQUIEL DE OLIVEIRA CORREA",
+      "carga": 0.0,
+      "transferencia": 0.0,
+      "tarifa": 0.0,
+      "prestacao": 0.0,
+      "saldo": 0.0
+    }
+  }
+}
