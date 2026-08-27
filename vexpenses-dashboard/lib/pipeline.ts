@@ -689,6 +689,7 @@ export async function downloadExpenses(
             if (!resp.ok) return 0;
           }
           const data = await resp.json();
+          const reportStatus = data.data?.status || null;
           const expenses = data.data?.expenses?.data || [];
           if (expenses.length === 0) return 0;
 
@@ -702,7 +703,7 @@ export async function downloadExpenses(
             for (const e of subBatch) {
               const placeholders = Array.from({ length: 7 }, () => `$${pIdx++}`);
               valueGroups.push(`(${placeholders.join(', ')})`);
-              params.push(e.id, rid, e.value, e.date || null, e.title || e.description || null, e.status || null, JSON.stringify(e));
+              params.push(e.id, rid, e.value, e.date || null, e.title || e.description || null, e.status || reportStatus || null, JSON.stringify(e));
             }
             const query = `INSERT INTO prestacao_expenses (id, report_id, value, date, description, status, raw_data)
               VALUES ${valueGroups.join(', ')}

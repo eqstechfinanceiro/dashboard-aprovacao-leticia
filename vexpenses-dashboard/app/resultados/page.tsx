@@ -57,7 +57,7 @@ const PIE_COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'];
 interface NotaLancada {
   id: string;
   titulo: string;
-  tipo: 'mercadoria' | 'servico' | 'agil' | 'devolucao';
+  tipo: 'mercadoria' | 'servico' | 'agilitas' | 'devolucao';
   valor: number;
   tempoSegundos: number;
   feitaPeloBot: boolean;
@@ -115,13 +115,13 @@ function formatTime(seconds: number): string {
 const tipoIcon: Record<string, React.ReactNode> = {
   mercadoria: <Package className="h-4 w-4 text-blue-500" />,
   servico: <Wrench className="h-4 w-4 text-green-500" />,
-  agil: <Zap className="h-4 w-4 text-yellow-500" />,
+  agilitas: <Zap className="h-4 w-4 text-yellow-500" />,
 };
 
 const tipoLabel: Record<string, string> = {
   mercadoria: 'Mercadoria',
   servico: 'Serviço',
-  agil: 'Ágil',
+  agilitas: 'Agilitas',
   devolucao: 'Devolução',
 };
 
@@ -212,6 +212,7 @@ export default function ResultadosPage() {
   const notasPorTipo = [
     { name: 'Mercadoria', value: tiposCount['mercadoria'] || 0, cor: '#3b82f6' },
     { name: 'Serviço', value: tiposCount['servico'] || 0, cor: '#22c55e' },
+    { name: 'Agilitas', value: tiposCount['agilitas'] || 0, cor: '#f59e0b' },
     { name: 'Devolução', value: tiposCount['devolucao'] || 0, cor: '#ef4444' },
   ].filter(t => t.value > 0);
 
@@ -343,6 +344,7 @@ export default function ResultadosPage() {
             <option value="all">Todos os tipos</option>
             <option value="mercadoria">Mercadoria</option>
             <option value="servico">Serviço</option>
+            <option value="agilitas">Agilitas</option>
             <option value="devolucao">Devolução</option>
           </select>
           <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>

@@ -481,7 +481,7 @@ export async function GET(request: NextRequest) {
           COALESCE(NULLIF(codigo_transacao, ''), hora::text)
         )
           UPPER(usuario) AS usuario_up,
-          data, tipo, valor, codigo_transacao
+          data, tipo, valor, codigo_transacao, descricao
         FROM extrato_movimentacao
         WHERE is_snapshot = FALSE
           AND data <= ${financial_cutoff}
@@ -490,9 +490,11 @@ export async function GET(request: NextRequest) {
       )
       SELECT
         usuario_up,
-        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
+        COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0
+          AND NOT (descricao ~* 'estorno.*taxa|taxa.*estorno|^CHARGEBACK_')), 0) AS carga_raw,
         COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-        COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')), 0) AS tarifa_raw
+        COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')
+          OR (tipo = 'Transferência' AND descricao ~* 'estorno.*taxa|taxa.*estorno|^CHARGEBACK_')), 0) AS tarifa_raw
       FROM deduped
       GROUP BY usuario_up
     `;
@@ -541,13 +543,17 @@ export async function GET(request: NextRequest) {
         const carga = Number(r.carga_raw || 0);
         const transf = Math.abs(Number(r.transf_raw || 0));
         const tarifa = Math.abs(Number(r.tarifa_raw || 0));
-        const somase = somaseByCpf.get(cpf) ?? 0;
-        const sp = r2(carga - transf - tarifa - somase);
-        saldoPrestacaoByCpf.set(cpf, sp);
-        cargaByCpf.set(cpf, carga);
-        transfByCpf.set(cpf, transf);
-        tarifaByCpf.set(cpf, tarifa);
+        // Accumulate: multiple extrato names may resolve to same CPF
+        cargaByCpf.set(cpf, (cargaByCpf.get(cpf) ?? 0) + carga);
+        transfByCpf.set(cpf, (transfByCpf.get(cpf) ?? 0) + transf);
+        tarifaByCpf.set(cpf, (tarifaByCpf.get(cpf) ?? 0) + tarifa);
       }
+    }
+    // Calculate saldo_prestacao after accumulating all extrato for each CPF
+    for (const cpf of cargaByCpf.keys()) {
+      const somase = somaseByCpf.get(cpf) ?? 0;
+      const sp = r2(cargaByCpf.get(cpf)! - transfByCpf.get(cpf)! - tarifaByCpf.get(cpf)! - somase);
+      saldoPrestacaoByCpf.set(cpf, sp);
     }
 
     // 2g. Saldo cartão — two views:
@@ -642,7 +648,8 @@ export async function GET(request: NextRequest) {
         const hasSnap = r.has_snapshot;
         const snapSaldo = toNum(r.snap_saldo as string);
         const computedSaldo = toNum(r.computed_saldo as string);
-        saldoCartaoControleByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+        // Accumulate: multiple extrato names may resolve to same CPF
+        saldoCartaoControleByCpf.set(cpf, r2((saldoCartaoControleByCpf.get(cpf) ?? 0) + (hasSnap ? snapSaldo : computedSaldo)));
       }
     }
 
@@ -653,7 +660,8 @@ export async function GET(request: NextRequest) {
         const hasSnap = r.has_snapshot;
         const snapSaldo = toNum(r.snap_saldo as string);
         const computedSaldo = toNum(r.computed_saldo as string);
-        saldoCartaoCargaByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+        // Accumulate: multiple extrato names may resolve to same CPF
+        saldoCartaoCargaByCpf.set(cpf, r2((saldoCartaoCargaByCpf.get(cpf) ?? 0) + (hasSnap ? snapSaldo : computedSaldo)));
       }
     }
 
@@ -717,7 +725,7 @@ export async function GET(request: NextRequest) {
         transferencia:     transf,
         tarifa,
         prestacao,
-        saldo_prestacao,
+        saldo_prestacao:   sp,
         saldo_cartao,
         saldo_final,
         saldo_reembolsar,

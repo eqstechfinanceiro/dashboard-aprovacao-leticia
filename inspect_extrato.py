@@ -4,14 +4,23 @@ wb = openpyxl.load_workbook('CONTROLE - VEXPENSES - AGOSTO 2026.xlsx', read_only
 
 # Check EXTRATO sheet
 ws = wb['EXTRATO']
-print("EXTRATO sheet - first 5 rows:")
-for i, row in enumerate(ws.iter_rows(min_row=1, max_row=5, values_only=True)):
-    vals = [str(v)[:18] if v is not None else '' for v in row[:20]]
-    print(f"Row {i+1}: {vals}")
+print("EXTRATO sheet - rows 7-12:")
+for i, row in enumerate(ws.iter_rows(min_row=7, max_row=12, values_only=True)):
+    vals = [str(v)[:20] if v is not None else '' for v in row[:15]]
+    print(f"Row {i+7}: {vals}")
 
-# Check SALDO CARTAO sheet
-ws2 = wb['SALDO CARTAO']
-print("\nSALDO CARTAO sheet - first 5 rows:")
-for i, row in enumerate(ws2.iter_rows(min_row=1, max_row=5, values_only=True)):
-    vals = [str(v)[:18] if v is not None else '' for v in row[:20]]
-    print(f"Row {i+1}: {vals}")
+# Count rows and get unique tipos
+print("\nCounting rows and tipos...")
+tipos = {}
+total = 0
+for row in ws.iter_rows(min_row=10, values_only=True):
+    if row[1] is None and row[8] is None:
+        continue
+    total += 1
+    tipo = str(row[9]).strip() if row[9] else 'NULL'
+    tipos[tipo] = tipos.get(tipo, 0) + 1
+
+print(f"Total rows: {total}")
+print("Tipos:")
+for t, c in sorted(tipos.items(), key=lambda x: -x[1]):
+    print(f"  {t}: {c}")

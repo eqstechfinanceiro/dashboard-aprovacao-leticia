@@ -85,7 +85,7 @@ async function main() {
       const horaFraction = row[21] ? Number(row[21]) : null;
       const hora = horaFraction != null ? excelTime(horaFraction) : null;
       const usuario = String(row[27] || '');
-      const feitaPeloBot = usuario === 'bot.contabil';
+      const feitaPeloBot = false;
       const titulo = `${numero} - ${fornecedorNome.substring(0, 40)}`;
       const tipo = tipoNota === 'D' ? 'devolucao' : especieDoc === 'SPED' ? 'mercadoria' : 'servico';
       const dataStr = dtLancto ? formatDate(dtLancto) : null;
@@ -128,7 +128,7 @@ async function main() {
         const horaFraction = row[21] ? Number(row[21]) : null;
         const hora = horaFraction != null ? excelTime(horaFraction) : null;
         const usuario = String(row[27] || '');
-        const feitaPeloBot = usuario === 'bot.contabil';
+        const feitaPeloBot = false;
         const titulo = `${numero} - ${fornecedorNome.substring(0, 40)}`;
         const tipo = tipoNota === 'D' ? 'devolucao' : especieDoc === 'SPED' ? 'mercadoria' : 'servico';
         const dataStr = dtLancto ? formatDate(dtLancto) : null;
