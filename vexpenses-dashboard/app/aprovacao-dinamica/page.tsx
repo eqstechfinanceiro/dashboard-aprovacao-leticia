@@ -632,18 +632,8 @@ export default function AprovacaoDinamicaPage() {
   const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
 
   const filteredExpenses = useCallback((reportId: number, expenses: ReportExpense[]): ReportExpense[] => {
-    if (!searchTerm.trim()) return expenses;
-    const term = searchTerm.toLowerCase();
-    return expenses.filter(e =>
-      e.title?.toLowerCase().includes(term) ||
-      String(e.expense_id).includes(term) ||
-      String(e.id).includes(term) ||
-      e.observation?.toLowerCase().includes(term) ||
-      e.expense_type?.description?.toLowerCase().includes(term) ||
-      e.costs_center?.name?.toLowerCase().includes(term) ||
-      formatCurrency(e.value).toLowerCase().includes(term)
-    );
-  }, [searchTerm]);
+    return expenses;
+  }, []);
 
   const stats = useMemo(() => {
     const total = filteredReports.length;
@@ -2355,7 +2345,7 @@ export default function AprovacaoDinamicaPage() {
                   {/* No expenses */}
                   {!isLoadingExp && filteredExpenses(report.id, expenses).length === 0 && (
                     <div className="py-8 text-center text-sm text-gray-400">
-                      {searchTerm ? `Nenhuma despesa encontrada para "${searchTerm}"` : 'Nenhuma despesa encontrada neste report'}
+                      Nenhuma despesa encontrada neste report
                     </div>
                   )}
                 </div>
