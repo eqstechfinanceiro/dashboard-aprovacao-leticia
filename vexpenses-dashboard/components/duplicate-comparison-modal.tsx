@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, FileText, ExternalLink, AlertCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, FileText, ExternalLink, AlertCircle, CheckCircle, XCircle, Loader2, Mail, Clipboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -28,6 +28,7 @@ interface DuplicateComparisonModalProps {
   duplicateExpenses: ComparisonExpense[];
   onDismiss?: (originalExpenseId: number, duplicateExpenseId: number, isDuplicate: boolean) => Promise<void> | void;
   dismissedBy?: string;
+  currentUserName?: string;
 }
 
 function ReceiptViewer({ url, label }: { url: string | null; label: string }) {
@@ -183,7 +184,14 @@ function ExpenseDetail({ expense, label, highlight }: {
         )}
         <div className="flex justify-between text-xs pt-1 border-t border-gray-100">
           <span className="text-gray-400">Relatório</span>
-          <span className="text-gray-600">{expense.report_name} (#{expense.report_id})</span>
+          <a
+            href={`https://amp.vexpenses.com/relatorios/${expense.report_id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-0.5 text-blue-600 hover:underline"
+          >
+            {expense.report_name} (#{expense.report_id}) <ExternalLink className="h-3 w-3" />
+          </a>
         </div>
         <div className="flex justify-between text-xs">
           <span className="text-gray-400">Usuário</span>
@@ -201,17 +209,22 @@ export function DuplicateComparisonModal({
   duplicateExpenses,
   onDismiss,
   dismissedBy,
+  currentUserName,
 }: DuplicateComparisonModalProps) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [dismissing, setDismissing] = useState(false);
   const [dismissedSet, setDismissedSet] = useState<Set<number>>(new Set());
   const [receiptFallbacks, setReceiptFallbacks] = useState<Record<number, string>>({});
+  const [emailText, setEmailText] = useState<string | null>(null);
+  const [emailCopied, setEmailCopied] = useState(false);
 
   useEffect(() => {
     if (open) {
       setCurrentIdx(0);
       setDismissedSet(new Set());
       setReceiptFallbacks({});
+      setEmailText(null);
+      setEmailCopied(false);
     }
   }, [open]);
 
@@ -421,6 +434,68 @@ export function DuplicateComparisonModal({
             </Button>
           </div>
         </div>
+
+        {/* Email text section */}
+        {originalExpense && currentDup && (
+          <div className="border-t border-gray-200 px-6 py-3 space-y-3">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                onClick={() => {
+                  const userName = currentDup.user_name || originalExpense.user_name || 'Colaborador';
+                  const origName = originalExpense.report_name || '';
+                  const dupName = currentDup.report_name || '';
+                  const origIsFatura = /FATURA/i.test(origName);
+                  const dupIsFatura = /FATURA/i.test(dupName);
+                  let reportName: string;
+                  let expenseValue: string;
+                  if (origIsFatura && !dupIsFatura) {
+                    reportName = dupName;
+                    expenseValue = formatCurrency(currentDup.value);
+                  } else if (dupIsFatura && !origIsFatura) {
+                    reportName = origName;
+                    expenseValue = formatCurrency(originalExpense.value);
+                  } else {
+                    reportName = origName;
+                    expenseValue = formatCurrency(currentDup.value);
+                  }
+                  const signedBy = currentUserName || dismissedBy || 'Equipe EQS';
+                  setEmailText(`Olá! Prezado(a) ${userName},
+
+Seu relatório ${reportName} foi reprovado devido à despesa(s) duplicada(s).
+Favor excluir a despesa no valor de ${expenseValue} da Vexpenses e reenviar o relatório corretamente.
+
+Obrigado!
+
+Att, ${signedBy}`);
+                  setEmailCopied(false);
+                }}
+              >
+                <Mail className="h-4 w-4" />
+                Gerar texto de e-mail
+              </Button>
+            </div>
+            {emailText && (
+              <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <pre className="whitespace-pre-wrap text-sm text-gray-700 font-sans pr-8">{emailText}</pre>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(emailText).then(() => {
+                      setEmailCopied(true);
+                      setTimeout(() => setEmailCopied(false), 2000);
+                    });
+                  }}
+                  className="absolute right-2 top-2 rounded-md bg-white/90 px-2 py-1 text-xs text-gray-600 shadow-sm hover:bg-white"
+                  title="Copiar"
+                >
+                  {emailCopied ? <CheckCircle className="h-4 w-4 text-green-600" /> : <Clipboard className="h-4 w-4" />}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

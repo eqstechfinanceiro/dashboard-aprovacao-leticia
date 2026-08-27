@@ -978,6 +978,7 @@ export default function AprovacaoDinamicaPage() {
         duplicateExpenses={comparisonModal?.duplicates ?? []}
         onDismiss={handleDismissDuplicate}
         dismissedBy={user?.name}
+        currentUserName={user?.name}
       />
 
       <BatchDuplicateReviewModal
