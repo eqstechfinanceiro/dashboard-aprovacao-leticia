@@ -150,15 +150,24 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss, dismissedB
   const [error, setError] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'different' | 'same'>('all');
   const [only2026, setOnly2026] = useState(true);
+  const [above50, setAbove50] = useState(false);
+  const [excludeParking, setExcludeParking] = useState(false);
   const [selectedUser, setSelectedUser] = useState<string>('all');
   const [emailText, setEmailText] = useState<string | null>(null);
   const [emailCopied, setEmailCopied] = useState(false);
+
+  const isParkingOrToll = (pair: BatchDuplicatePair): boolean => {
+    const text = `${pair.original.title || ''} ${pair.duplicate.title || ''} ${pair.original.expense_type || ''} ${pair.duplicate.expense_type || ''} ${pair.original.observation || ''} ${pair.duplicate.observation || ''}`.toLowerCase();
+    return /estacion|ped[áa]gio|parking|toll/.test(text);
+  };
 
   const userStats = useMemo(() => {
     const map = new Map<string, { count: number; total: number }>();
     for (let i = 0; i < pairs.length; i++) {
       if (filterMode === 'different' && pairs[i].duplicate.same_report) continue;
       if (filterMode === 'same' && !pairs[i].duplicate.same_report) continue;
+      if (above50 && pairs[i].duplicate.value < 50) continue;
+      if (excludeParking && isParkingOrToll(pairs[i])) continue;
       const pair = pairs[i];
       const name = pair.duplicate.user_name || pair.original.user_name || 'Desconhecido';
       const entry = map.get(name) || { count: 0, total: 0 };
@@ -169,7 +178,7 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss, dismissedB
     return Array.from(map.entries())
       .map(([name, stats]) => ({ name, ...stats }))
       .sort((a, b) => b.total - a.total);
-  }, [pairs, filterMode]);
+  }, [pairs, filterMode, above50, excludeParking]);
 
   const visibleIndices = useMemo(() => {
     return pairs
@@ -180,11 +189,16 @@ export function BatchDuplicateReviewModal({ open, onClose, onDismiss, dismissedB
         return true;
       })
       .filter(i => {
+        if (above50 && pairs[i].duplicate.value < 50) return false;
+        if (excludeParking && isParkingOrToll(pairs[i])) return false;
+        return true;
+      })
+      .filter(i => {
         if (selectedUser === 'all') return true;
         const userName = pairs[i].duplicate.user_name || pairs[i].original.user_name || 'Desconhecido';
         return userName === selectedUser;
       });
-  }, [pairs, filterMode, selectedUser]);
+  }, [pairs, filterMode, above50, excludeParking, selectedUser]);
 
   const currentVisiblePos = visibleIndices.indexOf(currentIdx);
   const totalVisible = visibleIndices.length;
@@ -439,6 +453,26 @@ Att, ${signedBy}`;
                 className="h-3.5 w-3.5 rounded border-gray-300"
               />
               <label htmlFor="only2026" className="text-xs text-gray-600 cursor-pointer select-none">Apenas 2026+</label>
+            </div>
+            <div className="flex items-center gap-1">
+              <input
+                id="above50"
+                type="checkbox"
+                checked={above50}
+                onChange={e => setAbove50(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-gray-300"
+              />
+              <label htmlFor="above50" className="text-xs text-gray-600 cursor-pointer select-none">Acima de R$50</label>
+            </div>
+            <div className="flex items-center gap-1">
+              <input
+                id="excludeParking"
+                type="checkbox"
+                checked={excludeParking}
+                onChange={e => setExcludeParking(e.target.checked)}
+                className="h-3.5 w-3.5 rounded border-gray-300"
+              />
+              <label htmlFor="excludeParking" className="text-xs text-gray-600 cursor-pointer select-none">Sem estacion./pedágio</label>
             </div>
           </div>
         )}

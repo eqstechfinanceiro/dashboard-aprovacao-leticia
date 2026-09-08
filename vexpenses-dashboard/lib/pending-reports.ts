@@ -70,6 +70,34 @@ export async function getPendingReports(
   };
 
   let allReports = reportsResult.data;
+
+  // DEBUG: Inject report 10851387 (APROVADO) for visual inspection
+  const DEBUG_REPORT_ID = 10851387;
+  if (!allReports.find((r: any) => r.id === DEBUG_REPORT_ID)) {
+    try {
+      const debugRes = await fetch(
+        `https://api.vexpenses.com/v2/reports/${DEBUG_REPORT_ID}?include=expenses.expense_type,expenses.costs_center,expenses.payment_method,user`,
+        {
+          headers: {
+            'Authorization': process.env.VEXPENSES_API_KEY || '',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(30000),
+        }
+      );
+      if (debugRes.ok) {
+        const debugData = await debugRes.json();
+        if (debugData.data) {
+          allReports.unshift(debugData.data);
+          console.log(`[Pending] DEBUG: Injected report ${DEBUG_REPORT_ID} for visual inspection`);
+        }
+      }
+    } catch (e) {
+      console.error(`[Pending] DEBUG: Failed to inject report ${DEBUG_REPORT_ID}:`, e);
+    }
+  }
+
   const staleFromOtherStatuses = new Set(reprovadoResult.data);
   const eqsMemberIds = new Set(teamMembersResult.data.memberIds);
   const userFlowMap = new Map(teamMembersResult.data.flowMap);
@@ -91,7 +119,7 @@ export async function getPendingReports(
   // Filter reports to only include EQS team members
   if (eqsMemberIds.size > 0) {
     const beforeCount = allReports.length;
-    const filtered = allReports.filter((r: any) => eqsMemberIds.has(r.user_id));
+    const filtered = allReports.filter((r: any) => eqsMemberIds.has(r.user_id) || r.id === 10851387);
     console.log(
       `[Pending] Filtered to EQS members: ${beforeCount} -> ${filtered.length} reports (${eqsMemberIds.size} EQS members)`
     );

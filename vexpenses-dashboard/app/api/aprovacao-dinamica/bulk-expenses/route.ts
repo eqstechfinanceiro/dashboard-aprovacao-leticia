@@ -79,6 +79,44 @@ export async function GET(request: NextRequest) {
       };
     }
 
+    // DEBUG: Also fetch report 10851387 (APROVADO) for visual inspection
+    const DEBUG_REPORT_ID = 10851387;
+    if (!result[DEBUG_REPORT_ID]) {
+      try {
+        const debugUrl = `${getApiUrl()}/v2/reports/${DEBUG_REPORT_ID}?include=${include}`;
+        const debugRes = await fetch(debugUrl, {
+          headers: { ...BROWSER_HEADERS, Authorization: process.env.VEXPENSES_API_KEY || '' },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(30000),
+        });
+        if (debugRes.ok) {
+          const debugData = await debugRes.json();
+          const debugReport = debugData.data;
+          if (debugReport) {
+            const debugExpenses = (debugReport.expenses?.data || []).map((e: any) => ({
+              id: e.id, expense_id: e.expense_id, title: e.title, value: e.value,
+              date: e.date, observation: e.observation,
+              receipt_url: e.reiceipt_url || e.receipt_url || '', rejected: e.rejected,
+              expense_type: e.expense_type?.data || null,
+              costs_center: e.costs_center?.data || null,
+              payment_method: e.payment_method?.data || null,
+            }));
+            const debugTotal = debugExpenses.reduce((s: number, e: any) => s + (parseFloat(e.value) || 0), 0);
+            result[DEBUG_REPORT_ID] = {
+              report_id: DEBUG_REPORT_ID, description: debugReport.description,
+              status: debugReport.status,
+              user_name: debugReport.user?.data?.name || debugReport.user?.name || '',
+              user_email: debugReport.user?.data?.email || debugReport.user?.email || '',
+              expenses: debugExpenses, total_value: debugTotal, expense_count: debugExpenses.length,
+            };
+            console.log(`[Bulk Expenses] DEBUG: Injected report ${DEBUG_REPORT_ID}`);
+          }
+        }
+      } catch (e) {
+        console.error(`[Bulk Expenses] DEBUG: Failed to inject report ${DEBUG_REPORT_ID}:`, e);
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: result,

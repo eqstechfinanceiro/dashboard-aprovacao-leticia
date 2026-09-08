@@ -151,6 +151,14 @@ export async function processReceiptGeminiDirect(
   }
 }
 
+function resetAllModelStates() {
+  for (const m of MODELS) {
+    modelState[m.id] = { lastCallTime: 0, cooldownUntil: 0, requestsToday: 0, lastResetDay: getTodayKey() };
+  }
+  currentModelIdx = 0;
+  console.log('[GeminiDirect] All model states reset for fallback key');
+}
+
 export async function processReceiptGeminiDirectBase64(
   fileBase64: string,
   mimeType: string,
@@ -158,6 +166,7 @@ export async function processReceiptGeminiDirectBase64(
   maxRetries = 3
 ): Promise<GeminiResult> {
   const groqApiKey = process.env.GROQ_API_KEY || '';
+  const fallbackApiKey = process.env.GEMINI_API_KEY_2 || '';
   try {
     const prompt = buildPrompt();
     let lastError = '';
@@ -312,6 +321,17 @@ export async function processReceiptGeminiDirectBase64(
       markModelRateLimited(model.id, 60000);
     }
 
+    // All models exhausted with primary key — try fallback key if available
+    if (fallbackApiKey && fallbackApiKey !== apiKey) {
+      console.log('[GeminiDirect] Primary key exhausted, switching to fallback key...');
+      resetAllModelStates();
+      const fallbackResult = await processReceiptGeminiDirectBase64(fileBase64, mimeType, fallbackApiKey, maxRetries);
+      if (fallbackResult.success) {
+        return fallbackResult;
+      }
+      lastError = `Primary key: ${lastError} | Fallback key: ${fallbackResult.error}`;
+    }
+
     return { success: false, error: lastError || `All models exhausted after ${maxRetries} attempts` };
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
@@ -328,6 +348,7 @@ export async function processReceiptGeminiDirectText(
   maxRetries = 3
 ): Promise<GeminiResult> {
   const groqApiKey = process.env.GROQ_API_KEY || '';
+  const fallbackApiKey = process.env.GEMINI_API_KEY_2 || '';
   try {
     const prompt = buildPrompt() + '\n\nConteúdo extraído do PDF (texto digital):\n' + pdfText;
     let lastError = '';
@@ -469,6 +490,17 @@ export async function processReceiptGeminiDirectText(
       lastError = `API error ${response.status} on ${model.id}: ${errorText.slice(0, 200)}`;
       console.log(`[GeminiDirect-Text] ${lastError}`);
       markModelRateLimited(model.id, 60000);
+    }
+
+    // All models exhausted with primary key — try fallback key if available
+    if (fallbackApiKey && fallbackApiKey !== apiKey) {
+      console.log('[GeminiDirect-Text] Primary key exhausted, switching to fallback key...');
+      resetAllModelStates();
+      const fallbackResult = await processReceiptGeminiDirectText(pdfText, fallbackApiKey, maxRetries);
+      if (fallbackResult.success) {
+        return fallbackResult;
+      }
+      lastError = `Primary key: ${lastError} | Fallback key: ${fallbackResult.error}`;
     }
 
     return { success: false, error: lastError || `All models exhausted after ${maxRetries} attempts` };
