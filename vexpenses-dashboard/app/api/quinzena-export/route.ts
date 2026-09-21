@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
+import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
@@ -15,74 +16,6 @@ function toNum(v: string | null | undefined): number {
 
 function r2(v: number): number {
   return Math.round(v * 100) / 100;
-}
-
-/** Normalize name for matching */
-function normalizeName(s: string | null | undefined): string {
-  if (!s) return '';
-  return s.toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function fuzzyMatchRatio(a: string, b: string): number {
-  if (a === b) return 1;
-  if (!a.length || !b.length) return 0;
-  const bigrams = (s: string): Set<string> => {
-    const set = new Set<string>();
-    for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
-    return set;
-  };
-  const ba = bigrams(a), bb = bigrams(b);
-  let intersection = 0;
-  for (const bg of ba) if (bb.has(bg)) intersection++;
-  return (2 * intersection) / (ba.size + bb.size);
-}
-
-function resolveCpfByName(
-  extratoName: string,
-  nomeToCpf: Map<string, string>,
-  fuzzyCache: Map<string, string>
-): string | undefined {
-  const normalized = normalizeName(extratoName);
-  const exact = nomeToCpf.get(normalized);
-  if (exact) return exact;
-  const cached = fuzzyCache.get(normalized);
-  if (cached) return cached;
-  let bestCpf: string | undefined;
-  let bestRatio = 0;
-  for (const [cadName, cpf] of nomeToCpf) {
-    const ratio = fuzzyMatchRatio(normalized, cadName);
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestCpf = cpf;
-    }
-  }
-  if (bestRatio >= 0.88 && bestCpf) {
-    fuzzyCache.set(normalized, bestCpf);
-    return bestCpf;
-  }
-  // Truncated-name fallback: bank statements may cut the holder name. Only
-  // resolve when the normalized extrato name is a strict prefix of exactly ONE
-  // cadastro name — never match by shared first-name prefix (different people
-  // like "GUILHERME JOSE" vs "GUILHERME BATISTA" must not merge balances).
-  if (normalized.length >= 10) {
-    let match: string | undefined;
-    let ambiguous = false;
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.length > normalized.length && cadName.startsWith(normalized)) {
-        if (match !== undefined && match !== cpf) { ambiguous = true; break; }
-        match = cpf;
-      }
-    }
-    if (!ambiguous && match) {
-      fuzzyCache.set(normalized, match);
-      return match;
-    }
-  }
-  return undefined;
 }
 
 function getQuinzenaDates(year: number, month: number, quinzena: number) {

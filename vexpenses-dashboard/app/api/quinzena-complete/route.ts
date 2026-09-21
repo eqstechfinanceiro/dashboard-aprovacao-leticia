@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
+import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 
 export const dynamic = 'force-dynamic';
 
@@ -170,102 +171,8 @@ function r2(v: number): number {
   return Math.round(v * 100) / 100;
 }
 
-/** Normalize name for matching: remove accents, uppercase, trim */
-function normalizeName(s: string | null | undefined): string {
-  if (!s) return '';
-  return s.toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // strip diacritics
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** Simple similarity ratio (based on Levenshtein-like character matching) */
-function fuzzyMatchRatio(a: string, b: string): number {
-  if (a === b) return 1;
-  if (!a.length || !b.length) return 0;
-  // Use Set-based bigram similarity (fast, good enough for short names)
-  const bigrams = (s: string): Set<string> => {
-    const set = new Set<string>();
-    for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
-    return set;
-  };
-  const ba = bigrams(a), bb = bigrams(b);
-  let intersection = 0;
-  for (const bg of ba) if (bb.has(bg)) intersection++;
-  return (2 * intersection) / (ba.size + bb.size);
-}
-
-/** Manual alias map: known name variations that fuzzy matching cannot catch.
- *  Maps normalized extrato name → normalized cadastro name.
- *  These are verified identity pairs where the names differ too much for fuzzy match. */
-const MANUAL_NAME_ALIASES: Record<string, string> = {
-  'FRANCIELLY FELIX CAVALCANTE DE ANDRADE': 'FRANCIELLY CAVALCANTE SANTOS DE ANDRADE',
-  'FRANCIELLY CAVALCANTE SANTOS DE ANDRADE': 'FRANCIELLY FELIX CAVALCANTE DE ANDRADE',
-  'ROGERIO GOMEA DE OLIVEIRA': 'ROGERIO GOMES DE OLIVEIRA',
-  'ROGERIO GOMES DE OLIVEIRA': 'ROGERIO GOMEA DE OLIVEIRA',
-  'EVERDON ESTEVES DOS SANTOS': 'EVERSON ESTEVES DOS SANTOS',
-  'EVERSON ESTEVES DOS SANTOS': 'EVERDON ESTEVES DOS SANTOS',
-  'CLEBERSON APARECIDO BORGES DOS SANTOS': 'CLEBERSON APARECIDO BORGES DO SANTOS',
-  'CLEBERSON APARECIDO BORGES DO SANTOS': 'CLEBERSON APARECIDO BORGES DOS SANTOS',
-};
-
-/** Resolve extrato usuario name to CPF via exact normalized match, then manual aliases, then fuzzy (>= 0.88), then prefix */
-function resolveCpfByName(
-  extratoName: string,
-  nomeToCpf: Map<string, string>,
-  fuzzyCache: Map<string, string>
-): string | undefined {
-  const normalized = normalizeName(extratoName);
-  // Exact match
-  const exact = nomeToCpf.get(normalized);
-  if (exact) return exact;
-  // Manual alias match (handles known name variations that fuzzy can't catch)
-  const alias = MANUAL_NAME_ALIASES[normalized];
-  if (alias) {
-    const aliasCpf = nomeToCpf.get(alias);
-    if (aliasCpf) {
-      fuzzyCache.set(normalized, aliasCpf);
-      return aliasCpf;
-    }
-  }
-  // Fuzzy cache (avoid re-computing for same name)
-  const cached = fuzzyCache.get(normalized);
-  if (cached) return cached;
-  // Fuzzy match FIRST (handles LUIZ vs LUIS, typos, etc.)
-  let bestCpf: string | undefined;
-  let bestRatio = 0;
-  for (const [cadName, cpf] of nomeToCpf) {
-    const ratio = fuzzyMatchRatio(normalized, cadName);
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestCpf = cpf;
-    }
-  }
-  if (bestRatio >= 0.88 && bestCpf) {
-    fuzzyCache.set(normalized, bestCpf);
-    return bestCpf;
-  }
-  // Truncated-name fallback: bank statements may cut the holder name. Only
-  // resolve when the normalized extrato name is a strict prefix of exactly ONE
-  // cadastro name — never match by shared first-name prefix (different people
-  // like "GUILHERME JOSE" vs "GUILHERME BATISTA" must not merge balances).
-  if (normalized.length >= 10) {
-    let match: string | undefined;
-    let ambiguous = false;
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.length > normalized.length && cadName.startsWith(normalized)) {
-        if (match !== undefined && match !== cpf) { ambiguous = true; break; }
-        match = cpf;
-      }
-    }
-    if (!ambiguous && match) {
-      fuzzyCache.set(normalized, match);
-      return match;
-    }
-  }
-  return undefined;
-}
+// Resolucao nome->CPF centralizada em @/lib/quinzena/name-resolve (aliases
+// manuais + fallback de prefixo nao-ambiguo). Nao manter copia local aqui.
 
 /**
  * Fórmulas confirmadas por inspeção direta nas planilhas de Carga (validado 100% em mai/2026):
