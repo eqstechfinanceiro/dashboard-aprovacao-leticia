@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
+import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,15 +88,22 @@ function resolveCpfByName(
     fuzzyCache.set(normalized, bestCpf);
     return bestCpf;
   }
-  // Prefix match: fallback for truncated names (15 chars, then 10)
+  // Truncated-name fallback: bank statements may cut the holder name. Only
+  // resolve when the normalized extrato name is a strict prefix of exactly ONE
+  // cadastro name — never match by shared first-name prefix (different people
+  // like "GUILHERME JOSE" vs "GUILHERME BATISTA" must not merge balances).
   if (normalized.length >= 10) {
-    const prefix15 = normalized.slice(0, 15);
+    let match: string | undefined;
+    let ambiguous = false;
     for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 15) === prefix15) return cpf;
+      if (cadName.length > normalized.length && cadName.startsWith(normalized)) {
+        if (match !== undefined && match !== cpf) { ambiguous = true; break; }
+        match = cpf;
+      }
     }
-    const prefix10 = normalized.slice(0, 10);
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 10) === prefix10) return cpf;
+    if (!ambiguous && match) {
+      fuzzyCache.set(normalized, match);
+      return match;
     }
   }
   return undefined;
@@ -126,9 +134,11 @@ export async function GET(request: NextRequest) {
 
   const { start_date, end_date, fechamento } = getQuinzenaDates(year, month, quinzena);
 
+  const scope = await getScopeForRequest(request);
+
   try {
     // 1. Snapshot do periodo (ground truth)
-    const snapshotRows = await sql`
+    let snapshotRows = await sql`
       SELECT
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
@@ -143,6 +153,10 @@ export async function GET(request: NextRequest) {
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
       ORDER BY colaborador ASC NULLS LAST
     `;
+
+    if (scope) {
+      snapshotRows = (snapshotRows as any[]).filter(r => scope.cpfs.has(normalizeCpf(r.cpf) ?? '__none__')) as any;
+    }
 
     if (snapshotRows.length === 0) {
       return NextResponse.json({ error: 'Sem snapshot para este periodo. Nada para validar.' }, { status: 404 });
