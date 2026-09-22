@@ -209,21 +209,15 @@ export default function PendenciasPage() {
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const sdsByClass = useMemo(() => {
-    const out: Record<string, { total: Bucket; eqs: Bucket; bratec: Bucket }> = {};
+  const sdsByEmpresa = useMemo(() => {
+    const out: Record<string, Record<string, Bucket>> = {};
     if (!data) return out;
     for (const r of data.sds.resumo) {
+      const emp = out[r.empresa] = out[r.empresa] || {};
       const k = r.classificacao || 'OUTROS';
-      const b = out[k] = out[k] || {
-        total: { count: 0, valor: 0 },
-        eqs: { count: 0, valor: 0 },
-        bratec: { count: 0, valor: 0 },
-      };
-      const eb = r.empresa === 'BRATEC' ? b.bratec : b.eqs;
-      b.total.count += r.count;
-      b.total.valor += r.valmerc;
-      eb.count += r.count;
-      eb.valor += r.valmerc;
+      const b = emp[k] = emp[k] || { count: 0, valor: 0 };
+      b.count += r.count;
+      b.valor += r.valmerc;
     }
     return out;
   }, [data]);
@@ -325,38 +319,43 @@ export default function PendenciasPage() {
 
       </div>
 
-      {/* Cards SDS */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).map((cls) => {
-          const Icon = cls === 'MERCADORIA' ? Package : cls === 'SERVICO' ? Wrench : Repeat;
-          const b = sdsByClass[cls] || {
-            total: { count: 0, valor: 0 },
-            eqs: { count: 0, valor: 0 },
-            bratec: { count: 0, valor: 0 },
-          };
-          return (
-            <Card key={cls}>
-              <CardContent className="px-4 pb-4 pt-4 text-center">
-                <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  <Icon className="h-4 w-4" /> {cls === 'SERVICO' ? 'Serviço' : cls === 'REMESSA' ? 'Remessa' : 'Mercadoria'}
-                </div>
-                <div className="mt-2 text-2xl font-bold text-gray-900">{b.total.count}</div>
-                <div className="text-sm font-medium text-gray-700">R$ {fmt(b.total.valor)}</div>
-                <div className="mt-3 space-y-1 text-xs text-gray-500">
-                  <div className="flex justify-between">
-                    <span>EQS</span>
-                    <span>{b.eqs.count} — R$ {fmt(b.eqs.valor)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>BRATEC</span>
-                    <span>{b.bratec.count} — R$ {fmt(b.bratec.valor)}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      {/* Cards SDS por empresa */}
+      {(['EQS', 'BRATEC'] as const).map((emp) => {
+        const classes = sdsByEmpresa[emp] || {};
+        const total = Object.values(classes).reduce(
+          (acc, b) => ({ count: acc.count + b.count, valor: acc.valor + b.valor }),
+          { count: 0, valor: 0 },
+        );
+        return (
+          <div key={emp} className="space-y-2">
+            <div className="flex items-baseline gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
+                {emp} — notas a lançar
+              </h2>
+              <span className="text-xs text-gray-500">
+                {total.count} notas — R$ {fmt(total.valor)}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).map((cls) => {
+                const Icon = cls === 'MERCADORIA' ? Package : cls === 'SERVICO' ? Wrench : Repeat;
+                const b = classes[cls] || { count: 0, valor: 0 };
+                return (
+                  <Card key={cls}>
+                    <CardContent className="px-4 pb-4 pt-4 text-center">
+                      <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <Icon className="h-4 w-4" /> {cls === 'SERVICO' ? 'Serviço' : cls === 'REMESSA' ? 'Remessa' : 'Mercadoria'}
+                      </div>
+                      <div className="mt-2 text-2xl font-bold text-gray-900">{b.count}</div>
+                      <div className="text-sm font-medium text-gray-700">R$ {fmt(b.valor)}</div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
 
       {/* Tabela reports */}
       <Card>
@@ -440,7 +439,7 @@ export default function PendenciasPage() {
         <CardContent className="px-4 pb-4 pt-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
-              Notas de entrada pendentes ({notas.length})
+              Notas pendentes de lançamento — contábil ({notas.length})
             </h2>
             <div className="flex flex-wrap items-center gap-2">
               <div className="relative">

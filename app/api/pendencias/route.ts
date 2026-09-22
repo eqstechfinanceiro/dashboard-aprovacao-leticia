@@ -64,17 +64,16 @@ export async function GET() {
       pendente: bucket(reports, (r) => r.meipag === 'V' && r.state === 'PENDENTE'),
       parcial: bucket(reports, (r) => r.meipag === 'V' && r.state === 'PARCIAL'),
     };
-    // SDS — notas de entrada pendentes de lançamento (status='P' no monitor
-    // SDS/MATA143). Todas as notas pendentes entram — a derivação por setor
-    // não vale como filtro: BRATEC não usa o setor 'C' e notas são baixadas
-    // a partir de qualquer setor.
+    // SDS — notas pendentes de lançamento no setor contábil (fila derivada
+    // pelo worker: setor '2' = "Situação Processo: Contábil" do monitor SDS).
+    // Demais setores são etapas anteriores do fluxo ou backlog histórico.
     const sdsResumo = await sql`
       SELECT empresa, classificacao,
              COUNT(*) AS count,
              COALESCE(SUM(valmerc), 0) AS valmerc,
              COALESCE(SUM(total_nf), 0) AS total_nf
       FROM z01.totvs_sds_notas
-      WHERE status = 'P'
+      WHERE status = 'P' AND fila = 'CONTABIL'
       GROUP BY empresa, classificacao
       ORDER BY empresa, classificacao
     `;
@@ -83,7 +82,7 @@ export async function GET() {
       SELECT nota_key, empresa, classificacao, doc, serie,
              nomefor, cnpj, emissa, pvenc, valmerc, total_nf, chavenf
       FROM z01.totvs_sds_notas
-      WHERE status = 'P'
+      WHERE status = 'P' AND fila = 'CONTABIL'
       ORDER BY emissa DESC NULLS LAST
     `;
 
