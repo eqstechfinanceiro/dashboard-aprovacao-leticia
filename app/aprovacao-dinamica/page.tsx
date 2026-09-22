@@ -25,7 +25,6 @@ import {
   User,
   ScanLine,
   Database,
-  PlayCircle,
   Search,
   Eye,
   Receipt,
@@ -39,13 +38,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { ManualReviewModal, type ManualReviewItem } from '@/components/manual-review-modal';
 import { PreApproveReviewModal, type PreApproveExpense } from '@/components/pre-approve-review-modal';
-import { useAuth } from '@/lib/auth-context';
-import type { ReportValidationSummary } from '@/lib/nf-validator';
+import { useAuth } from '@/lib/auth/auth-context';
+import type { ReportValidationSummary } from '@/lib/ai/nf-validator';
 import { DuplicateComparisonModal, type ComparisonExpense } from '@/components/duplicate-comparison-modal';
 import { BatchDuplicateReviewModal } from '@/components/batch-duplicate-review-modal';
 import { DismissLogsModal } from '@/components/dismiss-logs-modal';
+import { BotActivityModal } from '@/components/bot-activity-modal';
 import { FaturaUploadModal } from '@/components/fatura-upload-modal';
-import type { FaturaValidationRecord } from '@/lib/fatura-db';
+import { ExpenseReviewModal } from '@/components/expense-review-modal';
+import type { FaturaValidationRecord } from '@/lib/db/fatura-db';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 
 interface ReportApproval {
   approver_name: string;
@@ -66,7 +68,7 @@ interface PendingReport {
   approval_flow_name: string | null;
   approval_stage_id: number | null;
   approval_date: string | null;
-  current_step: number;
+  current_step: number | null;
   expense_count?: number;
 }
 
@@ -248,13 +250,15 @@ export default function AprovacaoDinamicaPage() {
   const validationBatchFetchedRef = useRef(false);
   const [auditingExpense, setAuditingExpense] = useState<string | null>(null);
   const [loadingExpenses, setLoadingExpenses] = useState<number | null>(null);
-  const [showReceiptFor, setShowReceiptFor] = useState<string | null>(null);
+  const [reviewExpense, setReviewExpense] = useState<{ reportId: number; expenseId: number } | null>(null);
   const [auditProgress, setAuditProgress] = useState<Record<number, { done: number; total: number }>>({});
-  const [globalAuditing, setGlobalAuditing] = useState(false);
-  const [globalProgress, setGlobalProgress] = useState<{ current: number; total: number; reportDesc: string } | null>(null);
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [approverFilter, setApproverFilter] = useState<string>('');
-  const [stepOneOnly, setStepOneOnly] = useState(false);
+  const [approverFilter, setApproverFilter] = useState<string>('891904'); // Letícia por padrão
+
+  const [hideApproved, setHideApproved] = useState(true);
+  const [caixaOnly, setCaixaOnly] = useState(false);
+  const [auditPendingOnly, setAuditPendingOnly] = useState(false);
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewItems, setReviewItems] = useState<ManualReviewItem[]>([]);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -273,95 +277,113 @@ export default function AprovacaoDinamicaPage() {
   const [validationDetails, setValidationDetails] = useState<Record<number, ValidationDetailData>>({});
   const [loadingValidationDetails, setLoadingValidationDetails] = useState<Set<number>>(new Set());
   const [alertsOnly, setAlertsOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<'recentes' | 'antigos' | 'adicionados' | 'valor' | 'az' | 'za'>('recentes');
+  const [monthFilter, setMonthFilter] = useState<string>('todos');
+  const [typeFilter, setTypeFilter] = useState<'todos' | 'caixa' | 'fatura'>('todos');
+  const [reportTotals, setReportTotals] = useState<Record<number, number>>({});
   const [comparisonModal, setComparisonModal] = useState<{ original: ComparisonExpense; duplicates: ComparisonExpense[] } | null>(null);
   const [batchDupModalOpen, setBatchDupModalOpen] = useState(false);
   const [logsModalOpen, setLogsModalOpen] = useState(false);
-  const [rejectingExpense, setRejectingExpense] = useState<string | null>(null);
-  const [rejectObservation, setRejectObservation] = useState<Record<string, string>>({});
+  const [botLogModalOpen, setBotLogModalOpen] = useState(false);
+  const [botStepSkips, setBotStepSkips] = useState<Set<number>>(new Set());
+  const [rejectMarks, setRejectMarks] = useState<Record<number, Set<number>>>({});
+  const [rejectJustify, setRejectJustify] = useState<Record<number, string>>({});
   const [rejectingReport, setRejectingReport] = useState<number | null>(null);
   const [faturaModalOpen, setFaturaModalOpen] = useState(false);
   const [faturaValidations, setFaturaValidations] = useState<Record<number, Record<number, FaturaValidationRecord>>>({});
+  const [autoApprove, setAutoApprove] = useState<boolean | null>(null);
+  const [autoApproveEligible, setAutoApproveEligible] = useState<number | null>(null);
+  const [autoApproveWaiting, setAutoApproveWaiting] = useState<number | null>(null);
+  const [autoApproveBusy, setAutoApproveBusy] = useState(false);
+  const [autoAudit, setAutoAudit] = useState<boolean | null>(null);
+  const [autoAuditPending, setAutoAuditPending] = useState<number | null>(null);
+  const [autoAuditBusy, setAutoAuditBusy] = useState(false);
 
   useEffect(() => {
     setVisibleCount(30);
     excludedReportsRef.current = new Set();
     setApprovalNotice(null);
-  }, [searchTerm, readyOnly, stepOneOnly, approverFilter, alertsOnly]);
+  }, [searchTerm, readyOnly, approverFilter, alertsOnly, hideApproved, caixaOnly, auditPendingOnly, monthFilter, typeFilter, sortBy]);
 
   // Keep ref in sync with auditResults
   useEffect(() => {
     auditResultsRef.current = auditResults;
   }, [auditResults]);
 
-  const loadAllSavedResults = useCallback(async () => {
-    try {
-      const res = await fetch('/api/aprovacao-dinamica/audit-all-results');
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!data.data) return;
-
-      const resultsMap: Record<number, Record<number, ExpenseAuditResult>> = {};
-      const progressMap: Record<number, { done: number; total: number }> = {};
-
-      for (const [reportIdStr, expenses] of Object.entries(data.data)) {
-        const reportId = parseInt(reportIdStr);
-        const expResults: Record<number, ExpenseAuditResult> = {};
-        (expenses as any[]).forEach(e => {
-          expResults[e.expense_id] = e;
-        });
-        resultsMap[reportId] = expResults;
-        progressMap[reportId] = { done: (expenses as any[]).length, total: 0 };
-      }
-
-      setAuditResults(resultsMap);
-      setAuditProgress(progressMap);
-
-      const auditedIds = new Set(Object.keys(resultsMap).map(Number));
-      setReports(prev => prev.map(r => auditedIds.has(r.id) ? { ...r, audited: true } : r));
-    } catch (err) {
-      console.error('Error loading saved results:', err);
-    }
+  // Auto-approve switch state (visible to all users)
+  useEffect(() => {
+    fetch('/api/aprovacao-dinamica/auto-approve')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          setAutoApprove(d.enabled === true);
+          setAutoApproveEligible(d.eligible_count ?? null);
+          setAutoApproveWaiting(d.waiting_next_step ?? null);
+        }
+      })
+      .catch(() => setAutoApprove(false));
   }, []);
 
-  const fetchPending = useCallback(async (opts?: { skipValidation?: boolean }) => {
-    setLoading(true);
-    setError(null);
+  const toggleAutoApprove = async () => {
+    if (autoApprove === null || autoApproveBusy) return;
+    setAutoApproveBusy(true);
     try {
-      const approverParam = approverFilter ? `&approver_id=${approverFilter}` : '';
-      const stepParam = stepOneOnly ? '&step=1' : '';
-      const res = await fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}${stepParam}`);
-      if (!res.ok) throw new Error('Failed to fetch pending reports');
+      const res = await fetch('/api/aprovacao-dinamica/auto-approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !autoApprove }),
+      });
       const data = await res.json();
-      const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
-      setReports(filtered);
-      await loadAllSavedResults();
-      // Use expense_count from pending response (avoids separate API call that gets 403'd by WAF)
-      const counts: Record<number, number> = {};
-      for (const r of (data.data || []) as PendingReport[]) {
-        if (r.expense_count !== undefined && r.expense_count > 0) {
-          counts[r.id] = r.expense_count;
-        }
-      }
-      if (Object.keys(counts).length > 0) {
-        setExpenseCounts(counts);
-      }
-      // Only fetch expense counts separately if pending response didn't include them
-      if (Object.keys(counts).length === 0) {
-        fetchExpenseCounts(data.data || []);
-      }
-      // Fetch existing approvals
-      fetchApprovals(data.data || []);
-      // Fetch NF validation batch summary only on first load or explicit refresh
-      if (!opts?.skipValidation && !validationBatchFetchedRef.current) {
-        validationBatchFetchedRef.current = true;
-        fetchValidationBatch(data.data || []);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      if (!res.ok) throw new Error(data.error || 'Erro ao atualizar');
+      setAutoApprove(data.enabled);
+      setApprovalNotice(
+        data.enabled
+          ? 'Aprovação automática ativada — caixas 100% auditados pelo bot serão aprovados no VExpenses.'
+          : 'Aprovação automática desativada.'
+      );
+    } catch (e) {
+      setApprovalNotice(e instanceof Error ? e.message : 'Erro ao atualizar aprovação automática');
     } finally {
-      setLoading(false);
+      setAutoApproveBusy(false);
     }
-  }, [loadAllSavedResults, approverFilter, stepOneOnly]);
+  };
+
+  // Auto-audit switch state (visible to all users)
+  useEffect(() => {
+    fetch('/api/aprovacao-dinamica/auto-audit')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          setAutoAudit(d.enabled === true);
+          setAutoAuditPending(d.pending?.expenses ?? null);
+        }
+      })
+      .catch(() => setAutoAudit(false));
+  }, []);
+
+  const toggleAutoAudit = async () => {
+    if (autoAudit === null || autoAuditBusy) return;
+    setAutoAuditBusy(true);
+    try {
+      const res = await fetch('/api/aprovacao-dinamica/auto-audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enabled: !autoAudit }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erro ao atualizar');
+      setAutoAudit(data.enabled);
+      setApprovalNotice(
+        data.enabled
+          ? 'Auditoria automática ativada — o bot audita novas despesas de caixas na etapa da Letícia continuamente.'
+          : 'Auditoria automática desativada.'
+      );
+    } catch (e) {
+      setApprovalNotice(e instanceof Error ? e.message : 'Erro ao atualizar auditoria automática');
+    } finally {
+      setAutoAuditBusy(false);
+    }
+  };
 
   const fetchValidationBatch = useCallback(async (reportList: PendingReport[]) => {
     if (reportList.length === 0) return;
@@ -395,36 +417,132 @@ export default function AprovacaoDinamicaPage() {
     }
   }, [validationDetails, loadingValidationDetails]);
 
-  const fetchApprovals = useCallback(async (reportList: PendingReport[]) => {
-    if (reportList.length === 0) return;
+  const fetchPending = useCallback(async (opts?: { skipValidation?: boolean }) => {
+    setLoading(true);
+    setError(null);
     try {
-      const ids = reportList.map(r => r.id).join(',');
-      const res = await fetch(`/api/aprovacao-dinamica/approvals?report_ids=${ids}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReportApprovals(data.data || {});
-      }
-    } catch (err) {
-      console.error('Error fetching approvals:', err);
-    }
-  }, []);
+      const approverParam = approverFilter ? `&approver_id=${approverFilter}` : '';
 
-  const fetchExpenseCounts = useCallback(async (reportList: PendingReport[]) => {
-    if (reportList.length === 0) return;
-    setLoadingCounts(true);
-    try {
-      const ids = reportList.map(r => r.id).join(',');
-      const res = await fetch(`/api/aprovacao-dinamica/expense-counts?ids=${ids}`);
-      if (res.ok) {
+      if (opts?.skipValidation) {
+        // Light refresh (60s auto-refresh): only fetch pending reports
+        const res = await fetch(`/api/aprovacao-dinamica/pending?include_audit=true${approverParam}`);
+        if (res.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        if (!res.ok) throw new Error(`Failed to fetch pending reports (HTTP ${res.status})`);
         const data = await res.json();
-        setExpenseCounts(data.data || {});
+        const filtered = (data.data || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+        setReports(filtered);
+        return;
+      }
+
+      // Full load: fetch init (reports + audit + fatura + approvals) + bulk-expenses in parallel
+      const initParams = new URLSearchParams();
+      if (approverFilter) initParams.set('approver_id', approverFilter);
+
+      const initPromise = fetch(`/api/aprovacao-dinamica/init?${initParams.toString()}`).then(r => {
+        if (r.status === 401) {
+          window.location.href = '/login';
+          throw new Error('Sessão expirada. Redirecionando para login...');
+        }
+        if (!r.ok) throw new Error(`Failed to fetch init data (HTTP ${r.status})`);
+        return r.json();
+      });
+      // bulk-expenses vem do banco (rápido) — passamos os ids do init pra buscar só o necessário
+      const bulkExpensesPromise = initPromise.then(d => {
+        const ids = ((d.data?.reports || []) as PendingReport[]).map(r => r.id).join(',');
+        return fetch(`/api/aprovacao-dinamica/bulk-expenses?report_ids=${ids}`)
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null);
+      });
+
+      const initData = await initPromise;
+      const d = initData.data || {};
+
+      // Process reports
+      const filtered: PendingReport[] = (d.reports || []).filter((r: PendingReport) => !excludedReportsRef.current.has(r.id));
+      setReports(filtered);
+
+      // Process audit results
+      if (d.auditResults) {
+        const resultsMap: Record<number, Record<number, ExpenseAuditResult>> = {};
+        const progressMap: Record<number, { done: number; total: number }> = {};
+        for (const [reportIdStr, expenses] of Object.entries(d.auditResults)) {
+          const reportId = parseInt(reportIdStr);
+          const expResults: Record<number, ExpenseAuditResult> = {};
+          (expenses as any[]).forEach(e => {
+            expResults[e.expense_id] = e;
+          });
+          resultsMap[reportId] = expResults;
+          progressMap[reportId] = { done: (expenses as any[]).length, total: 0 };
+        }
+        setAuditResults(resultsMap);
+        setAuditProgress(progressMap);
+      }
+
+      // Process fatura validations
+      if (d.faturaValidations) {
+        const faturaMap: Record<number, Record<number, FaturaValidationRecord>> = {};
+        for (const [rid, records] of Object.entries(d.faturaValidations)) {
+          const vMap: Record<number, FaturaValidationRecord> = {};
+          for (const v of records as FaturaValidationRecord[]) {
+            const existing = vMap[v.expense_id];
+            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
+              vMap[v.expense_id] = v;
+            }
+          }
+          faturaMap[Number(rid)] = vMap;
+        }
+        setFaturaValidations(faturaMap);
+      }
+
+      // Process approvals
+      setReportApprovals(d.approvals || {});
+
+      // Reports the bot already tried and skipped with 422 — live-verified
+      // "past step 1" signal, more reliable than the (possibly stale) tracking
+      setBotStepSkips(new Set(d.botStepSkips || []));
+
+      // Process expense counts from reports
+      const counts: Record<number, number> = {};
+      for (const r of filtered) {
+        if (r.expense_count !== undefined && r.expense_count > 0) {
+          counts[r.id] = r.expense_count;
+        }
+      }
+      if (Object.keys(counts).length > 0) {
+        setExpenseCounts(counts);
+      }
+
+      // Process bulk expenses (do banco, com fallback live pra reports novos)
+      const bulkExpensesData = await bulkExpensesPromise;
+      if (bulkExpensesData?.data) {
+        const expensesMap: Record<number, any[]> = {};
+        const bulkCounts: Record<number, number> = {};
+        const totals: Record<number, number> = {};
+        for (const [rid, info] of Object.entries(bulkExpensesData.data)) {
+          const r = info as any;
+          expensesMap[Number(rid)] = r.expenses;
+          bulkCounts[Number(rid)] = r.expense_count;
+          totals[Number(rid)] = r.total_value || 0;
+        }
+        setReportExpenses(expensesMap);
+        setExpenseCounts(prev => ({ ...bulkCounts, ...prev }));
+        setReportTotals(prev => ({ ...prev, ...totals }));
+      }
+
+      // Fetch NF validation batch only on first load
+      if (!validationBatchFetchedRef.current) {
+        validationBatchFetchedRef.current = true;
+        fetchValidationBatch(filtered);
       }
     } catch (err) {
-      console.error('Error fetching expense counts:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoadingCounts(false);
+      setLoading(false);
     }
-  }, []);
+  }, [approverFilter]);
 
   useEffect(() => {
     fetchPending();
@@ -432,22 +550,19 @@ export default function AprovacaoDinamicaPage() {
 
   // Auto-refresh every 60 seconds, but NOT while auditing
   useEffect(() => {
-    if (globalAuditing || auditingExpense) return;
+    if (auditingExpense) return;
     const interval = setInterval(() => {
       fetchPending({ skipValidation: true });
     }, 60000);
     return () => clearInterval(interval);
-  }, [fetchPending, globalAuditing, auditingExpense]);
+  }, [fetchPending, auditingExpense]);
 
   const loadExpenses = async (reportId: number) => {
-    if (reportExpenses[reportId]) return;
-    setLoadingExpenses(reportId);
+    if (!reportExpenses[reportId]) {
+      console.warn(`[loadExpenses] No bulk expenses for report ${reportId}, skipping (no individual fetch)`);
+      return;
+    }
     try {
-      const res = await fetch(`/api/aprovacao-dinamica/report/${reportId}/expenses`);
-      if (!res.ok) throw new Error('Failed to fetch expenses');
-      const data = await res.json();
-      setReportExpenses(prev => ({ ...prev, [reportId]: data.data.expenses }));
-
       const savedRes = await fetch(`/api/aprovacao-dinamica/audit-results/${reportId}`);
       if (savedRes.ok) {
         const savedData = await savedRes.json();
@@ -459,29 +574,12 @@ export default function AprovacaoDinamicaPage() {
           setAuditResults(prev => ({ ...prev, [reportId]: resultsMap }));
           setAuditProgress(prev => ({
             ...prev,
-            [reportId]: { done: savedData.data.expenses.length, total: data.data.expenses.length },
+            [reportId]: { done: savedData.data.expenses.length, total: reportExpenses[reportId]?.length || 0 },
           }));
         }
       }
-
-      const faturaRes = await fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${reportId}`);
-      if (faturaRes.ok) {
-        const faturaData = await faturaRes.json();
-        if (faturaData.data && Array.isArray(faturaData.data)) {
-          const vMap: Record<number, FaturaValidationRecord> = {};
-          for (const v of faturaData.data as FaturaValidationRecord[]) {
-            const existing = vMap[v.expense_id];
-            if (!existing || (v.validated_at && existing.validated_at && new Date(v.validated_at) > new Date(existing.validated_at))) {
-              vMap[v.expense_id] = v;
-            }
-          }
-          setFaturaValidations(prev => ({ ...prev, [reportId]: vMap }));
-        }
-      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error loading expenses');
-    } finally {
-      setLoadingExpenses(null);
+      console.error('Error loading audit results for report:', err);
     }
   };
 
@@ -556,64 +654,21 @@ export default function AprovacaoDinamicaPage() {
     }
   };
 
-  const auditAllReports = async () => {
-    setGlobalAuditing(true);
-    try {
-      for (let r = 0; r < reports.length; r++) {
-        const report = reports[r];
-        setGlobalProgress({ current: r + 1, total: reports.length, reportDesc: report.description || `Report #${report.id}` });
-
-        let expenses = reportExpenses[report.id];
-        if (!expenses) {
-          try {
-            const res = await fetch(`/api/aprovacao-dinamica/report/${report.id}/expenses`);
-            if (res.ok) {
-              const data = await res.json();
-              expenses = data.data.expenses;
-              setReportExpenses(prev => ({ ...prev, [report.id]: expenses! }));
-
-              const savedRes = await fetch(`/api/aprovacao-dinamica/audit-results/${report.id}`);
-              if (savedRes.ok) {
-                const savedData = await savedRes.json();
-                if (savedData.data?.expenses?.length > 0) {
-                  const resultsMap: Record<number, ExpenseAuditResult> = {};
-                  savedData.data.expenses.forEach((e: ExpenseAuditResult) => {
-                    resultsMap[e.expense_id] = e;
-                  });
-                  setAuditResults(prev => ({ ...prev, [report.id]: resultsMap }));
-                  setAuditProgress(prev => ({
-                    ...prev,
-                    [report.id]: { done: savedData.data.expenses.length, total: expenses!.length },
-                  }));
-                }
-              }
-            }
-          } catch (err) {
-            console.error(`Error loading expenses for report ${report.id}:`, err);
-            continue;
-          }
-        }
-
-        if (!expenses || expenses.length === 0) continue;
-
-        for (let i = 0; i < expenses.length; i++) {
-          const expense = expenses[i];
-          const existing = auditResultsRef.current[report.id]?.[expense.id];
-          if (existing && existing.extracted_data) continue;
-          if (i > 0) {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-          }
-          await auditSingleExpense(report.id, expense, !!existing);
-        }
-      }
-    } finally {
-      setGlobalAuditing(false);
-      setGlobalProgress(null);
-    }
-  };
-
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  const isItauExpense = (expense: ReportExpense): boolean => {
+    const pm = expense.payment_method;
+    if (!pm) return false;
+    const desc = (pm.description || '').toLowerCase();
+    return desc.includes('itaú') || desc.includes('itau');
+  };
+
+  const reportHasItauExpenses = (reportId: number): boolean => {
+    const expenses = reportExpenses[reportId];
+    if (!expenses || expenses.length === 0) return false;
+    return expenses.some(isItauExpense);
+  };
 
   const isReportReadyToApprove = useCallback((reportId: number) => {
     const results = auditResults[reportId] || {};
@@ -625,16 +680,52 @@ export default function AprovacaoDinamicaPage() {
     return allApproved;
   }, [auditResults, expenseCounts]);
 
+  // A report waits on a later approval step when the tracking map says step > 1
+  // OR the bot live-verified it with a 422 skip (tracking Excel can be stale).
+  const isWaitingNextStep = useCallback(
+    (r: PendingReport) => (r.current_step ?? 1) > 1 || botStepSkips.has(r.id),
+    [botStepSkips]
+  );
+
   const filteredReports = useMemo(() => {
     let filtered = reports;
+    if (hideApproved) {
+      // Hide reports we already approved via dashboard — unless the report was
+      // reopened and resubmitted afterwards (updated_at clearly newer than our approval).
+      filtered = filtered.filter(r => {
+        const ap = reportApprovals[r.id];
+        if (!ap) return true;
+        const updatedAt = r.updated_at ? new Date(r.updated_at).getTime() : 0;
+        const approvedAt = new Date(ap.approved_at).getTime();
+        return updatedAt > approvedAt + 120_000;
+      });
+    }
+    if (caixaOnly) {
+      filtered = filtered.filter(r => !isFaturaOrCartao(r.description || ''));
+    }
+    if (auditPendingOnly) {
+      filtered = filtered.filter(r => r.audited && !isReportReadyToApprove(r.id));
+    }
     if (readyOnly) {
-      filtered = filtered.filter(r => isReportReadyToApprove(r.id) && !reportApprovals[r.id]);
+      // "Prontos" = fully audited AND still at step 1 — reports already waiting
+      // on a later step can't be approved by us/the bot and don't count.
+      filtered = filtered.filter(
+        r => isReportReadyToApprove(r.id) && !reportApprovals[r.id] && !isWaitingNextStep(r) && r.current_step !== null
+      );
     }
     if (alertsOnly) {
       filtered = filtered.filter(r => {
         const v = validationSummary[r.id];
         return v && !('error' in v) && (v.has_duplicates || v.has_date_mismatch || v.has_total_mismatch);
       });
+    }
+    if (typeFilter === 'fatura') {
+      filtered = filtered.filter(r => isFaturaOrCartao(r.description || ''));
+    } else if (typeFilter === 'caixa') {
+      filtered = filtered.filter(r => !isFaturaOrCartao(r.description || ''));
+    }
+    if (monthFilter !== 'todos') {
+      filtered = filtered.filter(r => (r.description || '').match(/(\d{2})\/(\d{4})/)?.[0] === monthFilter);
     }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
@@ -646,24 +737,37 @@ export default function AprovacaoDinamicaPage() {
         r.approval_flow_name?.toLowerCase().includes(term)
       );
     }
-    return filtered;
-  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, reportApprovals, alertsOnly, validationSummary]);
+    const byDate = (a: PendingReport, b: PendingReport, k: 'created_at' | 'updated_at') =>
+      new Date(b[k] || 0).getTime() - new Date(a[k] || 0).getTime();
+    const sorted = [...filtered];
+    switch (sortBy) {
+      case 'valor': sorted.sort((a, b) => (reportTotals[b.id] ?? -1) - (reportTotals[a.id] ?? -1)); break;
+      case 'antigos': sorted.sort((a, b) => byDate(b, a, 'created_at')); break;
+      case 'adicionados': sorted.sort((a, b) => byDate(a, b, 'created_at')); break;
+      case 'az': sorted.sort((a, b) => (a.description || '').localeCompare(b.description || '', 'pt-BR')); break;
+      case 'za': sorted.sort((a, b) => (b.description || '').localeCompare(a.description || '', 'pt-BR')); break;
+      default: sorted.sort((a, b) => byDate(a, b, 'updated_at'));
+    }
+    return sorted;
+  }, [reports, searchTerm, readyOnly, isReportReadyToApprove, isWaitingNextStep, reportApprovals, alertsOnly, validationSummary, hideApproved, caixaOnly, auditPendingOnly, sortBy, monthFilter, typeFilter, reportTotals]);
 
   const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
 
+  const availableMonths = useMemo(() => {
+    const set = new Set<string>();
+    for (const r of reports) {
+      const m = (r.description || '').match(/(\d{2})\/(\d{4})/);
+      if (m) set.add(m[0]);
+    }
+    return [...set].sort((a, b) => {
+      const [ma, ya] = a.split('/'), [mb, yb] = b.split('/');
+      return ya !== yb ? Number(yb) - Number(ya) : Number(mb) - Number(ma);
+    });
+  }, [reports]);
+
   const filteredExpenses = useCallback((reportId: number, expenses: ReportExpense[]): ReportExpense[] => {
-    if (!searchTerm.trim()) return expenses;
-    const term = searchTerm.toLowerCase();
-    return expenses.filter(e =>
-      e.title?.toLowerCase().includes(term) ||
-      String(e.expense_id).includes(term) ||
-      String(e.id).includes(term) ||
-      e.observation?.toLowerCase().includes(term) ||
-      e.expense_type?.description?.toLowerCase().includes(term) ||
-      e.costs_center?.name?.toLowerCase().includes(term) ||
-      formatCurrency(e.value).toLowerCase().includes(term)
-    );
-  }, [searchTerm]);
+    return expenses;
+  }, []);
 
   const stats = useMemo(() => {
     const total = filteredReports.length;
@@ -711,14 +815,12 @@ export default function AprovacaoDinamicaPage() {
     setApprovingReport(reportId);
     setApproveError(prev => { const n = { ...prev }; delete n[reportId]; return n; });
     try {
-      const approverId = parseInt(approverFilter) || 891904;
       const observation = approveObservation[reportId] || '';
       const res = await fetch('/api/aprovacao-dinamica/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           report_id: reportId,
-          approver_id: approverId,
           approver_name: user?.name || 'unknown',
           observation,
         }),
@@ -737,15 +839,17 @@ export default function AprovacaoDinamicaPage() {
         }
         return;
       }
+      const approvedAs = data.approved_as || { id: null, name: user?.name || 'unknown' };
       setReportApprovals(prev => ({
         ...prev,
         [reportId]: {
-          approver_name: user?.name || 'unknown',
-          approver_user_id: approverId,
+          approver_name: approvedAs.name,
+          approver_user_id: approvedAs.id,
           observation: observation || null,
           approved_at: new Date().toISOString(),
         },
       }));
+      setApprovalNotice(`Relatório #${reportId} aprovado na VExpenses como ${approvedAs.name}`);
       setShowApproveUI(prev => { const n = new Set(prev); n.delete(reportId); return n; });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
@@ -755,36 +859,75 @@ export default function AprovacaoDinamicaPage() {
     }
   };
 
-  const handleRejectExpense = async (reportId: number, expense: ReportExpense) => {
-    const key = `${reportId}-${expense.id}`;
-    const observation = rejectObservation[key]?.trim();
-    if (!observation) return;
+  const buildRejectJustify = (reportId: number, marks: Set<number>) => {
+    const exps = reportExpenses[reportId] || [];
+    const results = auditResults[reportId] || {};
+    const lines = [...marks].map(id => {
+      const e = exps.find(x => x.id === id);
+      if (!e) return null;
+      const audit = results[id];
+      const reason = audit?.rules_triggered?.[0]?.reason || audit?.divergences?.[0] || audit?.summary || '';
+      return `${e.date} — ${e.title} — ${formatCurrency(e.value)}${reason ? `: ${reason}` : ''}`;
+    }).filter(Boolean);
+    return lines.join('\n');
+  };
+
+  const toggleRejectMark = (reportId: number, expenseId: number) => {
+    setRejectMarks(prev => {
+      const cur = new Set(prev[reportId] ?? []);
+      if (cur.has(expenseId)) cur.delete(expenseId); else cur.add(expenseId);
+      return { ...prev, [reportId]: cur };
+    });
+  };
+
+  // Preenche a justificativa automaticamente (se vazia) com os motivos do bot
+  // sempre que a lista de despesas marcadas muda.
+  useEffect(() => {
+    setRejectJustify(prev => {
+      let changed = false;
+      const next = { ...prev };
+      for (const [ridStr, marks] of Object.entries(rejectMarks)) {
+        const rid = Number(ridStr);
+        if (marks.size > 0 && !(next[rid] || '').trim()) {
+          next[rid] = buildRejectJustify(rid, marks);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rejectMarks]);
+
+  const handleRejectReport = async (reportId: number) => {
+    const justify = (rejectJustify[reportId] || '').trim();
+    const marks = rejectMarks[reportId];
+    if (!justify || !marks || marks.size === 0) return;
     setRejectingReport(reportId);
+    setApproveError(prev => { const n = { ...prev }; delete n[reportId]; return n; });
     try {
-      const approverId = parseInt(approverFilter) || 891904;
       const allExpenses = reportExpenses[reportId] || [];
       const expensesPayload: Record<string, boolean> = {};
       for (const exp of allExpenses) {
-        expensesPayload[String(exp.expense_id)] = exp.id === expense.id ? false : true;
+        expensesPayload[String(exp.id)] = !marks.has(exp.id);
       }
       const res = await fetch('/api/aprovacao-dinamica/reject', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           report_id: reportId,
-          approver_id: approverId,
-          comment: `Despesa "${expense.title}" (#${expense.expense_id}) reprovada via dashboard por ${user?.name || 'approver'}. Motivo: ${observation}`,
+          comment: `${justify}\n\nReprovado via dashboard por ${user?.name || 'approver'}`,
           expenses: expensesPayload,
         }),
       });
       const data = await res.json();
       if (!res.ok) {
-        setApproveError(prev => ({ ...prev, [reportId]: data.error || 'Failed to reject expense' }));
+        setApproveError(prev => ({ ...prev, [reportId]: data.error || 'Falha ao reprovar relatório' }));
         return;
       }
-      setRejectingExpense(null);
-      setRejectObservation(prev => { const n = { ...prev }; delete n[key]; return n; });
-      setApprovalNotice(`Despesa "${expense.title}" do relatório #${reportId} reprovada com sucesso.`);
+      const rejectedCount = marks.size;
+      setRejectMarks(prev => { const n = { ...prev }; delete n[reportId]; return n; });
+      setRejectJustify(prev => { const n = { ...prev }; delete n[reportId]; return n; });
+      setApprovalNotice(`Relatório #${reportId} reprovado — ${rejectedCount} despesa(s) reprovada(s), demais aprovadas.`);
       excludedReportsRef.current.add(reportId);
       setReports(prev => prev.filter(r => r.id !== reportId));
       fetchPending();
@@ -904,6 +1047,20 @@ export default function AprovacaoDinamicaPage() {
 
   return (
     <div className="space-y-6">
+      <ExpenseReviewModal
+        open={!!reviewExpense}
+        onClose={() => setReviewExpense(null)}
+        expenses={reviewExpense ? filteredExpenses(reviewExpense.reportId, reportExpenses[reviewExpense.reportId] || []) : []}
+        startExpenseId={reviewExpense?.expenseId ?? 0}
+        reportId={reviewExpense?.reportId ?? 0}
+        reportDescription={reviewExpense ? reports.find(r => r.id === reviewExpense.reportId)?.description || '' : ''}
+        auditResults={reviewExpense ? auditResults[reviewExpense.reportId] || {} : {}}
+        reviewerName={user?.name}
+        onDecision={(expenseId, decision) => {
+          if (reviewExpense) handleReviewComplete(reviewExpense.reportId, expenseId, decision, user?.name);
+        }}
+      />
+
       <ManualReviewModal
         open={reviewModalOpen}
         onClose={() => setReviewModalOpen(false)}
@@ -1008,6 +1165,7 @@ export default function AprovacaoDinamicaPage() {
         duplicateExpenses={comparisonModal?.duplicates ?? []}
         onDismiss={handleDismissDuplicate}
         dismissedBy={user?.name}
+        currentUserName={user?.name}
       />
 
       <BatchDuplicateReviewModal
@@ -1018,6 +1176,10 @@ export default function AprovacaoDinamicaPage() {
         currentUserName={user?.name}
       />
 
+      <BotActivityModal
+        open={botLogModalOpen}
+        onClose={() => setBotLogModalOpen(false)}
+      />
       <DismissLogsModal
         open={logsModalOpen}
         onClose={() => setLogsModalOpen(false)}
@@ -1028,7 +1190,7 @@ export default function AprovacaoDinamicaPage() {
         onClose={() => setFaturaModalOpen(false)}
         validatedBy={user?.name || 'Sistema'}
         onValidationComplete={() => {
-          const reportIds = Object.keys(faturaValidations).map(Number);
+          const reportIds = visibleReports.map(r => r.id);
           for (const rid of reportIds) {
             fetch(`/api/aprovacao-dinamica/fatura/status?reportId=${rid}`)
               .then(res => res.json())
@@ -1097,6 +1259,15 @@ export default function AprovacaoDinamicaPage() {
             Logs
           </Button>
           <Button
+            onClick={() => setBotLogModalOpen(true)}
+            size="sm"
+            variant="outline"
+            className="border-green-300 text-green-700 hover:bg-green-100"
+          >
+            <Bot className="h-4 w-4" />
+            Atividade do bot
+          </Button>
+          <Button
             onClick={() => setFaturaModalOpen(true)}
             size="sm"
             variant="outline"
@@ -1105,45 +1276,40 @@ export default function AprovacaoDinamicaPage() {
             <CreditCard className="h-4 w-4" />
             Validar Fatura
           </Button>
-          <Button
-            onClick={auditAllReports}
-            disabled={globalAuditing || loading || reports.length === 0}
-            size="sm"
+          <button
+            type="button"
+            onClick={toggleAutoAudit}
+            disabled={autoAudit === null || autoAuditBusy}
+            className="flex items-center gap-2 whitespace-nowrap rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700 disabled:opacity-50"
+            title={autoAuditPending !== null ? `${autoAuditPending} despesas na fila de auditoria` : 'Auditoria contínua pelo bot'}
           >
-            {globalAuditing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <PlayCircle className="h-4 w-4" />
+            <span
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                autoAudit ? 'bg-green-500' : 'bg-gray-300'
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                  autoAudit ? 'translate-x-4' : 'translate-x-0.5'
+                }`}
+              />
+            </span>
+            Auditoria automática
+            {autoAudit && autoAuditPending !== null && autoAuditPending > 0 && (
+              <span className="rounded-full bg-blue-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-blue-700">
+                {autoAuditPending} na fila
+              </span>
             )}
-            Auditar Tudo
-          </Button>
-          <Button onClick={() => { validationBatchFetchedRef.current = false; fetchPending(); }} disabled={loading || globalAuditing} variant="outline" size="sm">
+          </button>
+          <Button onClick={() => { validationBatchFetchedRef.current = false; fetchPending(); }} disabled={loading} variant="outline" size="sm">
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Atualizar
           </Button>
         </div>
       </div>
 
-      {/* Global Audit Progress */}
-      {globalProgress && (
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-          <div className="flex items-center justify-between text-sm text-blue-700">
-            <span className="flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Auditando report {globalProgress.current}/{globalProgress.total}: {globalProgress.reportDesc}
-            </span>
-          </div>
-          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-blue-200">
-            <div
-              className="h-full rounded-full bg-blue-600 transition-all duration-300"
-              style={{ width: `${(globalProgress.current / globalProgress.total) * 100}%` }}
-            />
-          </div>
-        </div>
-      )}
-
       {/* Search Bar + Approver Filter */}
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
           <Input
@@ -1172,20 +1338,38 @@ export default function AprovacaoDinamicaPage() {
         <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
           <input
             type="checkbox"
-            checked={stepOneOnly}
-            onChange={e => setStepOneOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          Só etapa 1
-        </label>
-        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
-          <input
-            type="checkbox"
             checked={readyOnly}
             onChange={e => setReadyOnly(e.target.checked)}
             className="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
           />
           Prontos para aprovar
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={auditPendingOnly}
+            onChange={e => setAuditPendingOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          Validados pra verificação
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={caixaOnly}
+            onChange={e => setCaixaOnly(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          Somente caixas
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
+          <input
+            type="checkbox"
+            checked={hideApproved}
+            onChange={e => setHideApproved(e.target.checked)}
+            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+          />
+          Remover já aprovados
         </label>
         <label className="flex items-center gap-2 text-sm text-gray-600 whitespace-nowrap">
           <input
@@ -1196,6 +1380,31 @@ export default function AprovacaoDinamicaPage() {
           />
           Só com alertas NF
         </label>
+        <button
+          type="button"
+          onClick={toggleAutoApprove}
+          disabled={autoApprove === null || autoApproveBusy}
+          className="flex items-center gap-2 whitespace-nowrap text-sm text-gray-700 disabled:opacity-50"
+          title={autoApproveEligible !== null ? `${autoApproveEligible} caixas na etapa da Letícia prontos agora${autoApproveWaiting ? ` · ${autoApproveWaiting} aguardando etapa 2+` : ''}` : undefined}
+        >
+          <span
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              autoApprove ? 'bg-green-500' : 'bg-gray-300'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                autoApprove ? 'translate-x-4' : 'translate-x-0.5'
+              }`}
+            />
+          </span>
+          Aprovação automática
+          {autoApprove && autoApproveEligible !== null && autoApproveEligible > 0 && (
+            <span className="rounded-full bg-green-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-green-700">
+              {autoApproveEligible} pronto{autoApproveEligible > 1 ? 's' : ''}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -1261,15 +1470,65 @@ export default function AprovacaoDinamicaPage() {
         </Card>
       </div>
 
+      {/* Ordenação e filtros */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-gray-200 bg-white px-4 py-2.5">
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          Ordenar:
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value as typeof sortBy)}
+            className="rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="recentes">Mais recentes</option>
+            <option value="antigos">Mais antigos</option>
+            <option value="adicionados">Últimos adicionados</option>
+            <option value="valor">Maior valor total</option>
+            <option value="az">A–Z</option>
+            <option value="za">Z–A</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          Tipo:
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value as typeof typeFilter)}
+            className="rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="todos">Todos</option>
+            <option value="caixa">Somente caixas</option>
+            <option value="fatura">Somente faturas/cartão</option>
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          Competência:
+          <select
+            value={monthFilter}
+            onChange={e => setMonthFilter(e.target.value)}
+            className="rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="todos">Todas</option>
+            {availableMonths.map(m => <option key={m} value={m}>{m}</option>)}
+          </select>
+        </label>
+        <span className="ml-auto text-xs text-gray-400">
+          {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
       {/* Error */}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4">
           <div className="flex items-center gap-2 text-red-800">
             <AlertCircle className="h-5 w-5" />
             <span className="text-sm font-medium">{error}</span>
-            <button onClick={() => setError(null)} className="ml-auto text-red-400 hover:text-red-600">
-              ×
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={() => fetchPending()} className="text-xs px-3 py-1 rounded-md bg-red-100 hover:bg-red-200 text-red-700 font-medium">
+                Tentar novamente
+              </button>
+              <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+                ×
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -1298,7 +1557,7 @@ export default function AprovacaoDinamicaPage() {
       {/* Empty state */}
       {!loading && filteredReports.length === 0 && reports.length > 0 && (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
+          <CardContent className="flex flex-col items-center justify-center py-12 pt-12">
             <Search className="h-12 w-12 text-gray-300" />
             <p className="mt-3 text-gray-500">Nenhum resultado para "{searchTerm}"</p>
             <Button variant="outline" size="sm" className="mt-3" onClick={() => setSearchTerm('')}>
@@ -1308,9 +1567,9 @@ export default function AprovacaoDinamicaPage() {
         </Card>
       )}
 
-      {!loading && reports.length === 0 && (
+      {!loading && !error && reports.length === 0 && (
         <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
+          <CardContent className="flex flex-col items-center justify-center py-12 pt-12">
             <Bot className="h-12 w-12 text-gray-300" />
             <p className="mt-3 text-gray-500">Nenhum report pendente encontrado</p>
             <p className="text-sm text-gray-400">Todos os reports já foram processados</p>
@@ -1332,7 +1591,9 @@ export default function AprovacaoDinamicaPage() {
           const approvedInReport = Object.values(results).filter(r => r.status === 'APROVADO_BOT' || r.status === 'APROVADO_HUMANO').length;
           const pendingInReport = Object.values(results).filter(r => r.status === 'PENDENTE' || r.status === 'ANALISAR_DEPOIS').length;
           const rejectedInReport = Object.values(results).filter(r => r.status === 'REPROVADO' || r.status === 'REPROVADO_HUMANO').length;
+          const markedCount = rejectMarks[report.id]?.size ?? 0;
           const isReadyToApprove = isReportReadyToApprove(report.id);
+          const allBotApproved = hasResults && Object.values(results).every(r => r.status === 'APROVADO_BOT');
           const reportApproval = reportApprovals[report.id];
           const isApproved = !!reportApproval;
 
@@ -1346,17 +1607,17 @@ export default function AprovacaoDinamicaPage() {
             <Card key={report.id} className={cardClass}>
               {/* Report Header */}
               <div
-                className="flex cursor-pointer items-center gap-3 p-4 hover:bg-gray-50"
+                className="flex cursor-pointer flex-wrap items-center gap-3 p-4 hover:bg-gray-50"
                 onClick={() => toggleReport(report.id)}
               >
                 {isExpanded ? (
-                  <ChevronDown className="h-5 w-5 text-gray-400" />
+                  <ChevronDown className="h-5 w-5 flex-shrink-0 text-gray-400" />
                 ) : (
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
+                  <ChevronRight className="h-5 w-5 flex-shrink-0 text-gray-400" />
                 )}
 
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-medium text-gray-900">{report.description || `Report #${report.id}`}</span>
                     <Badge variant="outline" className="text-xs">
                       #{report.id}
@@ -1371,7 +1632,7 @@ export default function AprovacaoDinamicaPage() {
                         Reaberto
                       </Badge>
                     )}
-                    {report.current_step > 1 && (
+                    {isWaitingNextStep(report) && !isReadyToApprove && (
                       <Badge className="bg-purple-100 text-purple-700 text-xs" title="Relatório já passou por pelo menos uma aprovação">
                         Etapa 2+
                       </Badge>
@@ -1388,10 +1649,30 @@ export default function AprovacaoDinamicaPage() {
                         Aprovado por {reportApproval.approver_name}
                       </Badge>
                     )}
-                    {isReadyToApprove && !isApproved && (
-                      <Badge className="bg-green-200 text-green-800 text-xs">
+                    {isReadyToApprove && !isApproved && !isWaitingNextStep(report) && report.current_step !== null && (
+                      <Badge
+                        className="bg-green-200 text-green-800 text-xs"
+                        title={allBotApproved ? 'Todas as despesas aprovadas pelo bot' : 'Inclui despesas aprovadas manualmente'}
+                      >
                         <CheckCircle className="mr-1 h-3 w-3" />
-                        Pronto para aprovar
+                        {allBotApproved ? 'Pronto p/ aprovar (100% bot)' : 'Pronto p/ aprovar (bot + humano)'}
+                      </Badge>
+                    )}
+                    {isReadyToApprove && !isApproved && !isWaitingNextStep(report) && report.current_step === null && (
+                      <Badge
+                        className="bg-gray-100 text-gray-600 text-xs"
+                        title="Não foi possível confirmar a etapa atual de aprovação no VExpenses"
+                      >
+                        Etapa não identificada
+                      </Badge>
+                    )}
+                    {isReadyToApprove && !isApproved && isWaitingNextStep(report) && (
+                      <Badge
+                        className="bg-purple-100 text-purple-700 text-xs"
+                        title="Despesas todas auditadas — aguardando o aprovador da próxima etapa (a etapa da Letícia já foi aprovada)"
+                      >
+                        <CheckCircle className="mr-1 h-3 w-3" />
+                        {(report.current_step ?? 0) > 1 ? `Aguardando etapa ${report.current_step}` : 'Aguardando etapa 2+'}
                       </Badge>
                     )}
                     {expenseCounts[report.id] !== undefined && hasResults && auditedCount < expenseCounts[report.id] && (
@@ -1399,6 +1680,33 @@ export default function AprovacaoDinamicaPage() {
                         {auditedCount}/{expenseCounts[report.id]}
                       </Badge>
                     )}
+                    {(() => {
+                      if (!reportHasItauExpenses(report.id)) return null;
+                      const faturaMap = faturaValidations[report.id];
+                      if (!faturaMap) return null;
+                      const faturaRecords = Object.values(faturaMap);
+                      if (faturaRecords.length === 0) return null;
+                      const validated = faturaRecords.filter(v => v.status === 'VALIDATED').length;
+                      const mismatch = faturaRecords.filter(v => v.status === 'MISMATCH').length;
+                      const notFound = faturaRecords.filter(v => v.status === 'NOT_FOUND').length;
+                      const total = faturaRecords.length;
+                      const allValidated = validated === total;
+                      const hasIssues = mismatch > 0 || notFound > 0;
+                      const badgeClass = allValidated
+                        ? 'bg-green-100 text-green-800'
+                        : hasIssues
+                        ? 'bg-orange-100 text-orange-800'
+                        : 'bg-purple-100 text-purple-800';
+                      const icon = allValidated ? <CheckCircle className="mr-1 h-3 w-3" /> : hasIssues ? <AlertCircle className="mr-1 h-3 w-3" /> : <FileText className="mr-1 h-3 w-3" />;
+                      const title = `Fatura Itaú: ${validated} validadas, ${mismatch} divergentes, ${notFound} não encontradas (de ${total} despesas)`;
+                      return (
+                        <Badge className={`${badgeClass} text-xs`} title={title}>
+                          {icon}
+                          Fatura: {validated}/{total}
+                          {mismatch > 0 && ` (${mismatch} div)`}
+                        </Badge>
+                      );
+                    })()}
                     {(() => {
                       const vs = validationSummary[report.id];
                       if (!vs || 'error' in vs) return null;
@@ -1426,7 +1734,7 @@ export default function AprovacaoDinamicaPage() {
                       );
                     })()}
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
+                  <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-gray-500">
                     {report.user && (
                       <span className="flex items-center gap-1">
                         <User className="h-3 w-3" />
@@ -1468,9 +1776,19 @@ export default function AprovacaoDinamicaPage() {
                   </div>
                 </div>
 
-                {/* Audit All + Manual Review Buttons */}
-                {isExpanded && expenses.length > 0 && (
-                  <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                {/* Canto superior direito: valor total + botões de ação */}
+                <div className="flex flex-col items-end gap-2 self-start" onClick={e => e.stopPropagation()}>
+                  {reportTotals[report.id] !== undefined && reportTotals[report.id] > 0 && (
+                    <span
+                      className="whitespace-nowrap text-base font-semibold text-gray-900"
+                      title="Valor total do relatório"
+                    >
+                      {formatCurrency(reportTotals[report.id])}
+                    </span>
+                  )}
+                  {/* Audit All + Manual Review Buttons */}
+                  {isExpanded && expenses.length > 0 && (
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     {(pendingInReport > 0 || rejectedInReport > 0) && (
                       <Button
                         size="sm"
@@ -1483,7 +1801,7 @@ export default function AprovacaoDinamicaPage() {
                         ) : (
                           <Eye className="h-4 w-4" />
                         )}
-                        Revisar
+                        Revisar pendências
                         {(pendingInReport + rejectedInReport) > 0 && (
                           <Badge className="ml-1 bg-orange-500 text-white text-xs">
                             {pendingInReport + rejectedInReport}
@@ -1576,6 +1894,19 @@ export default function AprovacaoDinamicaPage() {
                       )}
                       Auditar Tudo
                     </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const fExp = filteredExpenses(report.id, expenses);
+                        if (fExp.length > 0) setReviewExpense({ reportId: report.id, expenseId: fExp[0].id });
+                      }}
+                      disabled={isLoadingExp || expenses.length === 0}
+                      className="border-purple-300 text-purple-700 hover:bg-purple-100"
+                    >
+                      <Receipt className="h-4 w-4" />
+                      Ver todas as despesas
+                    </Button>
                     <a
                       href={`https://amp.vexpenses.com/relatorios/${report.id}`}
                       target="_blank"
@@ -1591,7 +1922,8 @@ export default function AprovacaoDinamicaPage() {
                       </Button>
                     </a>
                   </div>
-                )}
+                  )}
+                </div>
               </div>
 
               {/* Approve Panel for Ready Reports */}
@@ -1654,7 +1986,7 @@ export default function AprovacaoDinamicaPage() {
                         className="border-green-300 text-green-700 hover:bg-green-100"
                       >
                         <Receipt className="h-4 w-4" />
-                        Revisar despesas
+                        Conferir despesas
                       </Button>
                       <Button
                         size="sm"
@@ -1666,6 +1998,58 @@ export default function AprovacaoDinamicaPage() {
                       </Button>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Reject Panel — despesas marcadas para reprovação */}
+              {isExpanded && markedCount > 0 && !isApproved && (
+                <div className="border-t border-red-200 bg-red-50 p-4" onClick={e => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <XCircle className="h-5 w-5 text-red-600" />
+                    <span className="font-medium text-red-800">
+                      {markedCount} despesa(s) marcada(s) para reprovação — as outras {expenses.length - markedCount} serão aprovadas automaticamente
+                    </span>
+                  </div>
+                  <div className="space-y-3">
+                    <textarea
+                      placeholder="Justificativa da reprovação (obrigatória)..."
+                      value={rejectJustify[report.id] || ''}
+                      onChange={e => setRejectJustify(prev => ({ ...prev, [report.id]: e.target.value }))}
+                      className="w-full rounded-md border border-red-300 bg-white px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                      rows={4}
+                    />
+                    {approveError[report.id] && (
+                      <div className="rounded-md border border-red-200 bg-red-100 p-2 text-xs text-red-700">
+                        {approveError[report.id]}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleRejectReport(report.id)}
+                        disabled={rejectingReport === report.id || !(rejectJustify[report.id] || '').trim()}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        {rejectingReport === report.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <XCircle className="h-4 w-4" />
+                        )}
+                        Reprovar relatório no VExpenses
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setRejectMarks(prev => { const n = { ...prev }; delete n[report.id]; return n; });
+                          setRejectJustify(prev => { const n = { ...prev }; delete n[report.id]; return n; });
+                        }}
+                        disabled={rejectingReport === report.id}
+                      >
+                        Limpar marcações
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -1969,29 +2353,116 @@ export default function AprovacaoDinamicaPage() {
                     </div>
                   )}
 
+                  {/* Fatura Validation Summary — only for reports with Itaú expenses */}
+                  {!isLoadingExp && expenses.length > 0 && reportHasItauExpenses(report.id) && (() => {
+                    const faturaMap = faturaValidations[report.id];
+                    const validated: any[] = [];
+                    const mismatched: Array<{ expense: any; record: FaturaValidationRecord }> = [];
+                    const notFound: Array<{ expense: any; record: FaturaValidationRecord }> = [];
+                    const noValidation: any[] = [];
+                    const itauExpenses = expenses.filter(isItauExpense);
+                    for (const exp of itauExpenses) {
+                      const fv = faturaMap?.[exp.id] ?? faturaMap?.[exp.expense_id];
+                      if (!fv) {
+                        noValidation.push(exp);
+                      } else if (fv.status === 'VALIDATED') {
+                        validated.push(exp);
+                      } else if (fv.status === 'MISMATCH') {
+                        mismatched.push({ expense: exp, record: fv });
+                      } else if (fv.status === 'NOT_FOUND') {
+                        notFound.push({ expense: exp, record: fv });
+                      }
+                    }
+                    const total = itauExpenses.length;
+                    const hasAny = validated.length + mismatched.length + notFound.length + noValidation.length > 0;
+                    if (!hasAny || total === 0) return null;
+                    const allValidated = validated.length === total;
+                    return (
+                      <div className={`border-b px-4 py-3 ${allValidated ? 'border-green-200 bg-green-50' : 'border-orange-200 bg-orange-50'}`}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <p className={`text-sm font-medium ${allValidated ? 'text-green-800' : 'text-orange-800'}`}>
+                            Fatura Itaú:
+                          </p>
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-green-700">
+                            <CheckCircle className="h-3 w-3" /> {validated.length} OK
+                          </span>
+                          {mismatched.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-orange-700">
+                              <AlertCircle className="h-3 w-3" /> {mismatched.length} divergentes
+                            </span>
+                          )}
+                          {notFound.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-red-700">
+                              <XCircle className="h-3 w-3" /> {notFound.length} não encontradas
+                            </span>
+                          )}
+                          {noValidation.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-gray-500">
+                              <FileText className="h-3 w-3" /> {noValidation.length} sem validação
+                            </span>
+                          )}
+                          <span className="text-xs text-gray-400">de {total} despesas</span>
+                        </div>
+                        {(mismatched.length > 0 || notFound.length > 0) && (
+                          <div className="space-y-1.5">
+                            {mismatched.map(({ expense, record }) => (
+                              <div key={expense.id} className="flex items-center gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 font-medium text-orange-700">
+                                  <AlertCircle className="h-3 w-3" /> Divergente
+                                </span>
+                                <span className="font-medium text-gray-700">{expense.title}</span>
+                                <span className="text-gray-500">R$ {parseFloat(expense.value).toFixed(2)}</span>
+                                <span className="text-gray-400">→ Fatura: R$ {Number(record.fatura_value).toFixed(2)}</span>
+                                <span className="font-medium text-orange-800">Dif: R$ {Number(record.difference).toFixed(2)}</span>
+                                {record.fatura_description && (
+                                  <span className="text-gray-400 italic" title={record.fatura_description}>
+                                    ({record.fatura_description.length > 30 ? record.fatura_description.slice(0, 30) + '...' : record.fatura_description})
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {notFound.map(({ expense, record }) => (
+                              <div key={expense.id} className="flex items-center gap-2 text-xs">
+                                <span className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2 py-0.5 font-medium text-red-700">
+                                  <XCircle className="h-3 w-3" /> Não encontrada
+                                </span>
+                                <span className="font-medium text-gray-700">{expense.title}</span>
+                                <span className="text-gray-500">R$ {parseFloat(expense.value).toFixed(2)}</span>
+                                <span className="text-gray-400">{expense.date}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+
                   {/* Expenses as dynamic cards */}
                   {!isLoadingExp && expenses.length > 0 && (
                     <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2 lg:grid-cols-3">
                       {filteredExpenses(report.id, expenses).map(expense => {
                         const expAudit = results[expense.id];
                         const isAuditingThis = auditingExpense === `${report.id}-${expense.id}`;
-                        const showReceipt = showReceiptFor === expense.receipt_url;
+                        const isMarked = rejectMarks[report.id]?.has(expense.id) ?? false;
 
                         return (
                           <div
                             key={expense.id}
                             className={`rounded-lg border-2 p-3 transition-all ${
-                              expAudit
+                              isMarked
+                                ? 'border-red-400 bg-red-50'
+                                : expAudit
                                 ? STATUS_CONFIG[expAudit.status].color
                                 : 'border-gray-200 bg-white'
                             }`}
                           >
                             {/* Card Header */}
                             <div className="flex items-start justify-between gap-2">
-                              <div className="flex items-center gap-2">
+                              <div className="flex min-w-0 items-center gap-2">
                                 <div className="flex flex-shrink-0 items-center gap-1">
                                   <button
-                                    onClick={() => setShowReceiptFor(showReceipt ? null : expense.receipt_url)}
+                                    onClick={() => setReviewExpense({ reportId: report.id, expenseId: expense.id })}
+                                    title="Revisar despesa"
                                     className="flex h-10 w-10 items-center justify-center rounded border border-gray-200 bg-gray-50 hover:border-blue-400"
                                   >
                                     {expense.receipt_url ? (
@@ -2022,13 +2493,21 @@ export default function AprovacaoDinamicaPage() {
                                 </div>
                               </div>
 
-                              <div className="flex flex-col items-end gap-1">
+                              <div className="flex flex-shrink-0 flex-col items-end gap-1">
                                 {(() => {
-                                  const fatura = faturaValidations[report.id]?.[expense.expense_id];
-                                  if (!fatura) return null;
+                                  if (!isItauExpense(expense)) return null;
+                                  const fatura = faturaValidations[report.id]?.[expense.id] ?? faturaValidations[report.id]?.[expense.expense_id];
+                                  if (!fatura) {
+                                    return (
+                                      <div className="flex items-center gap-1 rounded-full border border-gray-200 bg-gray-50 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-gray-400" title="Esta despesa ainda não foi validada contra nenhuma fatura">
+                                        <FileText className="h-3 w-3" />
+                                        Sem validação
+                                      </div>
+                                    );
+                                  }
                                   if (fatura.status === 'VALIDATED') {
                                     return (
-                                      <div className="flex items-center gap-1 rounded-full border border-green-300 bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700" title={`Validado contra ${fatura.fatura_filename} em ${fatura.validated_at ? new Date(fatura.validated_at).toLocaleString('pt-BR') : '-'}`}>
+                                      <div className="flex items-center gap-1 rounded-full border border-green-300 bg-green-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-green-700" title={`Validado contra ${fatura.fatura_filename} em ${fatura.validated_at ? new Date(fatura.validated_at).toLocaleString('pt-BR') : '-'}`}>
                                         <CheckCircle className="h-3 w-3" />
                                         Fatura OK
                                       </div>
@@ -2036,7 +2515,7 @@ export default function AprovacaoDinamicaPage() {
                                   }
                                   if (fatura.status === 'MISMATCH') {
                                     return (
-                                      <div className="flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700" title={`Divergência: R$ ${fatura.difference.toFixed(2)} — ${fatura.fatura_filename}`}>
+                                      <div className="flex items-center gap-1 rounded-full border border-orange-300 bg-orange-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-orange-700" title={`Divergência: R$ ${Number(fatura.difference).toFixed(2)} — ${fatura.fatura_filename}`}>
                                         <AlertCircle className="h-3 w-3" />
                                         Fatura Divergente
                                       </div>
@@ -2044,7 +2523,7 @@ export default function AprovacaoDinamicaPage() {
                                   }
                                   if (fatura.status === 'NOT_FOUND') {
                                     return (
-                                      <div className="flex items-center gap-1 rounded-full border border-red-300 bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700" title={`Não encontrada na fatura ${fatura.fatura_filename}`}>
+                                      <div className="flex items-center gap-1 rounded-full border border-red-300 bg-red-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-red-700" title={`Não encontrada na fatura ${fatura.fatura_filename}`}>
                                         <XCircle className="h-3 w-3" />
                                         Sem Fatura
                                       </div>
@@ -2052,8 +2531,14 @@ export default function AprovacaoDinamicaPage() {
                                   }
                                   return null;
                                 })()}
+                                {isMarked && (
+                                  <div className="flex items-center gap-1 rounded-full border border-red-400 bg-red-100 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-red-700">
+                                    <XCircle className="h-3 w-3" />
+                                    Será reprovada
+                                  </div>
+                                )}
                                 {expAudit && (
-                                  <div className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+                                  <div className={`flex items-center gap-1 rounded-full border whitespace-nowrap px-2 py-0.5 text-xs font-medium ${STATUS_CONFIG[expAudit.status]?.color || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
                                     {React.createElement(STATUS_CONFIG[expAudit.status]?.icon || CheckCircle, { className: 'h-3 w-3' })}
                                     {STATUS_CONFIG[expAudit.status]?.label || expAudit.status}
                                   </div>
@@ -2078,7 +2563,8 @@ export default function AprovacaoDinamicaPage() {
                               )}
 
                               {(() => {
-                                const fatura = faturaValidations[report.id]?.[expense.expense_id];
+                                if (!isItauExpense(expense)) return null;
+                                const fatura = faturaValidations[report.id]?.[expense.id] ?? faturaValidations[report.id]?.[expense.expense_id];
                                 if (!fatura || fatura.status === 'NOT_FOUND') return null;
                                 return (
                                   <div className="rounded border border-purple-200 bg-purple-50 p-1.5">
@@ -2089,9 +2575,9 @@ export default function AprovacaoDinamicaPage() {
                                       {fatura.fatura_description && <span>• {fatura.fatura_description}</span>}
                                     </div>
                                     <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-purple-700">
-                                      <span>Fatura: R$ {fatura.fatura_value.toFixed(2)}</span>
-                                      <span>• Despesa: R$ {fatura.expense_value.toFixed(2)}</span>
-                                      {fatura.difference !== 0 && <span className="font-medium text-orange-700">• Diferença: R$ {fatura.difference.toFixed(2)}</span>}
+                                      <span>Fatura: R$ {Number(fatura.fatura_value).toFixed(2)}</span>
+                                      <span>• Despesa: R$ {Number(fatura.expense_value).toFixed(2)}</span>
+                                      {Number(fatura.difference) !== 0 && <span className="font-medium text-orange-700">• Diferença: R$ {Number(fatura.difference).toFixed(2)}</span>}
                                     </div>
                                     {fatura.validated_at && (
                                       <p className="mt-0.5 text-xs text-purple-400">
@@ -2106,7 +2592,7 @@ export default function AprovacaoDinamicaPage() {
                               {/* Audit Result Details */}
                               {expAudit && (
                                 <div className="mt-2 space-y-1.5">
-                                  {expAudit.divergences.length > 0 && (
+                                  {expAudit.divergences?.length > 0 && (
                                     <div className="rounded border border-orange-200 bg-orange-50 p-1.5">
                                       <p className="text-xs font-medium text-orange-800">Divergências:</p>
                                       {expAudit.divergences.map((d, i) => (
@@ -2115,7 +2601,7 @@ export default function AprovacaoDinamicaPage() {
                                     </div>
                                   )}
 
-                                  {expAudit.rules_triggered.length > 0 && (
+                                  {expAudit.rules_triggered?.length > 0 && (
                                     <div className="rounded border border-gray-200 bg-gray-50 p-1.5">
                                       <p className="text-xs font-medium text-gray-700">Regras:</p>
                                       {expAudit.rules_triggered.map((r, i) => (
@@ -2132,12 +2618,12 @@ export default function AprovacaoDinamicaPage() {
                                     <div className="rounded border border-blue-200 bg-blue-50 p-1.5">
                                       <p className="text-xs font-medium text-blue-800">Gemini extraiu:</p>
                                       <div className="mt-1 grid grid-cols-2 gap-0.5 text-xs text-blue-700">
-                                        {expAudit.extracted_data.valor_total && <span>Valor: {expAudit.extracted_data.valor_total}</span>}
-                                        {expAudit.extracted_data.data && <span>Data: {expAudit.extracted_data.data}</span>}
-                                        {expAudit.extracted_data.estabelecimento && <span>Estab: {expAudit.extracted_data.estabelecimento}</span>}
-                                        {expAudit.extracted_data.categoria && <span>Cat: {expAudit.extracted_data.categoria}</span>}
-                                        {expAudit.extracted_data.cnpj && <span>CNPJ: {expAudit.extracted_data.cnpj}</span>}
-                                        {expAudit.extracted_data.forma_pagamento && <span>Pag: {expAudit.extracted_data.forma_pagamento}</span>}
+                                        {expAudit.extracted_data.valor_total && <span className="min-w-0 break-words">Valor: {expAudit.extracted_data.valor_total}</span>}
+                                        {expAudit.extracted_data.data && <span className="min-w-0 break-words">Data: {expAudit.extracted_data.data}</span>}
+                                        {expAudit.extracted_data.estabelecimento && <span className="min-w-0 break-words">Estab: {expAudit.extracted_data.estabelecimento}</span>}
+                                        {expAudit.extracted_data.categoria && <span className="min-w-0 break-words">Cat: {expAudit.extracted_data.categoria}</span>}
+                                        {expAudit.extracted_data.cnpj && <span className="min-w-0 break-words">CNPJ: {expAudit.extracted_data.cnpj}</span>}
+                                        {expAudit.extracted_data.forma_pagamento && <span className="min-w-0 break-words">Pag: {expAudit.extracted_data.forma_pagamento}</span>}
                                       </div>
                                       {expAudit.extracted_data.itens && expAudit.extracted_data.itens.length > 0 && (
                                         <p className="mt-0.5 text-xs text-blue-700">
@@ -2151,95 +2637,47 @@ export default function AprovacaoDinamicaPage() {
                                 </div>
                               )}
 
-                              {/* Receipt preview */}
-                              {showReceipt && expense.receipt_url && (
-                                <div className="mt-2">
-                                  {expense.receipt_url.toLowerCase().endsWith('.pdf') || expense.receipt_url.toLowerCase().includes('/pdfs/') ? (
-                                    <iframe
-                                      src={`/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`}
-                                      title="Comprovante PDF"
-                                      className="h-96 w-full rounded-lg border border-gray-200"
-                                    />
-                                  ) : (
-                                    <img
-                                      src={expense.receipt_url}
-                                      alt="Comprovante"
-                                      className="max-h-64 rounded-lg border border-gray-200"
-                                      onError={e => {
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              )}
                             </div>
 
                             {/* Card Footer */}
                             <div className="mt-3 border-t border-gray-100 pt-2">
-                              {rejectingExpense === `${report.id}-${expense.id}` ? (
-                                <div className="space-y-2">
-                                  <Input
-                                    placeholder="Motivo da reprovação (obrigatório)..."
-                                    value={rejectObservation[`${report.id}-${expense.id}`] || ''}
-                                    onChange={e => setRejectObservation(prev => ({ ...prev, [`${report.id}-${expense.id}`]: e.target.value }))}
-                                    className="h-8 text-xs"
-                                  />
-                                  <div className="flex gap-2">
-                                    <Button
-                                      size="sm"
-                                      className="h-7 bg-red-600 hover:bg-red-700 text-white text-xs"
-                                      disabled={!rejectObservation[`${report.id}-${expense.id}`]?.trim() || rejectingReport === report.id}
-                                      onClick={() => handleRejectExpense(report.id, expense)}
-                                    >
-                                      {rejectingReport === report.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <XCircle className="h-3 w-3" />}
-                                      Confirmar
-                                    </Button>
+                              <div className="flex flex-wrap items-center gap-2">
+                                {expAudit ? (
+                                  expAudit.status !== 'APROVADO_HUMANO' && expAudit.status !== 'REPROVADO_HUMANO' && expAudit.status !== 'ANALISAR_DEPOIS' && !expAudit.extracted_data && !isAuditingThis ? (
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      className="h-7 text-xs"
-                                      onClick={() => { setRejectingExpense(null); setRejectObservation(prev => { const n = { ...prev }; delete n[`${report.id}-${expense.id}`]; return n; }); }}
+                                      className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                                      onClick={() => auditSingleExpense(report.id, expense, true)}
                                     >
-                                      Cancelar
+                                      <RefreshCw className="h-3 w-3" />
+                                      Re-analisar
                                     </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2">
-                                  {expAudit ? (
-                                    expAudit.status !== 'APROVADO_HUMANO' && expAudit.status !== 'REPROVADO_HUMANO' && expAudit.status !== 'ANALISAR_DEPOIS' && !expAudit.extracted_data && !isAuditingThis ? (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        className="h-7 text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
-                                        onClick={() => auditSingleExpense(report.id, expense, true)}
-                                      >
-                                        <RefreshCw className="h-3 w-3" />
-                                        Re-analisar
-                                      </Button>
-                                    ) : null
-                                  ) : (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-7 text-xs"
-                                      onClick={() => auditSingleExpense(report.id, expense)}
-                                    >
-                                      <ScanLine className="h-3 w-3" />
-                                      Analisar
-                                    </Button>
-                                  )}
+                                  ) : null
+                                ) : (
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    className="h-7 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                                    onClick={() => setRejectingExpense(`${report.id}-${expense.id}`)}
+                                    className="h-7 text-xs"
+                                    onClick={() => auditSingleExpense(report.id, expense)}
                                   >
-                                    <XCircle className="h-3 w-3" />
-                                    Reprovar
+                                    <ScanLine className="h-3 w-3" />
+                                    Analisar
                                   </Button>
-                                </div>
-                              )}
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant={isMarked ? 'default' : 'outline'}
+                                  className={isMarked
+                                    ? 'h-7 text-xs bg-red-600 hover:bg-red-700 text-white'
+                                    : 'h-7 text-xs text-red-600 border-red-200 hover:bg-red-50'}
+                                  onClick={() => toggleRejectMark(report.id, expense.id)}
+                                  disabled={rejectingReport === report.id}
+                                >
+                                  <XCircle className="h-3 w-3" />
+                                  {isMarked ? 'Desmarcar' : 'Reprovar'}
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         );
@@ -2250,7 +2688,7 @@ export default function AprovacaoDinamicaPage() {
                   {/* No expenses */}
                   {!isLoadingExp && filteredExpenses(report.id, expenses).length === 0 && (
                     <div className="py-8 text-center text-sm text-gray-400">
-                      {searchTerm ? `Nenhuma despesa encontrada para "${searchTerm}"` : 'Nenhuma despesa encontrada neste report'}
+                      Nenhuma despesa encontrada neste report
                     </div>
                   )}
                 </div>
