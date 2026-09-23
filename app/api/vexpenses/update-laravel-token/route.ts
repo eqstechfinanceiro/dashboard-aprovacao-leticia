@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
-import { clearLaravelTokenCache } from '@/lib/laravel-token';
+import { sql } from '@/lib/db/neon';
+import { clearLaravelTokenCache } from '@/lib/api/laravel-token';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +60,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'laravel_token é obrigatório' }, { status: 400 });
   }
 
-  if (EXTENSION_SECRET && body.secret !== EXTENSION_SECRET) {
+  // Fail-closed: sem secret configurado no servidor, ninguém atualiza o token —
+  // este endpoint controla as credenciais de todas as chamadas ao VExpenses.
+  if (!EXTENSION_SECRET || body.secret !== EXTENSION_SECRET) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
   }
 
