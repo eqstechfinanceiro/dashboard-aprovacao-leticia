@@ -19,7 +19,10 @@ import {
   Wrench,
   Zap,
   RefreshCw,
+  FileSpreadsheet,
+  Loader2,
 } from 'lucide-react';
+import { SetorChips, SetorEmpty, type Setor } from '@/components/setor-chips';
 import {
   BarChart,
   Bar,
@@ -156,6 +159,8 @@ export default function ResultadosPanel() {
   const [tiposCount, setTiposCount] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [setor, setSetor] = useState<Setor>('all');
+  const [exporting, setExporting] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -285,8 +290,71 @@ export default function ResultadosPanel() {
     setRefreshing(false);
   };
 
+  // Exporta um xlsx com 3 abas: Notas, Fechamentos e Conferências —
+  // respeita os filtros ativos (período, empresa, usuário, tipo).
+  const exportXlsx = async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const XLSX = await import('xlsx');
+      const wb = XLSX.utils.book_new();
+
+      const notasRows = notasSort.sortedRows.map((n) => ({
+        Nota: n.numeroNota || n.titulo,
+        Empresa: n.empresa || '',
+        Fornecedor: n.fornecedorNome || '',
+        'Usuário': n.usuario || '',
+        Tipo: tipoLabel[n.tipo] || n.tipo,
+        'Valor (R$)': n.valor,
+        'Tempo (s)': n.tempoSegundos ?? '',
+        Origem: n.feitaPeloBot ? 'Bot' : 'Manual',
+        Data: n.data,
+        Hora: n.hora || '',
+      }));
+      const wsNotas = XLSX.utils.json_to_sheet(notasRows);
+      wsNotas['!cols'] = [{ wch: 14 }, { wch: 8 }, { wch: 36 }, { wch: 22 }, { wch: 12 }, { wch: 14 }, { wch: 10 }, { wch: 8 }, { wch: 11 }, { wch: 9 }];
+      XLSX.utils.book_append_sheet(wb, wsNotas, 'Notas');
+
+      const fechRows = fechSort.sortedRows.map((f) => ({
+        Data: f.data,
+        'Responsável': f.responsavel,
+        Status: f.aprovadoPelaApp ? 'Aprovado' : 'Automático',
+        'Itens duplicados': f.itensDuplicados,
+        'Valor duplicado (R$)': f.valorDuplicado,
+        'Reprovados IA': f.despesasReprovadasIA,
+      }));
+      const wsFech = XLSX.utils.json_to_sheet(fechRows);
+      wsFech['!cols'] = [{ wch: 11 }, { wch: 26 }, { wch: 11 }, { wch: 16 }, { wch: 18 }, { wch: 14 }];
+      XLSX.utils.book_append_sheet(wb, wsFech, 'Fechamentos');
+
+      const confRows = conferenciasFiltradas.map((c) => ({
+        'Título': c.titulo,
+        Tipo: c.tipo === 'servico' ? 'Serviço' : 'Mercadoria',
+        Erro: erroLabel[c.erro] || c.erro,
+        'Valor (R$)': c.valor,
+        Data: c.data,
+      }));
+      const wsConf = XLSX.utils.json_to_sheet(confRows);
+      wsConf['!cols'] = [{ wch: 50 }, { wch: 12 }, { wch: 18 }, { wch: 14 }, { wch: 11 }];
+      XLSX.utils.book_append_sheet(wb, wsConf, 'Conferências');
+
+      XLSX.writeFile(wb, `resultados_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Chips de setor */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <SetorChips value={setor} onChange={setSetor} />
+        <Button variant="outline" size="sm" onClick={exportXlsx} disabled={exporting || loading}>
+          {exporting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-1 h-4 w-4" />}
+          Exportar Excel
+        </Button>
+      </div>
+
       {/* Toolbar de filtros */}
       <div className="flex items-center justify-end gap-2 flex-wrap">
         <div className="flex rounded-lg border border-border overflow-hidden">
@@ -365,7 +433,7 @@ export default function ResultadosPanel() {
       )}
 
       {/* === SEÇÃO 1: ENTRADA DE NOTAS === */}
-      {!loading && !error && (
+      {!loading && !error && (setor === 'all' || setor === 'entrada') && (
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Receipt className="h-5 w-5 text-blue-500" />
@@ -592,7 +660,7 @@ export default function ResultadosPanel() {
       )}
 
       {/* === SEÇÃO 2: GESTÃO DE CAIXA === */}
-      {!loading && !error && (
+      {!loading && !error && (setor === 'all' || setor === 'caixa') && (
       <div className="space-y-4 pt-4">
         <div className="flex items-center gap-2">
           <Wallet className="h-5 w-5 text-purple-500" />
@@ -755,8 +823,8 @@ export default function ResultadosPanel() {
       </div>
       )}
 
-      {/* === SEÇÃO 3: CONFERÊNCIAS === */}
-      {!loading && !error && (
+      {/* === SEÇÃO 3: CONFERÊNCIAS (erros de entrada) === */}
+      {!loading && !error && (setor === 'all' || setor === 'entrada') && (
       <div className="space-y-4 pt-4">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-orange-500" />
@@ -878,6 +946,9 @@ export default function ResultadosPanel() {
         </div>
       </div>
       )}
+
+      {/* Contas a Pagar — ainda sem fonte de dados nesta visão */}
+      {setor === 'pagar' && <SetorEmpty setor={setor} />}
 
       {/* Footer info */}
       <div className="flex items-center justify-center gap-2 pt-4 text-xs text-muted-foreground">

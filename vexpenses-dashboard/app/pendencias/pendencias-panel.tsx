@@ -16,7 +16,10 @@ import {
   Repeat,
   Search,
   AlertCircle,
+  FileSpreadsheet,
+  Loader2,
 } from 'lucide-react';
+import { SetorChips, SetorEmpty, type Setor } from '@/components/setor-chips';
 
 interface Bucket {
   count: number;
@@ -95,6 +98,8 @@ export default function PendenciasPanel() {
   const [notaClass, setNotaClass] = useState<'all' | 'MERCADORIA' | 'SERVICO' | 'REMESSA'>('all');
   const [notaEmpresa, setNotaEmpresa] = useState<'all' | 'EQS' | 'BRATEC'>('all');
   const [notaSearch, setNotaSearch] = useState('');
+  const [setor, setSetor] = useState<Setor>('all');
+  const [exporting, setExporting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -207,6 +212,74 @@ export default function PendenciasPanel() {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  // Exporta um xlsx com 3 abas: Resumo (cards), Caixas (fila Agilitas,
+  // respeitando filtros/ordenação da tela) e Notas SDS (idem).
+  const exportXlsx = async () => {
+    if (!data || exporting) return;
+    setExporting(true);
+    try {
+      const XLSX = await import('xlsx');
+      const wb = XLSX.utils.book_new();
+      const a = data.agilitas;
+      const sdsTotal = data.sds.resumo.reduce(
+        (acc, r) => ({ count: acc.count + r.count, valor: acc.valor + r.valmerc }),
+        { count: 0, valor: 0 },
+      );
+
+      const resumo = [
+        { Setor: 'Gestão de Caixa', Indicador: 'Caixas a conferir', Quantidade: a.conferir.total.count, 'Valor (R$)': a.conferir.total.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · Itaú', Quantidade: a.conferir.itau.count, 'Valor (R$)': a.conferir.itau.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · VEX', Quantidade: a.conferir.vex.count, 'Valor (R$)': a.conferir.vex.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · Outros', Quantidade: a.conferir.outros.count, 'Valor (R$)': a.conferir.outros.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Caixas a lançar (SIGA)', Quantidade: a.lancar.total.count, 'Valor (R$)': a.lancar.total.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'A lançar · Pendentes', Quantidade: a.lancar.pendente.count, 'Valor (R$)': a.lancar.pendente.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'A lançar · Parciais', Quantidade: a.lancar.parcial.count, 'Valor (R$)': a.lancar.parcial.valor },
+        { Setor: 'Entrada de Notas', Indicador: 'Notas a lançar (contábil)', Quantidade: sdsTotal.count, 'Valor (R$)': sdsTotal.valor },
+      ];
+      const wsResumo = XLSX.utils.json_to_sheet(resumo);
+      wsResumo['!cols'] = [{ wch: 20 }, { wch: 28 }, { wch: 12 }, { wch: 16 }];
+      XLSX.utils.book_append_sheet(wb, wsResumo, 'Resumo');
+
+      const caixas = rSort.sortedRows.map((r) => ({
+        Report: r.idagil,
+        Caixa: r.nome ?? '',
+        'Usuário': r.usuario ?? r.userId ?? '',
+        Meio: meipagLabel(r.meipag),
+        Estado: r.state,
+        'Emissão': fmtDate(r.dtemis),
+        'Itens pendentes': r.pending,
+        'Itens lançados': r.launched,
+        'Itens finalizados': r.finished,
+        'Itens total': r.itemCount,
+        'Valor total (R$)': r.total,
+      }));
+      const wsCaixas = XLSX.utils.json_to_sheet(caixas);
+      wsCaixas['!cols'] = [{ wch: 10 }, { wch: 32 }, { wch: 24 }, { wch: 9 }, { wch: 10 }, { wch: 11 }, { wch: 13 }, { wch: 13 }, { wch: 14 }, { wch: 10 }, { wch: 15 }];
+      XLSX.utils.book_append_sheet(wb, wsCaixas, 'Caixas');
+
+      const notasRows = nSort.sortedRows.map((n) => ({
+        Empresa: n.empresa,
+        'Classificação': n.classificacao ?? '',
+        Doc: n.doc ?? '',
+        'Série': n.serie ?? '',
+        Fornecedor: n.fornecedor ?? '',
+        CNPJ: n.cnpj ?? '',
+        'Emissão': fmtDate(n.emissao),
+        Vencimento: fmtDate(n.vencimento),
+        'Valor mercadoria (R$)': n.valmerc,
+        'Total NF (R$)': n.totalNf,
+        'Chave NF': n.chaveNf ?? '',
+      }));
+      const wsNotas = XLSX.utils.json_to_sheet(notasRows);
+      wsNotas['!cols'] = [{ wch: 8 }, { wch: 14 }, { wch: 10 }, { wch: 6 }, { wch: 36 }, { wch: 18 }, { wch: 11 }, { wch: 11 }, { wch: 18 }, { wch: 14 }, { wch: 46 }];
+      XLSX.utils.book_append_sheet(wb, wsNotas, 'Notas SDS');
+
+      XLSX.writeFile(wb, `pendencias_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const sdsByEmpresa = useMemo(() => {
     const out: Record<string, Record<string, Bucket>> = {};
     if (!data) return out;
@@ -246,23 +319,31 @@ export default function PendenciasPanel() {
     <div className="space-y-6">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {data.syncedAt ? (
-          <p className="text-sm text-gray-500">
-            Atualizado {new Date(data.syncedAt).toLocaleString('pt-BR')}
-          </p>
-        ) : <span />}
-        <div className="flex gap-2">
-          <Button onClick={load} variant="outline" size="sm" disabled={loading}>
-            <RefreshCw className={`mr-1 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
-          </Button>
-          <Button onClick={copyResumo} size="sm">
-            {copied ? <Check className="mr-1 h-4 w-4" /> : <ClipboardCopy className="mr-1 h-4 w-4" />}
-            {copied ? 'Copiado!' : 'Copiar resumo Agilitas'}
-          </Button>
+        <SetorChips value={setor} onChange={setSetor} />
+        <div className="flex items-center gap-3">
+          {data.syncedAt && (
+            <p className="text-sm text-gray-500">
+              Atualizado {new Date(data.syncedAt).toLocaleString('pt-BR')}
+            </p>
+          )}
+          <div className="flex gap-2">
+            <Button onClick={load} variant="outline" size="sm" disabled={loading}>
+              <RefreshCw className={`mr-1 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Atualizar
+            </Button>
+            <Button onClick={exportXlsx} variant="outline" size="sm" disabled={exporting}>
+              {exporting ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <FileSpreadsheet className="mr-1 h-4 w-4" />}
+              Exportar Excel
+            </Button>
+            <Button onClick={copyResumo} size="sm">
+              {copied ? <Check className="mr-1 h-4 w-4" /> : <ClipboardCopy className="mr-1 h-4 w-4" />}
+              {copied ? 'Copiado!' : 'Copiar resumo Agilitas'}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Cards Agilitas */}
+      {/* Cards Agilitas — Gestão de Caixa */}
+      {(setor === 'all' || setor === 'caixa') && (<>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardContent className="px-4 pb-4 pt-4 text-center">
@@ -313,8 +394,10 @@ export default function PendenciasPanel() {
         </Card>
 
       </div>
+      </>)}
 
-      {/* Cards SDS por empresa */}
+      {/* Cards SDS por empresa — Entrada de Notas */}
+      {(setor === 'all' || setor === 'entrada') && (<>
       {(['EQS', 'BRATEC'] as const).map((emp) => {
         const classes = sdsByEmpresa[emp] || {};
         const total = Object.values(classes).reduce(
@@ -351,8 +434,10 @@ export default function PendenciasPanel() {
           </div>
         );
       })}
+      </>)}
 
-      {/* Tabela reports */}
+      {/* Tabela reports — Gestão de Caixa */}
+      {(setor === 'all' || setor === 'caixa') && (
       <Card>
         <CardContent className="px-4 pb-4 pt-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -428,8 +513,10 @@ export default function PendenciasPanel() {
           </div>
         </CardContent>
       </Card>
+      )}
 
-      {/* Tabela notas SDS */}
+      {/* Tabela notas SDS — Entrada de Notas */}
+      {(setor === 'all' || setor === 'entrada') && (
       <Card>
         <CardContent className="px-4 pb-4 pt-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -507,6 +594,10 @@ export default function PendenciasPanel() {
           )}
         </CardContent>
       </Card>
+      )}
+
+      {/* Contas a Pagar — ainda sem fonte de dados de pendências */}
+      {setor === 'pagar' && <SetorEmpty setor={setor} />}
     </div>
   );
 }
