@@ -68,6 +68,7 @@ interface PendenciasData {
     resumo: { empresa: string; classificacao: string; count: number; valmerc: number; totalNf: number }[];
     notas: NotaRow[];
   };
+  topCategorias?: { classificacao: string | null; especie: string | null; count: number; valmerc: number }[];
 }
 
 function fmt(v: number): string {
@@ -274,6 +275,16 @@ export default function PendenciasPanel() {
       wsNotas['!cols'] = [{ wch: 8 }, { wch: 14 }, { wch: 10 }, { wch: 6 }, { wch: 36 }, { wch: 18 }, { wch: 11 }, { wch: 11 }, { wch: 18 }, { wch: 14 }, { wch: 46 }];
       XLSX.utils.book_append_sheet(wb, wsNotas, 'Notas SDS');
 
+      const catRows = (data.topCategorias || []).map((c) => ({
+        Classificação: c.classificacao ?? '',
+        Espécie: c.especie ?? '',
+        Quantidade: c.count,
+        'Valor (R$)': c.valmerc,
+      }));
+      const wsCats = XLSX.utils.json_to_sheet(catRows);
+      wsCats['!cols'] = [{ wch: 16 }, { wch: 10 }, { wch: 11 }, { wch: 16 }];
+      XLSX.utils.book_append_sheet(wb, wsCats, 'Categorias em aberto');
+
       XLSX.writeFile(wb, `pendencias_${new Date().toISOString().slice(0, 10)}.xlsx`);
     } finally {
       setExporting(false);
@@ -435,6 +446,40 @@ export default function PendenciasPanel() {
         );
       })}
       </>)}
+
+      {/* Top categorias em aberto — Entrada de Notas */}
+      {(setor === 'all' || setor === 'entrada') && (data?.topCategorias?.length ?? 0) > 0 && (
+      <Card>
+        <CardContent className="px-4 pb-4 pt-4">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-700">
+            Em aberto por categoria
+          </h2>
+          <div className="space-y-2">
+            {(() => {
+              const cats = data!.topCategorias!;
+              const max = Math.max(...cats.map((c) => c.valmerc), 1);
+              return cats.slice(0, 8).map((c, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="w-40 truncate text-xs text-gray-600">
+                    {c.classificacao || 'Outros'}{c.especie ? ` · ${c.especie}` : ''}
+                  </span>
+                  <div className="h-5 flex-1 rounded bg-gray-100">
+                    <div
+                      className="h-5 rounded bg-blue-500"
+                      style={{ width: `${Math.max((c.valmerc / max) * 100, 2)}%` }}
+                    />
+                  </div>
+                  <span className="w-28 text-right text-xs font-medium text-gray-700">
+                    R$ {fmt(c.valmerc)}
+                  </span>
+                  <span className="w-14 text-right text-xs text-gray-500">{c.count} notas</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </CardContent>
+      </Card>
+      )}
 
       {/* Tabela reports — Gestão de Caixa */}
       {(setor === 'all' || setor === 'caixa') && (

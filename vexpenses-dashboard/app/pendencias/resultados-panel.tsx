@@ -28,6 +28,7 @@ import {
   Bar,
   LineChart,
   Line,
+  ComposedChart,
   PieChart,
   Pie,
   Cell,
@@ -76,6 +77,31 @@ interface FiltrosData {
   empresas: string[];
   usuarios: string[];
   meses: string[];
+  anos: number[];
+}
+
+interface BotStats {
+  lancadas: number;
+  tempoMedioSegundos: number;
+  tempoMedioHumanoSegundos: number;
+  horasEconomizadas: number;
+  pct: number;
+}
+
+interface LancadorStats {
+  usuario: string;
+  total: number;
+  bot: number;
+  tempoMedioSegundos: number;
+  valorTotal: number;
+}
+
+interface FluxoDia {
+  dia: string;
+  entradas: number;
+  lancadas: number;
+  lancadasBot: number;
+  emAberto: number | null;
 }
 
 interface FechamentoCaixa {
@@ -127,28 +153,83 @@ const erroLabel: Record<string, string> = {
   fornecedor_errado: 'Fornecedor Errado',
 };
 
-const MESES_NOME: Record<string, string> = {
-  '01': 'Janeiro', '02': 'Fevereiro', '03': 'Março', '04': 'Abril',
-  '05': 'Maio', '06': 'Junho', '07': 'Julho', '08': 'Agosto',
-  '09': 'Setembro', '10': 'Outubro', '11': 'Novembro', '12': 'Dezembro',
-};
+const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-function mesLabel(mes: string): string {
-  const [ano, num] = mes.split('-');
-  return `${MESES_NOME[num] || num}/${ano}`;
+// Multi-select compacto (checklist em dropdown) para ano/mês
+function MultiSelect({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: { value: string | number; label: string }[];
+  selected: (string | number)[];
+  onChange: (v: (string | number)[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = React.useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, []);
+  const toggle = (v: string | number) =>
+    onChange(selected.includes(v) ? selected.filter((s) => s !== v) : [...selected, v]);
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background hover:bg-muted whitespace-nowrap"
+      >
+        {selected.length === 0
+          ? label
+          : `${label}: ${selected.length === 1 ? options.find((o) => o.value === selected[0])?.label : `${selected.length} selec.`}`}
+      </button>
+      {open && (
+        <div className="absolute right-0 z-20 mt-1 max-h-64 min-w-[10rem] overflow-y-auto rounded-lg border border-border bg-background p-1 shadow-lg">
+          <button
+            type="button"
+            onClick={() => onChange([])}
+            className="block w-full rounded px-2 py-1 text-left text-xs text-muted-foreground hover:bg-muted"
+          >
+            Limpar
+          </button>
+          {options.map((o) => (
+            <label
+              key={String(o.value)}
+              className="flex cursor-pointer items-center gap-2 rounded px-2 py-1 text-sm hover:bg-muted"
+            >
+              <input
+                type="checkbox"
+                checked={selected.includes(o.value)}
+                onChange={() => toggle(o.value)}
+                className="accent-primary"
+              />
+              {o.label}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default function ResultadosPanel() {
-  const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes'>('mes');
+  const [periodo, setPeriodo] = useState<'hoje' | 'semana' | 'mes' | 'tudo'>('hoje');
   const [refreshing, setRefreshing] = useState(false);
   const [notas, setNotas] = useState<NotaLancada[]>([]);
   const [fechamentos, setFechamentos] = useState<FechamentoCaixa[]>([]);
   const [conferencias, setConferencias] = useState<ConferenciaNota[]>([]);
   const [notasPorDiaEmpresa, setNotasPorDiaEmpresa] = useState<NotaPorDiaEmpresa[]>([]);
-  const [filtrosData, setFiltrosData] = useState<FiltrosData>({ empresas: [], usuarios: [], meses: [] });
+  const [filtrosData, setFiltrosData] = useState<FiltrosData>({ empresas: [], usuarios: [], meses: [], anos: [] });
   const [empresaSel, setEmpresaSel] = useState('all');
   const [usuarioSel, setUsuarioSel] = useState('all');
-  const [mesSel, setMesSel] = useState('all');
+  const [anosSel, setAnosSel] = useState<(string | number)[]>([]);
+  const [mesesSel, setMesesSel] = useState<(string | number)[]>([]);
   const [chartType, setChartType] = useState<'bar' | 'line'>('line');
   const [tipoSel, setTipoSel] = useState('all');
   const [totalNotas, setTotalNotas] = useState(0);
@@ -157,6 +238,9 @@ export default function ResultadosPanel() {
   const [notasBotApi, setNotasBotApi] = useState(0);
   const [valorTotalApi, setValorTotalApi] = useState(0);
   const [tiposCount, setTiposCount] = useState<Record<string, number>>({});
+  const [botStats, setBotStats] = useState<BotStats | null>(null);
+  const [porLancador, setPorLancador] = useState<LancadorStats[]>([]);
+  const [fluxo, setFluxo] = useState<FluxoDia[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [setor, setSetor] = useState<Setor>('all');
@@ -166,10 +250,13 @@ export default function ResultadosPanel() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ periodo });
+      // Ano/mês explícitos sobrepõem o período rápido (AND entre si)
+      const customRange = anosSel.length > 0 || mesesSel.length > 0;
+      const params = new URLSearchParams({ periodo: customRange ? 'tudo' : periodo });
       if (empresaSel !== 'all') params.set('empresa', empresaSel);
       if (usuarioSel !== 'all') params.set('usuario', usuarioSel);
-      if (mesSel !== 'all') params.set('mes', mesSel);
+      if (anosSel.length) params.set('anos', anosSel.join(','));
+      if (mesesSel.length) params.set('meses', mesesSel.join(','));
       if (tipoSel !== 'all') params.set('tipo', tipoSel);
       const res = await fetch(`/api/resultados?${params.toString()}`);
       if (!res.ok) throw new Error('Erro ao buscar dados');
@@ -178,19 +265,22 @@ export default function ResultadosPanel() {
       setFechamentos(data.fechamentos || []);
       setConferencias(data.conferencias || []);
       setNotasPorDiaEmpresa(data.notasPorDiaEmpresa || []);
-      setFiltrosData(data.filtros || { empresas: [], usuarios: [], meses: [] });
+      setFiltrosData(data.filtros || { empresas: [], usuarios: [], meses: [], anos: [] });
       setTotalNotas(data.totalNotas || 0);
       setTempoTotalNotas(data.tempoTotalNotas || 0);
       setTempoMedioNotas(data.tempoMedioNotas || 0);
       setNotasBotApi(data.notasBot || 0);
       setValorTotalApi(data.valorTotalNotas || 0);
       setTiposCount(data.tiposCount || {});
+      setBotStats(data.bot || null);
+      setPorLancador(data.porLancador || []);
+      setFluxo(data.fluxo || []);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
     } finally {
       setLoading(false);
     }
-  }, [periodo, empresaSel, usuarioSel, mesSel, tipoSel]);
+  }, [periodo, empresaSel, usuarioSel, tipoSel, anosSel, mesesSel]);
 
   useEffect(() => {
     fetchData();
@@ -250,7 +340,20 @@ export default function ResultadosPanel() {
   const EMPRESA_COLORS: Record<string, string> = {
     EQS: '#3b82f6',
     BRATEC: '#22c55e',
+    AGILITAS: '#f59e0b',
   };
+
+  // Fluxo diário formatado pro gráfico
+  const fluxoChart = useMemo(
+    () =>
+      fluxo.map((f) => ({
+        dia: f.dia.split('-').slice(1).join('/'),
+        entradas: f.entradas,
+        lancadas: f.lancadas,
+        emAberto: f.emAberto,
+      })),
+    [fluxo],
+  );
 
   // === Gestão de Caixa ===
   const totalFechamentos = fechamentosFiltrados.length;
@@ -358,30 +461,32 @@ export default function ResultadosPanel() {
       {/* Toolbar de filtros */}
       <div className="flex items-center justify-end gap-2 flex-wrap">
         <div className="flex rounded-lg border border-border overflow-hidden">
-          {(['hoje', 'semana', 'mes'] as const).map(p => (
+          {(['hoje', 'semana', 'mes', 'tudo'] as const).map(p => (
             <button
               key={p}
-              onClick={() => setPeriodo(p)}
+              onClick={() => { setPeriodo(p); setAnosSel([]); setMesesSel([]); }}
               className={`px-4 py-1.5 text-sm font-medium transition-colors ${
-                periodo === p
+                periodo === p && anosSel.length === 0 && mesesSel.length === 0
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-background hover:bg-muted'
               }`}
             >
-              {p === 'hoje' ? 'Hoje' : p === 'semana' ? 'Semana' : 'Mês'}
+              {p === 'hoje' ? 'Hoje' : p === 'semana' ? 'Semana' : p === 'mes' ? '30 dias' : 'Tudo'}
             </button>
           ))}
         </div>
-        <select
-          value={mesSel}
-          onChange={(e) => setMesSel(e.target.value)}
-          className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background"
-        >
-          <option value="all">Todos os meses</option>
-          {filtrosData.meses.map(m => (
-            <option key={m} value={m}>{mesLabel(m)}</option>
-          ))}
-        </select>
+        <MultiSelect
+          label="Ano"
+          options={filtrosData.anos.map((a) => ({ value: a, label: String(a) }))}
+          selected={anosSel}
+          onChange={setAnosSel}
+        />
+        <MultiSelect
+          label="Mês"
+          options={MESES_ABREV.map((m, i) => ({ value: i + 1, label: m }))}
+          selected={mesesSel}
+          onChange={setMesesSel}
+        />
         <select
           value={empresaSel}
           onChange={(e) => setEmpresaSel(e.target.value)}
@@ -504,6 +609,114 @@ export default function ResultadosPanel() {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Fluxo diário da fila: entradas x lançadas x profundidade em aberto.
+            Une pendências (fila atual) e resultados (o que saiu) — responde
+            "entrou mais nota do que saiu?" */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Fluxo da Fila — últimos 30 dias</CardTitle>
+            <span className="text-xs text-muted-foreground">
+              Entradas no monitor vs lançadas no Protheus; linha = notas em aberto na fila contábil
+            </span>
+          </CardHeader>
+          <CardContent>
+            {fluxoChart.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">Sem dados para exibir</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                <ComposedChart data={fluxoChart}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="dia" className="text-xs" />
+                  <YAxis yAxisId="left" className="text-xs" />
+                  <YAxis yAxisId="right" orientation="right" className="text-xs" />
+                  <Tooltip />
+                  <Legend />
+                  <Bar yAxisId="left" dataKey="entradas" name="Entradas" fill={COLORS.cyan} radius={[3, 3, 0, 0]} />
+                  <Bar yAxisId="left" dataKey="lancadas" name="Lançadas" fill={COLORS.success} radius={[3, 3, 0, 0]} />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="emAberto"
+                    name="Em aberto"
+                    stroke={COLORS.danger}
+                    strokeWidth={2}
+                    dot={{ r: 2 }}
+                    connectNulls
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Automação: desempenho do bot e ranking por lançador */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-base">Lançamentos por Lançador</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {porLancador.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Sem dados para exibir</p>
+              ) : (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={porLancador} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                    <XAxis type="number" className="text-xs" />
+                    <YAxis type="category" dataKey="usuario" width={110} className="text-xs" />
+                    <Tooltip />
+                    <Bar dataKey="total" name="Notas" fill={COLORS.primary} radius={[0, 4, 4, 0]}>
+                      {porLancador.map((l, i) => (
+                        <Cell key={i} fill={l.usuario.startsWith('bot.') ? COLORS.success : COLORS.primary} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Bot className="h-4 w-4 text-green-600" /> Automação
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-muted-foreground">Tempo médio (bot)</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {formatTime(Math.round(botStats?.tempoMedioSegundos ?? 0))}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Tempo médio (manual)</p>
+                  <p className="text-xl font-bold">
+                    {formatTime(Math.round(botStats?.tempoMedioHumanoSegundos ?? 0))}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Horas economizadas</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {(botStats?.horasEconomizadas ?? 0).toFixed(1)}h
+                  </p>
+                  <p className="text-xs text-muted-foreground">estimado no período</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Velocidade</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {(botStats?.tempoMedioSegundos ?? 0) > 0
+                      ? `${((botStats!.tempoMedioHumanoSegundos) / botStats!.tempoMedioSegundos).toFixed(1)}×`
+                      : '—'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">vs lançamento manual</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Gráficos Entrada de Notas */}
