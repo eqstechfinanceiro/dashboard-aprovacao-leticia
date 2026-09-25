@@ -598,64 +598,6 @@ export default function ResultadosPanel() {
           </div>
         </div>
 
-        {/* Tabela de Notas Recentes */}
-        <div>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Notas Lançadas Recentemente</CardTitle>
-              <span className="text-xs text-muted-foreground">{notasFiltradas.length} notas (máx. 500)</span>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <Th s={notasSort} k="numeroNota" className="text-left py-2 px-3 font-medium text-muted-foreground">Nota</Th>
-                      <Th s={notasSort} k="empresa" className="text-left py-2 px-3 font-medium text-muted-foreground">Empresa</Th>
-                      <Th s={notasSort} k="fornecedorNome" className="text-left py-2 px-3 font-medium text-muted-foreground">Fornecedor</Th>
-                      <Th s={notasSort} k="usuario" className="text-left py-2 px-3 font-medium text-muted-foreground">Usuário</Th>
-                      <Th s={notasSort} k="tipo" className="text-left py-2 px-3 font-medium text-muted-foreground">Tipo</Th>
-                      <Th s={notasSort} k="valor" className="text-right py-2 px-3 font-medium text-muted-foreground">Valor</Th>
-                      <Th s={notasSort} k="feitaPeloBot" className="text-center py-2 px-3 font-medium text-muted-foreground">Bot</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {notasFiltradas.length === 0 ? (
-                      <tr>
-                        <td colSpan={7} className="py-4 text-center text-muted-foreground">Nenhuma nota encontrada</td>
-                      </tr>
-                    ) : (
-                    notasSort.sortedRows.map(nota => (
-                      <tr key={nota.id} className="border-b hover:bg-muted/50">
-                        <td className="py-2 px-3 text-xs">{nota.numeroNota || nota.titulo}</td>
-                        <td className="py-2 px-3">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded ${nota.empresa === 'EQS' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{nota.empresa || '—'}</span>
-                        </td>
-                        <td className="py-2 px-3 text-xs text-muted-foreground max-w-[200px] truncate">{nota.fornecedorNome || '—'}</td>
-                        <td className="py-2 px-3 text-xs">{nota.usuario || '—'}</td>
-                        <td className="py-2 px-3">
-                          <div className="flex items-center gap-1.5">
-                            {tipoIcon[nota.tipo] || <Package className="h-4 w-4 text-gray-400" />}
-                            <span className="text-xs">{tipoLabel[nota.tipo] || nota.tipo}</span>
-                          </div>
-                        </td>
-                        <td className="py-2 px-3 text-right font-mono text-xs">{formatCurrency(nota.valor)}</td>
-                        <td className="py-2 px-3 text-center">
-                          {nota.feitaPeloBot ? (
-                            <Bot className="h-4 w-4 text-green-500 mx-auto" />
-                          ) : (
-                            <span className="text-muted-foreground text-xs">Manual</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
       )}
 
@@ -944,6 +886,62 @@ export default function ResultadosPanel() {
             </Card>
           </div>
         </div>
+      </div>
+      )}
+
+      {/* Tabela de Notas Recentes — por último: são até 500 linhas e
+          escondiam as seções de Conferências/Gestão atrás de scroll longo */}
+      {!loading && !error && (setor === 'all' || setor === 'entrada') && notasFiltradas.length > 0 && (
+      <div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Notas Lançadas Recentemente</CardTitle>
+            <span className="text-xs text-muted-foreground">{notasFiltradas.length} notas (máx. 500)</span>
+          </CardHeader>
+          <CardContent>
+            <div className="max-h-[560px] overflow-auto rounded-md border">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-background">
+                  <tr className="border-b">
+                    <Th s={notasSort} k="numeroNota" className="text-left py-2 px-3 font-medium text-muted-foreground">Nota</Th>
+                    <Th s={notasSort} k="empresa" className="text-left py-2 px-3 font-medium text-muted-foreground">Empresa</Th>
+                    <Th s={notasSort} k="fornecedorNome" className="text-left py-2 px-3 font-medium text-muted-foreground">Fornecedor</Th>
+                    <Th s={notasSort} k="usuario" className="text-left py-2 px-3 font-medium text-muted-foreground">Usuário</Th>
+                    <Th s={notasSort} k="tipo" className="text-left py-2 px-3 font-medium text-muted-foreground">Tipo</Th>
+                    <Th s={notasSort} k="valor" className="text-right py-2 px-3 font-medium text-muted-foreground">Valor</Th>
+                    <Th s={notasSort} k="feitaPeloBot" className="text-center py-2 px-3 font-medium text-muted-foreground">Bot</Th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notasSort.sortedRows.map(nota => (
+                    <tr key={nota.id} className="border-b hover:bg-muted/50">
+                      <td className="py-2 px-3 text-xs">{nota.numeroNota || nota.titulo}</td>
+                      <td className="py-2 px-3">
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded ${nota.empresa === 'EQS' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'}`}>{nota.empresa || '—'}</span>
+                      </td>
+                      <td className="py-2 px-3 text-xs text-muted-foreground max-w-[200px] truncate">{nota.fornecedorNome || '—'}</td>
+                      <td className="py-2 px-3 text-xs">{nota.usuario || '—'}</td>
+                      <td className="py-2 px-3">
+                        <div className="flex items-center gap-1.5">
+                          {tipoIcon[nota.tipo] || <Package className="h-4 w-4 text-gray-400" />}
+                          <span className="text-xs">{tipoLabel[nota.tipo] || nota.tipo}</span>
+                        </div>
+                      </td>
+                      <td className="py-2 px-3 text-right font-mono text-xs">{formatCurrency(nota.valor)}</td>
+                      <td className="py-2 px-3 text-center">
+                        {nota.feitaPeloBot ? (
+                          <Bot className="h-4 w-4 text-green-500 mx-auto" />
+                        ) : (
+                          <span className="text-muted-foreground text-xs">Manual</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       )}
 
