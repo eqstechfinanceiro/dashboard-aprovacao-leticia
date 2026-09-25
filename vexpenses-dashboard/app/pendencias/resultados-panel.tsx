@@ -129,8 +129,10 @@ function formatCurrency(value: number): string {
 
 function formatTime(seconds: number): string {
   if (seconds < 60) return `${seconds}s`;
-  const min = Math.floor(seconds / 60);
+  const h = Math.floor(seconds / 3600);
+  const min = Math.floor((seconds % 3600) / 60);
   const sec = seconds % 60;
+  if (h > 0) return sec > 0 ? `${h}h ${min}m ${sec}s` : `${h}h ${min}m`;
   return `${min}m ${sec}s`;
 }
 
