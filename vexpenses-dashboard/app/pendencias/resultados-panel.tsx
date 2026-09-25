@@ -104,6 +104,12 @@ interface FluxoDia {
   emAberto: number | null;
 }
 
+interface PorHora {
+  hora: number;
+  total: number;
+  bot: number;
+}
+
 interface FechamentoCaixa {
   id: string;
   responsavel: string;
@@ -243,6 +249,7 @@ export default function ResultadosPanel() {
   const [botStats, setBotStats] = useState<BotStats | null>(null);
   const [porLancador, setPorLancador] = useState<LancadorStats[]>([]);
   const [fluxo, setFluxo] = useState<FluxoDia[]>([]);
+  const [porHora, setPorHora] = useState<PorHora[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [setor, setSetor] = useState<Setor>('all');
@@ -277,6 +284,7 @@ export default function ResultadosPanel() {
       setBotStats(data.bot || null);
       setPorLancador(data.porLancador || []);
       setFluxo(data.fluxo || []);
+      setPorHora(data.porHora || []);
     } catch (err: any) {
       setError(err.message || 'Erro ao carregar dados');
     } finally {
@@ -344,6 +352,22 @@ export default function ResultadosPanel() {
     BRATEC: '#22c55e',
     AGILITAS: '#f59e0b',
   };
+
+  // Visão "hoje" (sem filtros de ano/mês) — mostra lançamentos por hora
+  const visaoHoje = periodo === 'hoje' && anosSel.length === 0 && mesesSel.length === 0;
+
+  const porHoraChart = useMemo(() => {
+    const map = new Map(porHora.map((h) => [h.hora, h]));
+    const horas = porHora.map((h) => h.hora);
+    const min = horas.length ? Math.min(...horas, 7) : 7;
+    const max = horas.length ? Math.max(...horas, 19) : 19;
+    const out: { h: string; bot: number; manual: number }[] = [];
+    for (let h = min; h <= max; h++) {
+      const r = map.get(h);
+      out.push({ h: `${String(h).padStart(2, '0')}h`, bot: r?.bot ?? 0, manual: (r?.total ?? 0) - (r?.bot ?? 0) });
+    }
+    return out;
+  }, [porHora]);
 
   // Fluxo diário formatado pro gráfico
   const fluxoChart = useMemo(
@@ -721,9 +745,35 @@ export default function ResultadosPanel() {
           </Card>
         </div>
 
-        {/* Gráficos Entrada de Notas */}
+        {/* Gráficos Entrada de Notas — na visão "hoje" o por-dia vira ponto
+            único; trocamos por lançamentos por hora */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="lg:col-span-2">
+            {visaoHoje ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Lançamentos por Hora</CardTitle>
+                <span className="text-xs text-muted-foreground">hoje, bot vs manual</span>
+              </CardHeader>
+              <CardContent>
+                {porHora.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">Nenhum lançamento hoje</p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={porHoraChart}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis dataKey="h" className="text-xs" />
+                      <YAxis className="text-xs" allowDecimals={false} />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey="bot" name="Bot" stackId="a" fill={COLORS.success} radius={[0, 0, 0, 0]} />
+                      <Bar dataKey="manual" name="Manual" stackId="a" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+            ) : (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-base">Notas por Dia por Empresa</CardTitle>
@@ -782,6 +832,7 @@ export default function ResultadosPanel() {
                 )}
               </CardContent>
             </Card>
+            )}
           </div>
 
           <div className="h-full">

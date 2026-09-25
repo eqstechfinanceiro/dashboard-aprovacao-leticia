@@ -253,6 +253,17 @@ export async function GET(request: NextRequest) {
       `);
     const minDeteccao = minDeteccaoResult.rows[0]?.d ? fmtDate(minDeteccaoResult.rows[0].d) : null;
 
+    // Lançamentos por hora — só faz sentido num dia único (visão "hoje")
+    const porHoraResult = periodo === 'hoje'
+      ? await sql.query(`
+          SELECT EXTRACT(HOUR FROM hora)::int AS h, COUNT(*) AS c,
+                 COUNT(*) FILTER (WHERE feita_pelo_bot) AS bot
+          FROM resultados_notas
+          WHERE ${notasWhere} AND hora IS NOT NULL
+          GROUP BY 1 ORDER BY 1
+        `)
+      : { rows: [] as any[] };
+
     const fluxo = fluxoResult.rows.map((r: any) => {
       const d = fmtDate(r.d);
       const l = lancadasMap.get(d);
@@ -302,6 +313,11 @@ export async function GET(request: NextRequest) {
         valorTotal: Number(r.valor_total || 0),
       })),
       fluxo,
+      porHora: porHoraResult.rows.map((r: any) => ({
+        hora: Number(r.h),
+        total: Number(r.c),
+        bot: Number(r.bot),
+      })),
       tiposCount,
       notas: notas.map((n: any) => ({
         id: String(n.id),
