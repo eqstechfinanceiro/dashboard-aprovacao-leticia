@@ -174,9 +174,13 @@ export async function GET(request: NextRequest) {
     ]);
 
     if (isFrozen) {
+      // Situacao é cadastral: o valor atual do cadastro (com merge do RH)
+      // sobrepõe o congelado — demissões recentes aparecem no export.
+      const sitByCpf = new Map<string, string>();
+      for (const c of cadastroRows as any[]) if (c.situacao) sitByCpf.set(c.cpf, c.situacao);
       for (const row of frozenRows as any[]) {
         cargaData.push([
-          row.cpf, row.colaborador, row.situacao, row.status_cartao,
+          row.cpf, row.colaborador, sitByCpf.get(row.cpf) ?? row.situacao, row.status_cartao,
           row.regional, row.centro_custo, row.gestor, row.diretor,
           toNum(row.carga), toNum(row.transferencia), toNum(row.tarifa), toNum(row.prestacao),
           toNum(row.saldo_prestacao), toNum(row.saldo_cartao), toNum(row.saldo_final), toNum(row.saldo_reembolsar),

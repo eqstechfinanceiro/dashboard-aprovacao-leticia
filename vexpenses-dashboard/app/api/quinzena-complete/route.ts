@@ -275,6 +275,13 @@ export async function GET(request: NextRequest) {
       const frozenSnapshots = frozenRows as unknown as (FrozenSnapshot & { frozen_at: string })[];
       frozenAt = frozenSnapshots[0]?.frozen_at ?? null;
 
+      // Situacao é dado cadastral — sobrepõe o valor atual do cadastro (que já
+      // incorpora o RH) sobre o congelado. Desligamentos/afastamentos posteriores
+      // ao freeze aparecem de imediato; valores financeiros ficam congelados.
+      const sitRows = await sql`SELECT cpf, situacao FROM quinzena_cadastro WHERE cpf IS NOT NULL`;
+      const sitByCpf = new Map<string, string>();
+      for (const r of sitRows as any[]) if (r.situacao) sitByCpf.set(r.cpf, r.situacao);
+
       // Return frozen data directly
       let rows: QuinzenaRow[] = frozenSnapshots.map((snap) => {
         const sf = toNum(snap.saldo_final);
@@ -290,7 +297,7 @@ export async function GET(request: NextRequest) {
         return {
           cpf: snap.cpf,
           colaborador: snap.colaborador ?? '',
-          situacao: snap.situacao ?? '',
+          situacao: sitByCpf.get(snap.cpf) ?? snap.situacao ?? '',
           status_cartao: snap.status_cartao ?? '',
           regional: snap.regional ?? '',
           centro_custo: snap.centro_custo ?? '',

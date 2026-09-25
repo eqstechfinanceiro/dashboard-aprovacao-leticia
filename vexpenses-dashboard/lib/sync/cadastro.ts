@@ -2,6 +2,7 @@
 import { sql } from '../db/neon';
 import { API_URL, API_KEY, v2Headers } from './client';
 import { getCurrentQuinzenaId } from '../pipeline/quinzena-dates';
+import { getSituacaoMap } from '../comprovantes/funcionarios';
 
 /** Refresh cadastro data — merge API team-members with last snapshot */
 export async function refreshCadastro(): Promise<Record<string, unknown>> {
@@ -80,6 +81,43 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
     console.log(`[cadastro] members sem CPF ignorados (${noCpf.length}): ${noCpf.join(', ')}`);
   }
 
+  // Merge situacao do RH (eqs_funcionarios.funcionarios) — fonte oficial de
+  // desligamento/afastamento. O VExpenses mantém o cartão ativo após a
+  // demissão, então RH não-ATIVO vence (INATIVO, PERÍCIA, CONTRATO SUSPENSO…).
+  // RH ATIVO não reativa quem está INATIVO no cadastro (VExpenses inativo ou
+  // baixa manual prevalecem); só preenche situacao vazia.
+  let rhUpdated = 0;
+  try {
+    const curRows: { cpf: string; situacao: string | null }[] =
+      await db`SELECT cpf, situacao FROM quinzena_cadastro WHERE cpf IS NOT NULL`;
+    const cadSit = new Map<string, string>();
+    for (const r of curRows) cadSit.set(r.cpf, (r.situacao ?? '').trim());
+    const rhMap = await getSituacaoMap([...cadSit.keys()]);
+    const updCpfs: string[] = [];
+    const updSits: string[] = [];
+    for (const [cpf, sit] of rhMap) {
+      const rh = (sit || '').trim();
+      if (!rh) continue;
+      const cur = cadSit.get(cpf) || '';
+      let next: string | null = null;
+      if (rh.toUpperCase() !== 'ATIVO') next = rh;                    // RH marca desligamento/afastamento
+      else if (!cur) next = 'ATIVO';                                 // só preenche vazio
+      if (next !== null && next !== cur) { updCpfs.push(cpf); updSits.push(next); }
+    }
+    if (updCpfs.length) {
+      await db.query(
+        `UPDATE quinzena_cadastro c SET situacao = v.s, updated_at = NOW()
+         FROM (SELECT unnest($1::text[]) AS cpf, unnest($2::text[]) AS s) v
+         WHERE c.cpf = v.cpf`,
+        [updCpfs, updSits]
+      );
+      rhUpdated = updCpfs.length;
+      console.log(`[cadastro] situacao RH aplicada em ${rhUpdated} cadastros`);
+    }
+  } catch (e) {
+    console.warn('[cadastro] merge de situacao RH falhou (segue com dados VExpenses):', e);
+  }
+
   // Get the most recent cadastral data from existing snapshots
   const lastSnapshots = await db`
     SELECT DISTINCT ON (cpf)
@@ -104,11 +142,24 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
       AND import_source = 'api'
   `;
 
+  // Situacao do RH (eqs_funcionarios) — mesma regra do merge no cadastro:
+  // RH não-ATIVO vence; caso contrário vale VExpenses/snapshot.
+  let rhMapControle = new Map<string, string>();
+  try {
+    rhMapControle = await getSituacaoMap(
+      lastSnapshots.map((s: any) => s.cpf).filter(Boolean)
+    );
+  } catch (e) {
+    console.warn('[cadastro] situacao RH indisponível para snapshot controle:', e);
+  }
+
   let upserted = 0;
   for (const snap of lastSnapshots) {
     // Update situacao based on API active status
     const apiActive = apiCpfActive.get(snap.cpf);
-    const situacao = apiActive === false ? 'INATIVO' : (snap.situacao || 'ATIVO');
+    const rh = (rhMapControle.get(snap.cpf) || '').trim();
+    const situacao = rh && rh.toUpperCase() !== 'ATIVO' ? rh
+      : apiActive === false ? 'INATIVO' : (snap.situacao || (rh || 'ATIVO'));
 
     await db`
       INSERT INTO quinzena_controle_snapshot
@@ -139,6 +190,7 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
     cadastro_inserted: cadastroInserted,
     cadastro_no_cpf: noCpf.length,
     cadastro_from_last_snapshot: lastSnapshots.length,
+    rh_situacao_aplicada: rhUpdated,
     upserted,
     quinzena: quinzenaId,
   };
