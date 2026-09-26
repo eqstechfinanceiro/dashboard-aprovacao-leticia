@@ -512,20 +512,22 @@ export default function ImpactoPanel() {
 
         <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 font-semibold">Participação por Validação</h3>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={(data?.porValidacao || []).slice(0, 7).concat(
-                  (data?.porValidacao || []).length > 7
-                    ? [{ validacao: 'OUTROS', total: (data?.porValidacao || []).slice(7).reduce((a, r) => a + r.total, 0), qtd: 0 }]
+                data={(data?.porValidacao || []).slice(0, 5).concat(
+                  (data?.porValidacao || []).length > 5
+                    ? [{ validacao: 'OUTROS', total: (data?.porValidacao || []).slice(5).reduce((a, r) => a + r.total, 0), qtd: 0 }]
                     : []
                 )}
-                dataKey="total" nameKey="validacao" innerRadius={55} outerRadius={85}
-                label={({ percent }: any) => `${(percent * 100).toFixed(0)}%`} fontSize={11}>
-                {(data?.porValidacao || []).slice(0, 8).map((_, i) => <Cell key={i} fill={PIE_CORES[i % PIE_CORES.length]} />)}
+                dataKey="total" nameKey="validacao" innerRadius={50} outerRadius={75} cx="38%"
+                label={({ percent }: any) => (percent * 100 >= 2 ? `${(percent * 100).toFixed(0)}%` : '')} fontSize={10}>
+                {(data?.porValidacao || []).slice(0, 6).map((_, i) => <Cell key={i} fill={PIE_CORES[i % PIE_CORES.length]} />)}
               </Pie>
               <Tooltip formatter={(v: any) => fmtBRL(Number(v))} />
-              <Legend formatter={(v: string) => (v.length > 24 ? v.slice(0, 24) + '…' : v)} />
+              <Legend layout="vertical" align="right" verticalAlign="middle" iconSize={9}
+                wrapperStyle={{ fontSize: 11, maxWidth: '58%' }}
+                formatter={(v: string) => (v.length > 30 ? v.slice(0, 30) + '…' : v)} />
             </PieChart>
           </ResponsiveContainer>
         </CardContent></Card>
