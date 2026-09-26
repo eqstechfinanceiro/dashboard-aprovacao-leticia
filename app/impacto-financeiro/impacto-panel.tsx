@@ -64,6 +64,30 @@ const MESES = [
 ];
 const MESES_ABREV = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
+const TABLE_COLS: { k: string; label: string; num?: boolean }[] = [
+  { k: 'empresa', label: 'Empresa' },
+  { k: 'baixa', label: 'DT Baixa' },
+  { k: 'fornecedor', label: 'Código' },
+  { k: 'fornecedor_nome', label: 'Fornecedor' },
+  { k: 'tipo', label: 'Tipo' },
+  { k: 'parcela', label: 'Parcela' },
+  { k: 'num', label: 'Nº Título' },
+  { k: 'valor', label: 'Valor', num: true },
+  { k: 'vencto_real', label: 'Vencto Real' },
+  { k: 'natureza', label: 'Natureza' },
+  { k: 'natureza_desc', label: 'Descrição Nat' },
+  { k: 'emissao', label: 'DT Emissao' },
+  { k: 'ccusto', label: 'Centro Custo' },
+  { k: 'ccusto_desc', label: 'Descrição CC' },
+  { k: 'validacao', label: 'Validação' },
+  { k: 'observacao', label: 'Observação' },
+  { k: 'multa', label: 'Multa', num: true },
+  { k: 'juros', label: 'Juros', num: true },
+  { k: 'acrescTot', label: 'Acrésc.', num: true },
+  { k: 'setor', label: 'Setor' },
+  { k: 'gestor', label: 'Gestor' },
+];
+
 const SETORES_PADRAO = [
   'COMPRAS', 'ADM', 'LOGÍSTICA', 'CONTABIL', 'FROTA', 'SMS', 'ALMOXARIFADO',
   'TI', 'DP', 'COMERCIAL', 'GESTÃO DOC', 'JURIDICO', 'FINANCEIRO',
@@ -194,9 +218,10 @@ export default function ImpactoPanel() {
   const [busca, setBusca] = useState('');
   const [buscaDeb, setBuscaDeb] = useState('');
   const [soPendentes, setSoPendentes] = useState(false);
-  const [sortDesc, setSortDesc] = useState<'baixa' | 'acresc'>('baixa');
+  const [sort, setSort] = useState<{ key: string; dir: 1 | -1 } | null>(null);
+  const [colFilters, setColFilters] = useState<Record<string, string>>({});
   const [pageIdx, setPageIdx] = useState(0);
-  const PAGE_SIZE = 100;
+  const [pageSize, setPageSize] = useState(100);
   const reqSeq = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -236,6 +261,48 @@ export default function ImpactoPanel() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
+  const colVal = useCallback((t: Titulo, key: string): string | number => {
+    if (key === 'acrescTot') return (t.multa || 0) + (t.juros || 0) + (t.acresc || 0);
+    const v = (t as any)[key];
+    return v ?? '';
+  }, []);
+
+  const titulosFiltrados = useMemo(() => {
+    let arr = data?.titulos || [];
+    const active = Object.entries(colFilters).filter(([, v]) => v.trim());
+    if (active.length) {
+      arr = arr.filter((t) =>
+        active.every(([k, v]) =>
+          String(colVal(t, k)).toLowerCase().includes(v.trim().toLowerCase())
+        )
+      );
+    }
+    if (sort) {
+      arr = [...arr].sort((a, b) => {
+        const va = colVal(a, sort.key);
+        const vb = colVal(b, sort.key);
+        if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sort.dir;
+        return String(va).localeCompare(String(vb), 'pt-BR') * sort.dir;
+      });
+    }
+    return arr;
+  }, [data, colFilters, sort, colVal]);
+
+  const totalPages = Math.max(1, Math.ceil(titulosFiltrados.length / pageSize));
+  const pageSafe = Math.min(pageIdx, totalPages - 1);
+  const titulosPage = useMemo(
+    () => titulosFiltrados.slice(pageSafe * pageSize, (pageSafe + 1) * pageSize),
+    [titulosFiltrados, pageSafe, pageSize]
+  );
+
+  const toggleSort = (key: string) =>
+    setSort((s) => (s?.key === key ? (s.dir === 1 ? { key, dir: -1 } : null) : { key, dir: 1 }));
+
+  const setColFilter = (key: string, v: string) => {
+    setColFilters((f) => ({ ...f, [key]: v }));
+    setPageIdx(0);
+  };
+
   const saveField = useCallback(async (id: number, field: string, value: string) => {
     setData((d) => d && {
       ...d,
@@ -271,7 +338,7 @@ export default function ImpactoPanel() {
     try {
       const XLSX = await import('xlsx');
       const wb = XLSX.utils.book_new();
-      const rows = data.titulos.map((t) => ({
+      const rows = titulosFiltrados.map((t) => ({
         Empresa: t.empresa, 'DT Baixa': t.baixa, Codigo: t.fornecedor,
         Fornecedor: t.fornecedor_nome, Tipo: t.tipo, Parcela: t.parcela,
         'No. Titulo': t.num, Valor: t.valor, 'Vencto Real': t.vencto_real,
@@ -281,12 +348,14 @@ export default function ImpactoPanel() {
         'Observação': t.observacao, Multa: t.multa, Juros: t.juros,
         'Acresc.': t.acresc, Setor: t.setor, Gestor: t.gestor,
       }));
-      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), 'BASE');
+      const ws = XLSX.utils.json_to_sheet(rows);
+      ws['!autofilter'] = { ref: ws['!ref'] as string };
+      XLSX.utils.book_append_sheet(wb, ws, 'BASE');
       XLSX.writeFile(wb, `impacto_financeiro_${new Date().toISOString().slice(0, 10)}.xlsx`);
     } finally {
       setExporting(false);
     }
-  }, [data]);
+  }, [data, titulosFiltrados]);
 
   const anosDisp = useMemo(() => {
     const s = new Set<number>((data?.porAno || []).map((a) => a.ano));
@@ -335,21 +404,6 @@ export default function ImpactoPanel() {
   const anoTotalGeral = useMemo(
     () => (data?.porAno || []).reduce((a, r) => a + r.total, 0),
     [data]
-  );
-
-  const titulosSorted = useMemo(() => {
-    const arr = [...(data?.titulos || [])];
-    if (sortDesc === 'acresc') {
-      arr.sort((a, b) => ((b.multa || 0) + (b.juros || 0) + (b.acresc || 0)) - ((a.multa || 0) + (a.juros || 0) + (a.acresc || 0)));
-    }
-    return arr;
-  }, [data, sortDesc]);
-
-  const totalPages = Math.max(1, Math.ceil(titulosSorted.length / PAGE_SIZE));
-  const pageSafe = Math.min(pageIdx, totalPages - 1);
-  const titulosPage = useMemo(
-    () => titulosSorted.slice(pageSafe * PAGE_SIZE, (pageSafe + 1) * PAGE_SIZE),
-    [titulosSorted, pageSafe]
   );
 
   if (loading && !data) {
@@ -651,30 +705,28 @@ export default function ImpactoPanel() {
           <table className="w-full text-xs">
             <thead className="sticky top-0 z-10 bg-muted">
               <tr className="text-left">
-                <th className="p-2">Empresa</th>
-                <th className="p-2">DT Baixa</th>
-                <th className="p-2">Código</th>
-                <th className="p-2">Fornecedor</th>
-                <th className="p-2">Tipo</th>
-                <th className="p-2">Parcela</th>
-                <th className="p-2">Nº Título</th>
-                <th className="p-2 text-right">Valor</th>
-                <th className="p-2">Vencto Real</th>
-                <th className="p-2">Natureza</th>
-                <th className="p-2">Descrição Nat</th>
-                <th className="p-2">DT Emissao</th>
-                <th className="p-2">Centro Custo</th>
-                <th className="p-2">Descrição CC</th>
-                <th className="p-2">Validação</th>
-                <th className="p-2">Observação</th>
-                <th className="p-2 text-right">Multa</th>
-                <th className="p-2 text-right">Juros</th>
-                <th className="p-2 text-right cursor-pointer select-none" title="Ordenar por maior acréscimo"
-                  onClick={() => setSortDesc((s) => (s === 'acresc' ? 'baixa' : 'acresc'))}>
-                  Acrésc.{sortDesc === 'acresc' ? ' ↓' : ''}
-                </th>
-                <th className="p-2">Setor</th>
-                <th className="p-2">Gestor</th>
+                {TABLE_COLS.map((c) => (
+                  <th key={c.k}
+                    className={`p-2 cursor-pointer select-none whitespace-nowrap ${c.num ? 'text-right' : ''}`}
+                    title="Clique para ordenar"
+                    onClick={() => toggleSort(c.k)}>
+                    {c.label}{sort?.key === c.k ? (sort.dir === 1 ? ' ↑' : ' ↓') : ''}
+                  </th>
+                ))}
+              </tr>
+              <tr className="border-b border-border">
+                {TABLE_COLS.map((c) => (
+                  <th key={c.k} className="px-1 pb-1 font-normal">
+                    {!c.num && (
+                      <input
+                        className="w-full min-w-[60px] rounded border border-border bg-background px-1 py-0.5 text-[10px] font-normal"
+                        value={colFilters[c.k] || ''}
+                        onChange={(e) => setColFilter(c.k, e.target.value)}
+                        placeholder="filtrar"
+                      />
+                    )}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -721,10 +773,17 @@ export default function ImpactoPanel() {
         </div>
         <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
           <span>
-            Mostrando {titulosPage.length ? pageSafe * PAGE_SIZE + 1 : 0}–{pageSafe * PAGE_SIZE + titulosPage.length} de {titulosSorted.length.toLocaleString('pt-BR')}
-            {(data?.totais.qtd || 0) > titulosSorted.length && ` (de ${(data?.totais.qtd || 0).toLocaleString('pt-BR')} no total — refine os filtros ou exporte)`}
+            Mostrando {titulosPage.length ? pageSafe * pageSize + 1 : 0}–{pageSafe * pageSize + titulosPage.length} de {titulosFiltrados.length.toLocaleString('pt-BR')}
+            {(data?.totais.qtd || 0) > titulosFiltrados.length && ` (de ${(data?.totais.qtd || 0).toLocaleString('pt-BR')} no total — refine os filtros ou exporte)`}
           </span>
           <div className="flex items-center gap-1">
+            <select
+              className="mr-2 rounded border border-border bg-background px-1 py-0.5"
+              value={pageSize}
+              onChange={(e) => { setPageSize(Number(e.target.value)); setPageIdx(0); }}
+            >
+              {[50, 100, 200, 500].map((n) => <option key={n} value={n}>{n}/pág</option>)}
+            </select>
             <Button variant="outline" size="sm" disabled={pageSafe === 0} onClick={() => setPageIdx(0)}>«</Button>
             <Button variant="outline" size="sm" disabled={pageSafe === 0} onClick={() => setPageIdx(pageSafe - 1)}>‹ Ant</Button>
             <span className="px-2">Pág. {pageSafe + 1}/{totalPages}</span>
