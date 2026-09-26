@@ -1,7 +1,10 @@
 ﻿'use client';
 import { ImportQzModal } from '@/components/ImportQzModal';
+import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
+import { useAuth } from '@/lib/auth/auth-context';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import { useTableSort, SortIcon } from '@/lib/table-sort';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -136,9 +139,9 @@ function StatCard({ label, value, sub, color = 'gray' }: {
   }[color];
 
   return (
-    <div className={`rounded-lg border p-3 ${cls}`}>
+    <div className={`rounded-lg border p-3 flex h-full flex-col justify-center ${cls}`}>
       <div className="text-xs font-medium opacity-70 mb-1">{label}</div>
-      <div className="text-lg font-bold leading-none">{value}</div>
+      <div className="text-lg font-bold leading-tight break-words">{value}</div>
       {sub && <div className="text-xs opacity-60 mt-1">{sub}</div>}
     </div>
   );
@@ -150,11 +153,13 @@ function EditCell({
   numeric = true,
   onSave,
   empty = '-',
+  readOnly = false,
 }: {
   value: number | string | null;
   numeric?: boolean;
   onSave: (v: string | null) => Promise<void>;
   empty?: string;
+  readOnly?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
@@ -204,6 +209,14 @@ function EditCell({
     ? num(value as number)
     : (value ?? null);
 
+  if (readOnly) {
+    return (
+      <span className={`block text-right px-1 py-0.5 ${display === null ? 'text-gray-300 italic text-xs' : ''}`}>
+        {display ?? empty}
+      </span>
+    );
+  }
+
   return (
     <button
       onClick={start}
@@ -220,6 +233,8 @@ function EditCell({
 // ---- Main page --------------------------------------------------------------
 
 export default function QuinzenaDinamicaPage() {
+  const { user } = useAuth();
+  const isGestor = user?.role === 'gestor';
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [periods, setPeriods] = useState<Period[]>([]);
   const [snapshotsLoading, setSnapshotsLoading] = useState(true);
@@ -237,6 +252,8 @@ export default function QuinzenaDinamicaPage() {
   const [onlyWithCarga, setOnlyWithCarga] = useState(true);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [freezing, setFreezing] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
   // Filtros dropdown
   const [selectedRegionals, setSelectedRegionals] = useState<Set<string>>(new Set());
@@ -298,6 +315,45 @@ export default function QuinzenaDinamicaPage() {
       loadData(year, month, quinzena);
     }
   }, [year, month, quinzena, loadData]);
+
+  // Sync with VExpenses API — discovers new reports, updates statuses, syncs expenses
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      const res = await fetch('/api/sync-expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'quick' }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Erro ao sincronizar');
+      setSyncMsg(`Sync iniciada — ${json.totalReports} relatórios. Atualizando...`);
+
+      // Poll until done
+      const poll = setInterval(async () => {
+        try {
+          const p = await fetch('/api/sync-expenses');
+          const pj = await p.json();
+          if (pj.status === 'done') {
+            clearInterval(poll);
+            setSyncing(false);
+            setSyncMsg(`Sync concluída: ${pj.new_reports_inserted || 0} novos, ${pj.status_updates || 0} status, ${pj.synced || 0} com mudanças`);
+            if (year && month && quinzena) loadData(year, month, quinzena);
+          } else if (pj.status === 'error' || pj.status === 'idle') {
+            clearInterval(poll);
+            setSyncing(false);
+            setSyncMsg(`Sync ${pj.status === 'error' ? 'falhou' : 'parada'}`);
+          } else {
+            setSyncMsg(`Sync: ${pj.processed}/${pj.total} (${pj.progress_pct || 0}%)`);
+          }
+        } catch {}
+      }, 3000);
+    } catch (e) {
+      setSyncing(false);
+      setSyncMsg(e instanceof Error ? e.message : 'Erro ao sincronizar');
+    }
+  };
 
   // Fechar dropdowns ao clicar fora
   useEffect(() => {
@@ -377,7 +433,37 @@ export default function QuinzenaDinamicaPage() {
     });
   };
 
-  // 4. Export XLSX
+  // 4a. Export XLSX (server-side, 7 abas completo)
+  const [exporting, setExporting] = useState(false);
+  const exportServerXLSX = async () => {
+    if (year === null || month === null || quinzena === null) return;
+    setExporting(true);
+    try {
+      const res = await fetch(`/api/quinzena-export?year=${year}&month=${month}&quinzena=${quinzena}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Erro ao gerar XLSX' }));
+        alert(err.error || 'Erro ao gerar XLSX');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `controle_${year}_${String(month).padStart(2, '0')}_Q${quinzena}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert('Erro ao baixar XLSX: ' + String(e));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // 4b. Export XLSX (client-side, apenas dados visiveis)
   const exportXLSX = () => {
     if (!filteredRows.length || !data) return;
 
@@ -597,7 +683,9 @@ export default function QuinzenaDinamicaPage() {
   const isCalcMode = data?.data_mode === 'calculado';
   const isFrozen = data?.is_frozen ?? false;
 
-  // Freeze/unfreeze handlers
+  // Freeze/unfreeze handlers — o freeze agora passa pelo pré-checklist
+  const [precheckOpen, setPrecheckOpen] = useState(false);
+
   const handleFreeze = async () => {
     if (year === null || month === null || quinzena === null) return;
     setFreezing(true);
@@ -614,6 +702,7 @@ export default function QuinzenaDinamicaPage() {
       loadData(year, month, quinzena);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao congelar');
+      throw e;
     } finally {
       setFreezing(false);
     }
@@ -640,7 +729,7 @@ export default function QuinzenaDinamicaPage() {
   const allRegionals = [...new Set((data?.data ?? []).map(r => r.regional).filter(Boolean))].sort();
   const allCentros   = [...new Set((data?.data ?? []).map(r => r.centro_custo).filter(Boolean))].sort();
 
-  const filteredRows = (data?.data ?? []).filter(r => {
+  const filteredRows = (data?.data ?? []).filter((r: QuinzenaRow) => {
     if (onlyWithCarga) {
       const col_qz_efetivo = r.col_qz_manual !== null ? r.col_qz_manual : (r.col_qz ?? 0);
       if (col_qz_efetivo <= 0) return false;
@@ -654,6 +743,18 @@ export default function QuinzenaDinamicaPage() {
       r.centro_custo.toLowerCase().includes(search.toLowerCase())
     );
   });
+
+  const { sortKey, sortDir, toggleSort, sortedRows } = useTableSort(filteredRows);
+  const SortTh = ({ k, className, children }: { k: string; className?: string; children: ReactNode }) => (
+    <th
+      onClick={() => toggleSort(k)}
+      className={`${className ?? ''} cursor-pointer select-none hover:bg-gray-100`}
+      title="Clique para ordenar"
+    >
+      {children}
+      <SortIcon active={sortKey === k} dir={sortDir} />
+    </th>
+  );
 
   const stats = data?.statistics;
 
@@ -673,6 +774,16 @@ export default function QuinzenaDinamicaPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          {!isGestor && (
+            <Button size="sm" variant="default"
+              onClick={handleSync}
+              disabled={syncing || loading}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${syncing ? 'animate-spin' : ''}`} />
+              {syncing ? 'Sincronizando...' : 'Sincronizar VExpenses'}
+            </Button>
+          )}
           <Button size="sm" variant="outline"
             onClick={() => year && month && quinzena && loadData(year, month, quinzena)}
             disabled={loading || year === null}
@@ -680,27 +791,34 @@ export default function QuinzenaDinamicaPage() {
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
-          {isFrozen ? (
+          {!isGestor && (isFrozen ? (
             <Button size="sm" variant="outline" onClick={handleUnfreeze} disabled={freezing || loading}>
               <Unlock className="h-4 w-4 mr-1" />
               Descongelar
             </Button>
           ) : (
-            <Button size="sm" variant="default" onClick={handleFreeze} disabled={freezing || loading || !data}>
+            <Button size="sm" variant="default" onClick={() => setPrecheckOpen(true)} disabled={freezing || loading || !data}>
               <Snowflake className="h-4 w-4 mr-1" />
               Congelar
             </Button>
+          ))}
+          {!isGestor && (
+            <Button size="sm" variant="outline"
+              onClick={() => setImportModalOpen(true)}
+              disabled={year === null || month === null || quinzena === null || isFrozen}
+              title={isFrozen ? 'Quinzena congelada — descongele para importar (o snapshot exibido não refletiria a importação)' : undefined}
+            >
+              <Upload className="h-4 w-4 mr-1" />
+              Importar QZ
+            </Button>
           )}
-          <Button size="sm" variant="outline"
-            onClick={() => setImportModalOpen(true)}
-            disabled={year === null || month === null || quinzena === null}
-          >
-            <Upload className="h-4 w-4 mr-1" />
-            Importar QZ
+          <Button size="sm" variant="default" onClick={exportServerXLSX} disabled={exporting || year === null || month === null || quinzena === null}>
+            <FileDown className="h-4 w-4 mr-1" />
+            {exporting ? 'Gerando...' : 'Baixar XLSX Completo'}
           </Button>
           <Button size="sm" variant="outline" onClick={exportXLSX} disabled={!filteredRows.length}>
             <FileDown className="h-4 w-4 mr-1" />
-            Excel
+            Excel (visível)
           </Button>
         </div>
       </div>
@@ -840,6 +958,27 @@ export default function QuinzenaDinamicaPage() {
                 <strong>Modo calculado:</strong> Sem snapshot importado para este período.
                 Saldo final/cartão calculados via extrato + âncora da quinzena anterior.
                 Coluna <strong>QZ</strong> requer entrada manual. Os demais campos são automáticos.
+              </AlertDescription>
+            </Alert>
+          )}
+          {(data as any)?.data_freshness?.warning && (
+            <Alert className="border-red-200 bg-red-50">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800">
+                <strong>Dados podem estar desatualizados:</strong>{' '}
+                {(data as any).data_freshness.warning}
+                {(data as any).data_freshness.last_sync_at && (
+                  <span className="block text-xs mt-1">
+                    Última sync: {new Date((data as any).data_freshness.last_sync_at).toLocaleString('pt-BR')}
+                  </span>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+          {syncMsg && (
+            <Alert className={syncMsg.includes('falhou') || syncMsg.includes('Erro') ? 'border-red-200 bg-red-50' : 'border-emerald-200 bg-emerald-50'}>
+              <AlertDescription className={syncMsg.includes('falhou') || syncMsg.includes('Erro') ? 'text-red-800' : 'text-emerald-800'}>
+                {syncMsg}
               </AlertDescription>
             </Alert>
           )}
@@ -1015,32 +1154,32 @@ export default function QuinzenaDinamicaPage() {
                   <thead className="sticky top-0 z-10 bg-gray-50">
                     <tr className="border-b border-gray-200 text-gray-600">
                       {/* Identity */}
-                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Colaborador</th>
-                      <th className="text-left px-2 py-2 font-semibold">CPF</th>
-                      <th className="text-left px-2 py-2 font-semibold">Situacao</th>
-                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Regional</th>
-                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Centro de Custo</th>
-                      <th className="text-left px-2 py-2 font-semibold">Gestor</th>
+                      <SortTh k="colaborador" className="text-left px-2 py-2 font-semibold whitespace-nowrap">Colaborador</SortTh>
+                      <SortTh k="cpf" className="text-left px-2 py-2 font-semibold">CPF</SortTh>
+                      <SortTh k="situacao" className="text-left px-2 py-2 font-semibold">Situacao</SortTh>
+                      <SortTh k="regional" className="text-left px-2 py-2 font-semibold whitespace-nowrap">Regional</SortTh>
+                      <SortTh k="centro_custo" className="text-left px-2 py-2 font-semibold whitespace-nowrap">Centro de Custo</SortTh>
+                      <SortTh k="gestor" className="text-left px-2 py-2 font-semibold">Gestor</SortTh>
                       {/* Neon */}
-                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Final</th>
-                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Cartao</th>
-                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Prest.</th>
-                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Reemb.</th>
+                      <SortTh k="saldo_final" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Final</SortTh>
+                      <SortTh k="saldo_cartao" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Cartao</SortTh>
+                      <SortTh k="saldo_prestacao" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Prest.</SortTh>
+                      <SortTh k="saldo_reembolsar" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Reemb.</SortTh>
                       {/* From carga spreadsheet */}
-                      <th className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">
+                      <SortTh k="col_qz" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">
                         {data.period.quinzena}a QZ (plan.)
-                      </th>
+                      </SortTh>
                       {/* Manual override */}
-                      <th className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">
+                      <SortTh k="col_qz_manual" className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">
                         {data.period.quinzena}a QZ (man.) *
-                      </th>
-                      <th className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Adiant. *</th>
+                      </SortTh>
+                      <SortTh k="adiantamento" className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Adiant. *</SortTh>
                       {/* Calculated */}
-                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Carga Parcial</th>
-                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Reembolso</th>
-                      <th className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap font-bold">Carga Final</th>
+                      <SortTh k="carga_parcial" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Carga Parcial</SortTh>
+                      <SortTh k="reembolso" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Reembolso</SortTh>
+                      <SortTh k="carga_final" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap font-bold">Carga Final</SortTh>
                       {/* Status / obs */}
-                      <th className="text-left px-2 py-2 font-semibold whitespace-nowrap">Status Cartao</th>
+                      <SortTh k="status_cartao" className="text-left px-2 py-2 font-semibold whitespace-nowrap">Status Cartao</SortTh>
                       <th className="text-left px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Obs *</th>
                     </tr>
                   </thead>
@@ -1051,7 +1190,7 @@ export default function QuinzenaDinamicaPage() {
                           {search ? 'Nenhum resultado para a busca.' : 'Sem dados.'}
                         </td>
                       </tr>
-                    ) : filteredRows.map((row, i) => {
+                    ) : sortedRows.map((row, i) => {
                       const isAtivo = row.situacao?.toUpperCase() === 'ATIVO';
                       const overrideActive = row.col_qz_manual !== null;
                       return (
@@ -1102,6 +1241,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric
                               onSave={v => saveField(row.cpf, 'col_1qz', v)}
                               empty="override..."
+                              readOnly={isGestor || isFrozen}
                             />
                           </td>
 
@@ -1112,6 +1252,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric
                               onSave={v => saveField(row.cpf, 'adiantamento', v)}
                               empty="0,00"
+                              readOnly={isGestor || isFrozen}
                             />
                           </td>
 
@@ -1129,8 +1270,9 @@ export default function QuinzenaDinamicaPage() {
                           {/* Status + obs */}
                           <td className="px-2 py-1.5 whitespace-nowrap">
                             <span className={`px-1.5 py-0.5 rounded text-xs ${
-                              row.status_cartao?.toLowerCase().includes('ativo') ? 'bg-green-100 text-green-700'
-                              : row.status_cartao?.toLowerCase().includes('bloqueado') ? 'bg-red-100 text-red-600'
+                              // 'cartão inativo' contém 'ativo' como substring — checar inativo/bloqueado ANTES
+                              /inativ|bloquead|cancel/i.test(row.status_cartao || '') ? 'bg-red-100 text-red-600'
+                              : row.status_cartao?.toLowerCase().includes('ativo') ? 'bg-green-100 text-green-700'
                               : 'bg-gray-100 text-gray-600'
                             }`}>
                               {row.status_cartao || '-'}
@@ -1142,6 +1284,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric={false}
                               onSave={v => saveField(row.cpf, 'obs', v)}
                               empty="obs..."
+                              readOnly={isGestor || isFrozen}
                             />
                           </td>
                         </tr>
@@ -1209,6 +1352,18 @@ export default function QuinzenaDinamicaPage() {
             setImportModalOpen(false);
             loadData(year, month, quinzena);
           }}
+        />
+      )}
+
+      {/* Pré-freeze checklist */}
+      {year !== null && month !== null && quinzena !== null && (
+        <FreezePrecheckModal
+          open={precheckOpen}
+          onClose={() => setPrecheckOpen(false)}
+          year={year}
+          month={month}
+          quinzena={quinzena}
+          onConfirm={handleFreeze}
         />
       )}
     </div>

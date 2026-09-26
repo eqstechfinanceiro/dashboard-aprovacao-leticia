@@ -19,6 +19,9 @@ import {
   FileDown,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useAuth } from '@/lib/auth/auth-context';
+import { useTableSort, SortIcon } from '@/lib/table-sort';
+import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
 
 // ---- Types ------------------------------------------------------------------
 
@@ -118,6 +121,8 @@ const TABS: { id: TabId; label: string; icon: typeof Table }[] = [
 // ---- Component ---------------------------------------------------------------
 
 export default function ControlePage() {
+  const { user } = useAuth();
+  const isGestor = user?.role === 'gestor';
   const [periods, setPeriods] = useState<Period[]>([]);
   const [selectedYear, setSelectedYear] = useState(2026);
   const [selectedMonth, setSelectedMonth] = useState(7);
@@ -177,7 +182,9 @@ export default function ControlePage() {
     loadData();
   }, [loadData]);
 
-  // Freeze/unfreeze handlers
+  // Freeze/unfreeze handlers — o freeze passa pelo pré-checklist
+  const [precheckOpen, setPrecheckOpen] = useState(false);
+
   const handleFreeze = async () => {
     setFreezing(true);
     try {
@@ -193,6 +200,7 @@ export default function ControlePage() {
       await loadData();
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao congelar');
+      throw e;
     } finally {
       setFreezing(false);
     }
@@ -313,7 +321,7 @@ export default function ControlePage() {
 
         {/* Period selectors + actions */}
         <Card className="mb-4">
-          <CardContent className="flex flex-wrap items-center gap-3 p-4">
+          <CardContent className="flex flex-wrap items-center gap-3 px-4 py-4 pt-4">
             <div className="flex items-center gap-2">
               <label className="text-sm font-medium text-gray-600">Ano:</label>
               <select
@@ -366,17 +374,17 @@ export default function ControlePage() {
                 <FileDown className="mr-1 h-4 w-4" />
                 Excel
               </Button>
-              {data?.is_frozen ? (
+              {!isGestor && (data?.is_frozen ? (
                 <Button variant="outline" size="sm" onClick={handleUnfreeze} disabled={freezing}>
                   <Unlock className="mr-1 h-4 w-4" />
                   Descongelar
                 </Button>
               ) : (
-                <Button variant="default" size="sm" onClick={handleFreeze} disabled={freezing || !data}>
+                <Button variant="default" size="sm" onClick={() => setPrecheckOpen(true)} disabled={freezing || !data}>
                   <Snowflake className="mr-1 h-4 w-4" />
                   Congelar
                 </Button>
-              )}
+              ))}
             </div>
           </CardContent>
         </Card>
@@ -425,13 +433,23 @@ export default function ControlePage() {
             <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
           </div>
         ) : data ? (
-          <ControleTable data={filteredData} tab={activeTab} />
+          <ControleTable key={activeTab} data={filteredData} tab={activeTab} />
         ) : (
           <div className="flex h-64 items-center justify-center text-gray-400">
             Selecione um período para visualizar os dados
           </div>
         )}
       </div>
+
+      {/* Pré-freeze checklist */}
+      <FreezePrecheckModal
+        open={precheckOpen}
+        onClose={() => setPrecheckOpen(false)}
+        year={selectedYear}
+        month={selectedMonth}
+        quinzena={selectedQuinzena}
+        onConfirm={handleFreeze}
+      />
     </div>
   );
 }
@@ -440,10 +458,10 @@ export default function ControlePage() {
 
 function StatCard({ label, value }: { label: string; value: string }) {
   return (
-    <Card>
-      <CardContent className="p-3">
+    <Card className="h-full">
+      <CardContent className="flex h-full flex-col justify-center px-3 py-3 pt-3 pb-3">
         <p className="text-xs text-gray-500">{label}</p>
-        <p className="mt-1 text-lg font-bold text-gray-900">{value}</p>
+        <p className="mt-1 break-words text-lg font-bold text-gray-900">{value}</p>
       </CardContent>
     </Card>
   );
@@ -452,6 +470,8 @@ function StatCard({ label, value }: { label: string; value: string }) {
 // ---- Table Component ---------------------------------------------------------
 
 function ControleTable({ data, tab }: { data: QuinzenaRow[]; tab: TabId }) {
+  const { sortKey, sortDir, toggleSort, sortedRows } = useTableSort(data);
+
   if (data.length === 0) {
     return <div className="py-8 text-center text-gray-400">Nenhum dado disponível</div>;
   }
@@ -466,15 +486,18 @@ function ControleTable({ data, tab }: { data: QuinzenaRow[]; tab: TabId }) {
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-3 py-2 text-left font-medium text-gray-600 ${col.numeric ? 'text-right' : ''}`}
+                onClick={() => toggleSort(col.key)}
+                className={`cursor-pointer select-none px-3 py-2 text-left font-medium text-gray-600 hover:bg-gray-100 ${col.numeric ? 'text-right' : ''}`}
+                title="Clique para ordenar"
               >
                 {col.label}
+                <SortIcon active={sortKey === col.key} dir={sortDir} />
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-100">
-          {data.map((row, i) => (
+          {sortedRows.map((row, i) => (
             <tr key={row.cpf + i} className="hover:bg-gray-50">
               {columns.map((col) => (
                 <td
