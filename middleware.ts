@@ -1,19 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
-import { AUTH_COOKIE, HREF_TO_MODULE } from '@/lib/auth';
+import { AUTH_COOKIE, HREF_TO_MODULES, canAccessModule } from '@/lib/auth/auth';
 
 const PUBLIC_PATHS = ['/login', '/change-password', '/auto-login'];
-const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login'];
+const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login', '/api/health'];
+
+// GETs com side-effect global (disparam sync) ou dados brutos sem escopo —
+// bloqueados para gestores mesmo em leitura.
+const GESTOR_BLOCKED_API_PREFIXES = [
+  '/api/cache/preload',
+  '/api/cache/refresh',
+  '/api/pipeline/run',
+  '/api/pipeline/step',
+  '/api/fix-',
+  '/api/smart-download-expenses',
+];
+
+// Operações sensíveis restritas a role=admin (jobs de sync, correções em massa,
+// bulk upserts). Antes ficavam abertas a qualquer usuário autenticado.
+const ADMIN_ONLY_API_PREFIXES = [
+  '/api/fix-',
+  '/api/pipeline/run',
+  '/api/pipeline/step',
+  '/api/smart-download-expenses',
+  '/api/reports/upsert',
+  '/api/preload',
+  '/api/download-progress',
+];
+
+// Módulos cujos dados alimentam as APIs /api/vexpenses — qualquer um deles libera.
+const VEXPENSES_MODULES = [
+  'dashboard', 'aprovacoes', 'pending-approvals', 'analytics', 'gestao-caixa',
+  'quinzena-dinamica', 'controle', 'fechamento', 'aprovacao-dinamica', 'resultados',
+];
+
+// APIs atreladas a módulos — sem grant em NENHUM dos módulos listados, 403.
+const API_MODULE_MAP: [string, string[]][] = [
+  ['/api/users', ['configuracoes']],
+  ['/api/aprovacao-dinamica', ['aprovacao-dinamica']],
+  ['/api/comprovantes', ['automacao-comprovantes']],
+  ['/api/itau', ['ferramentas-itau']],
+  ['/api/resultados', ['resultados']],
+  ['/api/pendencias', ['pendencias']],
+  ['/api/impacto', ['impacto-financeiro']],
+  ['/api/cartorios', ['cartorios']],
+  ['/api/quinzena', ['quinzena-dinamica', 'controle', 'configuracoes']],
+  ['/api/fechamento', ['fechamento', 'configuracoes']],
+  ['/api/analytics/posicao-caixa', ['gestao-caixa']],
+  ['/api/analytics/despesas', ['analytics']],
+  ['/api/analytics/visao-geral', ['dashboard']],
+  ['/api/pipeline/status', ['configuracoes']],
+  ['/api/sync-expenses', ['quinzena-dinamica']],
+  ['/api/vexpenses', VEXPENSES_MODULES],
+];
 
 function getSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET não configurado');
   return new TextEncoder().encode(secret);
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon') || pathname.includes('.')) {
+  // Paths com "." (assets estáticos) passam direto — exceto /api/*, que sempre
+  // exige auth mesmo com extensão na URL (ex.: /api/downloads/arquivo.exe).
+  if (pathname.startsWith('/_next') || pathname.startsWith('/favicon') || (pathname.includes('.') && !pathname.startsWith('/api/'))) {
     return NextResponse.next();
   }
 
@@ -31,9 +83,6 @@ export async function middleware(request: NextRequest) {
         const { payload } = await jwtVerify(token, getSecret());
         if (payload.must_change_password && pathname === '/login') {
           return NextResponse.redirect(new URL('/change-password', request.url));
-        }
-        if (!payload.must_change_password && pathname === '/change-password') {
-          return NextResponse.redirect(new URL('/', request.url));
         }
         if (!payload.must_change_password && pathname === '/login') {
           return NextResponse.redirect(new URL('/', request.url));
@@ -75,16 +124,57 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname !== '/' && pathname !== '/change-password' && !pathname.startsWith('/api/')) {
-    const moduleId = HREF_TO_MODULE[pathname];
-    if (moduleId && payload.role !== 'admin') {
-      const modules: string[] = payload.modules || [];
-      if (!modules.includes(moduleId)) {
-        return NextResponse.redirect(new URL('/', request.url));
-      }
+    const moduleIds = HREF_TO_MODULES[pathname] ?? HREF_TO_MODULES['/' + pathname.split('/')[1]];
+    if (moduleIds && !moduleIds.some((m) => canAccessModule(String(payload.role), payload.modules as string[] | undefined, m))) {
+      return NextResponse.redirect(new URL('/', request.url));
     }
   }
 
-  if (pathname.startsWith('/api/users') && payload.role !== 'admin') {
+  // Gate de módulo para APIs (chamada direta não pode burlar a sidebar).
+  if (pathname.startsWith('/api/')) {
+    const role = String(payload.role);
+    const mods = payload.modules as string[] | undefined;
+
+    // /api/cache: leitura (metadata/status) é usada pelas páginas; mutações e
+    // endpoints de debug são admin-only.
+    const cacheReadOnly =
+      pathname.startsWith('/api/cache/') &&
+      ['GET', 'HEAD'].includes(request.method) &&
+      !['/api/cache/debug', '/api/cache/test', '/api/cache/preload', '/api/cache/refresh'].some((p) => pathname.startsWith(p));
+
+    if (
+      role !== 'admin' &&
+      (ADMIN_ONLY_API_PREFIXES.some((p) => pathname.startsWith(p)) ||
+        (pathname.startsWith('/api/cache/') && !cacheReadOnly))
+    ) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+
+    const apiMods = API_MODULE_MAP.find(([prefix]) => pathname.startsWith(prefix))?.[1];
+    if (apiMods && !apiMods.some((m) => canAccessModule(role, mods, m))) {
+      return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
+    }
+  }
+
+  // Gestores são somente-leitura: qualquer escrita fora da whitelist é bloqueada.
+  // Rotas permitidas para escrita por gestores (cada uma valida o escopo por dentro).
+  if (
+    payload.role === 'gestor' &&
+    pathname.startsWith('/api/') &&
+    !['GET', 'HEAD', 'OPTIONS'].includes(request.method)
+  ) {
+    const WRITE_ALLOWED = ['/api/auth/', '/api/suporte', '/api/fechamento/sync', '/api/inactive-alerts', '/api/itau'];
+    if (!WRITE_ALLOWED.some((p) => pathname.startsWith(p))) {
+      return NextResponse.json({ error: 'Ação não permitida para gestores' }, { status: 403 });
+    }
+  }
+
+  // GETs bloqueados para gestores (side-effects globais / dados sem escopo).
+  if (
+    payload.role === 'gestor' &&
+    pathname.startsWith('/api/') &&
+    GESTOR_BLOCKED_API_PREFIXES.some((p) => pathname.startsWith(p))
+  ) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 

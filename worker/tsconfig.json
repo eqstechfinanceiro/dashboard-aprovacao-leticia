@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "lib": ["ES2020"],
+    "outDir": "../worker-dist",
+    "rootDir": "..",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["./sync-worker.ts", "./comprovantes-worker.ts", "../lib/sync/**/*", "../lib/comprovantes/**/*", "../lib/impacto/**/*", "../lib/db/neon.ts", "../lib/db/settings.ts", "../lib/api/laravel-token.ts", "../lib/pipeline/quinzena-dates.ts", "../lib/rules/report-filters.ts"],
+  "exclude": ["../node_modules"]
+}
