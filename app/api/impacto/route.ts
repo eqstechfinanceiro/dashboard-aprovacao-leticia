@@ -95,11 +95,18 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Detalhamento por setor: ranking + soma por validação
-    const detalhe = await sql.query(
-      `SELECT COALESCE(NULLIF(setor,''),'SEM SETOR') AS setor, COALESCE(NULLIF(validacao,''),'SEM VALIDAÇÃO') AS validacao,
-              SUM(${acrescExpr}) AS total, COUNT(*) AS qtd
-       FROM impacto_titulos ${where} GROUP BY 1,2 ORDER BY 1, total DESC`
-    );
+    const [detalhe, porValid] = await Promise.all([
+      sql.query(
+        `SELECT COALESCE(NULLIF(setor,''),'SEM SETOR') AS setor, COALESCE(NULLIF(validacao,''),'SEM VALIDAÇÃO') AS validacao,
+                SUM(${acrescExpr}) AS total, COUNT(*) AS qtd
+         FROM impacto_titulos ${where} GROUP BY 1,2 ORDER BY 1, total DESC`
+      ),
+      sql.query(
+        `SELECT COALESCE(NULLIF(validacao,''),'SEM VALIDAÇÃO') AS validacao,
+                SUM(${acrescExpr}) AS total, COUNT(*) AS qtd
+         FROM impacto_titulos ${where} GROUP BY 1 ORDER BY total DESC`
+      ),
+    ]);
 
     return NextResponse.json({
       titulos: titulos.rows.map((t: any) => ({
@@ -116,6 +123,7 @@ export async function GET(request: NextRequest) {
       topFornecedores: topForn.rows.map((r: any) => ({ nome: r.nome, total: Number(r.total) || 0, qtd: Number(r.qtd) })),
       topSetores: topSetor.rows.map((r: any) => ({ setor: r.setor, total: Number(r.total) || 0, qtd: Number(r.qtd) })),
       detalheSetor: detalhe.rows.map((r: any) => ({ setor: r.setor, validacao: r.validacao, total: Number(r.total) || 0, qtd: Number(r.qtd) })),
+      porValidacao: porValid.rows.map((r: any) => ({ validacao: r.validacao, total: Number(r.total) || 0, qtd: Number(r.qtd) })),
       opcoes: {
         setores: optSetor.rows.map((r: any) => r.setor),
         validacoes: [...new Set([...VALIDACOES, ...optValid.rows.map((r: any) => r.validacao)])],
