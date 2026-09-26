@@ -439,19 +439,19 @@ export default function ImpactoPanel() {
 
       {/* cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4 !pt-4">
           <div className="text-xs text-muted-foreground">Acréscimo Total</div>
           <div className="text-2xl font-bold text-red-600">{fmtBRL(data?.totais.jurosTotal || 0)}</div>
         </CardContent></Card>
-        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4 !pt-4">
           <div className="text-xs text-muted-foreground">Títulos</div>
           <div className="text-2xl font-bold">{(data?.totais.qtd || 0).toLocaleString('pt-BR')}</div>
         </CardContent></Card>
-        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4 !pt-4">
           <div className="text-xs text-muted-foreground">Valor dos Títulos</div>
           <div className="text-2xl font-bold">{fmtBRLs(data?.totais.valorTotal || 0)}</div>
         </CardContent></Card>
-        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4 !pt-4">
           <div className="text-xs text-muted-foreground">Pendentes de Validação</div>
           <div className="text-2xl font-bold text-amber-600">
             {(data?.totais.semValidacaoQtd || 0).toLocaleString('pt-BR')}
@@ -462,7 +462,7 @@ export default function ImpactoPanel() {
 
       {/* gráficos */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2"><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card className="lg:col-span-2"><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 font-semibold">Acréscimo por Mês</h3>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={mesData}>
@@ -477,7 +477,7 @@ export default function ImpactoPanel() {
           </ResponsiveContainer>
         </CardContent></Card>
 
-        <Card><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 font-semibold">Por Ano</h3>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={data?.porAno || []} layout="vertical">
@@ -496,7 +496,7 @@ export default function ImpactoPanel() {
 
       {/* donuts — participação por ano e por validação (como no BI) */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 font-semibold">Participação por Ano</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -510,7 +510,7 @@ export default function ImpactoPanel() {
           </ResponsiveContainer>
         </CardContent></Card>
 
-        <Card><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 font-semibold">Participação por Validação</h3>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
@@ -532,7 +532,7 @@ export default function ImpactoPanel() {
       </div>
 
       {/* matriz mês × ano (igual abertura anual do BI) */}
-      <Card><CardContent className="flex h-full flex-col justify-center p-4">
+      <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
         <h3 className="mb-3 font-semibold">Juros Pagos — Mês × Ano</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -559,7 +559,7 @@ export default function ImpactoPanel() {
       </CardContent></Card>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 flex items-center gap-2 font-semibold"><Building2 className="h-4 w-4" /> Fornecedores</h3>
           <ResponsiveContainer width="100%" height={180}>
             <BarChart data={(data?.topFornecedores || []).slice(0, 5)} layout="vertical">
@@ -595,7 +595,7 @@ export default function ImpactoPanel() {
           </div>
         </CardContent></Card>
 
-        <Card><CardContent className="flex h-full flex-col justify-center p-4">
+        <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
           <h3 className="mb-2 flex items-center gap-2 font-semibold"><Users className="h-4 w-4" /> Top Setores</h3>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={data?.topSetores || []} layout="vertical">
@@ -610,7 +610,7 @@ export default function ImpactoPanel() {
       </div>
 
       {/* detalhamento setor × validação */}
-      <Card><CardContent className="flex h-full flex-col justify-center p-4">
+      <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
         <h3 className="mb-3 font-semibold">Detalhamento por Setor</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -640,7 +640,7 @@ export default function ImpactoPanel() {
       </CardContent></Card>
 
       {/* tabela editável */}
-      <Card><CardContent className="flex h-full flex-col justify-center p-4">
+      <Card><CardContent className="flex h-full flex-col justify-center p-4 !pt-4">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="font-semibold">Títulos ({(data?.totais.qtd || 0).toLocaleString('pt-BR')})</h3>
           <Badge variant="outline" className="text-xs">edição inline — Validação / Observação / Setor / Gestor</Badge>
