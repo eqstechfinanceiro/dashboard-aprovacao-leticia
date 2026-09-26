@@ -192,6 +192,9 @@ export default function ImpactoPanel() {
   const [busca, setBusca] = useState('');
   const [buscaDeb, setBuscaDeb] = useState('');
   const [soPendentes, setSoPendentes] = useState(false);
+  const [sortDesc, setSortDesc] = useState<'baixa' | 'acresc'>('baixa');
+  const [pageIdx, setPageIdx] = useState(0);
+  const PAGE_SIZE = 100;
   const reqSeq = useRef(0);
 
   const fetchData = useCallback(async () => {
@@ -216,6 +219,7 @@ export default function ImpactoPanel() {
       if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
       if (seq !== reqSeq.current) return; // resposta velha não sobrescreve
       setData(j);
+      setPageIdx(0);
     } catch (e: any) {
       if (seq === reqSeq.current) setError(e?.message || 'Erro ao carregar');
     } finally {
@@ -311,6 +315,41 @@ export default function ImpactoPanel() {
     [data]
   );
 
+  // Matriz Mês × Ano (como a página anual do BI)
+  const matrizMesAno = useMemo(() => {
+    const anos = [...new Set((data?.porMes || []).map((m) => m.mes.slice(0, 4)))].sort();
+    const rows = MESES_ABREV.map((mesNome, i) => {
+      const vals: Record<string, number> = {};
+      for (const ano of anos) {
+        const k = `${ano}-${String(i + 1).padStart(2, '0')}`;
+        const hit = (data?.porMes || []).find((m) => m.mes === k);
+        vals[ano] = hit ? hit.eqs + hit.bratec : 0;
+      }
+      return { mesNome, vals, total: Object.values(vals).reduce((a, b) => a + b, 0) };
+    });
+    return { anos, rows };
+  }, [data]);
+
+  const anoTotalGeral = useMemo(
+    () => (data?.porAno || []).reduce((a, r) => a + r.total, 0),
+    [data]
+  );
+
+  const titulosSorted = useMemo(() => {
+    const arr = [...(data?.titulos || [])];
+    if (sortDesc === 'acresc') {
+      arr.sort((a, b) => ((b.multa || 0) + (b.juros || 0) + (b.acresc || 0)) - ((a.multa || 0) + (a.juros || 0) + (a.acresc || 0)));
+    }
+    return arr;
+  }, [data, sortDesc]);
+
+  const totalPages = Math.max(1, Math.ceil(titulosSorted.length / PAGE_SIZE));
+  const pageSafe = Math.min(pageIdx, totalPages - 1);
+  const titulosPage = useMemo(
+    () => titulosSorted.slice(pageSafe * PAGE_SIZE, (pageSafe + 1) * PAGE_SIZE),
+    [titulosSorted, pageSafe]
+  );
+
   if (loading && !data) {
     return <div className="p-6 text-muted-foreground">Carregando impacto financeiro…</div>;
   }
@@ -398,19 +437,19 @@ export default function ImpactoPanel() {
 
       {/* cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Card><CardContent className="p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
           <div className="text-xs text-muted-foreground">Acréscimo Total</div>
           <div className="text-2xl font-bold text-red-600">{fmtBRL(data?.totais.jurosTotal || 0)}</div>
         </CardContent></Card>
-        <Card><CardContent className="p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
           <div className="text-xs text-muted-foreground">Títulos</div>
           <div className="text-2xl font-bold">{(data?.totais.qtd || 0).toLocaleString('pt-BR')}</div>
         </CardContent></Card>
-        <Card><CardContent className="p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
           <div className="text-xs text-muted-foreground">Valor dos Títulos</div>
           <div className="text-2xl font-bold">{fmtBRLs(data?.totais.valorTotal || 0)}</div>
         </CardContent></Card>
-        <Card><CardContent className="p-4">
+        <Card><CardContent className="flex h-full min-h-[92px] flex-col justify-center p-4">
           <div className="text-xs text-muted-foreground">Pendentes de Validação</div>
           <div className="text-2xl font-bold text-amber-600">
             {(data?.totais.semValidacaoQtd || 0).toLocaleString('pt-BR')}
@@ -445,18 +484,46 @@ export default function ImpactoPanel() {
               <YAxis type="category" dataKey="ano" fontSize={11} width={50} />
               <Tooltip formatter={(v: any) => fmtBRL(Number(v))} />
               <Bar dataKey="total" fill="#7c3aed">
-                <LabelList dataKey="total" position="right" fontSize={11} formatter={(v: any) => fmtBRLs(Number(v))} />
+                <LabelList dataKey="total" position="right" fontSize={11}
+                  formatter={(v: any) => `${fmtBRLs(Number(v))} (${anoTotalGeral ? ((Number(v) / anoTotalGeral) * 100).toFixed(1) : 0}%)`} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </CardContent></Card>
       </div>
 
+      {/* matriz mês × ano (igual abertura anual do BI) */}
+      <Card><CardContent className="p-4">
+        <h3 className="mb-3 font-semibold">Juros Pagos — Mês × Ano</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-left text-xs text-muted-foreground">
+                <th className="pb-2 pr-4">Mês</th>
+                {matrizMesAno.anos.map((a) => <th key={a} className="pb-2 pr-4 text-right">{a}</th>)}
+                <th className="pb-2 text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {matrizMesAno.rows.map((r) => (
+                <tr key={r.mesNome} className="border-b border-border/50">
+                  <td className="py-1 pr-4 font-medium">{r.mesNome}</td>
+                  {matrizMesAno.anos.map((a) => (
+                    <td key={a} className="py-1 pr-4 text-right">{r.vals[a] ? fmtBRL(r.vals[a]) : '—'}</td>
+                  ))}
+                  <td className="py-1 text-right font-semibold">{r.total ? fmtBRL(r.total) : '—'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent></Card>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card><CardContent className="p-4">
-          <h3 className="mb-2 flex items-center gap-2 font-semibold"><Building2 className="h-4 w-4" /> Top 5 Fornecedores</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={data?.topFornecedores || []} layout="vertical">
+          <h3 className="mb-2 flex items-center gap-2 font-semibold"><Building2 className="h-4 w-4" /> Fornecedores</h3>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart data={(data?.topFornecedores || []).slice(0, 5)} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
               <XAxis type="number" fontSize={11} tickFormatter={(v) => `R$${(v / 1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="nome" fontSize={11} width={140}
@@ -465,6 +532,28 @@ export default function ImpactoPanel() {
               <Bar dataKey="total" fill="#dc2626" />
             </BarChart>
           </ResponsiveContainer>
+          <div className="mt-2 max-h-56 overflow-y-auto rounded border border-border">
+            <table className="w-full text-xs">
+              <thead className="sticky top-0 bg-muted">
+                <tr className="text-left">
+                  <th className="p-1.5">#</th>
+                  <th className="p-1.5">Fornecedor</th>
+                  <th className="p-1.5 text-right">Qtd</th>
+                  <th className="p-1.5 text-right">JRS Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(data?.topFornecedores || []).map((f, i) => (
+                  <tr key={i} className="border-t border-border/50">
+                    <td className="p-1.5 text-muted-foreground">{i + 1}</td>
+                    <td className="max-w-[220px] truncate p-1.5" title={f.nome}>{f.nome}</td>
+                    <td className="p-1.5 text-right">{f.qtd}</td>
+                    <td className="p-1.5 text-right font-medium">{fmtBRL(f.total)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </CardContent></Card>
 
         <Card><CardContent className="p-4">
@@ -514,7 +603,7 @@ export default function ImpactoPanel() {
       {/* tabela editável */}
       <Card><CardContent className="p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-semibold">Títulos ({data?.titulos.length || 0})</h3>
+          <h3 className="font-semibold">Títulos ({(data?.totais.qtd || 0).toLocaleString('pt-BR')})</h3>
           <Badge variant="outline" className="text-xs">edição inline — Validação / Observação / Setor / Gestor</Badge>
         </div>
         <div className="max-h-[560px] overflow-auto rounded border border-border">
@@ -539,13 +628,16 @@ export default function ImpactoPanel() {
                 <th className="p-2">Observação</th>
                 <th className="p-2 text-right">Multa</th>
                 <th className="p-2 text-right">Juros</th>
-                <th className="p-2 text-right">Acrésc.</th>
+                <th className="p-2 text-right cursor-pointer select-none" title="Ordenar por maior acréscimo"
+                  onClick={() => setSortDesc((s) => (s === 'acresc' ? 'baixa' : 'acresc'))}>
+                  Acrésc.{sortDesc === 'acresc' ? ' ↓' : ''}
+                </th>
                 <th className="p-2">Setor</th>
                 <th className="p-2">Gestor</th>
               </tr>
             </thead>
             <tbody>
-              {(data?.titulos || []).map((t) => {
+              {titulosPage.map((t) => {
                 const acrescTot = (t.multa || 0) + (t.juros || 0) + (t.acresc || 0);
                 return (
                   <tr key={t.id} className="border-t border-border/50 hover:bg-muted/40">
@@ -585,6 +677,19 @@ export default function ImpactoPanel() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+          <span>
+            Mostrando {titulosPage.length ? pageSafe * PAGE_SIZE + 1 : 0}–{pageSafe * PAGE_SIZE + titulosPage.length} de {titulosSorted.length.toLocaleString('pt-BR')}
+            {(data?.totais.qtd || 0) > titulosSorted.length && ` (de ${(data?.totais.qtd || 0).toLocaleString('pt-BR')} no total — refine os filtros ou exporte)`}
+          </span>
+          <div className="flex items-center gap-1">
+            <Button variant="outline" size="sm" disabled={pageSafe === 0} onClick={() => setPageIdx(0)}>«</Button>
+            <Button variant="outline" size="sm" disabled={pageSafe === 0} onClick={() => setPageIdx(pageSafe - 1)}>‹ Ant</Button>
+            <span className="px-2">Pág. {pageSafe + 1}/{totalPages}</span>
+            <Button variant="outline" size="sm" disabled={pageSafe >= totalPages - 1} onClick={() => setPageIdx(pageSafe + 1)}>Próx ›</Button>
+            <Button variant="outline" size="sm" disabled={pageSafe >= totalPages - 1} onClick={() => setPageIdx(totalPages - 1)}>»</Button>
+          </div>
         </div>
       </CardContent></Card>
     </div>

@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
       ),
       sql.query(
         `SELECT COALESCE(NULLIF(fornecedor_nome,''), fornecedor) AS nome, SUM(${acrescExpr}) AS total, COUNT(*) AS qtd
-         FROM impacto_titulos ${where} GROUP BY 1 ORDER BY total DESC LIMIT 5`
+         FROM impacto_titulos ${where} GROUP BY 1 ORDER BY total DESC LIMIT 50`
       ),
       sql.query(
         `SELECT COALESCE(NULLIF(setor,''),'SEM SETOR') AS setor, SUM(${acrescExpr}) AS total, COUNT(*) AS qtd
