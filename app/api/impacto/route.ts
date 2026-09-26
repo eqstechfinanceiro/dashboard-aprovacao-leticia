@@ -27,6 +27,10 @@ export async function GET(request: NextRequest) {
     const meses = csvNums(p.get('meses'), 1, 12);
     const setores = csv(p.get('setores'));
     const validacoes = csv(p.get('validacoes'));
+    const gestores = csv(p.get('gestores'));
+    const tipos = csv(p.get('tipos'));
+    const naturezas = csv(p.get('naturezas'));
+    const busca = (p.get('q') || '').trim();
     const semValidacao = p.get('sem_validacao') === '1';
     const limit = Math.min(parseInt(p.get('limit') || '500', 10) || 500, 5000);
 
@@ -36,12 +40,19 @@ export async function GET(request: NextRequest) {
     if (meses.length) conds.push(`EXTRACT(MONTH FROM baixa)::int IN (${meses.join(',')})`);
     if (setores.length) conds.push(`setor IN (${setores.map((s) => `'${esc(s)}'`).join(',')})`);
     if (validacoes.length) conds.push(`validacao IN (${validacoes.map((s) => `'${esc(s)}'`).join(',')})`);
+    if (gestores.length) conds.push(`gestor IN (${gestores.map((s) => `'${esc(s)}'`).join(',')})`);
+    if (tipos.length) conds.push(`tipo IN (${tipos.map((s) => `'${esc(s)}'`).join(',')})`);
+    if (naturezas.length) conds.push(`natureza IN (${naturezas.map((s) => `'${esc(s)}'`).join(',')})`);
+    if (busca) {
+      const b = esc(busca);
+      conds.push(`(num ILIKE '%${b}%' OR fornecedor ILIKE '%${b}%' OR fornecedor_nome ILIKE '%${b}%')`);
+    }
     if (semValidacao) conds.push(`(validacao IS NULL OR validacao = '')`);
     const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
 
     const acrescExpr = `(COALESCE(multa,0) + COALESCE(juros,0) + COALESCE(acresc,0))`;
 
-    const [titulos, mensal, anual, topForn, topSetor, optSetor, optValid, lastSync, totais] = await Promise.all([
+    const [titulos, mensal, anual, topForn, topSetor, optSetor, optValid, optGestor, optTipo, optNat, lastSync, totais] = await Promise.all([
       sql.query(
         `SELECT id, empresa, filial, num, parcela, tipo, fornecedor, fornecedor_nome,
                 natureza, natureza_desc, emissao, vencto, vencto_real, baixa,
@@ -71,6 +82,9 @@ export async function GET(request: NextRequest) {
       ),
       sql.query(`SELECT DISTINCT setor FROM impacto_titulos WHERE setor IS NOT NULL AND setor<>'' ORDER BY 1`),
       sql.query(`SELECT DISTINCT validacao FROM impacto_titulos WHERE validacao IS NOT NULL AND validacao<>'' ORDER BY 1`),
+      sql.query(`SELECT DISTINCT gestor FROM impacto_titulos WHERE gestor IS NOT NULL AND gestor<>'' ORDER BY 1`),
+      sql.query(`SELECT DISTINCT tipo FROM impacto_titulos WHERE tipo IS NOT NULL AND tipo<>'' ORDER BY 1`),
+      sql.query(`SELECT DISTINCT natureza FROM impacto_titulos WHERE natureza IS NOT NULL AND natureza<>'' ORDER BY 1`),
       sql.query(`SELECT empresa, last_sync_at, last_count FROM impacto_sync_state ORDER BY empresa`),
       sql.query(
         `SELECT COUNT(*) AS qtd, SUM(${acrescExpr}) AS juros_total, SUM(valor) AS valor_total,
@@ -105,6 +119,9 @@ export async function GET(request: NextRequest) {
       opcoes: {
         setores: optSetor.rows.map((r: any) => r.setor),
         validacoes: [...new Set([...VALIDACOES, ...optValid.rows.map((r: any) => r.validacao)])],
+        gestores: optGestor.rows.map((r: any) => r.gestor),
+        tipos: optTipo.rows.map((r: any) => r.tipo),
+        naturezas: optNat.rows.map((r: any) => r.natureza),
       },
       sync: lastSync.rows.map((r: any) => ({ empresa: r.empresa, at: r.last_sync_at, count: r.last_count })),
       totais: {

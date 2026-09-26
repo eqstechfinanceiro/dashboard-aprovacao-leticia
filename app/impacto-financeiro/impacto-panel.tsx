@@ -50,7 +50,7 @@ interface ImpactoData {
   topFornecedores: { nome: string; total: number; qtd: number }[];
   topSetores: { setor: string; total: number; qtd: number }[];
   detalheSetor: { setor: string; validacao: string; total: number; qtd: number }[];
-  opcoes: { setores: string[]; validacoes: string[] };
+  opcoes: { setores: string[]; validacoes: string[]; gestores: string[]; tipos: string[]; naturezas: string[] };
   sync: { empresa: string; at: string; count: number }[];
   totais: { qtd: number; jurosTotal: number; valorTotal: number; semValidacaoQtd: number; semValidacaoValor: number };
 }
@@ -186,6 +186,11 @@ export default function ImpactoPanel() {
   const [mesesSel, setMesesSel] = useState<(string | number)[]>([]);
   const [setoresSel, setSetoresSel] = useState<(string | number)[]>([]);
   const [validSel, setValidSel] = useState<(string | number)[]>([]);
+  const [gestoresSel, setGestoresSel] = useState<(string | number)[]>([]);
+  const [tiposSel, setTiposSel] = useState<(string | number)[]>([]);
+  const [naturezasSel, setNaturezasSel] = useState<(string | number)[]>([]);
+  const [busca, setBusca] = useState('');
+  const [buscaDeb, setBuscaDeb] = useState('');
   const [soPendentes, setSoPendentes] = useState(false);
   const reqSeq = useRef(0);
 
@@ -200,6 +205,10 @@ export default function ImpactoPanel() {
       if (mesesSel.length) q.set('meses', mesesSel.join(','));
       if (setoresSel.length) q.set('setores', setoresSel.join(','));
       if (validSel.length) q.set('validacoes', validSel.join(','));
+      if (gestoresSel.length) q.set('gestores', gestoresSel.join(','));
+      if (tiposSel.length) q.set('tipos', tiposSel.join(','));
+      if (naturezasSel.length) q.set('naturezas', naturezasSel.join(','));
+      if (buscaDeb) q.set('q', buscaDeb);
       if (soPendentes) q.set('sem_validacao', '1');
       q.set('limit', '2000');
       const r = await fetch(`/api/impacto?${q}`, { cache: 'no-store' });
@@ -212,7 +221,12 @@ export default function ImpactoPanel() {
     } finally {
       if (seq === reqSeq.current) setLoading(false);
     }
-  }, [empresasSel, anosSel, mesesSel, setoresSel, validSel, soPendentes]);
+  }, [empresasSel, anosSel, mesesSel, setoresSel, validSel, gestoresSel, tiposSel, naturezasSel, buscaDeb, soPendentes]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setBuscaDeb(busca.trim()), 350);
+    return () => clearTimeout(t);
+  }, [busca]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
@@ -285,8 +299,8 @@ export default function ImpactoPanel() {
     [data]
   );
   const gestoresOpts = useMemo(
-    () => [...new Set([...GESTORES_PADRAO])].sort(),
-    []
+    () => [...new Set([...GESTORES_PADRAO, ...(data?.opcoes.gestores || [])])].sort(),
+    [data]
   );
 
   const mesData = useMemo(
@@ -357,6 +371,19 @@ export default function ImpactoPanel() {
           selected={setoresSel} onChange={setSetoresSel} />
         <MultiSelect label="Validação" options={data?.opcoes.validacoes.map((s) => ({ value: s, label: s })) || []}
           selected={validSel} onChange={setValidSel} />
+        <MultiSelect label="Gestor" options={gestoresOpts.map((s) => ({ value: s, label: s }))}
+          selected={gestoresSel} onChange={setGestoresSel} />
+        <MultiSelect label="Tipo" options={(data?.opcoes.tipos || []).map((s) => ({ value: s, label: s }))}
+          selected={tiposSel} onChange={setTiposSel} />
+        <MultiSelect label="Natureza" options={(data?.opcoes.naturezas || []).map((s) => ({ value: s, label: s }))}
+          selected={naturezasSel} onChange={setNaturezasSel} />
+        <input
+          type="search"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+          placeholder="Buscar nº título ou fornecedor…"
+          className="w-56 rounded-lg border border-border bg-background px-3 py-1.5 text-sm focus:border-primary focus:outline-none"
+        />
         <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-muted">
           <input type="checkbox" checked={soPendentes} onChange={(e) => setSoPendentes(e.target.checked)} className="accent-primary" />
           Só pendentes de validação
@@ -496,17 +523,23 @@ export default function ImpactoPanel() {
               <tr className="text-left">
                 <th className="p-2">Empresa</th>
                 <th className="p-2">DT Baixa</th>
-                <th className="p-2">Nº Título</th>
-                <th className="p-2">Tipo</th>
+                <th className="p-2">Código</th>
                 <th className="p-2">Fornecedor</th>
+                <th className="p-2">Tipo</th>
+                <th className="p-2">Parcela</th>
+                <th className="p-2">Nº Título</th>
                 <th className="p-2 text-right">Valor</th>
+                <th className="p-2">Vencto Real</th>
+                <th className="p-2">Natureza</th>
+                <th className="p-2">Descrição Nat</th>
+                <th className="p-2">DT Emissao</th>
+                <th className="p-2">Centro Custo</th>
+                <th className="p-2">Descrição CC</th>
+                <th className="p-2">Validação</th>
+                <th className="p-2">Observação</th>
                 <th className="p-2 text-right">Multa</th>
                 <th className="p-2 text-right">Juros</th>
                 <th className="p-2 text-right">Acrésc.</th>
-                <th className="p-2">Natureza</th>
-                <th className="p-2">Centro Custo</th>
-                <th className="p-2">Validação</th>
-                <th className="p-2">Observação</th>
                 <th className="p-2">Setor</th>
                 <th className="p-2">Gestor</th>
               </tr>
@@ -518,29 +551,35 @@ export default function ImpactoPanel() {
                   <tr key={t.id} className="border-t border-border/50 hover:bg-muted/40">
                     <td className="p-2"><Badge variant="outline" style={{ borderColor: EMPRESA_COR[t.empresa], color: EMPRESA_COR[t.empresa] }}>{t.empresa}</Badge></td>
                     <td className="p-2 whitespace-nowrap">{t.baixa}</td>
-                    <td className="p-2 whitespace-nowrap">{t.num}</td>
-                    <td className="p-2">{t.tipo}</td>
-                    <td className="max-w-[180px] truncate p-2" title={`${t.fornecedor} ${t.fornecedor_nome || ''}`}>
+                    <td className="p-2 whitespace-nowrap">{t.fornecedor}</td>
+                    <td className="max-w-[180px] truncate p-2" title={t.fornecedor_nome || ''}>
                       {t.fornecedor_nome || t.fornecedor}
                     </td>
+                    <td className="p-2">{t.tipo}</td>
+                    <td className="p-2">{t.parcela}</td>
+                    <td className="p-2 whitespace-nowrap">{t.num}</td>
                     <td className="p-2 text-right whitespace-nowrap">{fmtBRL(t.valor)}</td>
-                    <td className="p-2 text-right whitespace-nowrap">{t.multa ? fmtBRL(t.multa) : ''}</td>
-                    <td className="p-2 text-right whitespace-nowrap">{t.juros ? fmtBRL(t.juros) : ''}</td>
-                    <td className="p-2 text-right font-semibold whitespace-nowrap">{fmtBRL(acrescTot)}</td>
-                    <td className="max-w-[140px] truncate p-2" title={t.natureza_desc || ''}>{t.natureza}</td>
-                    <td className="max-w-[140px] truncate p-2" title={t.ccusto_desc || ''}>{t.ccusto}</td>
+                    <td className="p-2 whitespace-nowrap">{t.vencto_real}</td>
+                    <td className="p-2 whitespace-nowrap">{t.natureza}</td>
+                    <td className="max-w-[160px] truncate p-2" title={t.natureza_desc || ''}>{t.natureza_desc}</td>
+                    <td className="p-2 whitespace-nowrap">{t.emissao}</td>
+                    <td className="p-2 whitespace-nowrap">{t.ccusto}</td>
+                    <td className="max-w-[160px] truncate p-2" title={t.ccusto_desc || ''}>{t.ccusto_desc}</td>
                     <td className="p-2">
                       <CellSelect value={t.validacao} options={[...new Set([...VALIDACOES, ...(data?.opcoes.validacoes || [])])]}
                         onSave={(v) => saveField(t.id, 'validacao', v)} />
                     </td>
                     <td className="p-2"><CellText value={t.observacao} onSave={(v) => saveField(t.id, 'observacao', v)} /></td>
+                    <td className="p-2 text-right whitespace-nowrap">{t.multa ? fmtBRL(t.multa) : ''}</td>
+                    <td className="p-2 text-right whitespace-nowrap">{t.juros ? fmtBRL(t.juros) : ''}</td>
+                    <td className="p-2 text-right font-semibold whitespace-nowrap">{fmtBRL(acrescTot)}</td>
                     <td className="p-2"><CellSelect value={t.setor} options={setoresOpts} onSave={(v) => saveField(t.id, 'setor', v)} /></td>
                     <td className="p-2"><CellSelect value={t.gestor} options={gestoresOpts} onSave={(v) => saveField(t.id, 'gestor', v)} /></td>
                   </tr>
                 );
               })}
               {!data?.titulos?.length && (
-                <tr><td colSpan={15} className="py-8 text-center text-muted-foreground">
+                <tr><td colSpan={21} className="py-8 text-center text-muted-foreground">
                   Nenhum título sincronizado — clique em "Atualizar Protheus" para puxar do SE2
                 </td></tr>
               )}
