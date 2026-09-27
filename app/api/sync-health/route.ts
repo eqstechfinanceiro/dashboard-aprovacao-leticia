@@ -140,8 +140,11 @@ export async function GET(request: NextRequest) {
       };
 
       const intervalMin = INTERVALS_MIN[kind];
+      // Atraso: >2x o intervalo esperado, com piso de 15min (o HOT roda a cada
+      // 5min mas um ciclo pode demorar — sem o piso ele oscila ok/atrasado).
+      const overdueMin = Math.max(intervalMin * 2, 15);
       const lastOkMinAgo = agoMin(lastOk?.finished_at ?? lastOk?.started_at);
-      const overdue = lastOkMinAgo === null || lastOkMinAgo > intervalMin * 2;
+      const overdue = lastOkMinAgo === null || lastOkMinAgo > overdueMin;
       const stuck =
         last?.status === 'running' &&
         (Date.now() - new Date(last.started_at).getTime()) > 30 * 60000;
