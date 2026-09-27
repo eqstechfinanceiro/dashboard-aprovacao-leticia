@@ -277,14 +277,23 @@ Impacto: Baixo · Esforço: 3h · Prioridade: P3
 
 ## Bugs conhecidos pendentes (encontrados nesta investigação)
 
-1. `quinzena_controle_snapshot` vazia — `refreshCadastro` não encontra base (A4.1)
-2. `quinzena_cadastro` stale desde 25/08 — só tools manuais escrevem nela
+1. ~~`quinzena_controle_snapshot` vazia~~ — resolvido (A4.1): seed vem de `quinzena_cadastro`
+2. ~~`quinzena_cadastro` stale~~ — resolvido: WARM atualiza; merge RH corrigido (worker-dist estava desatualizado)
 3. Cookie de auth compartilhado entre apps no mesmo host causa interferência (A1.7)
 4. Tabela de 804 linhas sem virtualização pode engasgar máquinas fracas (D)
 
 ---
 
 ## Changelog — implementado
+
+### Fila de conferência fiscal (nova)
+- **Objetivo**: dar ao setor fiscal (mercadoria × serviço) uma fila de trabalho no portal — "o que foi conferido, o que falta conferir, o que é erro".
+- **Fluxo**: as automações Python locais (`conferencia-notas-mercadoria` — TOTVS×SIEG-XML com regras Lince/TES — e `download-notas-de-servico` — TOTVS×PDF do portal) rodam agendadas na máquina e empurram o resultado estruturado via `POST /api/fiscal/import` (auth por `x-fiscal-secret`, escopo restrito a esse endpoint; `FISCAL_IMPORT_SECRET` no `.env` da VPS e `.env.fiscal` local).
+- **Tabelas**: `fiscal_runs` (uma por execução: período, contagens, hostname, relatório) e `fiscal_notas` (uma por NF: identificação, `auto_status`, checks campo-a-campo esperado×lançado, `review_status`, revisor, tipo de erro, link pro registro em `resultados_conferencias`). Dedup por `tipo+doc+serie+filial+emissao+fornecedor` com COALESCE (NULL não furta dedup); reimportar atualiza diagnóstico sem sobrescrever decisão humana.
+- **Status**: `match→auto_ok` (conta como conferido); `divergente/erro/pendente→pendente` na fila; fiscal marca `confirmado_ok` ou `confirmado_erro` (com tipo: TES/imposto/valor/doc/fornecedor/tipo/sem_documento/outro + descrição). Erro confirmado cria registro em `resultados_conferencias` (fonte `fiscal`) → aparece na aba de erros existente; reverter pra OK remove o registro.
+- **Página `/fiscal`**: alternância Mercadoria/Serviço, cards de contagem por status, filtro por status, expansão com tabela de checks (TOTVS×documento), audit via `fiscal.revisar`/`fiscal.import`. Módulo `fiscal` com grant explícito (admin acessa por padrão).
+- **Aba de erros**: categorias novas (`tes_errado`, `imposto_errado`, `doc_invalido`, `sem_documento`, `outro`) com labels pt-BR e gráfico por tipo dinâmico.
+- Pendente: criar os 2 usuários fiscais e dar grant do módulo `fiscal`; agendar os runners locais (Task Scheduler) apontando `FISCAL_IMPORT_SECRET`.
 
 ### v26.3.6
 - **Foto de perfil** — upload/remover no header (menu do usuário), armazenada em `app_users.avatar` (BYTEA) com mime + `avatar_updated_at`; validação por magic bytes (PNG/JPEG/WebP/GIF), máx. 3 MB; servida por `GET /api/auth/avatar/:id` (autenticado, cache privado); metadados `has_avatar`/`avatar_v` em `/api/auth/me` pra cache-busting. Padrão copiado do Portal Documentos.
