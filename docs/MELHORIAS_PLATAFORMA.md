@@ -212,11 +212,13 @@ esclarecimentos ("por que foi pago isso?").
 
 Impacto: Médio · Esforço: 4h · Prioridade: P2
 
-### C6. Modo "preparar fechamento" na posição de caixa
+### C6. Modo "preparar fechamento" na posição de caixa — ✅ implementado
 
-Wizard de 3 passos: (1) pendências críticas a resolver, (2) prévia dos números
-da quinzena, (3) congelar + exportar. É a UX do "um clique" mesmo antes da
-automação completa do B1.
+Wizard de 3 passos no botão "Preparar fechamento" da Posição de Caixa
+(`components/fechamento-wizard.tsx`): (1) pendências via precheck, (2) prévia
+dos números via quinzena-complete, (3) congelar + exportar via quinzena-fechar.
+Período selecionável (default = próxima QZ a fechar); período já congelado
+re-exporta o snapshot.
 
 Impacto: Alto · Esforço: 6h · Prioridade: **P1**
 
