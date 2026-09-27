@@ -5,9 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Search, FileSpreadsheet } from 'lucide-react';
+import { AlertTriangle, Search, FileSpreadsheet, Snowflake } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { SortIcon } from '@/lib/table-sort';
+import { FechamentoWizard } from '@/components/fechamento-wizard';
 import * as XLSX from 'xlsx-js-style';
 
 export const dynamic = 'force-dynamic';
@@ -64,6 +65,7 @@ export default function PosicaoCaixa() {
   const [alertFilter, setAlertFilter] = useState('todos');
   const [soComCarga, setSoComCarga] = useState(false);
   const [situacaoFilter, setSituacaoFilter] = useState<'todos' | 'ativos' | 'inativos'>('todos');
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['posicao-caixa'],
@@ -246,7 +248,13 @@ export default function PosicaoCaixa() {
             Quem está com dinheiro parado e quem deve · base {qzLabel}
           </p>
         </div>
+        <Button size="sm" onClick={() => setWizardOpen(true)}>
+          <Snowflake className="mr-1.5 h-4 w-4" />
+          Preparar fechamento
+        </Button>
       </div>
+
+      <FechamentoWizard open={wizardOpen} onClose={() => setWizardOpen(false)} />
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
