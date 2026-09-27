@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
+import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
+import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,70 +39,6 @@ function r2(v: number): number {
   return Math.round(v * 100) / 100;
 }
 
-/** Normalize name for matching: remove accents, uppercase, trim */
-function normalizeName(s: string | null | undefined): string {
-  if (!s) return '';
-  return s.toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // strip diacritics
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-/** Simple similarity ratio (based on bigram intersection) */
-function fuzzyMatchRatio(a: string, b: string): number {
-  if (a === b) return 1;
-  if (!a.length || !b.length) return 0;
-  const bigrams = (s: string): Set<string> => {
-    const set = new Set<string>();
-    for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
-    return set;
-  };
-  const ba = bigrams(a), bb = bigrams(b);
-  let intersection = 0;
-  for (const bg of ba) if (bb.has(bg)) intersection++;
-  return (2 * intersection) / (ba.size + bb.size);
-}
-
-/** Resolve extrato usuario name to CPF via exact normalized match, then fuzzy (>= 0.88), then prefix */
-function resolveCpfByName(
-  extratoName: string,
-  nomeToCpf: Map<string, string>,
-  fuzzyCache: Map<string, string>
-): string | undefined {
-  const normalized = normalizeName(extratoName);
-  const exact = nomeToCpf.get(normalized);
-  if (exact) return exact;
-  const cached = fuzzyCache.get(normalized);
-  if (cached) return cached;
-  // Fuzzy match FIRST (handles LUIZ vs LUIS, typos, etc.)
-  let bestCpf: string | undefined;
-  let bestRatio = 0;
-  for (const [cadName, cpf] of nomeToCpf) {
-    const ratio = fuzzyMatchRatio(normalized, cadName);
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestCpf = cpf;
-    }
-  }
-  if (bestRatio >= 0.88 && bestCpf) {
-    fuzzyCache.set(normalized, bestCpf);
-    return bestCpf;
-  }
-  // Prefix match: fallback for truncated names (15 chars, then 10)
-  if (normalized.length >= 10) {
-    const prefix15 = normalized.slice(0, 15);
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 15) === prefix15) return cpf;
-    }
-    const prefix10 = normalized.slice(0, 10);
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 10) === prefix10) return cpf;
-    }
-  }
-  return undefined;
-}
-
 interface Diff {
   cpf: string;
   colaborador: string;
@@ -126,9 +64,11 @@ export async function GET(request: NextRequest) {
 
   const { start_date, end_date, fechamento } = getQuinzenaDates(year, month, quinzena);
 
+  const scope = await getScopeForRequest(request);
+
   try {
     // 1. Snapshot do periodo (ground truth)
-    const snapshotRows = await sql`
+    let snapshotRows = await sql`
       SELECT
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
@@ -141,8 +81,13 @@ export async function GET(request: NextRequest) {
         saldo_cartao_carga::text
       FROM quinzena_controle_snapshot
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+        AND (import_source IS NULL OR import_source != 'api')
       ORDER BY colaborador ASC NULLS LAST
     `;
+
+    if (scope) {
+      snapshotRows = (snapshotRows as any[]).filter(r => scope.cpfs.has(normalizeCpf(r.cpf) ?? '__none__')) as any;
+    }
 
     if (snapshotRows.length === 0) {
       return NextResponse.json({ error: 'Sem snapshot para este periodo. Nada para validar.' }, { status: 404 });
@@ -173,6 +118,7 @@ export async function GET(request: NextRequest) {
         saldo_cartao_carga::text
       FROM quinzena_controle_snapshot
       WHERE (year, month, quinzena) < (${year}, ${month}, ${quinzena})
+        AND (import_source IS NULL OR import_source != 'api')
       ORDER BY cpf, year DESC, month DESC, quinzena DESC
     `;
 

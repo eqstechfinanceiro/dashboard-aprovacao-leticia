@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getQuinzenaDates } from '@/lib/quinzena/financials';
+import { normalizeCpf, normalizeName } from '@/lib/auth/scope';
 
 export const dynamic = 'force-dynamic';
 
@@ -258,6 +259,71 @@ export async function GET(request: NextRequest) {
       });
     } else {
       checks.push({ id: 'cadastro', severity: 'ok', title: 'Cadastro recente', detail: `Atualizado ${fmtAgo(lastCadastro)}` });
+    }
+
+    // 3d2. Qualidade do cadastro — duplicados de CPF/nome e campos faltantes.
+    // Nome duplicado entre CPFs distintos é risco financeiro real: o
+    // resolveCpfByName pode mapear gasto do cartão pro colaborador errado.
+    const cadRows = await sql`
+      SELECT cpf, colaborador, situacao, gestor, regional, centro_custo
+      FROM quinzena_cadastro
+    `;
+    const byCpf = new Map<string, string[]>();
+    const byNome = new Map<string, Set<string>>();
+    let nSemGestor = 0, nSemRegional = 0, nSemCc = 0, nSemCpf = 0, ativosCad = 0;
+    for (const r of cadRows as any[]) {
+      const cpf = normalizeCpf(r.cpf);
+      const nome = normalizeName(r.colaborador);
+      if (!cpf) { nSemCpf++; } else {
+        const l = byCpf.get(cpf) ?? [];
+        l.push(r.colaborador || '?');
+        byCpf.set(cpf, l);
+      }
+      if (nome && cpf) {
+        const s = byNome.get(nome) ?? new Set<string>();
+        s.add(cpf);
+        byNome.set(nome, s);
+      }
+      if ((r.situacao ?? '').toUpperCase() === 'ATIVO') {
+        ativosCad++;
+        if (!r.gestor) nSemGestor++;
+        if (!r.regional) nSemRegional++;
+        if (!r.centro_custo) nSemCc++;
+      }
+    }
+    const dupCpfs = [...byCpf.entries()].filter(([, v]) => v.length > 1);
+    const dupNomes = [...byNome.entries()].filter(([, s]) => s.size > 1);
+    if (dupCpfs.length > 0) {
+      checks.push({
+        id: 'cadastro_cpf_dup',
+        severity: 'error',
+        title: `${dupCpfs.length} CPF(s) duplicado(s) no cadastro`,
+        detail: 'Mesmo CPF com mais de uma linha — carga e saldo podem ser somados ou atribuídos errado.',
+        items: dupCpfs.slice(0, 8).map(([cpf, names]) => `${cpf}: ${names.join(' / ')}`),
+      });
+    } else {
+      checks.push({ id: 'cadastro_cpf_dup', severity: 'ok', title: 'Sem CPF duplicado no cadastro' });
+    }
+    if (dupNomes.length > 0) {
+      checks.push({
+        id: 'cadastro_nome_dup',
+        severity: 'warn',
+        title: `${dupNomes.length} nome(s) repetido(s) entre CPFs diferentes`,
+        detail: 'Nomes idênticos tornam o mapeamento extrato→colaborador ambíguo — gasto pode cair no CPF errado.',
+        items: dupNomes.slice(0, 8).map(([nome, s]) => `${nome} (${s.size} CPFs)`),
+      });
+    } else {
+      checks.push({ id: 'cadastro_nome_dup', severity: 'ok', title: 'Sem nome duplicado entre CPFs' });
+    }
+    if (nSemGestor > 0 || nSemRegional > 0 || nSemCc > 0 || nSemCpf > 0) {
+      checks.push({
+        id: 'cadastro_campos',
+        severity: 'warn',
+        title: 'Campos do cadastro incompletos',
+        detail: `${nSemGestor} ativos sem gestor · ${nSemRegional} sem regional · ${nSemCc} sem centro de custo · ${nSemCpf} linhas sem CPF.`,
+      });
+    } else {
+      checks.push({ id: 'cadastro_campos', severity: 'ok', title: 'Cadastro completo', detail: `${ativosCad} ativos com gestor, regional e centro de custo` });
     }
 
     // 3e. Despesas pendentes de aprovação (prestação ainda pode mudar)

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,6 +27,7 @@ export async function GET() {
         COUNT(*) AS total,
         MAX(imported_at) AS imported_at
       FROM quinzena_controle_snapshot
+      WHERE import_source IS NULL OR import_source != 'api'
       GROUP BY year, month, quinzena
       ORDER BY year DESC, month DESC, quinzena DESC
     `) as unknown as SnapshotRow[];
