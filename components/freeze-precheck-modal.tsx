@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  X, Snowflake, Loader2, CheckCircle2, AlertTriangle, XCircle, RefreshCw,
+  X, Snowflake, Loader2, CheckCircle2, AlertTriangle, XCircle, RefreshCw, Download,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,13 +31,19 @@ const SEV_META: Record<Severity, { icon: any; cls: string; label: string }> = {
   error: { icon: XCircle,       cls: 'text-red-600',   label: 'Bloqueio' },
 };
 
+export interface FreezeResult {
+  download_url?: string;
+  rows_frozen?: number;
+  already_frozen?: boolean;
+}
+
 interface Props {
   open: boolean;
   year: number;
   month: number;
   quinzena: number;
   onClose: () => void;
-  onConfirm: () => Promise<void> | void;
+  onConfirm: () => Promise<FreezeResult | void> | FreezeResult | void;
 }
 
 export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onConfirm }: Props) {
@@ -46,6 +52,7 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
   const [result, setResult] = useState<PrecheckResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ack, setAck] = useState(false);
+  const [done, setDone] = useState<FreezeResult | null>(null);
 
   const runCheck = useCallback(async () => {
     setLoading(true);
@@ -69,6 +76,7 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
     if (open) {
       setResult(null);
       setAck(false);
+      setDone(null);
       runCheck();
     }
   }, [open, runCheck]);
@@ -80,9 +88,17 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
 
   const handleConfirm = async () => {
     setConfirming(true);
+    setError(null);
     try {
-      await onConfirm();
-      onClose();
+      const r = await onConfirm();
+      if (r?.download_url) {
+        setDone(r);
+      } else {
+        onClose();
+      }
+    } catch {
+      // erro já tratado pelo onConfirm — reverifica o estado atual
+      await runCheck();
     } finally {
       setConfirming(false);
     }
@@ -122,7 +138,29 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-4 min-h-0">
-          {loading && !result ? (
+          {done ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <CheckCircle2 className="mb-3 h-12 w-12 text-green-600" />
+              <p className="text-base font-semibold text-gray-900">
+                Quinzena {done.already_frozen ? 'já estava congelada' : 'congelada'} e planilha gerada
+              </p>
+              {!!done.rows_frozen && (
+                <p className="mt-1 text-sm text-gray-600">
+                  {done.rows_frozen} colaboradores no snapshot
+                </p>
+              )}
+              <a
+                href={done.download_url}
+                className="mt-5 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+              >
+                <Download className="h-4 w-4" />
+                Baixar planilha da quinzena
+              </a>
+              <p className="mt-3 text-xs text-gray-500">
+                Também disponível no sino de notificações.
+              </p>
+            </div>
+          ) : loading && !result ? (
             <div className="flex items-center justify-center py-16">
               <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
               <span className="ml-2 text-sm text-gray-600">Verificando dados da quinzena…</span>
@@ -174,7 +212,7 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
         </div>
 
         <div className="border-t border-gray-200 px-6 py-3">
-          {hasWarnings && result?.can_freeze && (
+          {!done && hasWarnings && result?.can_freeze && (
             <label className="mb-3 flex cursor-pointer items-start gap-2 text-xs text-gray-700">
               <input
                 type="checkbox"
@@ -190,22 +228,26 @@ export function FreezePrecheckModal({ open, year, month, quinzena, onClose, onCo
           )}
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" onClick={onClose}>
-              Cancelar
+              {done ? 'Fechar' : 'Cancelar'}
             </Button>
-            <Button
-              size="sm"
-              variant={hasWarnings ? 'destructive' : 'default'}
-              disabled={!canFreeze || confirming || loading}
-              onClick={handleConfirm}
-              title={!result?.can_freeze ? 'Corrija os bloqueios antes de congelar' : undefined}
-            >
-              {confirming ? (
-                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-              ) : (
-                <Snowflake className="mr-1 h-4 w-4" />
-              )}
-              {hasWarnings ? 'Congelar mesmo assim' : 'Congelar quinzena'}
-            </Button>
+            {!done && (
+              <Button
+                size="sm"
+                variant={hasWarnings ? 'destructive' : 'default'}
+                disabled={!canFreeze || confirming || loading}
+                onClick={handleConfirm}
+                title={!result?.can_freeze ? 'Corrija os bloqueios antes de congelar' : undefined}
+              >
+                {confirming ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <Snowflake className="mr-1 h-4 w-4" />
+                )}
+                {confirming
+                  ? 'Congelando e gerando planilha…'
+                  : hasWarnings ? 'Congelar e gerar mesmo assim' : 'Congelar e gerar planilha'}
+              </Button>
+            )}
           </div>
         </div>
       </div>

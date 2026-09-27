@@ -148,6 +148,14 @@ export async function markAllNotificationsRead(appUserId: number): Promise<numbe
   return r.length;
 }
 
+// Notifica todos os admins ativos — usado por rotas (quinzena pronta) e worker.
+export async function notifyAdmins(n: Omit<NotifyInput, 'dedupKey'> & { dedupKey: string }): Promise<number> {
+  if (!sql) return 0;
+  const admins = (await targetUsers()).filter((u) => u.role === 'admin');
+  for (const a of admins) await upsertNotification(a.id, n);
+  return admins.length;
+}
+
 // ---- usuários alvo -----------------------------------------------------------
 
 interface AppUserRow {

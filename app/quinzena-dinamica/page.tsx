@@ -694,16 +694,19 @@ export default function QuinzenaDinamicaPage() {
     if (year === null || month === null || quinzena === null) return;
     setFreezing(true);
     try {
-      const res = await fetch('/api/quinzena-freeze', {
+      const res = await fetch('/api/quinzena-fechar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ year, month, quinzena }),
       });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Erro ao congelar');
-      }
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || 'Erro ao congelar');
       loadData(year, month, quinzena);
+      return {
+        download_url: body.download_url,
+        rows_frozen: body.rows_frozen,
+        already_frozen: !body.frozen_now,
+      };
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erro ao congelar');
       throw e;

@@ -12,3 +12,5 @@ cookies*.txt
 !components.json
 !next-env.d.ts
 .test-out/
+private-downloads/
+.tok*
