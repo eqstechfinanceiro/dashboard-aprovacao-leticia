@@ -23,6 +23,11 @@ import { refreshCadastro } from '../lib/sync/cadastro';
 import { runAutoApprove } from '../lib/sync/auto-approve';
 import { runAutoAudit } from '../lib/sync/auto-audit';
 import { generateInactiveAlerts } from '../lib/sync/inactive-alerts';
+import {
+  generateSyncFailureNotifications,
+  generateApprovalDigest,
+  generatePrestacaoStaleNotifications,
+} from '../lib/sync/notifications';
 import { syncImpacto } from '../lib/impacto/totvs';
 
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
@@ -178,6 +183,17 @@ async function warmCycle() {
       }
     } catch (e: any) {
       await logError(runId, 'warm', 'inactive-alerts', e?.message || String(e), true);
+    }
+    // Notificações in-app — digest de aprovações, prestação parada e falhas de
+    // sync (geradas depois dos dados pra refletir o estado recém-sincronizado)
+    try {
+      meta.notifications = {
+        approvals: await generateApprovalDigest(),
+        prestacao: await generatePrestacaoStaleNotifications(),
+        sync: await generateSyncFailureNotifications(),
+      };
+    } catch (e: any) {
+      await logError(runId, 'warm', 'notifications', e?.message || String(e), true);
     }
     // Impacto Financeiro — SE2 títulos com acréscimo (EQS+BRATEC), janela 4 meses
     try {
