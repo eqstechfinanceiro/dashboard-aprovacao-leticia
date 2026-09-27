@@ -231,6 +231,21 @@ async function main() {
   console.log('[sync-worker] iniciando...', new Date().toISOString());
   if (!sql) { console.error('[sync-worker] NEON_DATABASE_URL ausente'); process.exit(1); }
   await ensureTables();
+  // Runs deixados em 'running' por restart do processo são órfãos — sob o
+  // advisory lock nenhum outro worker está em ciclo, então é seguro abortá-los.
+  if (await acquireLock()) {
+    try {
+      await sql`
+        UPDATE sync_runs
+        SET status = 'error',
+            finished_at = NOW(),
+            meta = COALESCE(meta, '{}'::jsonb) || '{"error":"worker reiniciado — ciclo abandonado"}'::jsonb
+        WHERE status = 'running'
+      `;
+    } finally {
+      await releaseLock();
+    }
+  }
   // Kick off immediately, then every HOT_INTERVAL_MS
   lastWarm = Date.now(); // don't warm right away — let hot run first
   await loop();
