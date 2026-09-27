@@ -9,6 +9,7 @@
 > - ✅ B5 reconciliação extrato × prestação — `/api/quinzena-reconcile` + modal
 > - ✅ C1/B2 central de notificações — tabela `notifications`, sino unificado, digest de aprovações + prestação parada 30d
 > - ✅ Testes de fórmulas — `lib/quinzena/financials.test.ts` (17 testes, `npm run test:quinzena`)
+> - ✅ B1 parcial — quinzena de um clique: `POST /api/quinzena-fechar` (precheck → freeze → XLSX em `private-downloads/` → notificação com download); falta o disparo por agenda
 
 > Documento produzido após investigação completa da codebase (16 páginas, ~85 rotas
 > de API, 2 workers PM2, integrações VExpenses/SharePoint/e2doc/Gemini OCR).
@@ -65,11 +66,19 @@
 
 ## B. Automações — tirar trabalho manual das pessoas
 
-### B1. "Quinzena de um clique" (o objetivo final declarado)
+### B1. "Quinzena de um clique" (o objetivo final declarado) ✅ parcial (manual)
 
 Hoje: gerar a quinzena envolve sync, checar dados, congelar, exportar Excel, revisar.
 
-Proposta — pipeline `quinzena-autopilot` no worker, disparada por agenda **e** por botão:
+**Implementado (botão):** `POST /api/quinzena-fechar` orquestra precheck →
+freeze → export XLSX → salva em `private-downloads/` → notifica admins com
+link de download. O modal de pré-freeze virou o fluxo de um clique: confirmar
+congela e gera a planilha, exibindo o botão "Baixar planilha da quinzena".
+Idempotente (já congelada → re-exporta; notificação dedupada), auditado
+(`quinzena.fechar`), bloqueia gestor e aborta em erros de precheck.
+
+Falta (agenda): os passos 1 e 2 abaixo — disparo automático por cron no dia D
+e relatório D-1.
 
 1. **D-1 (véspera do fechamento)**: sync completo forçado + relatório de pré-freeze
    automático + alerta pro responsável: "amanhã fecha a quinzena; 3 pendências
