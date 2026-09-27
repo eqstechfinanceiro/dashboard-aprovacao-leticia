@@ -52,6 +52,7 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/pipeline/status', ['configuracoes']],
   ['/api/sync-expenses', ['quinzena-dinamica']],
   ['/api/sync-health', ['sync-health', 'configuracoes']],
+  ['/api/audit-log', ['audit-log', 'configuracoes']],
   ['/api/vexpenses', VEXPENSES_MODULES],
 ];
 
@@ -183,6 +184,7 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-user-id', String(payload.id));
   requestHeaders.set('x-user-role', String(payload.role));
   requestHeaders.set('x-user-email', String(payload.email));
+  requestHeaders.set('x-user-name', String(payload.name ?? ''));
 
   return NextResponse.next({
     request: { headers: requestHeaders },

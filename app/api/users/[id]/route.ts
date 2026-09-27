@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ensureUsersTable, updateUser } from '@/lib/auth-db';
-import { verifyToken, AUTH_COOKIE, generateFirstAccessPassword } from '@/lib/auth';
+import { ensureUsersTable, updateUser } from '@/lib/db/auth-db';
+import { verifyToken, AUTH_COOKIE, generateFirstAccessPassword } from '@/lib/auth/auth';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   const payload = await getAuthPayload(request);
-  if (!payload || payload.role !== 'admin') {
+  if (!payload || !(payload.modules || []).includes('configuracoes')) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 
@@ -29,6 +30,8 @@ export async function PATCH(
     job_title?: string | null;
     role?: 'admin' | 'gestor' | 'usuario';
     allowed_modules?: string[];
+    vexpenses_user_id?: number | null;
+    scope_flows?: number[] | null;
     active?: boolean;
     reset_password?: boolean;
   };
@@ -52,11 +55,19 @@ export async function PATCH(
       job_title: body.job_title,
       role: body.role,
       allowed_modules: body.allowed_modules,
+      vexpenses_user_id: body.vexpenses_user_id,
+      scope_flows: body.scope_flows,
       active: body.active,
     });
     if (!updated) {
       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
     }
+    await logAudit(request, {
+      action: 'usuario.reset_password',
+      entity_type: 'usuario',
+      entity_id: updated.email,
+      details: { user_id: id },
+    });
     return NextResponse.json({
       user: {
         id: updated.id,
@@ -65,6 +76,8 @@ export async function PATCH(
         job_title: updated.job_title,
         role: updated.role,
         allowed_modules: updated.allowed_modules,
+        vexpenses_user_id: updated.vexpenses_user_id,
+        scope_flows: updated.scope_flows,
         must_change_password: updated.must_change_password,
         active: updated.active,
       },
@@ -77,12 +90,28 @@ export async function PATCH(
     job_title: body.job_title,
     role: body.role,
     allowed_modules: body.allowed_modules,
+    vexpenses_user_id: body.vexpenses_user_id,
+    scope_flows: body.scope_flows,
     active: body.active,
   });
 
   if (!updated) {
     return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
   }
+
+  await logAudit(request, {
+    action: 'usuario.update',
+    entity_type: 'usuario',
+    entity_id: updated.email,
+    details: {
+      user_id: id,
+      changes: {
+        name: body.name, job_title: body.job_title, role: body.role,
+        allowed_modules: body.allowed_modules, vexpenses_user_id: body.vexpenses_user_id,
+        scope_flows: body.scope_flows, active: body.active,
+      },
+    },
+  });
 
   return NextResponse.json({
     user: {
@@ -92,6 +121,8 @@ export async function PATCH(
       job_title: updated.job_title,
       role: updated.role,
       allowed_modules: updated.allowed_modules,
+      vexpenses_user_id: updated.vexpenses_user_id,
+      scope_flows: updated.scope_flows,
       must_change_password: updated.must_change_password,
       active: updated.active,
     },
@@ -103,7 +134,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const payload = await getAuthPayload(request);
-  if (!payload || payload.role !== 'admin') {
+  if (!payload || !(payload.modules || []).includes('configuracoes')) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 
@@ -122,6 +153,13 @@ export async function DELETE(
   if (!updated) {
     return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
   }
+
+  await logAudit(request, {
+    action: 'usuario.deactivate',
+    entity_type: 'usuario',
+    entity_id: updated.email,
+    details: { user_id: id },
+  });
 
   return NextResponse.json({ ok: true });
 }

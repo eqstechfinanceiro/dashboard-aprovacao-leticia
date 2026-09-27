@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
 import { ensureImpactoTables } from '@/lib/impacto/totvs';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -164,9 +165,26 @@ export async function PATCH(request: NextRequest) {
       }
     }
     if (!sets.length) return NextResponse.json({ error: 'nada para atualizar' }, { status: 400 });
+    const before = await sql.query(
+      'SELECT id, num, prefixo, validacao, observacao, setor, gestor FROM impacto_titulos WHERE id = $1',
+      [id]
+    );
     vals.push(id);
     const r = await sql.query(`UPDATE impacto_titulos SET ${sets.join(', ')} WHERE id = $${vals.length} RETURNING id`, vals);
     if (!r.rows.length) return NextResponse.json({ error: 'Título não encontrado' }, { status: 404 });
+
+    const prev = before.rows[0] || {};
+    const changes: Record<string, { de: unknown; para: unknown }> = {};
+    for (const f of MANUAL_FIELDS) {
+      if (f in b) changes[f] = { de: prev[f] ?? null, para: b[f] === '' ? null : b[f] };
+    }
+    await logAudit(request, {
+      action: 'impacto.titulo_edit',
+      entity_type: 'titulo',
+      entity_id: prev.num ? `${prev.prefixo}/${prev.num}` : id,
+      details: { titulo_id: id, changes },
+    });
+
     return NextResponse.json({ ok: true });
   } catch (e: any) {
     console.error('[impacto PATCH]', e);

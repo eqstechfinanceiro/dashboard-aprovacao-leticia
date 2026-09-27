@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,17 @@ export async function POST(request: NextRequest) {
         errors.push(`CPF ${entry.cpf}: ${String(err)}`);
       }
     }
+
+    await logAudit(request, {
+      action: 'quinzena.import_qz',
+      entity_type: 'quinzena',
+      entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}`,
+      details: {
+        imported,
+        failed,
+        total_valor: entries.reduce((s, e) => s + (e.valor || 0), 0),
+      },
+    });
 
     return NextResponse.json({
       ok: true,

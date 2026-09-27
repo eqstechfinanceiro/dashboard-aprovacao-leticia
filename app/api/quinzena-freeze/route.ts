@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
+import { getScopeForRequest } from '@/lib/auth/scope';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +10,14 @@ export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   if (!sql) {
     return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
+  }
+
+  // Freeze é escrita global — gestores (escopo limitado) não podem congelar
+  if (await getScopeForRequest(request)) {
+    return NextResponse.json(
+      { error: 'Gestores não podem congelar a quinzena (ação global). Solicite a um administrador.' },
+      { status: 403 }
+    );
   }
 
   let body: {
@@ -103,6 +113,13 @@ export async function POST(request: NextRequest) {
       inserted++;
     }
 
+    await logAudit(request, {
+      action: 'quinzena.freeze',
+      entity_type: 'quinzena',
+      entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}`,
+      details: { rows_frozen: inserted, reembolso_multiplier: apiData.reembolso_multiplier },
+    });
+
     return NextResponse.json({
       ok: true,
       frozen: true,
@@ -124,6 +141,14 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   if (!sql) {
     return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
+  }
+
+  // Unfreeze é escrita global — gestores não podem descongelar
+  if (await getScopeForRequest(request)) {
+    return NextResponse.json(
+      { error: 'Gestores não podem descongelar a quinzena (ação global). Solicite a um administrador.' },
+      { status: 403 }
+    );
   }
 
   const { searchParams } = new URL(request.url);
@@ -151,6 +176,13 @@ export async function DELETE(request: NextRequest) {
         { status: 404 }
       );
     }
+
+    await logAudit(request, {
+      action: 'quinzena.unfreeze',
+      entity_type: 'quinzena',
+      entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}`,
+      details: { rows_removed: result.length },
+    });
 
     return NextResponse.json({
       ok: true,

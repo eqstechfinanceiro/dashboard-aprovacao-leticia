@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ensureUsersTable, listUsers, createUser, AppUser } from '@/lib/auth-db';
-import { generateFirstAccessPassword, nameFromEmail, verifyToken, AUTH_COOKIE } from '@/lib/auth';
+import { ensureUsersTable, listUsers, createUser, AppUser } from '@/lib/db/auth-db';
+import { generateFirstAccessPassword, nameFromEmail, verifyToken, AUTH_COOKIE } from '@/lib/auth/auth';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,15 +19,19 @@ function sanitizeUser(u: AppUser) {
     job_title: u.job_title,
     role: u.role,
     allowed_modules: u.allowed_modules,
+    vexpenses_user_id: u.vexpenses_user_id,
+    scope_flows: u.scope_flows,
     must_change_password: u.must_change_password,
     active: u.active,
     created_at: u.created_at,
+    has_avatar: u.has_avatar === true,
+    avatar_v: u.avatar_v ?? null,
   };
 }
 
 export async function GET(request: NextRequest) {
   const payload = await getAuthPayload(request);
-  if (!payload || payload.role !== 'admin') {
+  if (!payload || !(payload.modules || []).includes('configuracoes')) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 
@@ -37,7 +42,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const payload = await getAuthPayload(request);
-  if (!payload || payload.role !== 'admin') {
+  if (!payload || !(payload.modules || []).includes('configuracoes')) {
     return NextResponse.json({ error: 'Acesso negado' }, { status: 403 });
   }
 
@@ -47,6 +52,8 @@ export async function POST(request: NextRequest) {
     job_title?: string | null;
     role: 'admin' | 'gestor' | 'usuario';
     allowed_modules: string[];
+    vexpenses_user_id?: number | null;
+    scope_flows?: number[] | null;
   };
 
   try {
@@ -81,8 +88,17 @@ export async function POST(request: NextRequest) {
       job_title: body.job_title?.trim() || null,
       role,
       allowed_modules,
+      vexpenses_user_id: body.vexpenses_user_id ?? null,
+      scope_flows: body.scope_flows ?? null,
       first_access_password: firstAccessPassword,
       created_by: payload.id,
+    });
+
+    await logAudit(request, {
+      action: 'usuario.create',
+      entity_type: 'usuario',
+      entity_id: email,
+      details: { name, role, allowed_modules, scope_flows: body.scope_flows ?? null },
     });
 
     return NextResponse.json({
