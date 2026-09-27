@@ -76,6 +76,7 @@ export const MODULES = [
   { id: 'impacto-financeiro', label: 'Impacto Financeiro' },
   { id: 'sync-health', label: 'Saúde dos Syncs' },
   { id: 'audit-log', label: 'Log de Auditoria' },
+  { id: 'fiscal', label: 'Fiscal' },
   { id: 'configuracoes', label: 'Configurações' },
 ] as const;
 
@@ -97,6 +98,7 @@ export const MODULE_HREF_MAP: Record<string, string> = {
   'impacto-financeiro': '/impacto-financeiro',
   'sync-health': '/sync-health',
   'audit-log': '/audit-log',
+  fiscal: '/fiscal',
   configuracoes: '/configuracoes',
 };
 

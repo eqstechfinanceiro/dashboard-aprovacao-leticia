@@ -50,6 +50,7 @@ const ALL_CATEGORIES: NavCategory[] = [
       { id: 'gestao-caixa', name: 'Posição de Caixa', href: '/gestao-caixa', icon: TrendingUp },
       { id: 'pendencias', name: 'Pendências & Resultados', href: '/pendencias', icon: Hourglass, altIds: ['resultados'] },
       { id: 'impacto-financeiro', name: 'Impacto Financeiro', href: '/impacto-financeiro', icon: DollarSign },
+      { id: 'fiscal', name: 'Fiscal', href: '/fiscal', icon: ScrollText },
     ],
   },
   {

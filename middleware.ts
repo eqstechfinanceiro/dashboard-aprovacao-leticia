@@ -53,6 +53,7 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/sync-expenses', ['quinzena-dinamica']],
   ['/api/sync-health', ['sync-health', 'configuracoes']],
   ['/api/audit-log', ['audit-log', 'configuracoes']],
+  ['/api/fiscal', ['fiscal', 'configuracoes']],
   ['/api/vexpenses', VEXPENSES_MODULES],
 ];
 
@@ -89,6 +90,24 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-user-role', 'admin');
     requestHeaders.set('x-user-email', 'autopilot@interno');
     requestHeaders.set('x-user-name', 'Fechamento automático');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Importador fiscal local (automações Python): segredo dedicado, escopo
+  // estrito a POST /api/fiscal/import. Fail-closed igual ao cron.
+  const fiscalSecret = process.env.FISCAL_IMPORT_SECRET;
+  const providedFiscal = request.headers.get('x-fiscal-secret');
+  if (
+    fiscalSecret &&
+    providedFiscal === fiscalSecret &&
+    pathname === '/api/fiscal/import' &&
+    request.method === 'POST'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'fiscal-import@interno');
+    requestHeaders.set('x-user-name', 'Importador fiscal');
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
