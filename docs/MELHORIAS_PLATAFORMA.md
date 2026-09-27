@@ -9,7 +9,7 @@
 > - ✅ B5 reconciliação extrato × prestação — `/api/quinzena-reconcile` + modal
 > - ✅ C1/B2 central de notificações — tabela `notifications`, sino unificado, digest de aprovações + prestação parada 30d
 > - ✅ Testes de fórmulas — `lib/quinzena/financials.test.ts` (17 testes, `npm run test:quinzena`)
-> - ✅ B1 parcial — quinzena de um clique: `POST /api/quinzena-fechar` (precheck → freeze → XLSX em `private-downloads/` → notificação com download); falta o disparo por agenda
+> - ✅ B1 — quinzena de um clique: `POST /api/quinzena-fechar` (precheck → freeze → XLSX em `private-downloads/` → notificação com download) + agenda automática via worker (`/api/cron/quinzena-autopilot`: D-1 relatório dias 10/24, fechamento dias 11/25)
 
 > Documento produzido após investigação completa da codebase (16 páginas, ~85 rotas
 > de API, 2 workers PM2, integrações VExpenses/SharePoint/e2doc/Gemini OCR).
@@ -66,7 +66,7 @@
 
 ## B. Automações — tirar trabalho manual das pessoas
 
-### B1. "Quinzena de um clique" (o objetivo final declarado) ✅ parcial (manual)
+### B1. "Quinzena de um clique" (o objetivo final declarado) ✅
 
 Hoje: gerar a quinzena envolve sync, checar dados, congelar, exportar Excel, revisar.
 
@@ -77,8 +77,11 @@ congela e gera a planilha, exibindo o botão "Baixar planilha da quinzena".
 Idempotente (já congelada → re-exporta; notificação dedupada), auditado
 (`quinzena.fechar`), bloqueia gestor e aborta em erros de precheck.
 
-Falta (agenda): os passos 1 e 2 abaixo — disparo automático por cron no dia D
-e relatório D-1.
+**Agenda (worker `autopilotCheck`, 1x/dia após 05h UTC):** dia 10/24 →
+relatório D-1 com resumo do precheck; dia 11/25 → fechamento completo. Marker
+em `app_settings` (`autopilot:YYYY-MM-DD`) evita duplo disparo; `x-cron-secret`
+dá bypass de auth pra chamadas internas com identidade auditável
+("Fechamento automático").
 
 1. **D-1 (véspera do fechamento)**: sync completo forçado + relatório de pré-freeze
    automático + alerta pro responsável: "amanhã fecha a quinzena; 3 pendências
