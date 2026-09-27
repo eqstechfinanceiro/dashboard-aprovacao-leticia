@@ -29,6 +29,7 @@ import {
   generatePrestacaoStaleNotifications,
 } from '../lib/sync/notifications';
 import { syncImpacto } from '../lib/impacto/totvs';
+import { getSetting, setSetting } from '../lib/db/settings';
 
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
 const WARM_INTERVAL_MS = 45 * 60 * 1000;
@@ -231,12 +232,37 @@ async function coldCycle() {
   }
 }
 
+// Quinzena autopilot — roda 1x/dia nas datas relevantes:
+//   10 e 24 (D-1) → relatório de véspera; 11 e 25 (D) → fechamento automático.
+// Só depois das 05h UTC (~02h BRT) pra não pegar o dia errado por fuso.
+async function autopilotCheck() {
+  if (!process.env.CRON_SECRET) return;
+  const now = new Date();
+  const day = now.getUTCDate();
+  if (![10, 11, 24, 25].includes(day) || now.getUTCHours() < 5) return;
+  const marker = `autopilot:${now.toISOString().slice(0, 10)}`;
+  if (await getSetting(marker)) return; // já rodou hoje
+  await setSetting(marker, { fired_at: now.toISOString() }, 'sync-worker');
+  try {
+    const r = await fetch(`${APP_BASE}/api/cron/quinzena-autopilot`, {
+      headers: { 'x-cron-secret': process.env.CRON_SECRET },
+      signal: AbortSignal.timeout(300_000),
+    });
+    const body = await r.json().catch(() => ({}));
+    await setSetting(marker, { fired_at: now.toISOString(), status: r.status, body }, 'sync-worker');
+    console.log(`[autopilot] dia ${day}: HTTP ${r.status}`, JSON.stringify(body).slice(0, 300));
+  } catch (e: any) {
+    console.error('[autopilot] erro:', e?.message);
+  }
+}
+
 async function loop() {
   const now = Date.now();
   try {
     await hotCycle();
     if (now - lastWarm >= WARM_INTERVAL_MS) { lastWarm = now; await warmCycle(); }
     if (now - lastCold >= COLD_INTERVAL_MS) { lastCold = now; await coldCycle(); }
+    await autopilotCheck();
   } catch (e: any) {
     console.error('[worker] loop error:', e?.message);
   }

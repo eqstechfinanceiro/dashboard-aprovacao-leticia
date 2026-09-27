@@ -78,6 +78,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Automação interna (sync-worker / cron externo): segredo compartilhado dá
+  // acesso às APIs como identidade sintética de sistema. Fail-closed: sem
+  // CRON_SECRET configurado, nada passa.
+  const cronSecret = process.env.CRON_SECRET;
+  const providedCron = request.headers.get('x-cron-secret');
+  if (cronSecret && providedCron === cronSecret && pathname.startsWith('/api/')) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'autopilot@interno');
+    requestHeaders.set('x-user-name', 'Fechamento automático');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (isPublicPath) {
     const token = request.cookies.get(AUTH_COOKIE)?.value;
     if (token) {

@@ -78,9 +78,12 @@ export async function GET(request: NextRequest) {
 
     // 2. Dados calculados — mesma fonte que o freeze usa
     const baseUrl = new URL(request.url).origin;
+    const fwdHeaders: Record<string, string> = { cookie: request.headers.get('cookie') || '' };
+    const cronHdr = request.headers.get('x-cron-secret');
+    if (cronHdr) fwdHeaders['x-cron-secret'] = cronHdr;
     const apiRes = await fetch(
       `${baseUrl}/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}&forceCalc=true`,
-      { headers: { cookie: request.headers.get('cookie') || '' } }
+      { headers: fwdHeaders }
     );
     if (!apiRes.ok) {
       return NextResponse.json(

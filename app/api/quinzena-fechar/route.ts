@@ -49,6 +49,9 @@ export async function POST(req: NextRequest) {
     }
 
     const cookies = req.headers.get('cookie') || '';
+    const cronHdr = req.headers.get('x-cron-secret');
+    const fwd: Record<string, string> = { cookie: cookies };
+    if (cronHdr) fwd['x-cron-secret'] = cronHdr;
     const base = req.nextUrl.origin;
     const qs = `year=${year}&month=${month}&quinzena=${quinzena}`;
     const periodo = `${MESES[month - 1]}/${year} ${quinzena}a QZ`;
@@ -67,7 +70,7 @@ export async function POST(req: NextRequest) {
     // ---- 1. Precheck (so faz sentido antes do freeze) --------------------------
     if (!alreadyFrozen) {
       const preRes = await fetch(`${base}/api/quinzena-precheck?${qs}`, {
-        headers: { cookie: cookies }, cache: 'no-store',
+        headers: fwd, cache: 'no-store',
       });
       precheck = await preRes.json();
       if (!preRes.ok) {
@@ -98,7 +101,7 @@ export async function POST(req: NextRequest) {
     } else {
       const freezeRes = await fetch(`${base}/api/quinzena-freeze`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', cookie: cookies },
+        headers: { 'Content-Type': 'application/json', ...fwd },
         body: JSON.stringify({ year, month, quinzena }),
       });
       const freezeBody = await freezeRes.json().catch(() => ({}));
@@ -118,7 +121,7 @@ export async function POST(req: NextRequest) {
     // ---- 3. Export → salva arquivo ---------------------------------------------
     const filename = `controle_${year}_${String(month).padStart(2, '0')}_Q${quinzena}.xlsx`;
     const expRes = await fetch(`${base}/api/quinzena-export?${qs}`, {
-      headers: { cookie: cookies }, cache: 'no-store',
+      headers: fwd, cache: 'no-store',
     });
     if (!expRes.ok) {
       const eb = await expRes.json().catch(() => ({}));

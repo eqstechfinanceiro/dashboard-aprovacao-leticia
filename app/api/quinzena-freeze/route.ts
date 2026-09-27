@@ -60,9 +60,12 @@ export async function POST(request: NextRequest) {
     // Fetch the calculated data from quinzena-complete API logic
     // We need to call the same calculation logic — simplest is to fetch internally
     const baseUrl = new URL(request.url).origin;
+    const fwdHeaders: Record<string, string> = { cookie: request.headers.get('cookie') || '' };
+    const cronHdr = request.headers.get('x-cron-secret');
+    if (cronHdr) fwdHeaders['x-cron-secret'] = cronHdr;
     const apiRes = await fetch(
       `${baseUrl}/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}`,
-      { headers: { cookie: request.headers.get('cookie') || '' } }
+      { headers: fwdHeaders }
     );
 
     if (!apiRes.ok) {
