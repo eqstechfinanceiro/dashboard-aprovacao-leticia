@@ -56,7 +56,7 @@
 
 | # | Problema | Melhoria | Impacto | Esforço |
 |---|---|---|---|---|
-| A4.1 | **`quinzena_controle_snapshot` está vazia** — `refreshCadastro` no WARM não encontra base pra popular (bug pré-existente identificado); cadastro real vem de `quinzena_cadastro` atualizado por tool manual (stale desde 25/08) | Corrigir o refresh pra popular a tabela, ou consolidar pra uma fonte só de cadastro — hoje a detecção de inativos depende da API `active=false` como gambiarra | **Alto** — cadastro desatualizado gera alerta errado e filtro Ativo/Inativo errado | 3h |
+| A4.1 | ~~`quinzena_controle_snapshot` vazia~~ **✅ corrigido** — `refreshCadastro` semeia de `quinzena_cadastro` (fonte canônica); precheck ganha checks de qualidade (CPF/nome duplicado, campos faltantes) | — | — | — |
 | A4.2 | Resolução nome→CPF depende de fuzzy match + aliases manuais (`lib/quinzena/name-resolve.ts`, `mapeamento_nomes.json`) | UI para revisar/salvar mapeamentos ambíguos uma única vez (tabela `name_aliases` editável) em vez de JSON no repo; logar matches de baixa confiança | Alto — match errado = saldo na pessoa errada | 4h |
 | A4.3 | Freeze de quinzena não valida antes de congelar | **Relatório de pré-freeze**: ao clicar em congelar, rodar checklist automático (sync recente? despesas pendentes? divergências vs extrato? gestores faltantes?) e exigir confirmação listando os riscos | **Crítico** — é exatamente o medo do "freeze errado" | 4h |
 | A4.4 | Sem comparação entre quinzenas congeladas | Diff entre freezes: "o que mudou entre o congelamento de hoje e o da última quinzena pra esse CPF" — detecta retroescritura de dados | Alto | 3h |
