@@ -74,6 +74,7 @@ export const MODULES = [
   { id: 'resultados', label: 'Resultados (aba em Pendências)' },
   { id: 'pendencias', label: 'Pendências Protheus' },
   { id: 'impacto-financeiro', label: 'Impacto Financeiro' },
+  { id: 'sync-health', label: 'Saúde dos Syncs' },
   { id: 'configuracoes', label: 'Configurações' },
 ] as const;
 
@@ -93,6 +94,7 @@ export const MODULE_HREF_MAP: Record<string, string> = {
   resultados: '/pendencias',
   pendencias: '/pendencias',
   'impacto-financeiro': '/impacto-financeiro',
+  'sync-health': '/sync-health',
   configuracoes: '/configuracoes',
 };
 

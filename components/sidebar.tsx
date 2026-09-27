@@ -20,6 +20,7 @@ import {
   Send,
   LifeBuoy,
   DollarSign,
+  Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -73,6 +74,7 @@ const ALL_CATEGORIES: NavCategory[] = [
     label: 'Sistema',
     items: [
       { id: 'suporte', name: 'Suporte', href: '/suporte', icon: LifeBuoy, always: true },
+      { id: 'sync-health', name: 'Saúde dos Syncs', href: '/sync-health', icon: Activity },
       { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
     ],
   },

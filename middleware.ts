@@ -51,6 +51,7 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/analytics/visao-geral', ['dashboard']],
   ['/api/pipeline/status', ['configuracoes']],
   ['/api/sync-expenses', ['quinzena-dinamica']],
+  ['/api/sync-health', ['sync-health', 'configuracoes']],
   ['/api/vexpenses', VEXPENSES_MODULES],
 ];
 
