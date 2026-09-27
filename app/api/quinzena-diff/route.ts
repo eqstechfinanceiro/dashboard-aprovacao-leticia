@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { internalBase } from '@/lib/internal-fetch';
 import { sql } from '@/lib/db/neon';
 import { getScopeForRequest } from '@/lib/auth/scope';
 
@@ -93,7 +94,7 @@ export async function GET(request: NextRequest) {
     const frozenAt = (frozenRows[0] as any).frozen_at;
 
     // 2. Dados recalculados agora (forceCalc ignora o freeze)
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl = internalBase(request);
     const apiRes = await fetch(
       `${baseUrl}/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}&forceCalc=true`,
       { headers: { cookie: request.headers.get('cookie') || '' } }

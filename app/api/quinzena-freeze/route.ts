@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { internalBase } from '@/lib/internal-fetch';
 import { sql } from '@/lib/db/neon';
 import { getScopeForRequest } from '@/lib/auth/scope';
 import { logAudit } from '@/lib/db/audit';
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Fetch the calculated data from quinzena-complete API logic
     // We need to call the same calculation logic — simplest is to fetch internally
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl = internalBase(request);
     const fwdHeaders: Record<string, string> = { cookie: request.headers.get('cookie') || '' };
     const cronHdr = request.headers.get('x-cron-secret');
     if (cronHdr) fwdHeaders['x-cron-secret'] = cronHdr;

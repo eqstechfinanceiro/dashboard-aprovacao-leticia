@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { internalBase } from '@/lib/internal-fetch';
 import { logAudit } from '@/lib/db/audit';
 import { notifyAdmins } from '@/lib/sync/notifications';
 
@@ -66,7 +67,7 @@ export async function GET(req: NextRequest) {
     }
 
     const periodo = `${MESES[month - 1]}/${year} ${quinzena}a QZ`;
-    const base = req.nextUrl.origin;
+    const base = internalBase(req);
     const secret = req.headers.get('x-cron-secret') || '';
     const fwd: Record<string, string> = {};
     if (secret) fwd['x-cron-secret'] = secret;

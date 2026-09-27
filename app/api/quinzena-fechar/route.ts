@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { internalBase } from '@/lib/internal-fetch';
 import { writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { getScopeForRequest } from '@/lib/auth/scope';
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     const cronHdr = req.headers.get('x-cron-secret');
     const fwd: Record<string, string> = { cookie: cookies };
     if (cronHdr) fwd['x-cron-secret'] = cronHdr;
-    const base = req.nextUrl.origin;
+    const base = internalBase(req);
     const qs = `year=${year}&month=${month}&quinzena=${quinzena}`;
     const periodo = `${MESES[month - 1]}/${year} ${quinzena}a QZ`;
     const steps: string[] = [];

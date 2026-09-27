@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { internalBase } from '@/lib/internal-fetch';
 import { sql } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getQuinzenaDates } from '@/lib/quinzena/financials';
@@ -78,7 +79,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Dados calculados — mesma fonte que o freeze usa
-    const baseUrl = new URL(request.url).origin;
+    const baseUrl = internalBase(request);
     const fwdHeaders: Record<string, string> = { cookie: request.headers.get('cookie') || '' };
     const cronHdr = request.headers.get('x-cron-secret');
     if (cronHdr) fwdHeaders['x-cron-secret'] = cronHdr;
