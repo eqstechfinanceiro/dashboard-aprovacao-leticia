@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
+import { getQuinzenaDates } from '@/lib/quinzena/financials';
 
 export const dynamic = 'force-dynamic';
 
@@ -127,6 +129,36 @@ export async function GET(request: NextRequest) {
       `,
       sql`SELECT MAX(data)::text AS max_data FROM extrato_movimentacao WHERE is_snapshot = FALSE`,
       sql`SELECT MAX(data)::text AS max_data FROM extrato_movimentacao WHERE is_snapshot = TRUE`,
+    ]);
+
+    // Reconciliação extrato × prestação (mesmo cutoff financeiro do cálculo)
+    const { financial_cutoff } = getQuinzenaDates(year, month, quinzena);
+    const [reconcSem, reconcPend] = await Promise.all([
+      // Gasto no cartão sem nenhuma despesa vinculada — nunca vai entrar no somase
+      sql`
+        SELECT COUNT(*) AS n, COALESCE(SUM(-valor), 0)::text AS total
+        FROM extrato_movimentacao
+        WHERE is_snapshot = FALSE
+          AND tipo IN ('Compra', 'Pix')
+          AND id_despesa IS NULL
+          AND valor < 0
+          AND data <= ${financial_cutoff}
+      `,
+      // Gasto vinculado a despesa em relatório não-final (Aberto/Reprovado/...)
+      sql`
+        SELECT r.status, r.name, COUNT(*) AS n, COALESCE(SUM(-e2.valor), 0)::text AS total
+        FROM extrato_movimentacao e2
+        JOIN prestacao_expenses pe ON pe.id = e2.id_despesa
+        JOIN prestacao_reports r ON r.id = pe.report_id
+        WHERE e2.is_snapshot = FALSE
+          AND e2.valor < 0
+          AND e2.tipo IN ('Compra', 'Pix')
+          AND e2.data <= ${financial_cutoff}
+          AND r.status NOT ILIKE 'Aprovado'
+          AND r.status NOT ILIKE 'Enviado'
+          AND r.status NOT ILIKE 'Deletado'
+        GROUP BY r.status, r.name
+      `,
     ]);
 
     // 3a. Sync VExpenses recente (HOT roda a cada 5 min)
@@ -320,6 +352,44 @@ export async function GET(request: NextRequest) {
         title: `${cartaoPendente.length} ativos com cartão pendente`,
         detail: 'Carga zerada automaticamente para quem tem cartão pendente.',
         items: cartaoPendente.slice(0, 8).map((r) => r.colaborador || r.cpf),
+      });
+    }
+
+    // 4f. Reconciliação extrato × prestação
+    //   sem_despesa: gasto no cartão sem despesa vinculada (nunca será prestado)
+    //   pendente:    gasto vinculado a relatório não-final (não conta no somase)
+    const semN = Number(reconcSem[0]?.n || 0);
+    const semTotal = Number(reconcSem[0]?.total || 0);
+    let recPendN = 0, recPendTotal = 0;
+    const pendPorStatus = new Map<string, { n: number; total: number }>();
+    for (const r of reconcPend as any[]) {
+      if (isFaturaOrCartao(r.name || '')) continue;
+      const st = String(r.status || '').toUpperCase();
+      const cur = pendPorStatus.get(st) ?? { n: 0, total: 0 };
+      cur.n += Number(r.n); cur.total += Number(r.total);
+      pendPorStatus.set(st, cur);
+      recPendN += Number(r.n); recPendTotal += Number(r.total);
+    }
+    if (semN > 0 || recPendN > 0) {
+      const partes: string[] = [];
+      if (semN > 0) partes.push(`${semN} gastos sem despesa vinculada (${fmtBRL(semTotal)})`);
+      if (recPendN > 0) {
+        const det = [...pendPorStatus.entries()]
+          .map(([st, v]) => `${st}: ${v.n} (${fmtBRL(v.total)})`).join(', ');
+        partes.push(`${recPendN} gastos em relatórios não-finalizados (${fmtBRL(recPendTotal)} — ${det})`);
+      }
+      checks.push({
+        id: 'reconciliacao',
+        severity: 'warn',
+        title: `${fmtBRL(semTotal + recPendTotal)} no extrato sem prestação válida`,
+        detail: `${partes.join(' · ')}. Esse valor vira saldo a prestar — confira no botão "Reconciliação".`,
+      });
+    } else {
+      checks.push({
+        id: 'reconciliacao',
+        severity: 'ok',
+        title: 'Extrato reconciliado com prestações',
+        detail: 'Todo gasto de Compra/Pix está vinculado a despesa em relatório finalizado.',
       });
     }
 

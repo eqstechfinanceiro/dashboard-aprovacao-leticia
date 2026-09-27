@@ -2,6 +2,7 @@
 import { ImportQzModal } from '@/components/ImportQzModal';
 import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
 import { FreezeDiffModal } from '@/components/freeze-diff-modal';
+import { ReconcileModal } from '@/components/reconcile-modal';
 import { useAuth } from '@/lib/auth/auth-context';
 
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
@@ -687,6 +688,7 @@ export default function QuinzenaDinamicaPage() {
   // Freeze/unfreeze handlers — o freeze agora passa pelo pré-checklist
   const [precheckOpen, setPrecheckOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
 
   const handleFreeze = async () => {
     if (year === null || month === null || quinzena === null) return;
@@ -793,6 +795,12 @@ export default function QuinzenaDinamicaPage() {
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
+          {!isGestor && (
+            <Button size="sm" variant="outline" onClick={() => setReconcileOpen(true)}
+              title="Cruza gastos do cartão com despesas prestadas — acha dinheiro sem prestação">
+              Reconciliação
+            </Button>
+          )}
           {!isGestor && isFrozen && (
             <Button size="sm" variant="outline" onClick={() => setDiffOpen(true)}
               title="Compara o snapshot congelado com os dados recalculados agora">
@@ -1375,15 +1383,24 @@ export default function QuinzenaDinamicaPage() {
         />
       )}
 
-      {/* Diff pós-freeze */}
+      {/* Reconciliação extrato × prestação + diff pós-freeze */}
       {year !== null && month !== null && quinzena !== null && (
-        <FreezeDiffModal
-          open={diffOpen}
-          onClose={() => setDiffOpen(false)}
-          year={year}
-          month={month}
-          quinzena={quinzena}
-        />
+        <>
+          <ReconcileModal
+            open={reconcileOpen}
+            year={year}
+            month={month}
+            quinzena={quinzena}
+            onClose={() => setReconcileOpen(false)}
+          />
+          <FreezeDiffModal
+            open={diffOpen}
+            onClose={() => setDiffOpen(false)}
+            year={year}
+            month={month}
+            quinzena={quinzena}
+          />
+        </>
       )}
     </div>
   );

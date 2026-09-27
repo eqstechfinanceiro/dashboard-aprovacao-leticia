@@ -23,6 +23,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 import { useTableSort, SortIcon } from '@/lib/table-sort';
 import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
 import { FreezeDiffModal } from '@/components/freeze-diff-modal';
+import { ReconcileModal } from '@/components/reconcile-modal';
 
 // ---- Types ------------------------------------------------------------------
 
@@ -186,6 +187,7 @@ export default function ControlePage() {
   // Freeze/unfreeze handlers — o freeze passa pelo pré-checklist
   const [precheckOpen, setPrecheckOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
+  const [reconcileOpen, setReconcileOpen] = useState(false);
 
   const handleFreeze = async () => {
     setFreezing(true);
@@ -376,6 +378,12 @@ export default function ControlePage() {
                 <FileDown className="mr-1 h-4 w-4" />
                 Excel
               </Button>
+              {!isGestor && (
+                <Button variant="outline" size="sm" onClick={() => setReconcileOpen(true)}
+                  title="Cruza gastos do cartão com despesas prestadas — acha dinheiro sem prestação">
+                  Reconciliação
+                </Button>
+              )}
               {!isGestor && data?.is_frozen && (
                 <Button variant="outline" size="sm" onClick={() => setDiffOpen(true)}
                   title="Compara o snapshot congelado com os dados recalculados agora">
@@ -463,6 +471,15 @@ export default function ControlePage() {
       <FreezeDiffModal
         open={diffOpen}
         onClose={() => setDiffOpen(false)}
+        year={selectedYear}
+        month={selectedMonth}
+        quinzena={selectedQuinzena}
+      />
+
+      {/* Reconciliação extrato × prestação */}
+      <ReconcileModal
+        open={reconcileOpen}
+        onClose={() => setReconcileOpen(false)}
         year={selectedYear}
         month={selectedMonth}
         quinzena={selectedQuinzena}

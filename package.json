@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "build:worker": "tsc -p worker/tsconfig.json",
+    "worker": "node worker-dist/worker/sync-worker.js",
+    "lint": "next lint",
+    "prebuild": "node tools/build-extension-zip.js",
+    "test:quinzena": "tsc lib/quinzena/financials.ts lib/quinzena/financials.test.ts --outDir .test-out --module commonjs --target es2020 --moduleResolution node --skipLibCheck --esModuleInterop && node --test .test-out/financials.test.js"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -21,9 +25,12 @@
     "jose": "^6.2.3",
     "lucide-react": "^0.344.0",
     "next": "^14.2.0",
+    "nodemailer": "^10.0.10",
+    "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^4.8.69",
     "pg": "^8.21.0",
+    "playwright": "^1.62.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.12.0",
@@ -35,6 +42,7 @@
     "@playwright/test": "^1.60.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.12.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.20.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",

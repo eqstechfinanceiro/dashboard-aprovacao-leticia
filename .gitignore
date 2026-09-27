@@ -11,3 +11,4 @@ cookies*.txt
 !tsconfig.json
 !components.json
 !next-env.d.ts
+.test-out/
