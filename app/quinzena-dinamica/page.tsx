@@ -1,6 +1,7 @@
 ﻿'use client';
 import { ImportQzModal } from '@/components/ImportQzModal';
 import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
+import { FreezeDiffModal } from '@/components/freeze-diff-modal';
 import { useAuth } from '@/lib/auth/auth-context';
 
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
@@ -685,6 +686,7 @@ export default function QuinzenaDinamicaPage() {
 
   // Freeze/unfreeze handlers — o freeze agora passa pelo pré-checklist
   const [precheckOpen, setPrecheckOpen] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
 
   const handleFreeze = async () => {
     if (year === null || month === null || quinzena === null) return;
@@ -791,6 +793,12 @@ export default function QuinzenaDinamicaPage() {
             <RefreshCw className={`h-4 w-4 mr-1 ${loading ? 'animate-spin' : ''}`} />
             Atualizar
           </Button>
+          {!isGestor && isFrozen && (
+            <Button size="sm" variant="outline" onClick={() => setDiffOpen(true)}
+              title="Compara o snapshot congelado com os dados recalculados agora">
+              Divergências
+            </Button>
+          )}
           {!isGestor && (isFrozen ? (
             <Button size="sm" variant="outline" onClick={handleUnfreeze} disabled={freezing || loading}>
               <Unlock className="h-4 w-4 mr-1" />
@@ -1364,6 +1372,17 @@ export default function QuinzenaDinamicaPage() {
           month={month}
           quinzena={quinzena}
           onConfirm={handleFreeze}
+        />
+      )}
+
+      {/* Diff pós-freeze */}
+      {year !== null && month !== null && quinzena !== null && (
+        <FreezeDiffModal
+          open={diffOpen}
+          onClose={() => setDiffOpen(false)}
+          year={year}
+          month={month}
+          quinzena={quinzena}
         />
       )}
     </div>

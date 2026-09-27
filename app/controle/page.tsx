@@ -22,6 +22,7 @@ import * as XLSX from 'xlsx';
 import { useAuth } from '@/lib/auth/auth-context';
 import { useTableSort, SortIcon } from '@/lib/table-sort';
 import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
+import { FreezeDiffModal } from '@/components/freeze-diff-modal';
 
 // ---- Types ------------------------------------------------------------------
 
@@ -184,6 +185,7 @@ export default function ControlePage() {
 
   // Freeze/unfreeze handlers — o freeze passa pelo pré-checklist
   const [precheckOpen, setPrecheckOpen] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
 
   const handleFreeze = async () => {
     setFreezing(true);
@@ -374,6 +376,12 @@ export default function ControlePage() {
                 <FileDown className="mr-1 h-4 w-4" />
                 Excel
               </Button>
+              {!isGestor && data?.is_frozen && (
+                <Button variant="outline" size="sm" onClick={() => setDiffOpen(true)}
+                  title="Compara o snapshot congelado com os dados recalculados agora">
+                  Divergências
+                </Button>
+              )}
               {!isGestor && (data?.is_frozen ? (
                 <Button variant="outline" size="sm" onClick={handleUnfreeze} disabled={freezing}>
                   <Unlock className="mr-1 h-4 w-4" />
@@ -449,6 +457,15 @@ export default function ControlePage() {
         month={selectedMonth}
         quinzena={selectedQuinzena}
         onConfirm={handleFreeze}
+      />
+
+      {/* Diff pós-freeze */}
+      <FreezeDiffModal
+        open={diffOpen}
+        onClose={() => setDiffOpen(false)}
+        year={selectedYear}
+        month={selectedMonth}
+        quinzena={selectedQuinzena}
       />
     </div>
   );
