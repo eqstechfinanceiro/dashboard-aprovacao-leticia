@@ -108,6 +108,7 @@ export async function ensureFiscalTables(): Promise<void> {
   // Colunas adicionadas depois da criação inicial da tabela.
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_path TEXT`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_nome TEXT`;
+  await sql`ALTER TABLE fiscal_runs ADD COLUMN IF NOT EXISTS push_version TEXT`;
 }
 
 export function computeReviewStatus(autoStatus: AutoStatus): ReviewStatus {

@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     const runs = await sql`
       SELECT id, tipo, date_from::text, date_to::text, hostname, total_notas,
              matches, divergentes, erros, pendentes, relatorio_nome,
-             created_at
+             push_version, created_at
       FROM fiscal_runs ORDER BY created_at DESC LIMIT 20
     `;
 

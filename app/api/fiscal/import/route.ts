@@ -108,10 +108,11 @@ export async function POST(request: NextRequest) {
   for (const n of valid) counts[n.auto_status as keyof typeof counts]++;
 
   const runResult = await sql`
-    INSERT INTO fiscal_runs (tipo, date_from, date_to, hostname, total_notas, matches, divergentes, erros, pendentes, relatorio_nome)
+    INSERT INTO fiscal_runs (tipo, date_from, date_to, hostname, total_notas, matches, divergentes, erros, pendentes, relatorio_nome, push_version)
     VALUES (${run.tipo}, ${cleanDate(run.date_from)}, ${cleanDate(run.date_to)},
             ${cleanStr(run.hostname, 100)}, ${valid.length}, ${counts.match},
-            ${counts.divergente}, ${counts.erro}, ${counts.pendente}, ${cleanStr(run.relatorio_nome, 300)})
+            ${counts.divergente}, ${counts.erro}, ${counts.pendente}, ${cleanStr(run.relatorio_nome, 300)},
+            ${cleanStr(run.push_version, 40)})
     RETURNING id
   `;
   const runId = runResult[0].id as number;
