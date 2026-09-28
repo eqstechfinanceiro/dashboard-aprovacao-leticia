@@ -24,7 +24,7 @@ export type FiscalTipo = (typeof FISCAL_TIPOS)[number];
 export const AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'] as const;
 export type AutoStatus = (typeof AUTO_STATUS)[number];
 
-export const REVIEW_STATUS = ['auto_ok', 'pendente', 'confirmado_ok', 'confirmado_erro'] as const;
+export const REVIEW_STATUS = ['auto_ok', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro'] as const;
 export type ReviewStatus = (typeof REVIEW_STATUS)[number];
 
 // Categorias de erro confirmado → coluna `erro` de resultados_conferencias.
@@ -84,6 +84,8 @@ export async function ensureFiscalTables(): Promise<void> {
       erro_tipo TEXT,
       erro_descricao TEXT,
       resultados_id INT,
+      doc_path TEXT,
+      doc_nome TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
@@ -101,8 +103,13 @@ export async function ensureFiscalTables(): Promise<void> {
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_fiscal_notas_review ON fiscal_notas(review_status, tipo, emissao DESC)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_fiscal_notas_run ON fiscal_notas(run_id)`;
+  // Colunas adicionadas depois da criação inicial da tabela.
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_path TEXT`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_nome TEXT`;
 }
 
 export function computeReviewStatus(autoStatus: AutoStatus): ReviewStatus {
-  return autoStatus === 'match' ? 'auto_ok' : 'pendente';
+  if (autoStatus === 'match') return 'auto_ok';
+  if (autoStatus === 'erro') return 'falha_tecnica'; // download/parse — não é erro fiscal
+  return 'pendente';
 }

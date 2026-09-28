@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
              n.cnpj, n.valor, n.emissao::text, n.chave_acesso, n.auto_status,
              n.auto_resumo, n.checks, n.extra, n.review_status, n.reviewed_by,
              n.reviewed_at, n.review_nota, n.erro_tipo, n.erro_descricao,
-             n.resultados_id, n.created_at, n.updated_at
+             n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at
       FROM fiscal_notas n
       WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ${status})

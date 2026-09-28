@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { writeFileSync, mkdirSync } from 'fs';
+import path from 'path';
 import { sql } from '@/lib/db/neon';
 import {
   ensureFiscalTables,
@@ -9,6 +11,11 @@ import {
 import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+export const maxDuration = 300;
+
+const DOCS_DIR = path.join(process.cwd(), 'private-downloads', 'fiscal');
+const DOC_MAX_BYTES = 8 * 1024 * 1024; // PDF/XML de NF — 8MB é folga grande
 
 // Payload enviado pelos runners Python locais (conferencia-notas-mercadoria e
 // download-notas-de-servico). Auth: x-fiscal-secret (bypass no middleware,
@@ -37,6 +44,8 @@ interface NotaIn {
   auto_resumo?: string | null;
   checks?: unknown;
   extra?: unknown;
+  doc_base64?: string | null;
+  doc_nome?: string | null;
 }
 
 function cleanStr(v: unknown, max = 300): string | null {
@@ -150,6 +159,22 @@ export async function POST(request: NextRequest) {
     if (row.was_inserted) inserted++;
     else updated++;
     if (row.review_status === 'confirmado_ok' || row.review_status === 'confirmado_erro') preserved++;
+
+    // Documento (XML/PDF) anexado pelo runner — grava no disco e linka na nota.
+    if (n.doc_base64 && n.doc_nome) {
+      try {
+        const buf = Buffer.from(String(n.doc_base64), 'base64');
+        if (buf.length > 0 && buf.length <= DOC_MAX_BYTES) {
+          mkdirSync(DOCS_DIR, { recursive: true });
+          const safe = path.basename(String(n.doc_nome)).replace(/[^\w.\-]/g, '_');
+          const fname = `${row.id}_${safe}`;
+          writeFileSync(path.join(DOCS_DIR, fname), buf);
+          await sql`UPDATE fiscal_notas SET doc_path = ${`fiscal/${fname}`}, doc_nome = ${safe} WHERE id = ${row.id}`;
+        }
+      } catch (e) {
+        console.error('[fiscal/import] falha ao salvar documento:', e);
+      }
+    }
   }
 
   await logAudit(request, {

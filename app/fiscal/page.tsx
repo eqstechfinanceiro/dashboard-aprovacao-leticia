@@ -40,13 +40,15 @@ interface FiscalNota {
   auto_resumo: string | null;
   checks: Check[] | Check[][] | null;
   extra: Record<string, any> | null;
-  review_status: 'auto_ok' | 'pendente' | 'confirmado_ok' | 'confirmado_erro';
+  review_status: 'auto_ok' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro';
   reviewed_by: string | null;
   reviewed_at: string | null;
   review_nota: string | null;
   erro_tipo: string | null;
   erro_descricao: string | null;
   resultados_id: number | null;
+  doc_path: string | null;
+  doc_nome: string | null;
 }
 
 interface FiscalRun {
@@ -77,6 +79,7 @@ const ERRO_OPCOES: { value: string; label: string }[] = [
 const STATUS_LABEL: Record<string, string> = {
   auto_ok: 'Conferida (auto)',
   pendente: 'Pendente',
+  falha_tecnica: 'Falha técnica',
   confirmado_ok: 'Confirmada OK',
   confirmado_erro: 'Erro confirmado',
 };
@@ -84,6 +87,7 @@ const STATUS_LABEL: Record<string, string> = {
 const STATUS_STYLE: Record<string, string> = {
   auto_ok: 'bg-green-100 text-green-700',
   pendente: 'bg-amber-100 text-amber-700',
+  falha_tecnica: 'bg-gray-200 text-gray-600',
   confirmado_ok: 'bg-blue-100 text-blue-700',
   confirmado_erro: 'bg-red-100 text-red-700',
 };
@@ -212,7 +216,7 @@ export default function FiscalPage() {
 
       {/* Filtro de status */}
       <div className="flex gap-2 flex-wrap">
-        {['pendente', 'auto_ok', 'confirmado_ok', 'confirmado_erro', 'all'].map((s) => (
+        {['pendente', 'auto_ok', 'confirmado_ok', 'confirmado_erro', 'falha_tecnica', 'all'].map((s) => (
           <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
             {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
           </Button>
@@ -316,6 +320,16 @@ export default function FiscalPage() {
 
                         {n.chave_acesso && (
                           <p className="text-xs text-muted-foreground">Chave: {n.chave_acesso}</p>
+                        )}
+                        {n.doc_path && (
+                          <a
+                            href={`/api/fiscal/doc?id=${n.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                          >
+                            Ver documento ({n.doc_nome || 'arquivo'})
+                          </a>
                         )}
                         {n.reviewed_by && (
                           <p className="text-xs text-muted-foreground">
