@@ -5,6 +5,7 @@ import { sql } from '@/lib/db/neon';
 import {
   ensureFiscalTables,
   computeReviewStatus,
+  sweepOldFiscalDocs,
   FISCAL_TIPOS,
   AUTO_STATUS,
 } from '@/lib/fiscal/fiscal-db';
@@ -177,6 +178,15 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // Retenção: docs de notas antigas não-erro são apagados pra não pesar a VPS.
+  // Erros confirmados mantêm o documento (evidência da aba de erros).
+  let docsRemovidos = 0;
+  try {
+    docsRemovidos = await sweepOldFiscalDocs();
+  } catch {
+    /* sweep é best-effort */
+  }
+
   await logAudit(request, {
     action: 'fiscal.import',
     entity_type: 'fiscal_run',
@@ -201,6 +211,7 @@ export async function POST(request: NextRequest) {
     inserted,
     updated,
     revisoes_preservadas: preserved,
+    docs_removidos: docsRemovidos,
     counts,
   });
 }

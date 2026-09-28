@@ -14,6 +14,8 @@
 // sobrescreve uma decisão humana (confirmado_*) nem derruba auto_ok→pendente
 // quando o resultado automático continua ok.
 
+import { unlinkSync } from 'fs';
+import path from 'path';
 import { sql } from '../db/neon';
 
 let tableEnsured = false;
@@ -112,4 +114,55 @@ export function computeReviewStatus(autoStatus: AutoStatus): ReviewStatus {
   if (autoStatus === 'match') return 'auto_ok';
   if (autoStatus === 'erro') return 'falha_tecnica'; // download/parse — não é erro fiscal
   return 'pendente';
+}
+
+export const FISCAL_DOCS_DIR = () =>
+  path.join(process.cwd(), 'private-downloads', 'fiscal');
+
+// Remove o documento anexado de uma nota (disco + referência). Falha nunca
+// quebra o fluxo — arquivo órfão é limpo pelo sweep.
+export async function deleteFiscalDoc(notaId: number): Promise<void> {
+  if (!sql) return;
+  try {
+    const rows = await sql`SELECT doc_path FROM fiscal_notas WHERE id = ${notaId}`;
+    const rel = String(rows[0]?.doc_path || '');
+    if (rel.startsWith('fiscal/')) {
+      try {
+        unlinkSync(path.join(process.cwd(), 'private-downloads', rel));
+      } catch {
+        /* arquivo já não existe */
+      }
+    }
+    await sql`UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${notaId}`;
+  } catch {
+    /* noop */
+  }
+}
+
+// Retenção de documentos na VPS:
+//  - confirmado_erro → mantém (evidência da aba de erros)
+//  - demais status → apaga após DOC_RETENTION_DAYS dias
+// Chamado uma vez por importação; remove o arquivo físico e zera as colunas.
+export async function sweepOldFiscalDocs(): Promise<number> {
+  if (!sql) return 0;
+  const dir = FISCAL_DOCS_DIR();
+  const old = await sql`
+    SELECT id, doc_path FROM fiscal_notas
+    WHERE doc_path IS NOT NULL
+      AND review_status <> 'confirmado_erro'
+      AND created_at < NOW() - INTERVAL '90 days'
+  `;
+  let removed = 0;
+  for (const r of old) {
+    const rel = String(r.doc_path || '');
+    if (!rel.startsWith('fiscal/')) continue;
+    try {
+      unlinkSync(path.join(process.cwd(), 'private-downloads', rel));
+      removed++;
+    } catch {
+      /* arquivo já não existe — limpa referência mesmo assim */
+    }
+    await sql`UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${r.id}`;
+  }
+  return removed;
 }

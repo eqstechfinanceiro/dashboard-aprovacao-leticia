@@ -14,6 +14,9 @@ import {
   ChevronRight,
   Loader2,
   Clock,
+  Maximize2,
+  X,
+  FileText,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -114,6 +117,7 @@ export default function FiscalPage() {
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [acting, setActing] = useState<number | null>(null);
   const [erroForm, setErroForm] = useState<{ notaId: number; erro_tipo: string; descricao: string } | null>(null);
+  const [docModal, setDocModal] = useState<{ id: number; nome: string } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -284,7 +288,8 @@ export default function FiscalPage() {
                     </button>
 
                     {isOpen && (
-                      <div className="border-t px-4 py-3 space-y-3">
+                      <div className={cn('border-t px-4 py-3', n.doc_path && 'grid gap-4 lg:grid-cols-2')}>
+                        <div className="space-y-3 min-w-0">
                         {n.auto_resumo && <p className="text-sm">{n.auto_resumo}</p>}
 
                         {checks.length > 0 && (
@@ -322,14 +327,22 @@ export default function FiscalPage() {
                           <p className="text-xs text-muted-foreground">Chave: {n.chave_acesso}</p>
                         )}
                         {n.doc_path && (
-                          <a
-                            href={`/api/fiscal/doc?id=${n.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                          >
-                            Ver documento ({n.doc_nome || 'arquivo'})
-                          </a>
+                          <div className="flex items-center gap-3">
+                            <button
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                              onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
+                            >
+                              <Maximize2 className="h-3 w-3" /> Ampliar documento
+                            </button>
+                            <a
+                              href={`/api/fiscal/doc?id=${n.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                            >
+                              Abrir em nova aba
+                            </a>
+                          </div>
                         )}
                         {n.reviewed_by && (
                           <p className="text-xs text-muted-foreground">
@@ -404,6 +417,27 @@ export default function FiscalPage() {
                             </div>
                           </div>
                         )}
+                        </div>
+
+                        {n.doc_path && (
+                          <div className="min-w-0 border rounded-md overflow-hidden bg-muted/30 flex flex-col">
+                            <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/50 text-xs text-muted-foreground">
+                              <FileText className="h-3.5 w-3.5 shrink-0" />
+                              <span className="truncate">{n.doc_nome || 'documento'}</span>
+                              <button
+                                className="ml-auto text-blue-600 hover:underline inline-flex items-center gap-1"
+                                onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
+                              >
+                                <Maximize2 className="h-3 w-3" /> Ampliar
+                              </button>
+                            </div>
+                            <iframe
+                              src={`/api/fiscal/doc?id=${n.id}`}
+                              title={`Documento NF ${n.doc}`}
+                              className="w-full flex-1 min-h-[480px] bg-white"
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -413,6 +447,39 @@ export default function FiscalPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal — documento em tela quase cheia */}
+      {docModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex flex-col p-4"
+          onClick={() => setDocModal(null)}
+        >
+          <div
+            className="flex items-center gap-3 rounded-t-lg bg-background px-4 py-2"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FileText className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium truncate">{docModal.nome}</span>
+            <a
+              href={`/api/fiscal/doc?id=${docModal.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-auto text-xs text-blue-600 hover:underline"
+            >
+              Abrir em nova aba
+            </a>
+            <Button size="sm" variant="ghost" onClick={() => setDocModal(null)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <iframe
+            src={`/api/fiscal/doc?id=${docModal.id}`}
+            title={docModal.nome}
+            className="flex-1 rounded-b-lg bg-white"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

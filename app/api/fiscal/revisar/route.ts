@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
-import { ensureFiscalTables, ERRO_TIPOS } from '@/lib/fiscal/fiscal-db';
+import { ensureFiscalTables, ERRO_TIPOS, deleteFiscalDoc } from '@/lib/fiscal/fiscal-db';
 import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
@@ -72,11 +72,16 @@ export async function POST(request: NextRequest) {
       RETURNING id
     `;
     resultadosId = ins[0].id;
-  } else if (decisao === 'confirmado_ok' && resultadosId) {
-    // Revisão mudou de erro→ok: remove o registro da aba de erros para não
-    // deixar um falso positivo permanentemente listado.
-    await sql`DELETE FROM resultados_conferencias WHERE id = ${resultadosId} AND fonte = ${RESULTADOS_FONTE}`;
-    resultadosId = null;
+  } else if (decisao === 'confirmado_ok') {
+    if (resultadosId) {
+      // Revisão mudou de erro→ok: remove o registro da aba de erros para não
+      // deixar um falso positivo permanentemente listado.
+      await sql`DELETE FROM resultados_conferencias WHERE id = ${resultadosId} AND fonte = ${RESULTADOS_FONTE}`;
+      resultadosId = null;
+    }
+    // Nota conferida e OK: o documento-fonte não é mais necessário na VPS.
+    // Erros confirmados MANTÊM o doc (evidência na aba de erros).
+    await deleteFiscalDoc(notaId);
   }
 
   const upd = await sql`
