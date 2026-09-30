@@ -54,6 +54,8 @@ export async function GET(request: NextRequest) {
              lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'} OR
              lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
       ORDER BY
+        CASE WHEN ${status} IN ('confirmado_ok', 'confirmado_erro')
+             THEN n.reviewed_at END DESC NULLS LAST,
         CASE n.review_status WHEN 'pendente' THEN 0 ELSE 1 END,
         n.emissao DESC NULLS LAST, n.doc DESC
       LIMIT ${limit}

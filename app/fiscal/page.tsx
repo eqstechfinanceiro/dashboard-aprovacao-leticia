@@ -25,6 +25,7 @@ interface Check {
   expected: string;
   actual: string;
   match: boolean;
+  missing_xml?: boolean;
 }
 
 interface FiscalNota {
@@ -223,7 +224,7 @@ export default function FiscalPage() {
       <div className="flex gap-2 flex-wrap">
         {['pendente', 'auto_ok', 'confirmado_ok', 'confirmado_erro', 'falha_tecnica', 'all'].map((s) => (
           <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
-            {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
+            {s === 'all' ? 'Todas' : s === 'confirmado_ok' ? 'Histórico — Confirmadas OK' : STATUS_LABEL[s]}
           </Button>
         ))}
       </div>
@@ -284,6 +285,11 @@ export default function FiscalPage() {
                         <p className="text-xs text-muted-foreground truncate">
                           {n.fornecedor || '—'} {n.emissao ? `· ${n.emissao}` : ''} {n.filial ? `· filial ${n.filial}` : ''}
                         </p>
+                        {n.reviewed_by && (
+                          <p className="text-xs text-blue-600 truncate">
+                            ✓ por {n.reviewed_by} em {n.reviewed_at ? new Date(n.reviewed_at).toLocaleString('pt-BR') : '—'}
+                          </p>
+                        )}
                       </div>
                       <span className="text-sm font-semibold shrink-0">{fmtBRL(n.valor)}</span>
                     </button>
@@ -318,7 +324,15 @@ export default function FiscalPage() {
                                   <tr key={i} className={cn('border-b last:border-0', !c.match && 'bg-red-50')}>
                                     <td className="py-1 pr-3 font-medium">{c.field}</td>
                                     <td className="py-1 pr-3">{c.expected || '—'}</td>
-                                    <td className="py-1 pr-3">{c.actual || '—'}</td>
+                                    <td className="py-1 pr-3">
+                                      {c.actual === '—' && (c.missing_xml || !c.match) ? (
+                                        <span className="rounded bg-orange-100 px-1.5 py-0.5 text-[10px] font-medium text-orange-700">
+                                          ausente no XML
+                                        </span>
+                                      ) : (
+                                        c.actual || '—'
+                                      )}
+                                    </td>
                                     <td className="py-1">
                                       {c.match ? (
                                         <CheckCircle2 className="h-3.5 w-3.5 text-green-500" />
