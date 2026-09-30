@@ -5,6 +5,7 @@ import { apiCache } from '../db/neon-cache';
 import { sql } from '../db/neon';
 import { vexpensesRateLimiter } from './vexpenses-rate-limiter';
 import { getNextValidCookie, markTokenCooldownById, clearTokenCache } from './vexpenses-token-validator';
+import { getExcelWaitingStepMap } from './approval-excel';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.vexpenses.com';
 const API_KEY = process.env.VEXPENSES_API_KEY;
@@ -345,7 +346,13 @@ export async function resolveApproverForUser(
 }
 
 // === APPROVAL FLOWS ===
-export async function getApprovalFlows(): Promise<TimingResult<{ namesMap: [number, string][]; stepApprovers: [number, [number, number[]][]][] }>> {
+export async function getApprovalFlows(): Promise<TimingResult<{
+  namesMap: [number, string][];
+  stepApprovers: [number, [number, number[]][]][];
+  // entrance_value per step order — steps with an entrance threshold only apply
+  // to reports whose total value reaches it
+  stepEntrances: [number, [number, number | null][]][];
+}>> {
   return cachedFetch(
     CK.APPROVAL_FLOWS,
     TTL.APPROVAL_FLOWS,
@@ -355,17 +362,19 @@ export async function getApprovalFlows(): Promise<TimingResult<{ namesMap: [numb
         { signal: AbortSignal.timeout(30000) },
         5
       );
-      if (!response.ok) return { namesMap: [], stepApprovers: [] };
+      if (!response.ok) return { namesMap: [], stepApprovers: [], stepEntrances: [] };
 
       const data = await response.json();
       const flows = data.data || [];
       const namesMap: [number, string][] = [];
       const stepApprovers: [number, [number, number[]][]][] = [];
+      const stepEntrances: [number, [number, number | null][]][] = [];
 
       for (const flow of flows) {
         namesMap.push([flow.id, flow.description || `Flow ${flow.id}`]);
         const steps = flow.steps?.data || flow.steps || [];
         const stepList: [number, number[]][] = [];
+        const entranceList: [number, number | null][] = [];
         for (const step of steps) {
           const stepOrder = step.order || 1;
           const approverSet: number[] = [];
@@ -377,50 +386,111 @@ export async function getApprovalFlows(): Promise<TimingResult<{ namesMap: [numb
             }
           }
           stepList.push([stepOrder, approverSet]);
+          entranceList.push([stepOrder, step.entrance_value != null ? Number(step.entrance_value) : null]);
         }
         stepApprovers.push([flow.id, stepList]);
+        stepEntrances.push([flow.id, entranceList]);
       }
-      return { namesMap, stepApprovers };
+      return { namesMap, stepApprovers, stepEntrances };
     },
     'config'
   );
 }
 
-// === APPROVAL TRACKING (derived live from v2 report history events) ===
-// The current approval step of each ENVIADO report is derived from its event
-// feed: step = 1 + (# of `approved` events after the last `sent` event).
-// Every history event bumps the report's updated_at, so per-report state is
-// cached and only re-derived when updated_at changes (incremental refresh).
-// This replaces the old Excel scrape which silently returned empty whenever
-// the Laravel session token expired — making every report look like step 1.
+// === APPROVAL TRACKING (live step derivation) ===
+// The v2 report history feed only emits `approved` for the FINAL approval —
+// intermediate step approvals emit no event at all (they only bump updated_at
+// and replace approval_stage_id). So the current step is derived from two
+// signals, whichever is stronger:
+//   1. Stage transitions: each new approval_stage_id instance since the last
+//      `sent` event = +1 step (persisted per report, incremental).
+//   2. The admin approval-tracking Excel (lib/api/approval-excel.ts) — gives
+//      the absolute step, fixing reports already mid-flow before tracking
+//      started. Optional overlay: missing Excel never hides or downgrades.
+// Every history event bumps updated_at → per-report state is fingerprinted
+// and only re-derived when updated_at changes.
 
 interface ReportStepState {
   updatedAt: string;
   step: number;
   rejected: boolean;
   approvedLast: boolean;
+  /** timestampEvento of the last `sent` — discriminates submission rounds. */
+  sentKey?: string;
+  /** Distinct approval_stage_id values observed since sentKey. */
+  stageSeq?: number[];
 }
 
 const REPORT_STEP_CK_PREFIX = 'vexpenses-data:report-step:';
 const REPORT_STEP_TTL = 24 * 60 * 60 * 1000; // 24h — updated_at fingerprint keeps it honest
 
-function deriveStepFromHistory(events: any[]): Omit<ReportStepState, 'updatedAt'> {
+interface ParsedHistory {
+  sentKey: string | null;
+  approvedCount: number;
+  rejected: boolean;
+  approvedLast: boolean;
+}
+
+function parseHistory(events: any[]): ParsedHistory {
   const sorted = [...events].sort((a, b) =>
     String(a?.timestampEvento || '').localeCompare(String(b?.timestampEvento || ''))
   );
   const last = sorted[sorted.length - 1]?.evento;
   if (last === 'disapproved' || last === 'disapproved_by_admin' || last === 'reprovado') {
-    return { step: 0, rejected: true, approvedLast: false };
+    return { sentKey: null, approvedCount: 0, rejected: true, approvedLast: false };
   }
   if (last === 'reopen' || last === 'reaberto') {
     // Reopened for editing, not resubmitted — still ENVIADO in the list = stale.
-    return { step: 0, rejected: true, approvedLast: false };
+    return { sentKey: null, approvedCount: 0, rejected: true, approvedLast: false };
   }
   let lastSentIdx = -1;
   sorted.forEach((e, i) => { if (e?.evento === 'sent') lastSentIdx = i; });
   let approvals = 0;
   sorted.forEach((e, i) => { if (i > lastSentIdx && e?.evento === 'approved') approvals++; });
-  return { step: 1 + approvals, rejected: false, approvedLast: last === 'approved' };
+  return {
+    sentKey: lastSentIdx >= 0 ? String(sorted[lastSentIdx].timestampEvento || '') : null,
+    approvedCount: approvals,
+    rejected: false,
+    approvedLast: last === 'approved',
+  };
+}
+
+/**
+ * Merge a fresh history+stage observation into the persisted state.
+ * `applicableOrders` = the flow's step orders the report can actually traverse
+ * (entrance_value-gated steps excluded by report value); position → order.
+ */
+function mergeStepState(
+  prev: ReportStepState | undefined,
+  parsed: ParsedHistory,
+  curStageId: number | null,
+  applicableOrders: number[],
+  excelStep?: number | null
+): Omit<ReportStepState, 'updatedAt'> {
+  if (parsed.rejected) {
+    return { step: 0, rejected: true, approvedLast: false, sentKey: parsed.sentKey ?? prev?.sentKey ?? undefined, stageSeq: prev?.stageSeq };
+  }
+  let stageSeq = prev?.stageSeq ? [...prev.stageSeq] : [];
+  let position: number;
+  if (!parsed.sentKey || prev?.sentKey !== parsed.sentKey) {
+    // New submission round (or first observation): restart the stage sequence
+    // at the current stage instance.
+    stageSeq = curStageId != null ? [curStageId] : [];
+    position = Math.max(1, 1 + parsed.approvedCount);
+  } else {
+    if (curStageId != null && !stageSeq.includes(curStageId)) stageSeq.push(curStageId);
+    position = Math.max(stageSeq.length || 1, 1 + parsed.approvedCount);
+  }
+  // Excel knows the absolute step — pad the observed stage sequence with
+  // sentinels so future transitions keep counting from the right position
+  // even between Excel refreshes.
+  if (excelStep != null && excelStep > position) {
+    while (stageSeq.length < excelStep) stageSeq.unshift(-stageSeq.length - 1);
+    position = excelStep;
+  }
+  const orders = applicableOrders.length ? applicableOrders : [1, 2, 3, 4, 5];
+  const step = orders[Math.min(position, orders.length) - 1] ?? position;
+  return { step, rejected: false, approvedLast: parsed.approvedLast, sentKey: parsed.sentKey ?? undefined, stageSeq };
 }
 
 export async function getApprovalTracking(reports?: any[]): Promise<TimingResult<{
@@ -434,6 +504,55 @@ export async function getApprovalTracking(reports?: any[]): Promise<TimingResult
     TTL.APPROVAL_TRACKING,
     async () => {
       const reportList = reports ?? (await getReportsEnviado()).data ?? [];
+
+      // An empty list means the reports fetch failed upstream — never let it
+      // produce (and cache) a valid-looking empty tracking result.
+      if (reportList.length === 0) {
+        throw new Error('Approval tracking: report list unavailable (empty ENVIADO list)');
+      }
+
+      // Flow + member data for entrance_value-aware step ordering
+      const [teamRes, flowsRes] = await Promise.all([getTeamMembers(), getApprovalFlows()]);
+      const userFlowMap = new Map(teamRes.data.flowMap);
+      const entranceMap = new Map((flowsRes.data.stepEntrances || []) as [number, [number, number | null][]][]);
+
+      // Report values (entrance thresholds are value-based) — sum synced expenses
+      const valueMap = new Map<number, number>();
+      try {
+        const ids = reportList.map((r: any) => r.id);
+        if (ids.length > 0) {
+          const rows = await sql`
+            SELECT report_id, COALESCE(SUM(value), 0)::float AS v
+            FROM prestacao_expenses WHERE report_id = ANY(${ids})
+            GROUP BY report_id
+          `;
+          for (const row of rows as any[]) valueMap.set(row.report_id, row.v);
+        }
+      } catch (e) {
+        console.log('[VExpensesData] expense value lookup failed:', e);
+      }
+
+      const applicableOrdersFor = (r: any): number[] => {
+        const flowId = userFlowMap.get(r.user_id);
+        const entrances = flowId ? entranceMap.get(flowId) : undefined;
+        if (!entrances || entrances.length === 0) return [1, 2, 3, 4, 5];
+        const v = valueMap.get(r.id) ?? 0;
+        const orders = entrances
+          .filter(([, e]) => e == null || v >= e)
+          .map(([o]) => o)
+          .sort((a, b) => a - b);
+        return orders.length ? orders : entrances.map(([o]) => o).sort((a, b) => a - b);
+      };
+
+      // Absolute step overlay from the admin Excel — optional: when the Laravel
+      // session is dead we still track transitions, we just can't seed
+      // reports that were already mid-flow when tracking began.
+      let excelStepMap: Map<number, number> | null = null;
+      try {
+        excelStepMap = await getExcelWaitingStepMap();
+      } catch (e) {
+        console.log('[VExpensesData] Excel step overlay unavailable:', (e as Error)?.message);
+      }
 
       // Bulk-load previously derived states (fingerprinted by updated_at)
       const states = new Map<number, ReportStepState>();
@@ -457,13 +576,22 @@ export async function getApprovalTracking(reports?: any[]): Promise<TimingResult
       // Each derived state is persisted immediately — progress survives timeouts.
       let fetched = 0, failed = 0;
       await Promise.all(toFetch.map(r =>
-        vexpensesApiFetch(`/v2/reports/${r.id}?include=history`, { signal: AbortSignal.timeout(30000) }, 4)
+        // Long timeout: requests queue behind the shared 5 req/s rate limiter —
+        // a cold backfill of ~150 reports needs >30s of queue time alone.
+        vexpensesApiFetch(`/v2/reports/${r.id}?include=history`, { signal: AbortSignal.timeout(120000) }, 4)
           .then(async resp => {
             if (!resp.ok) { failed++; return; }
             const data = await resp.json();
             const history = data?.data?.history;
             const events = Array.isArray(history) ? history : (history?.data || []);
-            const state: ReportStepState = { updatedAt: r.updated_at || '', ...deriveStepFromHistory(events) };
+            const parsed = parseHistory(events);
+            const merged = mergeStepState(
+              states.get(r.id), parsed,
+              data?.data?.approval_stage_id ?? null,
+              applicableOrdersFor(r),
+              excelStepMap?.get(r.id)
+            );
+            const state: ReportStepState = { updatedAt: r.updated_at || '', ...merged };
             states.set(r.id, state);
             fetched++;
             await apiCache.set(`${REPORT_STEP_CK_PREFIX}${r.id}`, state, REPORT_STEP_TTL, 'reports');
@@ -480,25 +608,72 @@ export async function getApprovalTracking(reports?: any[]): Promise<TimingResult
       const approvedLastActionIds: number[] = [];
       const unknownIds: number[] = [];
       let staleStateReuse = 0;
+      let excelApplied = 0;
       for (const r of reportList) {
         const s = states.get(r.id);
-        if (!s) { unknownIds.push(r.id); continue; }
-        if (s.updatedAt !== (r.updated_at || '')) {
+        if (!s) {
+          // No derived state (first run or failed fetch) — the Excel overlay
+          // still knows the report's absolute step; prefer it over "unknown".
+          const ex = excelStepMap?.get(r.id);
+          if (ex != null && ex > 0) { waitingStepMap.push([r.id, ex]); excelApplied++; }
+          else if (ex === 0) { rejectedIds.push(r.id); }
+          else unknownIds.push(r.id);
+          continue;
+        }
+        const fingerprintMismatch = s.updatedAt !== (r.updated_at || '');
+        if (s.rejected) {
+          const ex = excelStepMap?.get(r.id);
+          if (ex != null) {
+            if (ex === 0) { rejectedIds.push(r.id); continue; }
+            // Excel says it's back in the approval flow (e.g. reenviado) —
+            // trust it over a cached rejection.
+            waitingStepMap.push([r.id, ex]);
+            excelApplied++;
+            continue;
+          }
+          if (fingerprintMismatch) {
+            // The report changed since this state was derived but the refetch
+            // failed — it may have been reopened+resent. Never hide a report
+            // on a stale rejection; surface it as unknown instead.
+            unknownIds.push(r.id);
+            staleStateReuse++;
+            continue;
+          }
+          rejectedIds.push(r.id);
+          continue;
+        }
+        let step = s.step;
+        const ex = excelStepMap?.get(r.id);
+        if (ex != null) {
+          if (ex === 0) { rejectedIds.push(r.id); continue; }
+          if (ex > step) { step = ex; }
+          excelApplied++;
+        }
+        if (fingerprintMismatch) {
           // Fetch failed but an older derivation exists — probably still valid
           // (updated_at also bumps on non-step changes like expense edits).
           staleStateReuse++;
         }
-        if (s.rejected) { rejectedIds.push(r.id); continue; }
-        waitingStepMap.push([r.id, s.step]);
+        waitingStepMap.push([r.id, step]);
         if (s.approvedLast) approvedLastActionIds.push(r.id);
       }
 
+      const trackingResult = { waitingStepMap, rejectedIds, approvedLastActionIds, unknownIds };
       console.log(
-        `[VExpensesData] Approval-tracking derived from history: ${waitingStepMap.length} steps, ` +
+        `[VExpensesData] Approval-tracking derived: ${waitingStepMap.length} steps, ` +
         `${rejectedIds.length} rejected/reopened, ${approvedLastActionIds.length} approved-last, ` +
-        `${unknownIds.length} unknown (${toFetch.length} fetched, ${failed} failed, ${staleStateReuse} stale-reused)`
+        `${unknownIds.length} unknown (${toFetch.length} fetched, ${failed} failed, ` +
+        `${staleStateReuse} stale-reused, excel=${excelStepMap ? excelApplied + ' applied' : 'unavailable'})`
       );
-      return { waitingStepMap, rejectedIds, approvedLastActionIds, unknownIds };
+      // Persist the aggregate inside the fetcher too — when the outer
+      // cachedFetch 30s race times out its own apiCache.set never runs, but
+      // per-report states are already saved so this keeps progress alive.
+      try {
+        await apiCache.set(CK.APPROVAL_TRACKING, trackingResult, TTL.APPROVAL_TRACKING, 'reports');
+      } catch (e) {
+        console.log('[VExpensesData] tracking aggregate persist failed:', e);
+      }
+      return trackingResult;
     },
     'reports'
   );

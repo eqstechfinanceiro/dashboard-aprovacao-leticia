@@ -254,7 +254,10 @@ export default function AprovacaoDinamicaPage() {
   const [auditProgress, setAuditProgress] = useState<Record<number, { done: number; total: number }>>({});
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [approverFilter, setApproverFilter] = useState<string>('891904'); // Letícia por padrão
+  // Sem filtro de aprovador por padrão — reports em etapas posteriores (outros
+  // aprovadores) devem aparecer como "Aguardando etapa N"; escondê-los fazia
+  // parecer que sumiram do Aery. O filtro "Letícia" continua disponível.
+  const [approverFilter, setApproverFilter] = useState<string>('');
 
   const [hideApproved, setHideApproved] = useState(true);
   const [caixaOnly, setCaixaOnly] = useState(false);

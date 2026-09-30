@@ -114,9 +114,13 @@ export async function getPendingReports(
   if (!trackingResult.isStale) {
     for (const id of rejectedIds) staleIds.add(id);
   }
+  // Reports the live tracking confirms as back in the approval flow must never
+  // be hidden by the (up-to-15min stale) REPROVADO status listing — a resent
+  // report keeps its REPROVADO entry until that cache refreshes.
+  const trackingOkIds = new Set((trackingResult.data.waitingStepMap || []).map(([id]) => id));
   if (!reprovadoResult.isStale || reportsResult.isStale) {
     for (const id of staleFromOtherStatuses) {
-      if (v2IdSet.has(id)) {
+      if (v2IdSet.has(id) && (trackingResult.isStale || !trackingOkIds.has(id))) {
         staleIds.add(id);
       }
     }
