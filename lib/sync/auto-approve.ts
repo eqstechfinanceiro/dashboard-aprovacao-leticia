@@ -119,10 +119,14 @@ export async function findAutoApprovableReports(): Promise<AutoApproveCandidates
     const audit = await sql`
       SELECT
         COUNT(*)::int AS total,
-        COUNT(*) FILTER (WHERE status = 'APROVADO_BOT')::int AS bot,
-        COUNT(*) FILTER (WHERE status <> 'APROVADO_BOT')::int AS other
-      FROM expense_audit_results
-      WHERE report_id = ${r.id}
+        COUNT(*) FILTER (WHERE ar.status = 'APROVADO_BOT')::int AS bot,
+        COUNT(*) FILTER (WHERE ar.status <> 'APROVADO_BOT')::int AS other
+      FROM expense_audit_results ar
+      WHERE ar.report_id = ${r.id}
+        AND EXISTS (
+          SELECT 1 FROM prestacao_expenses pe
+          WHERE pe.report_id = ar.report_id AND pe.id = ar.expense_id
+        )
     `;
     const a = audit[0] as any;
     if (!(a.total === r.expense_count && a.other === 0 && a.bot === r.expense_count && r.expense_count > 0)) continue;

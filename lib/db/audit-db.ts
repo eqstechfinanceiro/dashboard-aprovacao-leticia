@@ -1,16 +1,26 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ensureAuditTable = ensureAuditTable;
-exports.saveAuditResult = saveAuditResult;
-exports.getAuditResultsForReport = getAuditResultsForReport;
-exports.getAuditedReportIds = getAuditedReportIds;
-const neon_1 = require("./neon");
+import { sql } from './neon';
+
+export interface AuditRecord {
+  id?: number;
+  report_id: number;
+  expense_id: number;
+  status: 'APROVADO_BOT' | 'PENDENTE' | 'REPROVADO';
+  extracted_data: any;
+  informed_data: any;
+  divergences: string[];
+  rules_triggered: any[];
+  summary: string;
+  audited_at?: string;
+  audited_by?: string | null;
+  created_at?: string;
+}
+
 let tableEnsured = false;
-async function ensureAuditTable() {
-    if (tableEnsured || !neon_1.sql)
-        return;
-    try {
-        await (0, neon_1.sql) `
+
+export async function ensureAuditTable(): Promise<void> {
+  if (tableEnsured || !sql) return;
+  try {
+    await sql`
       CREATE TABLE IF NOT EXISTS expense_audit_results (
         id SERIAL PRIMARY KEY,
         report_id INTEGER NOT NULL,
@@ -27,21 +37,20 @@ async function ensureAuditTable() {
         UNIQUE(report_id, expense_id)
       )
     `;
-        await (0, neon_1.sql) `ALTER TABLE expense_audit_results ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 1`;
-        await (0, neon_1.sql) `CREATE INDEX IF NOT EXISTS idx_audit_report ON expense_audit_results(report_id)`;
-        await (0, neon_1.sql) `CREATE INDEX IF NOT EXISTS idx_audit_status ON expense_audit_results(status)`;
-        tableEnsured = true;
-        console.log('[Audit DB] Table ensured');
-    }
-    catch (error) {
-        console.error('[Audit DB] Error ensuring table:', error);
-    }
+    await sql`ALTER TABLE expense_audit_results ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 1`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_report ON expense_audit_results(report_id)`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_audit_status ON expense_audit_results(status)`;
+    tableEnsured = true;
+    console.log('[Audit DB] Table ensured');
+  } catch (error) {
+    console.error('[Audit DB] Error ensuring table:', error);
+  }
 }
-async function saveAuditResult(record) {
-    if (!neon_1.sql)
-        return;
-    try {
-        await (0, neon_1.sql) `
+
+export async function saveAuditResult(record: AuditRecord): Promise<void> {
+  if (!sql) return;
+  try {
+    await sql`
       INSERT INTO expense_audit_results
         (report_id, expense_id, status, extracted_data, informed_data, divergences, rules_triggered, summary, audited_by)
       VALUES
@@ -57,19 +66,19 @@ async function saveAuditResult(record) {
         audited_by = EXCLUDED.audited_by,
         attempts = expense_audit_results.attempts + 1
     `;
-    }
-    catch (error) {
-        console.error('[Audit DB] Error saving result:', error);
-        throw error;
-    }
+  } catch (error) {
+    console.error('[Audit DB] Error saving result:', error);
+    throw error;
+  }
 }
-async function getAuditResultsForReport(reportId) {
-    if (!neon_1.sql) {
-        console.log('[Audit DB] sql is null, returning empty');
-        return [];
-    }
-    try {
-        const rows = await (0, neon_1.sql) `
+
+export async function getAuditResultsForReport(reportId: number): Promise<AuditRecord[]> {
+  if (!sql) {
+    console.log('[Audit DB] sql is null, returning empty');
+    return [];
+  }
+  try {
+    const rows = await sql`
       SELECT ar.id, ar.report_id, ar.expense_id, ar.status,
              ar.extracted_data::text as extracted_data,
              ar.informed_data::text as informed_data,
@@ -84,25 +93,25 @@ async function getAuditResultsForReport(reportId) {
         )
       ORDER BY ar.expense_id
     `;
-        const parsed = rows.map((r) => ({
-            ...r,
-            extracted_data: r.extracted_data ? JSON.parse(r.extracted_data) : null,
-            informed_data: r.informed_data ? JSON.parse(r.informed_data) : null,
-            divergences: r.divergences ? JSON.parse(r.divergences) : null,
-            rules_triggered: r.rules_triggered ? JSON.parse(r.rules_triggered) : null,
-        }));
-        return parsed;
-    }
-    catch (error) {
-        console.error('[Audit DB] Error fetching results:', error);
-        return [];
-    }
+
+    const parsed = rows.map((r: any) => ({
+      ...r,
+      extracted_data: r.extracted_data ? JSON.parse(r.extracted_data) : null,
+      informed_data: r.informed_data ? JSON.parse(r.informed_data) : null,
+      divergences: r.divergences ? JSON.parse(r.divergences) : null,
+      rules_triggered: r.rules_triggered ? JSON.parse(r.rules_triggered) : null,
+    }));
+    return parsed as AuditRecord[];
+  } catch (error) {
+    console.error('[Audit DB] Error fetching results:', error);
+    return [];
+  }
 }
-async function getAuditedReportIds() {
-    if (!neon_1.sql)
-        return new Set();
-    try {
-        const rows = await (0, neon_1.sql) `
+
+export async function getAuditedReportIds(): Promise<Set<number>> {
+  if (!sql) return new Set();
+  try {
+    const rows = await sql`
       SELECT DISTINCT ar.report_id
       FROM expense_audit_results ar
       WHERE EXISTS (
@@ -110,10 +119,9 @@ async function getAuditedReportIds() {
         WHERE pe.report_id = ar.report_id AND pe.id = ar.expense_id
       )
     `;
-        return new Set(rows.map((r) => r.report_id));
-    }
-    catch (error) {
-        console.error('[Audit DB] Error fetching audited IDs:', error);
-        return new Set();
-    }
+    return new Set(rows.map((r: any) => r.report_id));
+  } catch (error) {
+    console.error('[Audit DB] Error fetching audited IDs:', error);
+    return new Set();
+  }
 }

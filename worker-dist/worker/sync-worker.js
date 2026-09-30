@@ -28,6 +28,7 @@ const auto_audit_1 = require("../lib/sync/auto-audit");
 const inactive_alerts_1 = require("../lib/sync/inactive-alerts");
 const notifications_1 = require("../lib/sync/notifications");
 const totvs_1 = require("../lib/impacto/totvs");
+const settings_1 = require("../lib/db/settings");
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
 const WARM_INTERVAL_MS = 45 * 60 * 1000;
 const COLD_INTERVAL_MS = 24 * 60 * 60 * 1000;
@@ -241,6 +242,33 @@ async function coldCycle() {
         await releaseLock();
     }
 }
+// Quinzena autopilot — roda 1x/dia nas datas relevantes:
+//   10 e 24 (D-1) → relatório de véspera; 11 e 25 (D) → fechamento automático.
+// Só depois das 05h UTC (~02h BRT) pra não pegar o dia errado por fuso.
+async function autopilotCheck() {
+    if (!process.env.CRON_SECRET)
+        return;
+    const now = new Date();
+    const day = now.getUTCDate();
+    if (![10, 11, 24, 25].includes(day) || now.getUTCHours() < 5)
+        return;
+    const marker = `autopilot:${now.toISOString().slice(0, 10)}`;
+    if (await (0, settings_1.getSetting)(marker))
+        return; // já rodou hoje
+    await (0, settings_1.setSetting)(marker, { fired_at: now.toISOString() }, 'sync-worker');
+    try {
+        const r = await fetch(`${APP_BASE}/api/cron/quinzena-autopilot`, {
+            headers: { 'x-cron-secret': process.env.CRON_SECRET },
+            signal: AbortSignal.timeout(300000),
+        });
+        const body = await r.json().catch(() => ({}));
+        await (0, settings_1.setSetting)(marker, { fired_at: now.toISOString(), status: r.status, body }, 'sync-worker');
+        console.log(`[autopilot] dia ${day}: HTTP ${r.status}`, JSON.stringify(body).slice(0, 300));
+    }
+    catch (e) {
+        console.error('[autopilot] erro:', e?.message);
+    }
+}
 async function loop() {
     const now = Date.now();
     try {
@@ -253,6 +281,7 @@ async function loop() {
             lastCold = now;
             await coldCycle();
         }
+        await autopilotCheck();
     }
     catch (e) {
         console.error('[worker] loop error:', e?.message);

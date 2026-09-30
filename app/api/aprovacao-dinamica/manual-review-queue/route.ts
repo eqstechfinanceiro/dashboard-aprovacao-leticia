@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
@@ -31,6 +31,10 @@ export async function GET(request: NextRequest) {
         FROM expense_audit_results ear
         WHERE ear.status IN ('PENDENTE', 'REPROVADO')
           AND ear.report_id = ${parseInt(reportId)}
+          AND EXISTS (
+            SELECT 1 FROM prestacao_expenses pe
+            WHERE pe.report_id = ear.report_id AND pe.id = ear.expense_id
+          )
         ORDER BY ear.expense_id
       `;
     } else if (reportIdsParam) {
@@ -52,6 +56,10 @@ export async function GET(request: NextRequest) {
         FROM expense_audit_results ear
         WHERE ear.status IN ('PENDENTE', 'REPROVADO')
           AND ear.report_id = ANY(${reportIds}::int[])
+          AND EXISTS (
+            SELECT 1 FROM prestacao_expenses pe
+            WHERE pe.report_id = ear.report_id AND pe.id = ear.expense_id
+          )
         ORDER BY ear.report_id, ear.expense_id
       `;
     } else {
@@ -68,6 +76,10 @@ export async function GET(request: NextRequest) {
           ear.audited_by
         FROM expense_audit_results ear
         WHERE ear.status IN ('PENDENTE', 'REPROVADO')
+          AND EXISTS (
+            SELECT 1 FROM prestacao_expenses pe
+            WHERE pe.report_id = ear.report_id AND pe.id = ear.expense_id
+          )
         ORDER BY ear.report_id, ear.expense_id
       `;
     }

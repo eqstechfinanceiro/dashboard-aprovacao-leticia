@@ -76,12 +76,13 @@ async function syncReportExpenses(report, onRateLimit) {
     const apiIds = new Set(apiExpenses.map((e) => e.id));
     // Current DB expenses for this report
     const dbExpenses = await (0, neon_1.sql) `
-    SELECT id, value, raw_data
+    SELECT id, value, date::text AS date, raw_data
     FROM prestacao_expenses
     WHERE report_id = ${report.id}
   `;
     const dbIds = new Set(dbExpenses.map((e) => e.id));
     const dbVals = new Map(dbExpenses.map((e) => [e.id, Number(e.value)]));
+    const dbDates = new Map(dbExpenses.map((e) => [e.id, String(e.date || '').slice(0, 10)]));
     const dbReceipts = new Map(dbExpenses.map((e) => [e.id, e.raw_data?.reicept_url || '']));
     const toDelete = [...dbIds].filter(id => !apiIds.has(id));
     const toInsert = apiExpenses.filter((e) => !dbIds.has(e.id));
@@ -92,12 +93,25 @@ async function syncReportExpenses(report, onRateLimit) {
             return true;
         if ((e.reicept_url || '') !== (dbReceipts.get(e.id) || ''))
             return true;
+        if (String(e.date || '').slice(0, 10) !== (dbDates.get(e.id) || ''))
+            return true;
         return false;
     });
     if (toDelete.length === 0 && toInsert.length === 0 && toUpdate.length === 0) {
         return base;
     }
     base.unchanged = false;
+    // Audit rows are keyed (report_id, expense_id): expenses removed from the
+    // report leave orphan audits that inflate audited counts and block
+    // auto-approve forever; expenses whose value/receipt/date changed carry a
+    // STALE audit computed on old data — both must be re-audited.
+    const staleAuditIds = [...toDelete, ...toUpdate.map((e) => e.id)];
+    if (staleAuditIds.length > 0) {
+        await (0, neon_1.sql) `
+      DELETE FROM expense_audit_results
+      WHERE report_id = ${report.id} AND expense_id = ANY(${staleAuditIds}::int[])
+    `;
+    }
     if (toDelete.length > 0) {
         await (0, neon_1.sql) `DELETE FROM prestacao_expenses WHERE id = ANY(${toDelete}::int[])`;
         base.deleted_expenses = toDelete.length;

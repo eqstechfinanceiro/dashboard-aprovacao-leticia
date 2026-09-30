@@ -120,7 +120,17 @@ async function refreshCadastro() {
     catch (e) {
         console.warn('[cadastro] merge de situacao RH falhou (segue com dados VExpenses):', e);
     }
-    // Get the most recent cadastral data from existing snapshots
+    // Base do snapshot por período: o cadastro canônico (quinzena_cadastro).
+    // Antes isso lia da própria quinzena_controle_snapshot — que nunca foi
+    // populada, então a tabela ficava vazia pra sempre (ovo-e-galinha).
+    const cadastroRows = await db `
+    SELECT cpf, colaborador, situacao, status_cartao,
+           regional, centro_custo, gestor, diretor
+    FROM quinzena_cadastro
+    WHERE cpf IS NOT NULL
+  `;
+    // Complemento: CPFs que saíram do cadastro mas existiam em snapshots antigos
+    // (histórico importado pela tool manual, se houver).
     const lastSnapshots = await db `
     SELECT DISTINCT ON (cpf)
       cpf, colaborador, situacao, status_cartao,
@@ -129,6 +139,11 @@ async function refreshCadastro() {
     WHERE cpf IS NOT NULL
     ORDER BY cpf, year DESC, month DESC, quinzena DESC
   `;
+    const seenCpfs = new Set(cadastroRows.map((r) => r.cpf));
+    const seedRows = [
+        ...cadastroRows,
+        ...lastSnapshots.filter((s) => !seenCpfs.has(s.cpf)),
+    ];
     // Determine target quinzena
     const quinzenaId = (0, quinzena_dates_1.getCurrentQuinzenaId)();
     const [qYear, qMonth, qQuinzena] = quinzenaId.split('-');
@@ -145,13 +160,13 @@ async function refreshCadastro() {
     // RH não-ATIVO vence; caso contrário vale VExpenses/snapshot.
     let rhMapControle = new Map();
     try {
-        rhMapControle = await (0, funcionarios_1.getSituacaoMap)(lastSnapshots.map((s) => s.cpf).filter(Boolean));
+        rhMapControle = await (0, funcionarios_1.getSituacaoMap)(seedRows.map((s) => s.cpf).filter(Boolean));
     }
     catch (e) {
         console.warn('[cadastro] situacao RH indisponível para snapshot controle:', e);
     }
     let upserted = 0;
-    for (const snap of lastSnapshots) {
+    for (const snap of seedRows) {
         // Update situacao based on API active status
         const apiActive = apiCpfActive.get(snap.cpf);
         const rh = (rhMapControle.get(snap.cpf) || '').trim();
@@ -184,7 +199,8 @@ async function refreshCadastro() {
         team_members_api: allMembers.length,
         cadastro_inserted: cadastroInserted,
         cadastro_no_cpf: noCpf.length,
-        cadastro_from_last_snapshot: lastSnapshots.length,
+        seed_from_cadastro: cadastroRows.length,
+        seed_from_last_snapshot: lastSnapshots.length,
         rh_situacao_aplicada: rhUpdated,
         upserted,
         quinzena: quinzenaId,

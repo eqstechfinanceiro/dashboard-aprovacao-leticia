@@ -81,8 +81,17 @@ async function markReportDeleted(reportId) {
     WHERE id = ${reportId} AND status != 'DELETADO'
     RETURNING id
   `;
-    if (res.length > 0)
+    if (res.length > 0) {
         await recordStatusTransition(reportId, null, 'DELETADO', 'sync');
+        // The report no longer exists upstream — its audit rows are dead data
+        // that would inflate audited counts and mark it as "Auditado" forever.
+        try {
+            await (0, neon_1.sql) `DELETE FROM expense_audit_results WHERE report_id = ${reportId}`;
+        }
+        catch {
+            // table may not exist yet on fresh databases
+        }
+    }
     return res.length > 0;
 }
 // Histórico de transições de status — prestacao_reports só guarda o status

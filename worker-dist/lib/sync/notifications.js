@@ -7,6 +7,7 @@ exports.resolveOtherDedups = resolveOtherDedups;
 exports.listNotifications = listNotifications;
 exports.markNotificationRead = markNotificationRead;
 exports.markAllNotificationsRead = markAllNotificationsRead;
+exports.notifyAdmins = notifyAdmins;
 exports.generateSyncFailureNotifications = generateSyncFailureNotifications;
 exports.generateApprovalDigest = generateApprovalDigest;
 exports.generatePrestacaoStaleNotifications = generatePrestacaoStaleNotifications;
@@ -134,6 +135,15 @@ async function markAllNotificationsRead(appUserId) {
     RETURNING id
   `;
     return r.length;
+}
+// Notifica todos os admins ativos — usado por rotas (quinzena pronta) e worker.
+async function notifyAdmins(n) {
+    if (!neon_1.sql)
+        return 0;
+    const admins = (await targetUsers()).filter((u) => u.role === 'admin');
+    for (const a of admins)
+        await upsertNotification(a.id, n);
+    return admins.length;
 }
 async function targetUsers() {
     const rows = await (0, neon_1.sql) `
