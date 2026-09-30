@@ -118,6 +118,7 @@ export default function FiscalPage() {
   const [acting, setActing] = useState<number | null>(null);
   const [erroForm, setErroForm] = useState<{ notaId: number; erro_tipo: string; descricao: string } | null>(null);
   const [docModal, setDocModal] = useState<{ id: number; nome: string } | null>(null);
+  const [onlyErr, setOnlyErr] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -294,6 +295,15 @@ export default function FiscalPage() {
 
                         {checks.length > 0 && (
                           <div className="overflow-x-auto">
+                            <label className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={onlyErr}
+                                onChange={(e) => setOnlyErr(e.target.checked)}
+                                className="h-3.5 w-3.5 accent-red-600"
+                              />
+                              Somente itens com erro ({falhas.length})
+                            </label>
                             <table className="w-full text-xs">
                               <thead>
                                 <tr className="border-b text-left text-muted-foreground">
@@ -304,7 +314,7 @@ export default function FiscalPage() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {checks.map((c, i) => (
+                                {(onlyErr ? falhas : checks).map((c, i) => (
                                   <tr key={i} className={cn('border-b last:border-0', !c.match && 'bg-red-50')}>
                                     <td className="py-1 pr-3 font-medium">{c.field}</td>
                                     <td className="py-1 pr-3">{c.expected || '—'}</td>

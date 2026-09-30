@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createReadStream, existsSync, statSync } from 'fs';
+import { createReadStream, existsSync, readFileSync, statSync } from 'fs';
 import { Readable } from 'stream';
 import path from 'path';
 import { sql } from '@/lib/db/neon';
+import { danfeHtml } from '@/lib/fiscal/danfe-html';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -37,6 +38,17 @@ export async function GET(request: NextRequest) {
   }
 
   const ext = path.extname(file).toLowerCase();
+
+  // XML de NF-e: renderiza como DANFE legível (HTML). ?raw=1 devolve o XML puro.
+  if (ext === '.xml' && request.nextUrl.searchParams.get('raw') !== '1') {
+    return new NextResponse(danfeHtml(readFileSync(file, 'utf-8')), {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Disposition': `inline; filename="${docNome.replace(/\.xml$/i, '')}.html"`,
+      },
+    });
+  }
+
   const type = MIME[ext] || 'application/octet-stream';
   const webStream = Readable.toWeb(createReadStream(file));
   return new NextResponse(webStream as ReadableStream, {
