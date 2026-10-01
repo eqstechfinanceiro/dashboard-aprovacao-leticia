@@ -31,8 +31,19 @@ function fmtBRL(v: number | null): string {
 
 function fmtDate(d: string | null): string {
   if (!d) return '—';
+  // 'YYYY-MM-DD' puro parseia como UTC e vira dia anterior em BRT — tratar como data local
+  const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
   const dt = new Date(d);
   return isNaN(dt.getTime()) ? d : dt.toLocaleDateString('pt-BR');
+}
+
+function fmtCNPJ(v: string | null): string {
+  if (!v) return '';
+  const d = v.replace(/\D/g, '');
+  return d.length === 14
+    ? d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+    : v;
 }
 
 export async function enviarEmailErroFiscal(nota: {
@@ -53,27 +64,21 @@ export async function enviarEmailErroFiscal(nota: {
   const tipoLabel = nota.tipo === 'servico' ? 'Serviço' : 'Mercadoria';
   const erroLabel = ERRO_LABEL[nota.erro_tipo || ''] || nota.erro_tipo || 'Não especificado';
 
-  const corpo = `Olá!
-
-Uma nota fiscal foi conferida pelo setor fiscal e teve um erro confirmado. Seguem os dados para tratativa:
-
-NOTA FISCAL
+  const corpo = `Olá! Uma nota fiscal teve um erro confirmado. Seguem os dados para tratativa:
  - Número: ${nota.doc}${nota.serie ? ` (série ${nota.serie})` : ''}
  - Tipo: ${tipoLabel}
- - Fornecedor: ${nota.fornecedor || '—'}${nota.cnpj ? ` — CNPJ ${nota.cnpj}` : ''}
+ - Fornecedor: ${nota.fornecedor || '—'}${nota.cnpj ? ` — CNPJ ${fmtCNPJ(nota.cnpj)}` : ''}
  - Filial: ${nota.filial || '—'}
  - Emissão: ${fmtDate(nota.emissao || null)}
  - Valor: ${fmtBRL(nota.valor ?? null)}
 ${nota.chave_acesso ? ` - Chave de acesso: ${nota.chave_acesso}\n` : ''}
 ERRO IDENTIFICADO
  - Tipo: ${erroLabel}
-${nota.erro_descricao ? ` - Detalhes: ${nota.erro_descricao}\n` : ''}
-Conferido por: ${reviewer}
+ - Conferido por: ${reviewer}
 
-Os detalhes completos da divergência e o documento da nota estão disponíveis no portal Aery, em Fiscal → Histórico.
+Atenciosamente, Aery — Conferência Fiscal
 
-Atenciosamente,
-Aery — Conferência Fiscal`;
+Mensagem enviada automaticamente, favor não responder.`;
 
   const port = Number(process.env.SMTP_PORT || 465);
   const transporter = nodemailer.createTransport({
@@ -90,7 +95,7 @@ Aery — Conferência Fiscal`;
   await transporter.sendMail({
     from: process.env.SMTP_FROM || process.env.SMTP_USER,
     to: destinatarios.join(', '),
-    subject: `Erro confirmado na conferência fiscal — NF ${nota.doc} · ${nota.fornecedor || 'fornecedor'}`,
+    subject: `Nota fiscal com erro - ${tipoLabel} - NF ${nota.doc} · ${nota.fornecedor || 'fornecedor'}`,
     text: corpo,
   });
 }
