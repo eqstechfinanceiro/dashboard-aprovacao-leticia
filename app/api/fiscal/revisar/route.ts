@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
 import { ensureFiscalTables, ERRO_TIPOS, deleteFiscalDoc } from '@/lib/fiscal/fiscal-db';
-import { enviarEmailErroFiscal } from '@/lib/fiscal/email';
+import { enviarTeamsErroFiscal } from '@/lib/fiscal/teams';
 import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
@@ -130,14 +130,14 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  // E-mail informacional ao confirmar erro — fire-and-forget: falha de
-  // SMTP nunca pode impedir a revisão de ser registrada.
+  // Notificação no Teams ao confirmar erro — fire-and-forget: falha do
+  // webhook nunca pode impedir a revisão de ser registrada.
   if (decisao === 'confirmado_erro') {
-    enviarEmailErroFiscal({
+    enviarTeamsErroFiscal({
       ...nota,
       erro_tipo: erroTipo,
       erro_descricao: body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo,
-    }, reviewer).catch((e) => console.error('[Fiscal] envio de e-mail falhou:', e?.message || e));
+    }, reviewer).catch((e) => console.error('[Fiscal] envio ao Teams falhou:', e?.message || e));
   }
 
   return NextResponse.json({ ok: true, nota: upd[0] });

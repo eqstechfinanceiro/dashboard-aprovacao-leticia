@@ -649,7 +649,7 @@ export default function FiscalPage() {
             </div>
             <p className="text-xs text-muted-foreground">
               O sistema lê os dados da NF-e do XML e registra a nota como erro confirmado
-              no histórico (dispara o e-mail informacional).
+              no histórico (dispara a notificação no Teams).
             </p>
             <div className="space-y-3">
               <div>

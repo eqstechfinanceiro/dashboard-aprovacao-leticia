@@ -3,7 +3,7 @@ import { writeFileSync, mkdirSync } from 'fs';
 import path from 'path';
 import { sql } from '@/lib/db/neon';
 import { ensureFiscalTables, ERRO_TIPOS, FISCAL_TIPOS } from '@/lib/fiscal/fiscal-db';
-import { enviarEmailErroFiscal } from '@/lib/fiscal/email';
+import { enviarTeamsErroFiscal } from '@/lib/fiscal/teams';
 import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
@@ -156,10 +156,10 @@ export async function POST(request: NextRequest) {
     details: { doc: dados.doc, fornecedor: dados.fornecedor, motivo, erro_tipo: erroTipo, tipo, resultados_id: resultadosId },
   });
 
-  enviarEmailErroFiscal(
+  enviarTeamsErroFiscal(
     { ...dados, tipo, erro_tipo: erroTipo, erro_descricao: motivo },
     reviewer
-  ).catch((e) => console.error('[Fiscal] envio de e-mail falhou:', e?.message || e));
+  ).catch((e) => console.error('[Fiscal] envio ao Teams falhou:', e?.message || e));
 
   return NextResponse.json({ ok: true, nota_id: nota.id, doc: dados.doc });
 }
