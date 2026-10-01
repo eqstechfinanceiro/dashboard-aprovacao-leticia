@@ -52,7 +52,7 @@ export function montarMensagemErroFiscal(nota: {
   erro_tipo?: string | null;
   erro_descricao?: string | null;
 }, reviewer: string): string {
-  const tipoLabel = nota.tipo === 'servico' ? 'Serviço' : 'Mercadoria';
+  const tipoLabel = nota.tipo === 'servico' ? 'Serviço' : nota.tipo === 'vexpenses' ? 'VExpenses' : 'Mercadoria';
   const erroLabel = ERRO_LABEL[nota.erro_tipo || ''] || nota.erro_tipo || 'Não especificado';
 
   return `**Nota fiscal com erro - ${tipoLabel} - NF ${nota.doc} · ${nota.fornecedor || 'fornecedor'}**

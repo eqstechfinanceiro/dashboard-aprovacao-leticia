@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
 
   const escopoLabel =
     scope === 'historico' ? 'Histórico (erros e canceladas)' :
-    `Fila — ${tipo === 'servico' ? 'Serviço' : tipo === 'mercadoria' ? 'Mercadoria' : 'Todos'}`;
+    `Fila — ${tipo === 'servico' ? 'Serviço' : tipo === 'mercadoria' ? 'Mercadoria' : tipo === 'vexpenses' ? 'VExpenses' : 'Todos'}`;
 
   const COLS = [
     'NF', 'Série', 'Tipo', 'Filial', 'Fornecedor', 'CNPJ', 'Emissão',
@@ -155,7 +155,7 @@ export async function GET(request: NextRequest) {
   notas.forEach((n, i) => {
     const r = 4 + i;
     const values: any[] = [
-      n.doc, n.serie || '', n.tipo === 'servico' ? 'Serviço' : 'Mercadoria',
+      n.doc, n.serie || '', n.tipo === 'servico' ? 'Serviço' : n.tipo === 'vexpenses' ? 'VExpenses' : 'Mercadoria',
       n.filial || '', n.fornecedor || '', fmtCnpj(n.cnpj), fmtDt(n.emissao),
       n.valor !== null ? Number(n.valor) : '', n.chave_acesso || '',
       STATUS_LABEL[n.review_status] || n.review_status,

@@ -35,7 +35,7 @@ interface Check {
 interface FiscalNota {
   id: number;
   run_id: number;
-  tipo: 'mercadoria' | 'servico';
+  tipo: 'mercadoria' | 'servico' | 'vexpenses';
   doc: string;
   serie: string | null;
   filial: string | null;
@@ -124,7 +124,7 @@ function flatChecks(checks: FiscalNota['checks']): Check[] {
 
 export default function FiscalPage() {
   const [view, setView] = useState<'fila' | 'historico'>('fila');
-  const [tipo, setTipo] = useState<'mercadoria' | 'servico'>('mercadoria');
+  const [tipo, setTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
   const [status, setStatus] = useState<string>('pendente');
   const [histStatus, setHistStatus] = useState<string>('confirmado_erro');
   const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[] } | null>(null);
@@ -140,7 +140,7 @@ export default function FiscalPage() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importMotivo, setImportMotivo] = useState('');
   const [importErroTipo, setImportErroTipo] = useState('outro');
-  const [importTipo, setImportTipo] = useState<'mercadoria' | 'servico'>('mercadoria');
+  const [importTipo, setImportTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
   const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
@@ -246,6 +246,12 @@ export default function FiscalPage() {
           <Wrench className="h-4 w-4 mr-2" /> Serviço
         </Button>
         <Button
+          variant={view === 'fila' && tipo === 'vexpenses' ? 'default' : 'outline'}
+          onClick={() => { setView('fila'); setTipo('vexpenses'); }}
+        >
+          <FileText className="h-4 w-4 mr-2" /> VExpenses
+        </Button>
+        <Button
           variant={view === 'historico' ? 'default' : 'outline'}
           onClick={() => setView('historico')}
         >
@@ -327,7 +333,7 @@ export default function FiscalPage() {
           <CardTitle className="text-base">
             {view === 'historico'
               ? (histStatus === 'all' ? 'Histórico — erros e canceladas' : STATUS_LABEL[histStatus] || histStatus)
-              : `${status === 'all' ? 'Todas as notas' : STATUS_LABEL[status]} — ${tipo === 'mercadoria' ? 'Mercadoria' : 'Serviço'}`}
+              : `${status === 'all' ? 'Todas as notas' : STATUS_LABEL[status]} — ${tipo === 'mercadoria' ? 'Mercadoria' : tipo === 'servico' ? 'Serviço' : 'VExpenses'}`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -364,7 +370,7 @@ export default function FiscalPage() {
                           {n.serie && <span className="text-xs text-muted-foreground">série {n.serie}</span>}
                           {view === 'historico' && (
                             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                              {n.tipo === 'servico' ? 'Serviço' : 'Mercadoria'}
+                              {n.tipo === 'servico' ? 'Serviço' : n.tipo === 'vexpenses' ? 'VExpenses' : 'Mercadoria'}
                             </span>
                           )}
                           <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_STYLE[n.review_status])}>
@@ -666,10 +672,11 @@ export default function FiscalPage() {
                 <select
                   className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
                   value={importTipo}
-                  onChange={(e) => setImportTipo(e.target.value as 'mercadoria' | 'servico')}
+                  onChange={(e) => setImportTipo(e.target.value as 'mercadoria' | 'servico' | 'vexpenses')}
                 >
                   <option value="mercadoria">Mercadoria</option>
                   <option value="servico">Serviço</option>
+                  <option value="vexpenses">VExpenses</option>
                 </select>
               </div>
               <div>

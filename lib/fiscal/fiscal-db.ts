@@ -20,7 +20,7 @@ import { sql } from '../db/neon';
 
 let tableEnsured = false;
 
-export const FISCAL_TIPOS = ['mercadoria', 'servico'] as const;
+export const FISCAL_TIPOS = ['mercadoria', 'servico', 'vexpenses'] as const;
 export type FiscalTipo = (typeof FISCAL_TIPOS)[number];
 
 export const AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'] as const;
