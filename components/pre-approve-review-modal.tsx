@@ -408,7 +408,7 @@ export function PreApproveReviewModal({
                         <div className="mt-3">
                           {expense.receipt_url.toLowerCase().endsWith('.pdf') || expense.receipt_url.toLowerCase().includes('/pdfs/') ? (
                             <iframe
-                              src={`/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`}
+                              src={/amazonaws|cloudfront/i.test(expense.receipt_url) ? expense.receipt_url : `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`}
                               title="Comprovante PDF"
                               className="h-96 w-full rounded-lg border border-gray-200"
                             />

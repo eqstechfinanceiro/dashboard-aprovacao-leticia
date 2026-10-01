@@ -22,6 +22,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  RotateCw,
   Undo2,
   User,
   Filter,
@@ -125,7 +126,10 @@ export function ManualReviewModal({
   const [isPdf, setIsPdf] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [rotation, setRotation] = useState(0);
   const [isPanning, setIsPanning] = useState(false);
+  const [paneSize, setPaneSize] = useState({ w: 0, h: 0 });
+  const paneRef = useRef<HTMLDivElement>(null);
   const panStart = useRef({ x: 0, y: 0 });
   const [reviewHistory, setReviewHistory] = useState<{ index: number; decision: Decision; item: ManualReviewItem }[]>([]);
   const [expenseDetails, setExpenseDetails] = useState<{
@@ -171,6 +175,7 @@ export function ManualReviewModal({
     setExpenseDetails(null);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setRotation(0);
     try {
       const res = await fetch(`/api/aprovacao-dinamica/report/${reportId}/expenses`);
       if (!res.ok) return;
@@ -195,8 +200,12 @@ export function ManualReviewModal({
           const url = expense.receipt_url;
           const pdf = url.toLowerCase().endsWith('.pdf') || url.toLowerCase().includes('/pdfs/');
           setIsPdf(pdf);
-          const proxyUrl = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(url)}`;
-          setImageUrl(proxyUrl);
+          // S3/CloudFront são públicos — carrega direto (não depende do servidor);
+          // outros hosts passam pelo proxy (Referer de app.vexpenses.com).
+          const displayUrl = /amazonaws|cloudfront/i.test(url)
+            ? url
+            : `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(url)}`;
+          setImageUrl(displayUrl);
         } else {
           setImageUrl(null);
           setIsPdf(false);
@@ -253,6 +262,7 @@ export function ManualReviewModal({
         setIsPdf(false);
         setZoom(1);
         setPan({ x: 0, y: 0 });
+        setRotation(0);
         savingRef.current = false;
         setIsSaving(false);
       }, 400);
@@ -273,6 +283,7 @@ export function ManualReviewModal({
     setReviewHistory([]);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setRotation(0);
     setCategoryFilter('ALL');
     onClose();
   }, [onClose]);
@@ -288,6 +299,7 @@ export function ManualReviewModal({
     setIsPdf(false);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setRotation(0);
   }, [reviewHistory, isSaving, isAnimating]);
 
   const handleCategoryChange = useCallback((category: string) => {
@@ -301,6 +313,7 @@ export function ManualReviewModal({
     setReviewedCount(0);
     setZoom(1);
     setPan({ x: 0, y: 0 });
+    setRotation(0);
   }, []);
 
   useEffect(() => {
@@ -313,12 +326,25 @@ export function ManualReviewModal({
           const expense = data.data?.expenses?.find((e: any) => e.id === nextItem.expense_id);
           if (expense?.receipt_url) {
             const img = new Image();
-            img.src = `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`;
+            img.src = /amazonaws|cloudfront/i.test(expense.receipt_url)
+              ? expense.receipt_url
+              : `/api/aprovacao-dinamica/receipt-proxy?url=${encodeURIComponent(expense.receipt_url)}`;
           }
         })
         .catch(() => {});
     }
   }, [open, imageUrl, imageError, filteredItems, currentIndex]);
+
+  useEffect(() => {
+    if (!open) return;
+    const el = paneRef.current;
+    if (!el) return;
+    const update = () => setPaneSize({ w: el.clientWidth, h: el.clientHeight });
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [open, currentItem]);
 
   useEffect(() => {
     if (!open) return;
@@ -481,7 +507,7 @@ export function ManualReviewModal({
       ) : (
         <div className="flex flex-1 overflow-hidden">
           {/* Left: Receipt image with zoom */}
-          <div className="relative flex flex-1 items-center justify-center overflow-auto bg-gray-950 p-6"
+          <div ref={paneRef} className="relative flex flex-1 items-center justify-center overflow-auto bg-gray-950 p-6"
             onMouseDown={(e) => { if (zoom > 1) { setIsPanning(true); panStart.current = { x: e.clientX - pan.x, y: e.clientY - pan.y }; } }}
             onMouseMove={(e) => { if (isPanning && zoom > 1) { setPan({ x: e.clientX - panStart.current.x, y: e.clientY - panStart.current.y }); } }}
             onMouseUp={() => setIsPanning(false)}
@@ -523,7 +549,7 @@ export function ManualReviewModal({
               <img
                 src={imageUrl}
                 alt="Comprovante"
-                className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
+                className="rounded-lg object-contain shadow-2xl"
                 onLoad={() => setImageLoading(false)}
                 onError={() => {
                   setImageError(true);
@@ -531,9 +557,11 @@ export function ManualReviewModal({
                 }}
                 style={{
                   display: imageLoading ? 'none' : 'block',
-                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                  maxWidth: rotation % 180 !== 0 && paneSize.h > 0 ? paneSize.h - 48 : '100%',
+                  maxHeight: rotation % 180 !== 0 && paneSize.w > 0 ? paneSize.w - 48 : '100%',
+                  transform: `rotate(${rotation}deg) scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
                   cursor: zoom > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
-                  transition: isPanning ? 'none' : 'transform 0.1s',
+                  transition: isPanning ? 'none' : 'transform 0.15s',
                 }}
               />
             )}
@@ -558,9 +586,17 @@ export function ManualReviewModal({
                 </button>
                 <div className="mx-1 h-4 w-px bg-gray-600" />
                 <button
-                  onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
-                  disabled={zoom === 1}
+                  onClick={() => setRotation(r => (r + 90) % 360)}
+                  className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white"
+                  title="Girar 90°"
+                >
+                  <RotateCw className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); setRotation(0); }}
+                  disabled={zoom === 1 && rotation === 0}
                   className="rounded p-1.5 text-gray-400 hover:bg-gray-700 hover:text-white disabled:opacity-30"
+                  title="Resetar zoom e rotação"
                 >
                   <RotateCcw className="h-4 w-4" />
                 </button>
