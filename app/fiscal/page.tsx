@@ -210,8 +210,8 @@ export default function FiscalPage() {
   };
 
   const exportUrl = view === 'historico'
-    ? `/api/fiscal/exportar-xml?scope=historico&status=${histStatus}`
-    : `/api/fiscal/exportar-xml?scope=fila&tipo=${tipo}&status=${status}`;
+    ? `/api/fiscal/exportar-xlsx?scope=historico&status=${histStatus}`
+    : `/api/fiscal/exportar-xlsx?scope=fila&tipo=${tipo}&status=${status}`;
 
   const resumoTipo = data?.resumo?.[tipo] || {};
   const latestRun = data?.runs?.find((r) => r.tipo === tipo);
@@ -257,7 +257,7 @@ export default function FiscalPage() {
           </Button>
           <a href={exportUrl} download>
             <Button variant="outline" type="button">
-              <Download className="h-4 w-4 mr-2" /> Exportar XML
+              <Download className="h-4 w-4 mr-2" /> Exportar Excel
             </Button>
           </a>
         </div>
