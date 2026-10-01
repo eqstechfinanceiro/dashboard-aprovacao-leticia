@@ -19,6 +19,8 @@ import {
   FileText,
   History,
   Ban,
+  Upload,
+  Download,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -134,6 +136,12 @@ export default function FiscalPage() {
   const [cancelForm, setCancelForm] = useState<{ notaId: number; motivo: string } | null>(null);
   const [docModal, setDocModal] = useState<{ id: number; nome: string } | null>(null);
   const [onlyErr, setOnlyErr] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importMotivo, setImportMotivo] = useState('');
+  const [importErroTipo, setImportErroTipo] = useState('outro');
+  const [importTipo, setImportTipo] = useState<'mercadoria' | 'servico'>('mercadoria');
+  const [importing, setImporting] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -175,6 +183,36 @@ export default function FiscalPage() {
     }
   };
 
+  const importarXml = async () => {
+    if (!importFile || !importMotivo.trim()) return;
+    setImporting(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', importFile);
+      fd.append('motivo', importMotivo.trim());
+      fd.append('erro_tipo', importErroTipo);
+      fd.append('tipo', importTipo);
+      const res = await fetch('/api/fiscal/importar-xml', { method: 'POST', body: fd });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      setImportOpen(false);
+      setImportFile(null);
+      setImportMotivo('');
+      setImportErroTipo('outro');
+      setView('historico');
+      setHistStatus('confirmado_erro');
+      await load();
+    } catch (e: any) {
+      alert(`Erro ao importar: ${e.message}`);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const exportUrl = view === 'historico'
+    ? `/api/fiscal/exportar-xml?scope=historico&status=${histStatus}`
+    : `/api/fiscal/exportar-xml?scope=fila&tipo=${tipo}&status=${status}`;
+
   const resumoTipo = data?.resumo?.[tipo] || {};
   const latestRun = data?.runs?.find((r) => r.tipo === tipo);
 
@@ -213,6 +251,16 @@ export default function FiscalPage() {
         >
           <History className="h-4 w-4 mr-2" /> Histórico
         </Button>
+        <div className="ml-auto flex gap-2">
+          <Button variant="outline" onClick={() => { setImportTipo(view === 'fila' ? tipo : 'mercadoria'); setImportOpen(true); }}>
+            <Upload className="h-4 w-4 mr-2" /> Importar XML
+          </Button>
+          <a href={exportUrl} download>
+            <Button variant="outline" type="button">
+              <Download className="h-4 w-4 mr-2" /> Exportar XML
+            </Button>
+          </a>
+        </div>
       </div>
 
       {/* Resumo do tipo selecionado (só na fila de trabalho) */}
@@ -582,6 +630,85 @@ export default function FiscalPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal — importar XML de nota errada */}
+      {importOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setImportOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg bg-background p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Registrar nota errada via XML</h2>
+              <Button size="sm" variant="ghost" onClick={() => setImportOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              O sistema lê os dados da NF-e do XML e registra a nota como erro confirmado
+              no histórico (dispara o e-mail informacional).
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium">Arquivo XML da NF-e</label>
+                <input
+                  type="file"
+                  accept=".xml,text/xml,application/xml"
+                  className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                  onChange={(e) => setImportFile(e.target.files?.[0] || null)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium">Tipo da nota</label>
+                <select
+                  className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                  value={importTipo}
+                  onChange={(e) => setImportTipo(e.target.value as 'mercadoria' | 'servico')}
+                >
+                  <option value="mercadoria">Mercadoria</option>
+                  <option value="servico">Serviço</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium">Tipo de erro</label>
+                <select
+                  className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                  value={importErroTipo}
+                  onChange={(e) => setImportErroTipo(e.target.value)}
+                >
+                  {ERRO_OPCOES.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-medium">Motivo do erro <span className="text-red-600">*</span></label>
+                <textarea
+                  className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                  rows={3}
+                  placeholder="Ex.: Nota lançada com CFOP errado no TOTVS"
+                  value={importMotivo}
+                  onChange={(e) => setImportMotivo(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setImportOpen(false)}>Cancelar</Button>
+              <Button
+                variant="destructive"
+                disabled={!importFile || !importMotivo.trim() || importing}
+                onClick={importarXml}
+              >
+                {importing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
+                Registrar erro
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal — documento em tela quase cheia */}
       {docModal && (
