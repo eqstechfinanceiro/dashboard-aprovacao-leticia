@@ -17,6 +17,8 @@ import {
   Maximize2,
   X,
   FileText,
+  History,
+  Ban,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -44,9 +46,12 @@ interface FiscalNota {
   auto_resumo: string | null;
   checks: Check[] | Check[][] | null;
   extra: Record<string, any> | null;
-  review_status: 'auto_ok' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro';
+  review_status: 'auto_ok' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro' | 'cancelado';
   reviewed_by: string | null;
   reviewed_at: string | null;
+  cancelled_by: string | null;
+  cancelled_at: string | null;
+  cancel_motivo: string | null;
   review_nota: string | null;
   erro_tipo: string | null;
   erro_descricao: string | null;
@@ -86,6 +91,7 @@ const STATUS_LABEL: Record<string, string> = {
   falha_tecnica: 'Falha técnica',
   confirmado_ok: 'Confirmada OK',
   confirmado_erro: 'Erro confirmado',
+  cancelado: 'Cancelada',
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -94,7 +100,12 @@ const STATUS_STYLE: Record<string, string> = {
   falha_tecnica: 'bg-gray-200 text-gray-600',
   confirmado_ok: 'bg-blue-100 text-blue-700',
   confirmado_erro: 'bg-red-100 text-red-700',
+  cancelado: 'bg-slate-200 text-slate-600',
 };
+
+const ERRO_LABEL: Record<string, string> = Object.fromEntries(
+  ERRO_OPCOES.map((o) => [o.value, o.label])
+);
 
 function fmtBRL(v: number | null): string {
   if (v === null || v === undefined) return '—';
@@ -110,14 +121,17 @@ function flatChecks(checks: FiscalNota['checks']): Check[] {
 }
 
 export default function FiscalPage() {
+  const [view, setView] = useState<'fila' | 'historico'>('fila');
   const [tipo, setTipo] = useState<'mercadoria' | 'servico'>('mercadoria');
   const [status, setStatus] = useState<string>('pendente');
+  const [histStatus, setHistStatus] = useState<string>('confirmado_erro');
   const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [acting, setActing] = useState<number | null>(null);
   const [erroForm, setErroForm] = useState<{ notaId: number; erro_tipo: string; descricao: string } | null>(null);
+  const [cancelForm, setCancelForm] = useState<{ notaId: number; motivo: string } | null>(null);
   const [docModal, setDocModal] = useState<{ id: number; nome: string } | null>(null);
   const [onlyErr, setOnlyErr] = useState(false);
 
@@ -125,7 +139,10 @@ export default function FiscalPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/fiscal/fila?tipo=${tipo}&status=${status}&limit=500`);
+      const url = view === 'historico'
+        ? `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500`
+        : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500`;
+      const res = await fetch(url);
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
       setData(body);
@@ -134,21 +151,22 @@ export default function FiscalPage() {
     } finally {
       setLoading(false);
     }
-  }, [tipo, status]);
+  }, [view, tipo, status, histStatus]);
 
   useEffect(() => { load(); }, [load]);
 
-  const revisar = async (notaId: number, decisao: string, erroTipo?: string, descricao?: string) => {
+  const revisar = async (notaId: number, decisao: string, erroTipo?: string, descricao?: string, motivo?: string) => {
     setActing(notaId);
     try {
       const res = await fetch('/api/fiscal/revisar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nota_id: notaId, decisao, erro_tipo: erroTipo, erro_descricao: descricao }),
+        body: JSON.stringify({ nota_id: notaId, decisao, erro_tipo: erroTipo, erro_descricao: descricao, cancel_motivo: motivo }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
       setErroForm(null);
+      setCancelForm(null);
       await load();
     } catch (e: any) {
       alert(`Erro ao revisar: ${e.message}`);
@@ -175,23 +193,30 @@ export default function FiscalPage() {
         </Button>
       </div>
 
-      {/* Seletor de fila: mercadoria × serviço */}
+      {/* Seletor de aba: fila de trabalho × histórico de erros */}
       <div className="flex gap-2">
         <Button
-          variant={tipo === 'mercadoria' ? 'default' : 'outline'}
-          onClick={() => setTipo('mercadoria')}
+          variant={view === 'fila' && tipo === 'mercadoria' ? 'default' : 'outline'}
+          onClick={() => { setView('fila'); setTipo('mercadoria'); }}
         >
           <Package className="h-4 w-4 mr-2" /> Mercadoria
         </Button>
         <Button
-          variant={tipo === 'servico' ? 'default' : 'outline'}
-          onClick={() => setTipo('servico')}
+          variant={view === 'fila' && tipo === 'servico' ? 'default' : 'outline'}
+          onClick={() => { setView('fila'); setTipo('servico'); }}
         >
           <Wrench className="h-4 w-4 mr-2" /> Serviço
         </Button>
+        <Button
+          variant={view === 'historico' ? 'default' : 'outline'}
+          onClick={() => setView('historico')}
+        >
+          <History className="h-4 w-4 mr-2" /> Histórico
+        </Button>
       </div>
 
-      {/* Resumo do tipo selecionado */}
+      {/* Resumo do tipo selecionado (só na fila de trabalho) */}
+      {view === 'fila' && (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Clock className="h-4 w-4 text-amber-500" />Pendentes</CardTitle></CardHeader>
@@ -210,8 +235,9 @@ export default function FiscalPage() {
           <CardContent><div className="text-2xl font-bold text-red-600">{resumoTipo.confirmado_erro || 0}</div></CardContent>
         </Card>
       </div>
+      )}
 
-      {latestRun && (
+      {view === 'fila' && latestRun && (
         <p className="text-xs text-muted-foreground">
           Última importação ({latestRun.tipo}): {latestRun.date_from} → {latestRun.date_to} ·{' '}
           {latestRun.total_notas} notas · {latestRun.matches} OK / {latestRun.divergentes} divergentes /{' '}
@@ -220,14 +246,28 @@ export default function FiscalPage() {
         </p>
       )}
 
-      {/* Filtro de status */}
-      <div className="flex gap-2 flex-wrap">
-        {['pendente', 'auto_ok', 'confirmado_ok', 'confirmado_erro', 'falha_tecnica', 'all'].map((s) => (
-          <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
-            {s === 'all' ? 'Todas' : s === 'confirmado_ok' ? 'Histórico — Confirmadas OK' : STATUS_LABEL[s]}
-          </Button>
-        ))}
-      </div>
+      {/* Filtro de status — fila: estados de trabalho; histórico: erros/canceladas */}
+      {view === 'fila' ? (
+        <div className="flex gap-2 flex-wrap">
+          {['pendente', 'auto_ok', 'falha_tecnica', 'all'].map((s) => (
+            <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
+              {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
+            </Button>
+          ))}
+        </div>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { v: 'confirmado_erro', l: 'Erros confirmados' },
+            { v: 'cancelado', l: 'Canceladas' },
+            { v: 'all', l: 'Todas' },
+          ].map((o) => (
+            <Button key={o.v} size="sm" variant={histStatus === o.v ? 'default' : 'outline'} onClick={() => setHistStatus(o.v)}>
+              {o.l}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
@@ -237,7 +277,9 @@ export default function FiscalPage() {
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            {status === 'all' ? 'Todas as notas' : STATUS_LABEL[status]} — {tipo === 'mercadoria' ? 'Mercadoria' : 'Serviço'}
+            {view === 'historico'
+              ? (histStatus === 'all' ? 'Histórico — erros e canceladas' : STATUS_LABEL[histStatus] || histStatus)
+              : `${status === 'all' ? 'Todas as notas' : STATUS_LABEL[status]} — ${tipo === 'mercadoria' ? 'Mercadoria' : 'Serviço'}`}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -247,7 +289,9 @@ export default function FiscalPage() {
             </div>
           ) : !data || data.notas.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
-              Nenhuma nota neste estado. As automações locais importam os resultados após cada execução.
+              {view === 'historico'
+                ? 'Nenhuma nota neste estado. Notas com erro confirmado aparecem aqui.'
+                : 'Nenhuma nota neste estado. As automações locais importam os resultados após cada execução.'}
             </p>
           ) : (
             <div className="space-y-2">
@@ -270,9 +314,19 @@ export default function FiscalPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-sm">NF {n.doc}</span>
                           {n.serie && <span className="text-xs text-muted-foreground">série {n.serie}</span>}
+                          {view === 'historico' && (
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                              {n.tipo === 'servico' ? 'Serviço' : 'Mercadoria'}
+                            </span>
+                          )}
                           <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_STYLE[n.review_status])}>
                             {STATUS_LABEL[n.review_status]}
                           </span>
+                          {view === 'historico' && n.erro_tipo && (
+                            <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700 border border-red-200">
+                              {ERRO_LABEL[n.erro_tipo] || n.erro_tipo}
+                            </span>
+                          )}
                           {n.auto_status === 'divergente' && (
                             <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">
                               {falhas.length || '?'} divergência(s)
@@ -287,7 +341,13 @@ export default function FiscalPage() {
                         </p>
                         {n.reviewed_by && (
                           <p className="text-xs text-blue-600 truncate">
-                            ✓ por {n.reviewed_by} em {n.reviewed_at ? new Date(n.reviewed_at).toLocaleString('pt-BR') : '—'}
+                            {n.review_status === 'confirmado_erro' ? 'Erro confirmado' : '✓'} por {n.reviewed_by} em {n.reviewed_at ? new Date(n.reviewed_at).toLocaleString('pt-BR') : '—'}
+                          </p>
+                        )}
+                        {n.review_status === 'cancelado' && n.cancelled_by && (
+                          <p className="text-xs text-slate-600 truncate">
+                            Cancelada por {n.cancelled_by} em {n.cancelled_at ? new Date(n.cancelled_at).toLocaleString('pt-BR') : '—'}
+                            {n.cancel_motivo ? ` — ${n.cancel_motivo}` : ''}
                           </p>
                         )}
                       </div>
@@ -376,7 +436,7 @@ export default function FiscalPage() {
                           </p>
                         )}
 
-                        {n.review_status === 'pendente' && (
+                        {view === 'fila' && n.review_status === 'pendente' && (
                           <div className="flex gap-2 pt-1">
                             <Button
                               size="sm"
@@ -398,15 +458,66 @@ export default function FiscalPage() {
                           </div>
                         )}
 
-                        {(n.review_status === 'confirmado_ok' || n.review_status === 'confirmado_erro') && (
+                        {view === 'fila' && (n.review_status === 'confirmado_ok' || n.review_status === 'confirmado_erro') && (
                           <Button
                             size="sm"
                             variant="ghost"
                             disabled={acting === n.id}
-                            onClick={() => revisar(n.id, n.review_status === 'confirmado_ok' ? 'confirmado_erro' : 'confirmado_ok', n.review_status === 'confirmado_ok' ? 'outro' : undefined)}
+                            onClick={() => revisar(n.id, n.review_status === 'confirmado_ok' ? 'confirmado_erro' : 'confirmado_ok', n.review_status === 'confirmado_ok' ? 'outro' : (n.erro_tipo || 'outro'))}
                           >
                             Reverter para {n.review_status === 'confirmado_ok' ? 'erro' : 'OK'}
                           </Button>
+                        )}
+
+                        {/* Histórico: ações do setor que trata os erros */}
+                        {view === 'historico' && n.review_status === 'confirmado_erro' && !cancelForm && (
+                          <div className="pt-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={acting === n.id}
+                              onClick={() => setCancelForm({ notaId: n.id, motivo: '' })}
+                            >
+                              <Ban className="h-4 w-4 mr-1" /> Marcar como cancelada
+                            </Button>
+                          </div>
+                        )}
+
+                        {view === 'historico' && n.review_status === 'cancelado' && (
+                          <div className="pt-1">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              disabled={acting === n.id}
+                              onClick={() => revisar(n.id, 'confirmado_erro', n.erro_tipo || 'outro', n.erro_descricao || undefined)}
+                            >
+                              Desfazer cancelamento
+                            </Button>
+                          </div>
+                        )}
+
+                        {cancelForm?.notaId === n.id && (
+                          <div className="rounded-md border border-slate-300 bg-slate-50 p-3 space-y-2">
+                            <p className="text-sm font-medium text-slate-800">
+                              Marcar nota como cancelada — registra quem cancelou e quando
+                            </p>
+                            <input
+                              className="w-full rounded border bg-white px-2 py-1 text-sm"
+                              placeholder="Motivo do cancelamento (opcional)"
+                              value={cancelForm.motivo}
+                              onChange={(e) => setCancelForm({ ...cancelForm, motivo: e.target.value })}
+                            />
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'cancelado', undefined, undefined, cancelForm.motivo)}
+                              >
+                                {acting === n.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirmar cancelamento'}
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => setCancelForm(null)}>Voltar</Button>
+                            </div>
+                          </div>
                         )}
 
                         {erroForm?.notaId === n.id && (

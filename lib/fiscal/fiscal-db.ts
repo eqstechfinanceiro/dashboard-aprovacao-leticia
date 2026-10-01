@@ -26,7 +26,7 @@ export type FiscalTipo = (typeof FISCAL_TIPOS)[number];
 export const AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'] as const;
 export type AutoStatus = (typeof AUTO_STATUS)[number];
 
-export const REVIEW_STATUS = ['auto_ok', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro'] as const;
+export const REVIEW_STATUS = ['auto_ok', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'] as const;
 export type ReviewStatus = (typeof REVIEW_STATUS)[number];
 
 // Categorias de erro confirmado → coluna `erro` de resultados_conferencias.
@@ -109,6 +109,11 @@ export async function ensureFiscalTables(): Promise<void> {
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_path TEXT`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS doc_nome TEXT`;
   await sql`ALTER TABLE fiscal_runs ADD COLUMN IF NOT EXISTS push_version TEXT`;
+  // Cancelamento de nota com erro confirmado (decisão do outro setor —
+  // ex.: NF cancelada no TOTVS). Guarda quem/quando/motivo.
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_by TEXT`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancel_motivo TEXT`;
 }
 
 export function computeReviewStatus(autoStatus: AutoStatus): ReviewStatus {

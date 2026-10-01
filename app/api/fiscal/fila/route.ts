@@ -14,6 +14,10 @@ export async function GET(request: NextRequest) {
   const sp = request.nextUrl.searchParams;
   const tipo = sp.get('tipo') || 'all';
   const status = sp.get('status') || 'all';
+  // scope=fila (default em uso) → fila de trabalho do fiscal, sem as
+  // finalizadas; scope=historico → só erros confirmados + canceladas
+  // (visão do setor que trata os erros).
+  const scope = sp.get('scope') || 'all';
   const from = sp.get('from') || null;
   const to = sp.get('to') || null;
   const q = (sp.get('q') || '').trim().toLowerCase();
@@ -42,10 +46,13 @@ export async function GET(request: NextRequest) {
              n.cnpj, n.valor, n.emissao::text, n.chave_acesso, n.auto_status,
              n.auto_resumo, n.checks, n.extra, n.review_status, n.reviewed_by,
              n.reviewed_at, n.review_nota, n.erro_tipo, n.erro_descricao,
+             n.cancelled_by, n.cancelled_at, n.cancel_motivo,
              n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at
       FROM fiscal_notas n
       WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ${status})
+        AND (${scope} <> 'fila' OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
         AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
         AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
         AND (${runId}::int IS NULL OR n.run_id = ${runId})
@@ -54,7 +61,7 @@ export async function GET(request: NextRequest) {
              lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'} OR
              lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
       ORDER BY
-        CASE WHEN ${status} IN ('confirmado_ok', 'confirmado_erro')
+        CASE WHEN ${scope} = 'historico' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
              THEN n.reviewed_at END DESC NULLS LAST,
         CASE n.review_status WHEN 'pendente' THEN 0 ELSE 1 END,
         n.emissao DESC NULLS LAST, n.doc DESC
