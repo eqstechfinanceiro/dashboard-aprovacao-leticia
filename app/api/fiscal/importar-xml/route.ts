@@ -13,12 +13,13 @@ const DOCS_DIR = path.join(process.cwd(), 'private-downloads', 'fiscal');
 const DOC_MAX_BYTES = 8 * 1024 * 1024;
 
 // POST /api/fiscal/importar-xml  (multipart/form-data)
-// Campos: file (XML da NF), motivo (obrigatório), erro_tipo?, tipo?
+// Campos: file (XML da NF-e ou PDF de NFS), motivo (obrigatório),
+//         erro_tipo?, tipo?, doc?, fornecedor?, cnpj?, valor?, emissao?
 //
-// Registro manual de nota errada pelo fiscal: sobe o XML, o sistema extrai os
-// dados da NF-e e já grava como confirmado_erro (vai direto pro Histórico e
-// dispara o e-mail informacional). Sem grant extra — quem acessa a página
-// fiscal pode usar.
+// Registro manual de nota errada pelo fiscal. XML de NF-e tem os campos
+// extraídos automaticamente; PDF de nota de serviço não é parseável — nesse
+// caso os campos informados manualmente no form são usados (doc obrigatório).
+// A nota entra como confirmado_erro (vai pro Histórico e dispara o Teams).
 //
 // Se a nota já existir (mesma dedup da importação automática), a revisão
 // humana é aplicada sobre a linha existente.
@@ -49,7 +50,7 @@ export async function POST(request: NextRequest) {
   const tipoForm = String(form.get('tipo') || 'mercadoria');
 
   if (!(file instanceof File) || file.size === 0) {
-    return NextResponse.json({ error: 'Arquivo XML obrigatório' }, { status: 400 });
+    return NextResponse.json({ error: 'Arquivo da nota obrigatório (XML ou PDF)' }, { status: 400 });
   }
   if (file.size > DOC_MAX_BYTES) {
     return NextResponse.json({ error: 'Arquivo maior que 8MB' }, { status: 400 });
@@ -60,33 +61,66 @@ export async function POST(request: NextRequest) {
   const erroTipo = ERRO_TIPOS.includes(erroTipoForm as any) ? erroTipoForm : 'outro';
   const tipo = FISCAL_TIPOS.includes(tipoForm as any) ? tipoForm : 'mercadoria';
 
-  const xmlText = await file.text();
-  const ide = section(xmlText, 'ide');
-  const emit = section(xmlText, 'emit');
-  const tot = section(xmlText, 'ICMSTot');
-  const chaveMatch = xmlText.match(/Id="NFe(\d{44})"/) || xmlText.match(/<chNFe>(\d{44})<\/chNFe>/);
+  const isPdf = /\.pdf$/i.test(file.name || '') || file.type === 'application/pdf';
 
-  const doc = tag(ide, 'nNF');
-  if (!doc) {
-    return NextResponse.json(
-      { error: 'XML não parece uma NF-e (campo nNF não encontrado)' },
-      { status: 400 }
-    );
-  }
+  // Campos manuais — usados quando o arquivo não é NF-e parseável (PDF de NFS).
+  const m = (k: string) => String(form.get(k) || '').trim() || null;
+  const manualDoc = m('doc');
+  const manualEmissao = m('emissao');
+  const manualValor = parseFloat(String(form.get('valor') || '').replace(',', '.'));
 
-  const emissaoRaw = tag(ide, 'dhEmi') || tag(ide, 'dEmi');
-  const emissao = /^\d{4}-\d{2}-\d{2}/.test(emissaoRaw) ? emissaoRaw.slice(0, 10) : null;
-  const valor = parseFloat(tag(tot, 'vNF'));
-  const dados = {
-    doc: doc.slice(0, 60),
-    serie: tag(ide, 'serie') || null,
-    filial: null as string | null,
-    fornecedor: tag(emit, 'xNome') || null,
-    cnpj: (tag(emit, 'CNPJ') || tag(emit, 'CPF') || '').replace(/\D/g, '') || null,
-    valor: Number.isFinite(valor) ? valor : null,
-    emissao,
-    chave_acesso: chaveMatch ? chaveMatch[1] : null,
+  let dados: {
+    doc: string; serie: string | null; filial: string | null;
+    fornecedor: string | null; cnpj: string | null; valor: number | null;
+    emissao: string | null; chave_acesso: string | null;
   };
+
+  if (isPdf) {
+    if (!manualDoc) {
+      return NextResponse.json(
+        { error: 'Informe o número da nota (PDF não é parseável)' },
+        { status: 400 }
+      );
+    }
+    dados = {
+      doc: manualDoc.slice(0, 60),
+      serie: m('serie'),
+      filial: m('filial'),
+      fornecedor: m('fornecedor'),
+      cnpj: (m('cnpj') || '').replace(/\D/g, '') || null,
+      valor: Number.isFinite(manualValor) ? manualValor : null,
+      emissao: manualEmissao && /^\d{4}-\d{2}-\d{2}/.test(manualEmissao) ? manualEmissao.slice(0, 10) : null,
+      chave_acesso: null,
+    };
+  } else {
+    const xmlText = await file.text();
+    const ide = section(xmlText, 'ide');
+    const emit = section(xmlText, 'emit');
+    const tot = section(xmlText, 'ICMSTot');
+    const chaveMatch = xmlText.match(/Id="NFe(\d{44})"/) || xmlText.match(/<chNFe>(\d{44})<\/chNFe>/);
+
+    const doc = tag(ide, 'nNF');
+    if (!doc) {
+      return NextResponse.json(
+        { error: 'XML não parece uma NF-e (campo nNF não encontrado). Se for PDF de serviço, informe o número da nota.' },
+        { status: 400 }
+      );
+    }
+
+    const emissaoRaw = tag(ide, 'dhEmi') || tag(ide, 'dEmi');
+    const emissao = /^\d{4}-\d{2}-\d{2}/.test(emissaoRaw) ? emissaoRaw.slice(0, 10) : null;
+    const valor = parseFloat(tag(tot, 'vNF'));
+    dados = {
+      doc: doc.slice(0, 60),
+      serie: tag(ide, 'serie') || null,
+      filial: null,
+      fornecedor: tag(emit, 'xNome') || null,
+      cnpj: (tag(emit, 'CNPJ') || tag(emit, 'CPF') || '').replace(/\D/g, '') || null,
+      valor: Number.isFinite(valor) ? valor : null,
+      emissao,
+      chave_acesso: chaveMatch ? chaveMatch[1] : null,
+    };
+  }
 
   const reviewer =
     request.headers.get('x-user-name') ||
@@ -138,15 +172,15 @@ export async function POST(request: NextRequest) {
     await sql`UPDATE fiscal_notas SET resultados_id = ${resultadosId} WHERE id = ${nota.id}`;
   }
 
-  // Guarda o XML como documento da nota (evidência no histórico).
+  // Guarda o documento (XML ou PDF) como evidência da nota no histórico.
   try {
     mkdirSync(DOCS_DIR, { recursive: true });
-    const safe = path.basename(file.name || 'nota.xml').replace(/[^\w.\-]/g, '_');
+    const safe = path.basename(file.name || `nota.${isPdf ? 'pdf' : 'xml'}`).replace(/[^\w.\-]/g, '_');
     const fname = `${nota.id}_${safe}`;
-    writeFileSync(path.join(DOCS_DIR, fname), Buffer.from(xmlText, 'utf-8'));
+    writeFileSync(path.join(DOCS_DIR, fname), Buffer.from(await file.arrayBuffer()));
     await sql`UPDATE fiscal_notas SET doc_path = ${`fiscal/${fname}`}, doc_nome = ${safe} WHERE id = ${nota.id}`;
   } catch (e) {
-    console.error('[fiscal/importar-xml] falha ao salvar XML:', e);
+    console.error('[fiscal/importar-xml] falha ao salvar documento:', e);
   }
 
   await logAudit(request, {

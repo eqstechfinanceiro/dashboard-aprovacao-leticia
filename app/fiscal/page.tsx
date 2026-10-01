@@ -142,6 +142,8 @@ export default function FiscalPage() {
   const [importErroTipo, setImportErroTipo] = useState('outro');
   const [importTipo, setImportTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
   const [importing, setImporting] = useState(false);
+  const [importManual, setImportManual] = useState({ doc: '', serie: '', filial: '', fornecedor: '', cnpj: '', valor: '', emissao: '' });
+  const importIsPdf = !!importFile && /\.pdf$/i.test(importFile.name);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -192,6 +194,11 @@ export default function FiscalPage() {
       fd.append('motivo', importMotivo.trim());
       fd.append('erro_tipo', importErroTipo);
       fd.append('tipo', importTipo);
+      if (importIsPdf) {
+        for (const [k, v] of Object.entries(importManual)) {
+          if (v.trim()) fd.append(k, v.trim());
+        }
+      }
       const res = await fetch('/api/fiscal/importar-xml', { method: 'POST', body: fd });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
@@ -199,6 +206,7 @@ export default function FiscalPage() {
       setImportFile(null);
       setImportMotivo('');
       setImportErroTipo('outro');
+      setImportManual({ doc: '', serie: '', filial: '', fornecedor: '', cnpj: '', valor: '', emissao: '' });
       setView('historico');
       setHistStatus('confirmado_erro');
       await load();
@@ -259,7 +267,7 @@ export default function FiscalPage() {
         </Button>
         <div className="ml-auto flex gap-2">
           <Button variant="outline" onClick={() => { setImportTipo(view === 'fila' ? tipo : 'mercadoria'); setImportOpen(true); }}>
-            <Upload className="h-4 w-4 mr-2" /> Importar XML
+            <Upload className="h-4 w-4 mr-2" /> Importar nota
           </Button>
           <a href={exportUrl} download>
             <Button variant="outline" type="button">
@@ -648,25 +656,94 @@ export default function FiscalPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Registrar nota errada via XML</h2>
+              <h2 className="text-lg font-semibold">Registrar nota errada</h2>
               <Button size="sm" variant="ghost" onClick={() => setImportOpen(false)}>
                 <X className="h-4 w-4" />
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              O sistema lê os dados da NF-e do XML e registra a nota como erro confirmado
-              no histórico (dispara a notificação no Teams).
+              Envie o XML da NF-e (os dados são lidos automaticamente) ou o PDF de uma
+              nota de serviço (informe os dados manualmente). A nota é registrada como
+              erro confirmado no histórico e dispara a notificação no Teams.
             </p>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-medium">Arquivo XML da NF-e</label>
+                <label className="text-xs font-medium">Arquivo da nota (XML ou PDF)</label>
                 <input
                   type="file"
-                  accept=".xml,text/xml,application/xml"
+                  accept=".xml,.pdf,text/xml,application/xml,application/pdf"
                   className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
                   onChange={(e) => setImportFile(e.target.files?.[0] || null)}
                 />
               </div>
+              {importIsPdf && (
+                <div className="rounded border border-amber-300 bg-amber-50 p-3 space-y-3">
+                  <p className="text-xs text-amber-800">
+                    PDF não permite leitura automática — preencha os dados da nota:
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs font-medium">Número da nota <span className="text-red-600">*</span></label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        value={importManual.doc}
+                        onChange={(e) => setImportManual({ ...importManual, doc: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Série</label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        value={importManual.serie}
+                        onChange={(e) => setImportManual({ ...importManual, serie: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Filial</label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        value={importManual.filial}
+                        onChange={(e) => setImportManual({ ...importManual, filial: e.target.value })}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-medium">Fornecedor</label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        value={importManual.fornecedor}
+                        onChange={(e) => setImportManual({ ...importManual, fornecedor: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">CNPJ</label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        placeholder="00.000.000/0000-00"
+                        value={importManual.cnpj}
+                        onChange={(e) => setImportManual({ ...importManual, cnpj: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Valor (R$)</label>
+                      <input
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        placeholder="0,00"
+                        value={importManual.valor}
+                        onChange={(e) => setImportManual({ ...importManual, valor: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium">Emissão</label>
+                      <input
+                        type="date"
+                        className="mt-1 w-full rounded border bg-white px-2 py-1.5 text-sm"
+                        value={importManual.emissao}
+                        onChange={(e) => setImportManual({ ...importManual, emissao: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
               <div>
                 <label className="text-xs font-medium">Tipo da nota</label>
                 <select
@@ -706,7 +783,7 @@ export default function FiscalPage() {
               <Button variant="ghost" onClick={() => setImportOpen(false)}>Cancelar</Button>
               <Button
                 variant="destructive"
-                disabled={!importFile || !importMotivo.trim() || importing}
+                disabled={!importFile || !importMotivo.trim() || (importIsPdf && !importManual.doc.trim()) || importing}
                 onClick={importarXml}
               >
                 {importing ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
