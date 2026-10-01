@@ -35,6 +35,17 @@ export function danfeHtml(xmlText: string): string {
   .tot td { font-weight: normal; }
   .foot { font-size: 8.5px; color: #555; margin-top: 6px; display: flex; justify-content: space-between; }
   .muted { color: #888; }
+  @media print {
+    @page { size: A4 landscape; margin: 6mm; }
+    body { background: #fff; padding: 0; }
+    .page { max-width: none; width: 100%; padding: 0; box-shadow: none; }
+    .box { overflow-x: visible !important; }
+    table { table-layout: auto; font-size: 7.5px; }
+    th, td { padding: 1px 2px; }
+    th { font-size: 5.5px; }
+    .tot { font-size: 7px; }
+    .sec { font-size: 8px; }
+  }
 </style>
 </head>
 <body>
@@ -110,7 +121,7 @@ try{
   }
   // ===== Impostos totais =====
   if(tot){
-    html+='<div class="sec">Cálculo do Imposto</div><div class="box"><table class="tot"><thead><tr>'+
+    html+='<div class="sec">Cálculo do Imposto</div><div class="box" style="overflow-x:auto"><table class="tot"><thead><tr>'+
       '<th class="r">BC ICMS</th><th class="r">V. ICMS</th><th class="r">BC ICMS-ST</th><th class="r">V. ICMS-ST</th><th class="r">V. Produtos</th><th class="r">V. Frete</th><th class="r">V. Seguro</th><th class="r">V. Desconto</th><th class="r">Outras Desp.</th><th class="r">V. IPI</th><th class="r">V. II</th><th class="r">V. PIS</th><th class="r">V. COFINS</th><th class="r">V. TOTAL NF</th>'+
       '</tr></thead><tbody><tr>'+
       '<td class="r">'+fmt(T(tot,['vBC']))+'</td><td class="r">'+fmt(T(tot,['vICMS']))+'</td><td class="r">'+fmt(T(tot,['vBCST']))+'</td><td class="r">'+fmt(T(tot,['vST']))+
