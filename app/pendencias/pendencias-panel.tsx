@@ -127,6 +127,9 @@ export default function PendenciasPanel() {
   const [reportSearch, setReportSearch] = useState('');
   const [notaClass, setNotaClass] = useState<'all' | 'MERCADORIA' | 'SERVICO' | 'REMESSA'>('all');
   const [notaEmpresa, setNotaEmpresa] = useState<'all' | 'EQS' | 'BRATEC'>('all');
+  const [classesOn, setClassesOn] = useState<Record<string, boolean>>({
+    MERCADORIA: true, SERVICO: true, REMESSA: true,
+  });
   const [notaSearch, setNotaSearch] = useState('');
   const [setor, setSetor] = useState<Setor>('all');
   const [periodo, setPeriodo] = useState<PeriodoEmissao>('all');
@@ -167,6 +170,7 @@ export default function PendenciasPanel() {
   const notas = useMemo(() => {
     if (!data) return [];
     return data.sds.notas.filter((n) => {
+      if (n.classificacao && classesOn[n.classificacao] === false) return false;
       if (notaClass !== 'all' && n.classificacao !== notaClass) return false;
       if (notaEmpresa !== 'all' && n.empresa !== notaEmpresa) return false;
       if (notaSearch) {
@@ -177,7 +181,7 @@ export default function PendenciasPanel() {
       if (!inPeriodo(n.emissao, periodo, mesCustom)) return false;
       return true;
     });
-  }, [data, notaClass, notaEmpresa, notaSearch, periodo, mesCustom]);
+  }, [data, notaClass, notaEmpresa, notaSearch, periodo, mesCustom, classesOn]);
 
   // Cards recalculados a partir das linhas filtradas — o resumo do topo
   // acompanha o período de emissão e os demais filtros da tela.
@@ -485,6 +489,27 @@ export default function PendenciasPanel() {
 
       {/* Cards SDS por empresa — Entrada de Notas */}
       {(setor === 'all' || setor === 'entrada') && (<>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-medium uppercase tracking-wide text-gray-500">Tipos:</span>
+        {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).map((cls) => {
+          const on = classesOn[cls];
+          const label = cls === 'SERVICO' ? 'Serviço' : cls === 'REMESSA' ? 'Remessa' : 'Mercadoria';
+          return (
+            <button
+              key={cls}
+              onClick={() => setClassesOn((s) => ({ ...s, [cls]: !s[cls] }))}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                on
+                  ? 'border-rose-600 bg-rose-600 text-white'
+                  : 'border-gray-300 bg-white text-gray-400 line-through'
+              }`}
+              title={`${on ? 'Ocultar' : 'Mostrar'} notas de ${label}`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
       {(['EQS', 'BRATEC'] as const).map((emp) => {
         const classes = sdsByEmpresa[emp] || {};
         const total = Object.values(classes).reduce(
@@ -497,12 +522,12 @@ export default function PendenciasPanel() {
               <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700">
                 {emp} — notas a lançar
               </h2>
-              <span className="text-xs text-gray-500">
+              <span className="text-lg font-bold text-gray-900">
                 {total.count} notas — R$ {fmt(total.valor)}
               </span>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).map((cls) => {
+              {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).filter((cls) => classesOn[cls]).map((cls) => {
                 const Icon = cls === 'MERCADORIA' ? Package : cls === 'SERVICO' ? Wrench : Repeat;
                 const b = classes[cls] || { count: 0, valor: 0 };
                 return (
