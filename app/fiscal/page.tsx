@@ -616,7 +616,7 @@ export default function FiscalPage() {
                         )}
                         </div>
 
-                        {n.doc_path && (
+                        {(n.doc_path || /^\d{44}$/.test(n.chave_acesso || '')) && (
                           <div className="min-w-0 border rounded-md overflow-hidden bg-muted/30 flex flex-col">
                             <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/50 text-xs text-muted-foreground">
                               <FileText className="h-3.5 w-3.5 shrink-0" />
