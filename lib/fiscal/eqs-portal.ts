@@ -130,3 +130,37 @@ export async function eqsGetDanfePdf(chave: string): Promise<Buffer | null> {
   if (res.status < 200 || res.status >= 300 || !res.body.subarray(0, 5).equals(Buffer.from('%PDF-'))) return null;
   return res.body;
 }
+
+// Fornecedor pelo CNPJ (14 dígitos). Retorna {cod, loja} do SA2 ou null.
+export async function eqsGetFornecedorByCnpj(cnpj: string): Promise<{ cod: string; loja: string } | null> {
+  if (!eqsPortalConfigured() || !/^\d{14}$/.test(cnpj)) return null;
+  const token = await getToken();
+  const res = await httpRequest(`/wsrfornecedor?CA2CGC=${cnpj}&page=1&pageSize=3`, { headers: authHeaders(token) });
+  if (res.status < 200 || res.status >= 300) return null;
+  const items = JSON.parse(res.body.toString('utf-8')).items || [];
+  const f = items.find((x: any) => String(x.CA2CGC || '').trim() === cnpj) || items[0];
+  if (!f) return null;
+  return { cod: String(f.CA2COD || '').trim(), loja: String(f.CA2LOJA || '01').trim() };
+}
+
+// Processo de pagamento pela nota de serviço (doc + fornecedor).
+// Retorna o NDSRECNO — usado no deep link do portal Angular.
+export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promise<string | null> {
+  if (!eqsPortalConfigured() || !doc || !fornecCod) return null;
+  const token = await getToken();
+  const q = new URLSearchParams({
+    page: '1',
+    pageSize: '50',
+    DDSEMISSA_DE: '2024-01-01T00:00:00-03:00',
+    DDSEMISSA_ATE: '2030-12-31',
+    CDSDOC: doc.trim(),
+    CDSFORNEC: fornecCod,
+    CDSMODELO: 'S',
+    CDSMODELO_NOT_IN: 'R',
+  });
+  const res = await httpRequest(`/wsrprocpag?${q}`, { headers: authHeaders(token) });
+  if (res.status < 200 || res.status >= 300) return null;
+  const items = JSON.parse(res.body.toString('utf-8')).items || [];
+  const recno = items[0]?.NDSRECNO;
+  return recno ? String(recno).trim() : null;
+}

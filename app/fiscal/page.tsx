@@ -21,6 +21,7 @@ import {
   Ban,
   Upload,
   Download,
+  ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -472,6 +473,14 @@ export default function FiscalPage() {
                         {n.chave_acesso && (
                           <p className="text-xs text-muted-foreground">Chave: {n.chave_acesso}</p>
                         )}
+                        <a
+                          href={`/api/fiscal/portal-link?id=${n.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3" /> Abrir no portal EQS
+                        </a>
                         {n.doc_path && (
                           <div className="flex items-center gap-3">
                             <button
