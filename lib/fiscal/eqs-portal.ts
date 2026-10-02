@@ -143,24 +143,31 @@ export async function eqsGetFornecedorByCnpj(cnpj: string): Promise<{ cod: strin
   return { cod: String(f.CA2COD || '').trim(), loja: String(f.CA2LOJA || '01').trim() };
 }
 
-// Processo de pagamento pela nota de serviço (doc + fornecedor).
-// Retorna o NDSRECNO — usado no deep link do portal Angular.
+// Processo de pagamento pela nota (doc + fornecedor). Retorna o NDSRECNO —
+// usado no deep link do portal Angular. Primeiro tenta modelo 'S' (serviço);
+// se não achar, repete sem filtro de modelo — notas de mercadoria usam
+// modelo '1'/'55' e morreriam no filtro de serviço.
 export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promise<string | null> {
   if (!eqsPortalConfigured() || !doc || !fornecCod) return null;
   const token = await getToken();
-  const q = new URLSearchParams({
+  const base = {
     page: '1',
     pageSize: '50',
     DDSEMISSA_DE: '2024-01-01T00:00:00-03:00',
     DDSEMISSA_ATE: '2030-12-31',
     CDSDOC: doc.trim(),
     CDSFORNEC: fornecCod,
-    CDSMODELO: 'S',
-    CDSMODELO_NOT_IN: 'R',
-  });
-  const res = await httpRequest(`/wsrprocpag?${q}`, { headers: authHeaders(token) });
-  if (res.status < 200 || res.status >= 300) return null;
-  const items = JSON.parse(res.body.toString('utf-8')).items || [];
-  const recno = items[0]?.NDSRECNO;
-  return recno ? String(recno).trim() : null;
+  };
+  const tentativas = [
+    { ...base, CDSMODELO: 'S', CDSMODELO_NOT_IN: 'R' },
+    base,
+  ];
+  for (const params of tentativas) {
+    const res = await httpRequest(`/wsrprocpag?${new URLSearchParams(params)}`, { headers: authHeaders(token) });
+    if (res.status < 200 || res.status >= 300) continue;
+    const items = JSON.parse(res.body.toString('utf-8')).items || [];
+    const recno = items[0]?.NDSRECNO;
+    if (recno) return String(recno).trim();
+  }
+  return null;
 }

@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const id = parseInt(request.nextUrl.searchParams.get('id') || '', 10);
   if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 });
 
-  const rows = await sql`SELECT doc_path, doc_nome, chave_acesso, doc, tipo FROM fiscal_notas WHERE id = ${id}`;
+  const rows = await sql`SELECT doc_path, doc_nome, chave_acesso, doc, tipo, review_status FROM fiscal_notas WHERE id = ${id}`;
   if (!rows[0]) return NextResponse.json({ error: 'Nota não encontrada' }, { status: 404 });
   const docNome = (rows[0]?.doc_nome as string) || 'documento';
   let docPath = rows[0]?.doc_path as string | undefined;
@@ -43,6 +43,11 @@ export async function GET(request: NextRequest) {
         writeFileSync(path.join(DIR, rel), pdf);
         const nome = `danfe-${rows[0].doc || id}.pdf`;
         await sql`UPDATE fiscal_notas SET doc_path = ${rel}, doc_nome = ${nome} WHERE id = ${id} AND (doc_path IS NULL OR doc_path = '')`;
+        // A falha técnica era quase sempre "sem documento" — com a evidência
+        // anexada a nota volta pra fila pendente pro fiscal revisar.
+        if (rows[0].review_status === 'falha_tecnica') {
+          await sql`UPDATE fiscal_notas SET review_status = 'pendente' WHERE id = ${id} AND review_status = 'falha_tecnica'`;
+        }
         docPath = rel;
         return new NextResponse(new Uint8Array(pdf), {
           headers: {

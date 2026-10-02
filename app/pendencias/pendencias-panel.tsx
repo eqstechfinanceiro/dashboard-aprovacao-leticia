@@ -117,6 +117,27 @@ function inPeriodo(iso: string | null, periodo: PeriodoEmissao, mesCustom: strin
   return periodo === 'custom'; // mês ainda não escolhido → não filtra
 }
 
+// Cor por tipo de nota — o usuário identifica o grupo pela cor antes de ler.
+const CLASSE_STYLE: Record<'MERCADORIA' | 'SERVICO' | 'REMESSA', {
+  label: string; Icon: typeof Package; card: string; text: string; iconBg: string; chipOn: string;
+}> = {
+  MERCADORIA: {
+    label: 'Mercadoria', Icon: Package,
+    card: 'border-t-blue-500 bg-blue-50/40', text: 'text-blue-700', iconBg: 'bg-blue-100',
+    chipOn: 'border-blue-600 bg-blue-600 text-white',
+  },
+  SERVICO: {
+    label: 'Serviço', Icon: Wrench,
+    card: 'border-t-emerald-500 bg-emerald-50/40', text: 'text-emerald-700', iconBg: 'bg-emerald-100',
+    chipOn: 'border-emerald-600 bg-emerald-600 text-white',
+  },
+  REMESSA: {
+    label: 'Remessa', Icon: Repeat,
+    card: 'border-t-violet-500 bg-violet-50/40', text: 'text-violet-700', iconBg: 'bg-violet-100',
+    chipOn: 'border-violet-600 bg-violet-600 text-white',
+  },
+};
+
 export default function PendenciasPanel() {
   const [data, setData] = useState<PendenciasData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -436,12 +457,12 @@ export default function PendenciasPanel() {
       {/* Cards Agilitas — Gestão de Caixa */}
       {(setor === 'all' || setor === 'caixa') && (<>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="border-t-4 border-t-amber-500 bg-amber-50/40">
           <CardContent className="px-4 pb-4 pt-4 text-center">
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              <Hourglass className="h-4 w-4" /> Caixas a conferir
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
+              <span className="rounded-full bg-amber-100 p-1"><Hourglass className="h-4 w-4" /></span> Caixas a conferir
             </div>
-            <div className="mt-2 text-3xl font-bold text-gray-900">{a.conferir.total.count}</div>
+            <div className="mt-2 text-3xl font-bold text-amber-700">{a.conferir.total.count}</div>
             <div className="text-sm font-medium text-gray-700">R$ {fmt(a.conferir.total.valor)}</div>
             <div className="mt-3 space-y-1 text-xs text-gray-500">
               <div className="flex justify-between">
@@ -463,12 +484,12 @@ export default function PendenciasPanel() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-t-4 border-t-blue-500 bg-blue-50/40">
           <CardContent className="px-4 pb-4 pt-4 text-center">
-            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              <FileCheck className="h-4 w-4" /> Caixas a lançar (SIGA)
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
+              <span className="rounded-full bg-blue-100 p-1"><FileCheck className="h-4 w-4" /></span> Caixas a lançar (SIGA)
             </div>
-            <div className="mt-2 text-3xl font-bold text-gray-900">{a.lancar.total.count}</div>
+            <div className="mt-2 text-3xl font-bold text-blue-700">{a.lancar.total.count}</div>
             <div className="text-sm font-medium text-gray-700">R$ {fmt(a.lancar.total.valor)}</div>
             <div className="mt-3 space-y-1 text-xs text-gray-500">
               <div className="flex justify-between">
@@ -493,19 +514,17 @@ export default function PendenciasPanel() {
         <span className="text-xs font-medium uppercase tracking-wide text-gray-500">Tipos:</span>
         {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).map((cls) => {
           const on = classesOn[cls];
-          const label = cls === 'SERVICO' ? 'Serviço' : cls === 'REMESSA' ? 'Remessa' : 'Mercadoria';
+          const st = CLASSE_STYLE[cls];
           return (
             <button
               key={cls}
               onClick={() => setClassesOn((s) => ({ ...s, [cls]: !s[cls] }))}
               className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                on
-                  ? 'border-rose-600 bg-rose-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-400 line-through'
+                on ? `${st.chipOn}` : 'border-gray-300 bg-white text-gray-400 line-through'
               }`}
-              title={`${on ? 'Ocultar' : 'Mostrar'} notas de ${label}`}
+              title={`${on ? 'Ocultar' : 'Mostrar'} notas de ${st.label}`}
             >
-              {label}
+              {st.label}
             </button>
           );
         })}
@@ -528,15 +547,15 @@ export default function PendenciasPanel() {
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {(['MERCADORIA', 'SERVICO', 'REMESSA'] as const).filter((cls) => classesOn[cls]).map((cls) => {
-                const Icon = cls === 'MERCADORIA' ? Package : cls === 'SERVICO' ? Wrench : Repeat;
+                const st = CLASSE_STYLE[cls];
                 const b = classes[cls] || { count: 0, valor: 0 };
                 return (
-                  <Card key={cls}>
+                  <Card key={cls} className={`border-t-4 ${st.card}`}>
                     <CardContent className="px-4 pb-4 pt-4 text-center">
-                      <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                        <Icon className="h-4 w-4" /> {cls === 'SERVICO' ? 'Serviço' : cls === 'REMESSA' ? 'Remessa' : 'Mercadoria'}
+                      <div className={`flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide ${st.text}`}>
+                        <span className={`rounded-full p-1 ${st.iconBg}`}><st.Icon className="h-4 w-4" /></span> {st.label}
                       </div>
-                      <div className="mt-2 text-2xl font-bold text-gray-900">{b.count}</div>
+                      <div className={`mt-2 text-2xl font-bold ${st.text}`}>{b.count}</div>
                       <div className="text-sm font-medium text-gray-700">R$ {fmt(b.valor)}</div>
                     </CardContent>
                   </Card>
