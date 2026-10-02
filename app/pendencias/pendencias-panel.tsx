@@ -88,7 +88,7 @@ function meipagLabel(m: string | null): string {
   return m || '—';
 }
 
-type PeriodoEmissao = 'all' | 'mes_atual' | 'mes_passado' | '30d' | 'custom';
+type PeriodoEmissao = 'all' | 'mes_atual' | 'mes_passado' | 'ate_mes_passado' | '30d' | 'custom';
 
 // Filtra por mês de emissão — a data vem como 'YYYY-MM-DD...' em dtemis/emissao.
 function inPeriodo(iso: string | null, periodo: PeriodoEmissao, mesCustom: string): boolean {
@@ -103,6 +103,10 @@ function inPeriodo(iso: string | null, periodo: PeriodoEmissao, mesCustom: strin
   if (periodo === 'mes_passado') {
     const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     return y === prev.getFullYear() && m === prev.getMonth() + 1;
+  }
+  if (periodo === 'ate_mes_passado') {
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return y < prev.getFullYear() || (y === prev.getFullYear() && m <= prev.getMonth() + 1);
   }
   if (periodo === '30d') {
     return new Date(y, m - 1, d).getTime() >= now.getTime() - 30 * 86400000;
@@ -390,6 +394,7 @@ export default function PendenciasPanel() {
             <option value="all">Todas as emissões</option>
             <option value="mes_atual">Mês atual</option>
             <option value="mes_passado">Mês passado</option>
+            <option value="ate_mes_passado">Até o mês passado</option>
             <option value="30d">Últimos 30 dias</option>
             <option value="custom">Escolher mês…</option>
           </select>
