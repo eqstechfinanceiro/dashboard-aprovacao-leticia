@@ -175,6 +175,39 @@ export default function PendenciasPanel() {
     });
   }, [data, notaClass, notaEmpresa, notaSearch, periodo, mesCustom]);
 
+  // Cards recalculados a partir das linhas filtradas — o resumo do topo
+  // acompanha o período de emissão e os demais filtros da tela.
+  const bucketOf = (rows: ReportRow[], pred: (r: ReportRow) => boolean): Bucket => {
+    const sel = rows.filter(pred);
+    return { count: sel.length, valor: sel.reduce((s, r) => s + (r.total || 0), 0) };
+  };
+
+  const agilitas = useMemo(() => ({
+    conferir: {
+      total: bucketOf(reports, (r) => r.state === 'PARCIAL'),
+      itau: bucketOf(reports, (r) => r.state === 'PARCIAL' && r.meipag === 'I'),
+      vex: bucketOf(reports, (r) => r.state === 'PARCIAL' && r.meipag === 'V'),
+      outros: bucketOf(reports, (r) => r.state === 'PARCIAL' && r.meipag !== 'I' && r.meipag !== 'V'),
+    },
+    lancar: {
+      total: bucketOf(reports, (r) => r.meipag === 'V'),
+      pendente: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PENDENTE'),
+      parcial: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PARCIAL'),
+    },
+  }), [reports]);
+
+  const sdsByEmpresa = useMemo(() => {
+    const out: Record<string, Record<string, Bucket>> = {};
+    for (const n of notas) {
+      const emp = out[n.empresa] = out[n.empresa] || {};
+      const k = n.classificacao || 'OUTROS';
+      const b = emp[k] = emp[k] || { count: 0, valor: 0 };
+      b.count += 1;
+      b.valor += n.valmerc;
+    }
+    return out;
+  }, [notas]);
+
   const rSort = useTableSort(reports, {
     total: (r) => r.total,
     dtemis: (r) => r.dtemis || '',
@@ -199,8 +232,8 @@ export default function PendenciasPanel() {
   const copyResumo = async () => {
     if (!data) return;
     const hoje = new Date().toLocaleDateString('pt-BR');
-    const c = data.agilitas.conferir;
-    const l = data.agilitas.lancar;
+    const c = agilitas.conferir;
+    const l = agilitas.lancar;
     const lines = [
       'Bom dia pessoal !!',
       '',
@@ -250,9 +283,9 @@ export default function PendenciasPanel() {
     try {
       const XLSX = await import('xlsx');
       const wb = XLSX.utils.book_new();
-      const a = data.agilitas;
-      const sdsTotal = data.sds.resumo.reduce(
-        (acc, r) => ({ count: acc.count + r.count, valor: acc.valor + r.valmerc }),
+      const a = agilitas;
+      const sdsTotal = notas.reduce(
+        (acc, n) => ({ count: acc.count + 1, valor: acc.valor + n.valmerc }),
         { count: 0, valor: 0 },
       );
 
@@ -320,19 +353,6 @@ export default function PendenciasPanel() {
     }
   };
 
-  const sdsByEmpresa = useMemo(() => {
-    const out: Record<string, Record<string, Bucket>> = {};
-    if (!data) return out;
-    for (const r of data.sds.resumo) {
-      const emp = out[r.empresa] = out[r.empresa] || {};
-      const k = r.classificacao || 'OUTROS';
-      const b = emp[k] = emp[k] || { count: 0, valor: 0 };
-      b.count += r.count;
-      b.valor += r.valmerc;
-    }
-    return out;
-  }, [data]);
-
   if (loading && !data) {
     return (
       <div className="flex h-64 items-center justify-center text-gray-500">
@@ -353,7 +373,7 @@ export default function PendenciasPanel() {
 
   if (!data) return null;
 
-  const a = data.agilitas;
+  const a = agilitas;
 
   return (
     <div className="space-y-6">
