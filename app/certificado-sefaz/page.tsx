@@ -24,7 +24,7 @@ export default function CertificadoSefazPage() {
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
 
   const reload = () => {
-    fetch('/api/fiscal/certificado').then(async (r) => {
+    fetch('/api/certificado-sefaz').then(async (r) => {
       if (r.status === 403) { setDenied(true); return; }
       setCerts((await r.json()).certificados || []);
     }).catch(() => setDenied(true));
@@ -38,7 +38,7 @@ export default function CertificadoSefazPage() {
     fd.append('file', file);
     fd.append('senha', senha);
     fd.append('rotulo', rotulo);
-    const r = await fetch('/api/fiscal/certificado', { method: 'POST', body: fd });
+    const r = await fetch('/api/certificado-sefaz', { method: 'POST', body: fd });
     const d = await r.json().catch(() => ({}));
     if (r.ok) {
       setMsg({ ok: true, text: `Certificado "${rotulo}" instalado com sucesso.` });
