@@ -171,10 +171,7 @@ export default function BoletosPanel() {
           <ScanBarcode className="h-6 w-6 text-blue-600" />
           <div>
             <h1 className="text-xl font-bold">Boletos — Inconsistências</h1>
-            <p className="text-xs text-muted-foreground">
-              Validação FEBRABAN: DVs, valor, vencimento e banco embutidos no código × título SE2
-              {lastSync ? ` · Último sync: ${lastSync}` : ''}
-            </p>
+            {lastSync && <p className="text-xs text-muted-foreground">Último sync: {lastSync}</p>}
           </div>
         </div>
         <Button onClick={sincronizar} disabled={syncing} variant="outline" size="sm">
@@ -184,12 +181,12 @@ export default function BoletosPanel() {
       </div>
 
       {/* cards resumo por flag */}
-      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-5 gap-3">
         <Card
           className={`cursor-pointer border-2 ${flagsSel.length === 0 && soFlags ? 'border-blue-400' : 'border-transparent'}`}
           onClick={() => { setFlagsSel([]); setSoFlags(true); }}
         >
-          <CardContent className="p-3">
+          <CardContent className="flex h-full min-h-[92px] flex-col justify-center gap-1 p-4 !pt-4">
             <div className="text-2xl font-bold">{data?.totais.qtd ?? '—'}</div>
             <div className="text-xs text-muted-foreground">títulos com inconsistência</div>
           </CardContent>
@@ -205,7 +202,7 @@ export default function BoletosPanel() {
                 setFlagsSel((prev) => (ativo ? prev.filter((x) => x !== f.tipo) : [...prev, f.tipo]))
               }
             >
-              <CardContent className="p-3">
+              <CardContent className="flex h-full min-h-[92px] flex-col justify-center gap-1 p-4 !pt-4">
                 <div className="text-2xl font-bold">{f.qtd}</div>
                 <div className="text-xs text-muted-foreground leading-tight">{fb.label}</div>
               </CardContent>
