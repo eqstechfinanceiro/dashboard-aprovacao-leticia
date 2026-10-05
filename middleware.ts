@@ -112,6 +112,24 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  // protheus-reports-vex: leitura da classificação fiscal dos comprovantes.
+  // Escopo estrito a GET /api/aprovacao-dinamica/doc-classification.
+  const docSecret = process.env.DOC_CLASSIFICATION_SECRET;
+  const providedDoc = request.headers.get('x-doc-class-secret');
+  if (
+    docSecret &&
+    providedDoc === docSecret &&
+    pathname === '/api/aprovacao-dinamica/doc-classification' &&
+    request.method === 'GET'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'protheus-reports@interno');
+    requestHeaders.set('x-user-name', 'Protheus Reports VEX');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
   if (isPublicPath) {
     const token = request.cookies.get(AUTH_COOKIE)?.value;
     if (token) {

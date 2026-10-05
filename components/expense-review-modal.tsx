@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { DocClassEditor } from '@/components/doc-class-editor';
 import {
   X,
   Check,
@@ -485,6 +486,14 @@ export function ExpenseReviewModal({
                   Esta despesa ainda não foi auditada pelo bot.
                 </p>
               )}
+
+              {/* Classificação fiscal do documento (consumida pelo protheus-reports-vex) */}
+              <DocClassEditor
+                key={`docclass-${expense.id}`}
+                reportId={reportId}
+                expenseId={expense.id}
+                reviewerName={reviewerName}
+              />
             </div>
 
             {/* Actions */}

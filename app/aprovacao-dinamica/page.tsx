@@ -245,6 +245,7 @@ export default function AprovacaoDinamicaPage() {
   const [expandedReport, setExpandedReport] = useState<number | null>(null);
   const [reportExpenses, setReportExpenses] = useState<Record<number, ReportExpense[]>>({});
   const [auditResults, setAuditResults] = useState<Record<number, Record<number, ExpenseAuditResult>>>({});
+  const [docClasses, setDocClasses] = useState<Record<number, Record<number, { tipo_documento: string; chave_acesso: string | null; needs_review: boolean }>>>({});
   const auditResultsRef = useRef(auditResults);
   const excludedReportsRef = useRef<Set<number>>(new Set());
   const validationBatchFetchedRef = useRef(false);
@@ -581,9 +582,22 @@ export default function AprovacaoDinamicaPage() {
           }));
         }
       }
+      await loadDocClasses(reportId);
     } catch (err) {
       console.error('Error loading audit results for report:', err);
     }
+  };
+
+  const loadDocClasses = async (reportId: number) => {
+    try {
+      const res = await fetch(`/api/aprovacao-dinamica/doc-classification?report_id=${reportId}`);
+      if (res.ok) {
+        const j = await res.json();
+        const map: Record<number, { tipo_documento: string; chave_acesso: string | null; needs_review: boolean }> = {};
+        (j.data || []).forEach((c: any) => { map[c.expense_id] = c; });
+        setDocClasses(prev => ({ ...prev, [reportId]: map }));
+      }
+    } catch { /* auxiliar — não bloqueia a página */ }
   };
 
   const toggleReport = (reportId: number) => {
@@ -1052,7 +1066,10 @@ export default function AprovacaoDinamicaPage() {
     <div className="space-y-6">
       <ExpenseReviewModal
         open={!!reviewExpense}
-        onClose={() => setReviewExpense(null)}
+        onClose={() => {
+          if (reviewExpense) loadDocClasses(reviewExpense.reportId);
+          setReviewExpense(null);
+        }}
         expenses={reviewExpense ? filteredExpenses(reviewExpense.reportId, reportExpenses[reviewExpense.reportId] || []) : []}
         startExpenseId={reviewExpense?.expenseId ?? 0}
         reportId={reviewExpense?.reportId ?? 0}
@@ -2546,6 +2563,31 @@ export default function AprovacaoDinamicaPage() {
                                     {STATUS_CONFIG[expAudit.status]?.label || expAudit.status}
                                   </div>
                                 )}
+                                {(() => {
+                                  const dc = docClasses[report.id]?.[expense.id];
+                                  if (!dc) return null;
+                                  if (dc.needs_review) {
+                                    return (
+                                      <button
+                                        onClick={() => setReviewExpense({ reportId: report.id, expenseId: expense.id })}
+                                        title="Tipo do documento ou chave NF-e não identificados — revisar manualmente"
+                                        className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-amber-700 hover:bg-amber-100"
+                                      >
+                                        <AlertTriangle className="h-3 w-3" />
+                                        Doc?
+                                      </button>
+                                    );
+                                  }
+                                  if (dc.tipo_documento === 'nfe') {
+                                    return (
+                                      <span title={`NF-e · chave ${dc.chave_acesso ?? ''}`} className="flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 whitespace-nowrap px-2 py-0.5 text-xs font-medium text-blue-700">
+                                        <FileText className="h-3 w-3" />
+                                        NF-e
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                                 {expAudit?.audited_by && (expAudit.status === 'APROVADO_HUMANO' || expAudit.status === 'REPROVADO_HUMANO') && (
                                   <span className="text-xs text-gray-500">por {expAudit.audited_by}</span>
                                 )}

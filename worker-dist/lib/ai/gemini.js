@@ -14,12 +14,19 @@ function buildPrompt() {
   "categoria": "categoria da despesa baseada nos produtos/serviços",
   "cnpj": "CNPJ do estabelecimento (se visível)",
   "itens": ["lista de produtos/serviços principais"],
-  "forma_pagamento": "forma de pagamento (dinheiro, cartão, pix, etc)"
+  "forma_pagamento": "forma de pagamento (dinheiro, cartão, pix, etc)",
+  "tipo_documento": "tipo do documento: 'nfe', 'nfce', 'sat', 'recibo' ou 'desconhecido'",
+  "chave_acesso": "chave de acesso da NF-e com 44 dígitos (somente se tipo_documento='nfe'), senão null"
 }
 
 Regras:
 - O valor_total deve ser o VALOR TOTAL DA NOTA ou VALOR PAGO, não valores individuais de itens ou impostos
 - A categoria deve ser uma das seguintes: ALIMENTACAO, TRANSPORTE, MATERIAIS_CONSTRUCAO, FERRAMENTA, ELETRONICO, FARMACIA, LIMPEZA, COMBUSTIVEL, ESTACIONAMENTO, OUTROS
+- tipo_documento='nfe' APENAS para DANFE/NF-e modelo 55: folha A4 com "DANFE" no cabeçalho e "CHAVE DE ACESSO" de 44 dígitos
+- NFC-e (cupom de consumidor, modelo 65) e cupom SAT NÃO são 'nfe' — classifique como 'nfce'/'sat' mesmo que tenham chave de 44 dígitos
+- 'recibo' = recibo simples, comprovante de pagamento, nota de serviço, fatura, boleto ou qualquer outro documento
+- 'desconhecido' = imagem ilegível ou tipo de documento não identificável
+- A chave_acesso deve ter exatamente 44 dígitos numéricos, sem espaços nem pontuação; se a NF-e não mostrar a chave completa e legível, use null
 - Se um campo não for visível ou legível, use null
 - Retorne APENAS o JSON, sem texto adicional ou markdown`;
 }

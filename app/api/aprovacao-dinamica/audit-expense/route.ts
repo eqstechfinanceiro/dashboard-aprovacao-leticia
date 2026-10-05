@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processReceiptHybrid } from '@/lib/hybrid-ocr';
-import { auditExpense, type ExpenseAuditResult } from '@/lib/audit-rules';
-import { ensureAuditTable, saveAuditResult, getAuditResultsForReport } from '@/lib/audit-db';
+import { processReceiptHybrid } from '@/lib/ai/hybrid-ocr';
+import { auditExpense, extractCaixaRefMonth, type ExpenseAuditResult, type CaixaRef } from '@/lib/rules/audit-rules';
+import { ensureAuditTable, saveAuditResult, getAuditResultsForReport } from '@/lib/db/audit-db';
+import { saveBotClassification } from '@/lib/db/doc-classification';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
+import { sql } from '@/lib/db/neon';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -88,11 +91,23 @@ export async function POST(request: NextRequest) {
         extractedData = hybridResult.structured_data;
         provider = hybridResult.provider;
         console.log(`[Audit] Expense ${expense.id} processed by ${provider}`);
+        try {
+          await saveBotClassification(report_id, expense.id, extractedData.tipo_documento, extractedData.chave_acesso);
+        } catch (e) {
+          console.error(`[Audit] doc-class save error expense ${expense.id}:`, e);
+        }
       } else if (hybridResult.provider === 'skipped') {
         console.log(`[Audit] Expense ${expense.id} skipped: ${hybridResult.error}`);
       } else {
         console.log(`[Audit] Both providers failed for expense ${expense.id}: ${hybridResult.error}`);
       }
+    }
+
+    let caixaRef: CaixaRef | null = null;
+    if (sql) {
+      const rows = await sql`SELECT name FROM prestacao_reports WHERE id = ${report_id} LIMIT 1`;
+      const name = String((rows[0] as any)?.name || '');
+      if (name && !isFaturaOrCartao(name)) caixaRef = extractCaixaRefMonth(name);
     }
 
     const result = auditExpense(
@@ -103,7 +118,8 @@ export async function POST(request: NextRequest) {
         date: expense.date,
         title: expense.title || '',
         observation: expense.observation || '',
-      }
+      },
+      { caixaRef }
     );
 
     if (extractedData) {

@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { processReceiptGeminiDirect, isPdfUrl } from '@/lib/gemini-direct';
-import { auditExpense, type ExpenseAuditResult } from '@/lib/audit-rules';
-import { ensureAuditTable, saveAuditResult, getAuditResultsForReport } from '@/lib/audit-db';
+import { processReceiptGeminiDirect, isPdfUrl } from '@/lib/ai/gemini-direct';
+import { auditExpense, extractCaixaRefMonth, type ExpenseAuditResult, type CaixaRef } from '@/lib/rules/audit-rules';
+import { ensureAuditTable, saveAuditResult, getAuditResultsForReport } from '@/lib/db/audit-db';
+import { saveBotClassification } from '@/lib/db/doc-classification';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
+import { sql } from '@/lib/db/neon';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -91,9 +94,21 @@ export async function POST(request: NextRequest) {
       if (result.success && result.structured_data) {
         extractedData = result.structured_data;
         console.log(`[GeminiDirect] Expense ${expense.id} succeeded - valor: ${extractedData.valor_total}, estab: ${extractedData.estabelecimento}`);
+        try {
+          await saveBotClassification(report_id, expense.id, extractedData.tipo_documento, extractedData.chave_acesso);
+        } catch (e) {
+          console.error(`[GeminiDirect] doc-class save error expense ${expense.id}:`, e);
+        }
       } else {
         console.log(`[GeminiDirect] Expense ${expense.id} failed: ${result.error}`);
       }
+    }
+
+    let caixaRef: CaixaRef | null = null;
+    if (sql) {
+      const rows = await sql`SELECT name FROM prestacao_reports WHERE id = ${report_id} LIMIT 1`;
+      const name = String((rows[0] as any)?.name || '');
+      if (name && !isFaturaOrCartao(name)) caixaRef = extractCaixaRefMonth(name);
     }
 
     const result = auditExpense(
@@ -104,7 +119,8 @@ export async function POST(request: NextRequest) {
         date: expense.date,
         title: expense.title || '',
         observation: expense.observation || '',
-      }
+      },
+      { caixaRef }
     );
 
     if (extractedData) {

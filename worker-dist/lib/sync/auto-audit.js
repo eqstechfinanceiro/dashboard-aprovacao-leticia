@@ -23,6 +23,7 @@ const report_filters_1 = require("../rules/report-filters");
 const gemini_direct_1 = require("../ai/gemini-direct");
 const audit_rules_1 = require("../rules/audit-rules");
 const audit_db_1 = require("../db/audit-db");
+const doc_classification_1 = require("../db/doc-classification");
 const tracking_1 = require("./tracking");
 const client_1 = require("./client");
 exports.AUTO_AUDIT_KEY = 'auto_audit_enabled';
@@ -144,6 +145,14 @@ async function runAutoAudit() {
                 }
                 catch (e) {
                     console.error(`[AutoAudit] OCR error expense ${expense.id}:`, e?.message);
+                }
+                if (extractedData) {
+                    try {
+                        await (0, doc_classification_1.saveBotClassification)(report.id, expense.id, extractedData.tipo_documento, extractedData.chave_acesso);
+                    }
+                    catch (e) {
+                        console.error(`[AutoAudit] doc-class error expense ${expense.id}:`, e?.message);
+                    }
                 }
             }
             const auditResult = (0, audit_rules_1.auditExpense)(expense.id, extractedData, {
