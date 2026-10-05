@@ -7,8 +7,10 @@ import { logAudit } from '@/lib/db/audit';
 export const dynamic = 'force-dynamic';
 
 // POST /api/fiscal/revisar
-// { nota_id, decisao: 'confirmado_ok' | 'confirmado_erro' | 'cancelado',
+// { nota_id, decisao: 'confirmado_ok' | 'confirmado_erro' | 'cancelado' | 'pendente',
 //   erro_tipo?, erro_descricao?, review_nota?, cancel_motivo? }
+// 'pendente' = reabrir a nota (volta pra fila) — usado pelo kanban ao arrastar
+// um card de volta e pela ação "desfazer".
 //
 // confirmado_erro → cria registro em resultados_conferencias (aba de erros
 // existente) e linka via resultados_id. Idempotente: revisar de novo a mesma
@@ -30,9 +32,9 @@ export async function POST(request: NextRequest) {
 
   const notaId = parseInt(body.nota_id, 10);
   const decisao = String(body.decisao || '');
-  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado'].includes(decisao)) {
+  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado', 'pendente'].includes(decisao)) {
     return NextResponse.json(
-      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado) obrigatórios' },
+      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado|pendente) obrigatórios' },
       { status: 400 }
     );
   }
@@ -84,7 +86,7 @@ export async function POST(request: NextRequest) {
       RETURNING id
     `;
     resultadosId = ins[0].id;
-  } else if (decisao === 'confirmado_ok') {
+  } else if (decisao === 'confirmado_ok' || decisao === 'pendente') {
     if (resultadosId) {
       // Revisão mudou de erro→ok: remove o registro da aba de erros para não
       // deixar um falso positivo permanentemente listado.
@@ -93,15 +95,17 @@ export async function POST(request: NextRequest) {
     }
     // Nota conferida e OK: o documento-fonte não é mais necessário na VPS.
     // Erros confirmados MANTÊM o doc (evidência na aba de erros).
-    await deleteFiscalDoc(notaId);
+    // Reabrir (pendente) também não precisa segurar o arquivo.
+    if (decisao === 'confirmado_ok') await deleteFiscalDoc(notaId);
   }
 
   const isCancel = decisao === 'cancelado';
+  const isReopen = decisao === 'pendente';
   const upd = await sql`
     UPDATE fiscal_notas SET
       review_status = ${decisao},
-      reviewed_by = ${isCancel ? nota.reviewed_by : reviewer},
-      reviewed_at = ${isCancel ? nota.reviewed_at : new Date().toISOString()},
+      reviewed_by = ${isCancel ? nota.reviewed_by : (isReopen ? null : reviewer)},
+      reviewed_at = ${isCancel ? nota.reviewed_at : (isReopen ? null : new Date().toISOString())},
       review_nota = ${isCancel ? nota.review_nota : (body.review_nota ? String(body.review_nota).slice(0, 500) : null)},
       erro_tipo = ${decisao === 'confirmado_erro' ? erroTipo : (isCancel ? nota.erro_tipo : null)},
       erro_descricao = ${decisao === 'confirmado_erro' ? (body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo) : (isCancel ? nota.erro_descricao : null)},

@@ -5,6 +5,7 @@ import path from 'path';
 import { sql } from '@/lib/db/neon';
 import { danfeHtml } from '@/lib/fiscal/danfe-html';
 import { eqsGetDanfePdf } from '@/lib/fiscal/eqs-portal';
+import { revalidateNotaComDoc } from '@/lib/fiscal/revalidar-danfe';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -47,6 +48,9 @@ export async function GET(request: NextRequest) {
         // anexada a nota volta pra fila pendente pro fiscal revisar.
         if (rows[0].review_status === 'falha_tecnica') {
           await sql`UPDATE fiscal_notas SET review_status = 'pendente' WHERE id = ${id} AND review_status = 'falha_tecnica'`;
+          // Com o documento anexado, refaz a comparação lançado × documento —
+          // o fiscal precisa ver os checks, não o erro de download antigo.
+          try { await revalidateNotaComDoc(id); } catch { /* parse falhou — segue */ }
         }
         docPath = rel;
         return new NextResponse(new Uint8Array(pdf), {

@@ -106,6 +106,14 @@ const STATUS_STYLE: Record<string, string> = {
   cancelado: 'bg-slate-200 text-slate-600',
 };
 
+const KANBAN_COLS: { status: string; label: string; drop: boolean; cls: string }[] = [
+  { status: 'pendente', label: 'Pendentes', drop: true, cls: 'border-amber-300 bg-amber-50/40' },
+  { status: 'falha_tecnica', label: 'Falha técnica', drop: false, cls: 'border-gray-300 bg-gray-50/40' },
+  { status: 'confirmado_ok', label: 'Confirmadas OK', drop: true, cls: 'border-blue-300 bg-blue-50/40' },
+  { status: 'confirmado_erro', label: 'Erros confirmados', drop: true, cls: 'border-red-300 bg-red-50/40' },
+  { status: 'cancelado', label: 'Canceladas', drop: true, cls: 'border-slate-300 bg-slate-50/40' },
+];
+
 const ERRO_LABEL: Record<string, string> = Object.fromEntries(
   ERRO_OPCOES.map((o) => [o.value, o.label])
 );
@@ -128,6 +136,8 @@ export default function FiscalPage() {
   const [tipo, setTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
   const [status, setStatus] = useState<string>('pendente');
   const [histStatus, setHistStatus] = useState<string>('confirmado_erro');
+  const [histMode, setHistMode] = useState<'lista' | 'kanban'>('lista');
+  const [dragOver, setDragOver] = useState<string | null>(null);
   const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -151,7 +161,9 @@ export default function FiscalPage() {
     setError(null);
     try {
       const url = view === 'historico'
-        ? `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500`
+        ? histMode === 'kanban'
+          ? `/api/fiscal/fila?scope=kanban&status=all&limit=1000`
+          : `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500`
         : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500`;
       const res = await fetch(url);
       const body = await res.json();
@@ -162,7 +174,7 @@ export default function FiscalPage() {
     } finally {
       setLoading(false);
     }
-  }, [view, tipo, status, histStatus]);
+  }, [view, tipo, status, histStatus, histMode]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -183,6 +195,21 @@ export default function FiscalPage() {
       alert(`Erro ao revisar: ${e.message}`);
     } finally {
       setActing(null);
+    }
+  };
+
+  // Arrastar card no kanban → mesma decisão dos botões da lista.
+  const kanbanDrop = (notaId: number, from: string, to: string) => {
+    if (!to || from === to) return;
+    if (to === 'confirmado_ok') revisar(notaId, 'confirmado_ok');
+    else if (to === 'pendente') revisar(notaId, 'pendente');
+    else if (to === 'confirmado_erro') setErroForm({ notaId, erro_tipo: 'outro', descricao: '' });
+    else if (to === 'cancelado') {
+      if (from !== 'confirmado_erro') {
+        alert('Só é possível cancelar uma nota com erro confirmado — arraste primeiro para "Erros confirmados".');
+        return;
+      }
+      setCancelForm({ notaId, motivo: '' });
     }
   };
 
@@ -312,16 +339,31 @@ export default function FiscalPage() {
       {/* Filtro de status — fila: estados de trabalho; histórico: erros/canceladas */}
       {view === 'fila' ? (
         <div className="flex gap-2 flex-wrap">
-          {['pendente', 'auto_ok', 'falha_tecnica', 'all'].map((s) => (
+          {['pendente', 'auto_ok', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'all'].map((s) => (
             <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
               {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
             </Button>
           ))}
         </div>
       ) : (
-        <div className="flex gap-2 flex-wrap">
-          {[
+        <div className="flex gap-2 flex-wrap items-center">
+          <div className="flex rounded-md border overflow-hidden">
+            <button
+              className={cn('px-3 py-1.5 text-sm', histMode === 'lista' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted')}
+              onClick={() => setHistMode('lista')}
+            >
+              Lista
+            </button>
+            <button
+              className={cn('px-3 py-1.5 text-sm border-l', histMode === 'kanban' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted')}
+              onClick={() => setHistMode('kanban')}
+            >
+              Kanban
+            </button>
+          </div>
+          {histMode === 'lista' && [
             { v: 'confirmado_erro', l: 'Erros confirmados' },
+            { v: 'confirmado_ok', l: 'Confirmadas OK' },
             { v: 'cancelado', l: 'Canceladas' },
             { v: 'all', l: 'Todas' },
           ].map((o) => (
@@ -341,7 +383,9 @@ export default function FiscalPage() {
         <CardHeader>
           <CardTitle className="text-base">
             {view === 'historico'
-              ? (histStatus === 'all' ? 'Histórico — erros e canceladas' : STATUS_LABEL[histStatus] || histStatus)
+              ? histMode === 'kanban'
+                ? 'Quadro — arraste os cards entre as colunas'
+                : (histStatus === 'all' ? 'Histórico — erros e canceladas' : STATUS_LABEL[histStatus] || histStatus)
               : `${status === 'all' ? 'Todas as notas' : STATUS_LABEL[status]} — ${tipo === 'mercadoria' ? 'Mercadoria' : tipo === 'servico' ? 'Serviço' : 'VExpenses'}`}
           </CardTitle>
         </CardHeader>
@@ -349,6 +393,159 @@ export default function FiscalPage() {
           {loading ? (
             <div className="flex items-center justify-center py-8 text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin mr-2" /> Carregando...
+            </div>
+          ) : view === 'historico' && histMode === 'kanban' ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-3 items-start">
+              {KANBAN_COLS.map((col) => {
+                const cards = (data?.notas || []).filter((n) => n.review_status === col.status);
+                return (
+                  <div
+                    key={col.status}
+                    className={cn(
+                      'rounded-lg border-2 border-dashed p-2 min-h-[160px] transition-colors',
+                      col.cls,
+                      col.drop && dragOver === col.status && 'border-solid ring-2 ring-blue-400'
+                    )}
+                    onDragOver={col.drop ? (e) => { e.preventDefault(); setDragOver(col.status); } : undefined}
+                    onDragLeave={col.drop ? () => setDragOver(null) : undefined}
+                    onDrop={col.drop ? (e) => {
+                      e.preventDefault();
+                      const id = Number(e.dataTransfer.getData('nota-id'));
+                      const from = e.dataTransfer.getData('nota-status');
+                      setDragOver(null);
+                      if (id) kanbanDrop(id, from, col.status);
+                    } : undefined}
+                  >
+                    <div className="flex items-center justify-between px-1 pb-2">
+                      <span className={cn('rounded-full px-2 py-0.5 text-xs font-semibold', STATUS_STYLE[col.status])}>
+                        {col.label}
+                      </span>
+                      <span className="text-xs text-muted-foreground">{cards.length}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {cards.map((n) => (
+                        <div
+                          key={n.id}
+                          draggable
+                          onDragStart={(e) => {
+                            e.dataTransfer.setData('nota-id', String(n.id));
+                            e.dataTransfer.setData('nota-status', n.review_status);
+                            e.dataTransfer.effectAllowed = 'move';
+                          }}
+                          className="rounded-md border bg-white p-2.5 shadow-sm cursor-grab active:cursor-grabbing hover:shadow transition-shadow"
+                        >
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="font-medium text-xs">NF {n.doc}</span>
+                            {n.serie && <span className="text-[10px] text-muted-foreground">série {n.serie}</span>}
+                            <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] text-slate-600">
+                              {n.tipo === 'servico' ? 'Serviço' : n.tipo === 'vexpenses' ? 'VExpenses' : 'Mercadoria'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-muted-foreground truncate mt-0.5" title={n.fornecedor || ''}>
+                            {n.fornecedor || '—'}
+                          </p>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="text-xs font-semibold">{fmtBRL(n.valor)}</span>
+                            <div className="flex gap-1.5">
+                              <a
+                                href={`/api/fiscal/portal-link?id=${n.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="Abrir no portal EQS"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                              {n.doc_path && (
+                                <button
+                                  className="text-blue-600 hover:text-blue-800"
+                                  title="Ampliar documento"
+                                  onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
+                                >
+                                  <Maximize2 className="h-3 w-3" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          {n.reviewed_by && (
+                            <p className="text-[10px] text-blue-600 truncate mt-0.5">
+                              por {n.reviewed_by}
+                            </p>
+                          )}
+                          {n.review_status === 'cancelado' && n.cancelled_by && (
+                            <p className="text-[10px] text-slate-500 truncate mt-0.5">
+                              cancelada por {n.cancelled_by}
+                            </p>
+                          )}
+                          {erroForm?.notaId === n.id && (
+                            <div className="rounded border border-red-200 bg-red-50 p-2 mt-1.5 space-y-1.5">
+                              <p className="text-[11px] font-medium text-red-800">Confirmar erro</p>
+                              <select
+                                className="w-full rounded border bg-white px-1.5 py-1 text-[11px]"
+                                value={erroForm.erro_tipo}
+                                onChange={(e) => setErroForm({ ...erroForm, erro_tipo: e.target.value })}
+                              >
+                                {ERRO_OPCOES.map((o) => (
+                                  <option key={o.value} value={o.value}>{o.label}</option>
+                                ))}
+                              </select>
+                              <textarea
+                                className="w-full rounded border bg-white px-1.5 py-1 text-[11px]"
+                                rows={2}
+                                placeholder="Descrição (opcional)"
+                                value={erroForm.descricao}
+                                onChange={(e) => setErroForm({ ...erroForm, descricao: e.target.value })}
+                              />
+                              <div className="flex gap-1.5">
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  className="h-7 text-[11px] px-2"
+                                  disabled={acting === n.id}
+                                  onClick={() => revisar(n.id, 'confirmado_erro', erroForm.erro_tipo, erroForm.descricao)}
+                                >
+                                  {acting === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Registrar'}
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => setErroForm(null)}>
+                                  Voltar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          {cancelForm?.notaId === n.id && (
+                            <div className="rounded border border-slate-300 bg-slate-50 p-2 mt-1.5 space-y-1.5">
+                              <p className="text-[11px] font-medium text-slate-800">Marcar como cancelada</p>
+                              <input
+                                className="w-full rounded border bg-white px-1.5 py-1 text-[11px]"
+                                placeholder="Motivo (opcional)"
+                                value={cancelForm.motivo}
+                                onChange={(e) => setCancelForm({ ...cancelForm, motivo: e.target.value })}
+                              />
+                              <div className="flex gap-1.5">
+                                <Button
+                                  size="sm"
+                                  className="h-7 text-[11px] px-2"
+                                  disabled={acting === n.id}
+                                  onClick={() => revisar(n.id, 'cancelado', undefined, undefined, cancelForm.motivo)}
+                                >
+                                  {acting === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Confirmar'}
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => setCancelForm(null)}>
+                                  Voltar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {cards.length === 0 && (
+                        <p className="text-[11px] text-muted-foreground text-center py-4">—</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : !data || data.notas.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">

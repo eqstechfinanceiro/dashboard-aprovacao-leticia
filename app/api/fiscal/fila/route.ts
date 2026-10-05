@@ -15,8 +15,10 @@ export async function GET(request: NextRequest) {
   const tipo = sp.get('tipo') || 'all';
   const status = sp.get('status') || 'all';
   // scope=fila (default em uso) → fila de trabalho do fiscal, sem as
-  // finalizadas; scope=historico → só erros confirmados + canceladas
-  // (visão do setor que trata os erros).
+  // finalizadas — exceto quando `status` pede explicitamente uma finalizada
+  // (visão individual das confirmadas OK/erro). scope=historico → só erros
+  // confirmados + canceladas. scope=kanban → colunas do quadro (pendentes,
+  // falhas técnicas e decisões humanas — auto_ok fica fora).
   const scope = sp.get('scope') || 'all';
   const from = sp.get('from') || null;
   const to = sp.get('to') || null;
@@ -51,8 +53,10 @@ export async function GET(request: NextRequest) {
       FROM fiscal_notas n
       WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ${status})
-        AND (${scope} <> 'fila' OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
+             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
         AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'))
         AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
         AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
         AND (${runId}::int IS NULL OR n.run_id = ${runId})
