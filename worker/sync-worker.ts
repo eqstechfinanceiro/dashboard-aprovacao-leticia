@@ -29,6 +29,7 @@ import {
   generatePrestacaoStaleNotifications,
 } from '../lib/sync/notifications';
 import { syncImpacto } from '../lib/impacto/totvs';
+import { syncBoletos } from '../lib/boletos/totvs';
 import { getSetting, setSetting } from '../lib/db/settings';
 
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
@@ -204,6 +205,15 @@ async function warmCycle() {
     } catch (e: any) {
       failed = true;
       await logError(runId, 'warm', 'impacto-se2', e?.message || String(e), true);
+    }
+    // Boletos — validação de código de barras/linha digitável (SE2, EQS+BRATEC)
+    try {
+      const bol = await syncBoletos();
+      meta.boletos = bol.map((r) => `${r.empresa}:${r.upserted}/${r.flagged}${r.error ? '!err' : ''}`);
+      if (bol.some((r) => r.error)) failed = true;
+    } catch (e: any) {
+      failed = true;
+      await logError(runId, 'warm', 'boletos-se2', e?.message || String(e), true);
     }
     await finishRun(runId, failed ? 'error' : 'done', meta);
     console.log('[WARM] ciclo', failed ? 'com erros' : 'ok');

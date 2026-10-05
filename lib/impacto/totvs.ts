@@ -91,7 +91,7 @@ async function login() {
 }
 
 /** genericQuery com retry + re-login (o proxy derruba conexões com frequência). */
-async function genericQuery(tenantId: string, params: Record<string, string>): Promise<Json> {
+export async function genericQuery(tenantId: string, params: Record<string, string>): Promise<Json> {
   let lastErr: any = null;
   for (let attempt = 0; attempt < 6; attempt++) {
     try {

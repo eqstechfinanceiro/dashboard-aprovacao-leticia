@@ -43,6 +43,7 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/resultados', ['resultados']],
   ['/api/pendencias', ['pendencias']],
   ['/api/impacto', ['impacto-financeiro']],
+  ['/api/boletos', ['boletos']],
   ['/api/cartorios', ['cartorios']],
   ['/api/quinzena', ['quinzena-dinamica', 'controle', 'configuracoes']],
   ['/api/fechamento', ['fechamento', 'configuracoes']],

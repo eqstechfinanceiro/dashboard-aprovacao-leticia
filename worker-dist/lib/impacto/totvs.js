@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EMPRESAS = void 0;
+exports.genericQuery = genericQuery;
 exports.ensureImpactoTables = ensureImpactoTables;
 exports.syncImpactoEmpresa = syncImpactoEmpresa;
 exports.syncImpacto = syncImpacto;

@@ -31,12 +31,14 @@ const SECTOR_MODULES: Record<Exclude<SectorView, 'all'>, string[]> = {
     'fechamento',
     'sync-health',
     'audit-log',
+    'boletos',
   ],
   'contas-pagar': [
     'pendencias',
     'automacao-comprovantes',
     'ferramentas-itau',
     'cartorios',
+    'boletos',
   ],
   // Gerencial menos Fiscal e Impacto Financeiro.
   'entrada-notas': [

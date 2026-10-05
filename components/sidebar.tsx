@@ -22,6 +22,7 @@ import {
   DollarSign,
   Activity,
   ScrollText,
+  ScanBarcode,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -51,6 +52,7 @@ const ALL_CATEGORIES: NavCategory[] = [
       { id: 'gestao-caixa', name: 'Posição de Caixa', href: '/gestao-caixa', icon: TrendingUp },
       { id: 'pendencias', name: 'Pendências & Resultados', href: '/pendencias', icon: Hourglass, altIds: ['resultados'] },
       { id: 'impacto-financeiro', name: 'Impacto Financeiro', href: '/impacto-financeiro', icon: DollarSign },
+      { id: 'boletos', name: 'Boletos', href: '/boletos', icon: ScanBarcode },
       { id: 'fiscal', name: 'Fiscal', href: '/fiscal', icon: ScrollText },
     ],
   },
