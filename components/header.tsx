@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Bell, Search, User, LogOut, Puzzle, Check, UserX, Camera, Trash2, KeyRound, MonitorDown, Download, AlertTriangle, FileCheck, Clock } from 'lucide-react';
+import { Bell, Eye, User, LogOut, Puzzle, Check, UserX, Camera, Trash2, KeyRound, MonitorDown, Download, AlertTriangle, FileCheck, Clock } from 'lucide-react';
 import { useAuth } from '@/lib/auth/auth-context';
+import { SECTOR_VIEWS, VIEW_STORAGE_KEY, VIEW_EVENT, readStoredView, type SectorView } from '@/lib/nav-views';
 import { useRouter } from 'next/navigation';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 
@@ -52,6 +53,9 @@ export function Header() {
   const [installEvt, setInstallEvt] = useState<any>(null);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isElectron, setIsElectron] = useState(false);
+  const [view, setView] = useState<SectorView>('all');
+
+  useEffect(() => setView(readStoredView()), []);
 
   useEffect(() => {
     setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
@@ -207,12 +211,24 @@ export function Header() {
     <header className="flex h-16 items-center justify-between border-b bg-white px-6">
       <div className="flex items-center gap-4">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="w-40 rounded-lg border border-gray-300 pl-10 pr-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 md:w-64 xl:w-96"
-          />
+          <Eye className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          <select
+            value={view}
+            onChange={(e) => {
+              const v = e.target.value as SectorView;
+              setView(v);
+              window.localStorage.setItem(VIEW_STORAGE_KEY, v);
+              window.dispatchEvent(new CustomEvent(VIEW_EVENT, { detail: v }));
+            }}
+            title="Ver o menu como um setor específico"
+            className="w-48 appearance-none rounded-lg border border-gray-300 pl-10 pr-8 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 md:w-56"
+          >
+            {SECTOR_VIEWS.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.id === 'all' ? 'Ver: todos os setores' : `Ver como: ${s.label}`}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       

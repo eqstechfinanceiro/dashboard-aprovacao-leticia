@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   LayoutDashboard,
   FileCheck,
@@ -26,6 +26,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth/auth-context';
 import { canAccessModule } from '@/lib/auth/auth';
+import { itemInView, readStoredView, VIEW_EVENT, type SectorView } from '@/lib/nav-views';
 
 type NavItem = {
   id: string;
@@ -91,6 +92,15 @@ export function Sidebar() {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set(ALL_CATEGORIES.map((c) => c.label))
   );
+  const [view, setView] = useState<SectorView>('all');
+
+  // "Ver como setor" — escolha feita no header, persiste em localStorage.
+  useEffect(() => {
+    setView(readStoredView());
+    const on = (e: Event) => setView((e as CustomEvent<SectorView>).detail || readStoredView());
+    window.addEventListener(VIEW_EVENT, on);
+    return () => window.removeEventListener(VIEW_EVENT, on);
+  }, []);
 
   if (loading) {
     return (
@@ -119,10 +129,11 @@ export function Sidebar() {
   const categories = ALL_CATEGORIES.map((cat) => {
     const items = cat.items.filter(
       (item) =>
-        item.always ||
-        (user &&
-          (canAccessModule(user.role, user.modules, item.id) ||
-            (item.altIds ?? []).some((alt) => canAccessModule(user.role, user.modules, alt))))
+        itemInView(view, cat.label, item.id, item.always) &&
+        (item.always ||
+          (user &&
+            (canAccessModule(user.role, user.modules, item.id) ||
+              (item.altIds ?? []).some((alt) => canAccessModule(user.role, user.modules, alt)))))
     );
     return { ...cat, items };
   }).filter((cat) => cat.items.length > 0);
@@ -134,7 +145,7 @@ export function Sidebar() {
         <h1 className="text-xl font-bold">Aery</h1>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-3">
+      <nav className="sidebar-scroll flex-1 overflow-y-auto px-3 py-3">
         {categories.map((cat) => {
           const isExpanded = expanded.has(cat.label);
           const hasActive = cat.items.some((item) => pathname === item.href);
