@@ -1,8 +1,7 @@
 // "Ver como" — filtro de setor aplicado ao menu lateral.
 // O admin/gestor escolhe um setor no header e o menu passa a mostrar só o que
-// aquele setor usa. A categoria "Análise Gerencial" e itens `always` (Suporte)
-// permanecem visíveis em todas as visões — o filtro só encolhe, nunca expande
-// (interseção com as permissões reais do usuário).
+// aquele setor usa. O filtro só encolhe, nunca expande (interseção com as
+// permissões reais do usuário). Itens `always` (Suporte) ficam em toda visão.
 
 export const SECTOR_VIEWS = [
   { id: 'all', label: 'Todos os setores' },
@@ -14,42 +13,47 @@ export const SECTOR_VIEWS = [
 
 export type SectorView = (typeof SECTOR_VIEWS)[number]['id'];
 
-// Categoria que fica sempre visível (sujeita à permissão por módulo).
-export const GERENCIAL_CATEGORY = 'Análise Gerencial';
-
-// Módulos fora de "Análise Gerencial" que cada setor enxerga.
+// Módulos que cada setor enxerga (mapeamento definido com o time).
 const SECTOR_MODULES: Record<Exclude<SectorView, 'all'>, string[]> = {
+  // Gerencial: tudo menos Impacto Financeiro e Fiscal.
+  // Operacional: tudo menos Automação Comprovantes, Ferramentas Itaú, Cartórios.
+  // Fechamento: tudo. Sistema: tudo menos Configurações.
   'gestao-caixa': [
+    'dashboard',
+    'analytics',
+    'gestao-caixa',
+    'pendencias',
     'aprovacoes',
     'pending-approvals',
     'aprovacao-dinamica',
-    'automacao-comprovantes',
-    'ferramentas-itau',
     'quinzena-dinamica',
     'controle',
     'fechamento',
+    'sync-health',
+    'audit-log',
   ],
   'contas-pagar': [
+    'pendencias',
     'automacao-comprovantes',
-    'quinzena-dinamica',
-    'controle',
-    'fechamento',
+    'ferramentas-itau',
     'cartorios',
   ],
+  // Gerencial menos Fiscal e Impacto Financeiro.
   'entrada-notas': [
-    'quinzena-dinamica',
-    'fechamento',
+    'dashboard',
+    'analytics',
+    'gestao-caixa',
+    'pendencias',
   ],
-  fiscal: [],
+  fiscal: ['fiscal'],
 };
 
 export const VIEW_STORAGE_KEY = 'aery:view';
 export const VIEW_EVENT = 'aery:view-changed';
 
 // Decide se um item do menu aparece na visão escolhida.
-// `category` é o label do grupo no sidebar.
-export function itemInView(view: SectorView, category: string, moduleId: string, always?: boolean): boolean {
-  if (view === 'all' || always || category === GERENCIAL_CATEGORY) return true;
+export function itemInView(view: SectorView, moduleId: string, always?: boolean): boolean {
+  if (view === 'all' || always) return true;
   return SECTOR_MODULES[view].includes(moduleId);
 }
 

@@ -129,7 +129,7 @@ export function Sidebar() {
   const categories = ALL_CATEGORIES.map((cat) => {
     const items = cat.items.filter(
       (item) =>
-        itemInView(view, cat.label, item.id, item.always) &&
+        itemInView(view, item.id, item.always) &&
         (item.always ||
           (user &&
             (canAccessModule(user.role, user.modules, item.id) ||
