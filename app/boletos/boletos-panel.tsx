@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   RefreshCw, Loader2, AlertTriangle, ScanBarcode, ChevronDown,
-  ChevronRight, Search, CheckCircle2, Building2,
+  ChevronRight, Search, CheckCircle2, Building2, Download, X, FileSpreadsheet,
 } from 'lucide-react';
 
 /* ============================ tipos ============================ */
@@ -99,6 +99,8 @@ export default function BoletosPanel() {
   const [soFlags, setSoFlags] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [flagsOpen, setFlagsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const flagsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -158,6 +160,44 @@ export default function BoletosPanel() {
       return n;
     });
 
+  const exportar = async () => {
+    setExporting(true);
+    try {
+      const p = new URLSearchParams();
+      if (empresa) p.set('empresas', empresa);
+      if (status) p.set('status', status);
+      if (flagsSel.length) p.set('flags', flagsSel.join(','));
+      if (buscaDeb) p.set('q', buscaDeb);
+      p.set('so_flags', soFlags ? '1' : '0');
+      const r = await fetch(`/api/boletos/exportar-xlsx?${p}`);
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        throw new Error(j.error || `HTTP ${r.status}`);
+      }
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `boletos-inconsistencias-${new Date().toISOString().slice(0, 10)}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setExportOpen(false);
+    } catch (e: any) {
+      setErro(e?.message || 'Erro ao exportar');
+      setExportOpen(false);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const filtrosAtivos = [
+    empresa || 'Todas empresas',
+    status === 'aberto' ? 'Em aberto' : status === 'baixado' ? 'Baixados' : 'Todos os status',
+    flagsSel.length ? `${flagsSel.length} tipo(s) de inconsistência` : 'Todos os tipos',
+    buscaDeb ? `Busca: "${buscaDeb}"` : null,
+    soFlags ? 'Somente com inconsistência' : 'Incluindo sem inconsistência',
+  ].filter(Boolean) as string[];
+
   const lastSync = useMemo(
     () => data?.sync?.map((s) => `${s.empresa} ${new Date(s.at).toLocaleString('pt-BR')}`).join(' · '),
     [data]
@@ -174,10 +214,16 @@ export default function BoletosPanel() {
             {lastSync && <p className="text-xs text-muted-foreground">Último sync: {lastSync}</p>}
           </div>
         </div>
-        <Button onClick={sincronizar} disabled={syncing} variant="outline" size="sm">
-          {syncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-          Sincronizar Protheus
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button onClick={() => setExportOpen(true)} variant="outline" size="sm">
+            <Download className="h-4 w-4 mr-2" />
+            Exportar XLSX
+          </Button>
+          <Button onClick={sincronizar} disabled={syncing} variant="outline" size="sm">
+            {syncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+            Sincronizar Protheus
+          </Button>
+        </div>
       </div>
 
       {/* cards resumo por flag */}
@@ -428,6 +474,60 @@ export default function BoletosPanel() {
           )}
         </CardContent>
       </Card>
+
+      {/* modal confirmação de exportação */}
+      {exportOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => !exporting && setExportOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg bg-background p-5 space-y-4 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <FileSpreadsheet className="h-5 w-5 text-emerald-600" />
+                Exportar para XLSX
+              </h2>
+              <Button size="sm" variant="ghost" onClick={() => setExportOpen(false)} disabled={exporting}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <p className="text-sm text-muted-foreground">
+              A planilha será gerada com a <b className="text-foreground">visão atual</b> — os mesmos
+              filtros aplicados na tela agora:
+            </p>
+            <ul className="text-xs space-y-1 rounded-lg border border-border bg-muted/40 p-3">
+              {filtrosAtivos.map((f, i) => (
+                <li key={i} className="flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-blue-500 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sm">
+              <b>{data?.totais.qtd ?? 0}</b> título(s) serão exportados
+              {data ? ` · ${fmtBRL(data.totais.valorAberto)} em aberto` : ''}.
+            </p>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="outline" size="sm" onClick={() => setExportOpen(false)} disabled={exporting}>
+                Cancelar
+              </Button>
+              <Button size="sm" onClick={exportar} disabled={exporting}>
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Download className="h-4 w-4 mr-2" />
+                )}
+                {exporting ? 'Gerando…' : 'Exportar'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
