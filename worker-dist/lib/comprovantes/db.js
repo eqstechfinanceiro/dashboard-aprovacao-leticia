@@ -57,6 +57,8 @@ async function ensureComprovantesTables() {
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
+    await (0, neon_1.sql) `ALTER TABLE comprovantes_envios ADD COLUMN IF NOT EXISTS banco TEXT`;
+    await (0, neon_1.sql) `ALTER TABLE comprovantes_envios ADD COLUMN IF NOT EXISTS meta JSONB`;
     await (0, neon_1.sql) `ALTER TABLE comprovantes_runs ADD COLUMN IF NOT EXISTS selection JSONB`;
     await (0, neon_1.sql) `ALTER TABLE comprovantes_runs ADD COLUMN IF NOT EXISTS label TEXT`;
     await (0, neon_1.sql) `ALTER TABLE comprovantes_runs ALTER COLUMN year DROP NOT NULL`;
@@ -146,12 +148,13 @@ async function insertEnvio(e) {
     INSERT INTO comprovantes_envios (
       run_id, source_file, page_num, chave, cpf, nome, regiao, cc,
       tipo_pagamento, pedido, modelo_documento, competencia,
-      destino_path, destino_filename, status, error, generated_pdf_path
+      destino_path, destino_filename, status, error, generated_pdf_path, banco, meta
     ) VALUES (
       ${e.runId}, ${e.sourceFile}, ${e.pageNum}, ${e.chave || null}, ${e.cpf || null}, ${e.nome || null},
       ${e.regiao || null}, ${e.cc || null}, ${e.tipoPagamento || null}, ${e.pedido || null},
       ${e.modeloDocumento || null}, ${e.competencia || null}, ${e.destinoPath || null},
-      ${e.destinoFilename || null}, ${e.status}, ${e.error || null}, ${e.generatedPdfPath || null}
+      ${e.destinoFilename || null}, ${e.status}, ${e.error || null}, ${e.generatedPdfPath || null},
+      ${e.banco || null}, ${e.meta ? JSON.stringify(e.meta) : null}::jsonb
     ) RETURNING id
   `;
     return rows[0].id;

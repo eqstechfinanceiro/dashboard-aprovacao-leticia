@@ -17,6 +17,7 @@ const path_1 = __importDefault(require("path"));
 const neon_1 = require("../lib/db/neon");
 const db_1 = require("../lib/comprovantes/db");
 const pipeline_1 = require("../lib/comprovantes/pipeline");
+const remessa_pipeline_1 = require("../lib/comprovantes/remessa-pipeline");
 const sharepoint_1 = require("../lib/comprovantes/sharepoint");
 const POLL_MS = 10 * 1000;
 const LOCK_ID = 8675311;
@@ -38,7 +39,10 @@ async function tick() {
         if (!run)
             return;
         console.log(`[comprovantes] run #${run.id} iniciado: ${run.source} ${run.year}/${run.month_folder}/${run.bank}/${run.date_folder}`);
-        await (0, pipeline_1.processRun)(run);
+        if (run.source === 'remessa')
+            await (0, remessa_pipeline_1.processRemessaRun)(run);
+        else
+            await (0, pipeline_1.processRun)(run);
         console.log(`[comprovantes] run #${run.id} finalizado`);
     }
     finally {
