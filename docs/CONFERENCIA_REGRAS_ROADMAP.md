@@ -84,22 +84,29 @@ completa e correta — lançamento, conferência e exceções auditáveis num s�
 
 ## 4. Bloco 1 — Conferência contínua na VPS
 
-### 4.1 Modelo: ledger em vez de janela de execução
+### 4.1 Modelo: ciclo curto + dedup — não existe mais "dia a dia"
 
-O erro de hoje é tratar conferência como "run por período". Passa a ser
-**estado por nota**:
+A conferência roda em **intervalo curto** (configurável; alvo inicial
+~30–60 min), não mais de um dia pro outro. Cada nota é um item de estado:
 
-- A cada ciclo, o worker consulta TOTVS (SF1, espécies fiscais) desde
-  `watermark - janela_sobreposição` (ex.: últimos 14 dias) e **upserta** cada
-  documento em `fiscal_notas` (chave já existente por doc+serie+filial+emissão
-  +fornecedor) com `review_status='pendente'` se ainda não conferido.
-- Cada nota passa por estados: `pendente → auto_ok | pendente(divergência) |
-  falha_tecnica → confirmado_ok | confirmado_erro | cancelado`.
+- A cada ciclo, o worker consulta TOTVS (SF1, espécies fiscais) numa janela
+  com sobreposição (ex.: últimos 14 dias) e **upserta** cada documento em
+  `fiscal_notas` (chave já existente por doc+serie+filial+emissão+fornecedor)
+  como `pendente` se nunca conferida.
+- **Dedup antes de conferir**: nota em `auto_ok` ou com decisão humana
+  (`confirmado_ok`/`confirmado_erro`/`cancelado`) **nunca é reprocessada** —
+  o ciclo só toca o que está `pendente` ou `falha_tecnica` elegível a retry.
+  Reconferência deliberada só acontece por ação explícita ("reconferir com
+  regras atuais" após edição de regra — §7.4).
+- Estados: `pendente → auto_ok | pendente(divergência) | falha_tecnica →
+  confirmado_ok | confirmado_erro | cancelado`.
 - **Nada some por janela**: nota não resolvida continua `pendente` para o
-  próximo ciclo. Não existe mais "dia sem conferência" — PC ligado ou não,
-  a fila só esvazia quando cada nota tem veredicto.
-- Reprocessamento automático de `falha_tecnica` com backoff (XML pode chegar
-  atrasado no SIEG; nota recém-lançada pode estar em consolidação).
+  próximo ciclo. PC ligado ou não, feriado ou fim de semana — a fila só
+  esvazia quando cada nota tem veredicto.
+- `falha_tecnica` reprocessa com backoff exponencial (XML pode chegar
+  atrasado na fonte; nota recém-lançada pode estar em consolidação).
+- **Escopo = tudo que foi lançado** — por bot **e** por humano (SF1 não
+  distingue origem; `USERLGI` decodifica quem lançou pra auditoria).
 
 ### 4.2 Itens de implementação
 
@@ -130,15 +137,14 @@ falharam → `falha_tecnica` com `auto_resumo` listando tentativas.
 
 | Fonte | O que entrega | Cobertura | Disponível hoje? |
 |---|---|---|---|
-| **SIEG** | XML (e PDF?) por chave | Todas as NF-e — atual | Sim — `requests` + login Playwright p/ `COFRE.AUTH` |
+| **SIEG** | XML por chave | Todas as NF-e — fonte atual | Sim — `requests` + login Playwright p/ `COFRE.AUTH` |
 | **TOTVS `Z01_XMLNFE`** | XML completo embutido | Itens Agilitas lançados ("DS") | Sim — mesmo genericQuery, zero auth extra |
 | **VExpenses attachments** | PDF/imagem do comprovante (`Z01_JSON.reicept_url`) | Recibos/notas anexadas pelo usuário | Sim — já baixado no auto-audit |
 | **Cache launcher** | XML baixado pelo Lince/reports-vex antes do lançamento | Tudo que o bot lançou | Sim — unificar em store da VPS |
-| **e2doc** | Docs fiscais arquivados | Contratos/documental | Verificar cobertura de NFs |
 | **SharePoint books** | NFs nos books mensais por CC | Esporádica (docs contratuais) | Sim — índice já existe |
-| **SEFAZ DistDFe** | XML oficial por CNPJ | 100% das NF-e emitidas p/ empresa | Futuro — exige certificado A1 + manifestação |
 | **Email fornecedor** | XML anexo | Alto potencial | Futuro — caixa dedicada + parser |
-| **APIs pagas** (Arquivei, Nuvem) | XML/DANFE por CNPJ | Quase total | Futuro — custo/validação |
+| **APIs pagas** (Arquivei, Nuvem Fiscal) | XML/DANFE por CNPJ | Quase total | Futuro — custo/validação |
+| ~~SEFAZ DistDFe~~ | — | — | **Descartado** — empresa não possui certificado A1 |
 
 ### 5.2 Regras operacionais
 
@@ -214,7 +220,7 @@ procedural; todas as tabelas de decisão migram para o Postgres.
 | **F3** | Tabelas de regras + seed a partir de `tes_rules.py` + endpoints de leitura + paridade automatizada | — (paralelo a F1) | Pendente |
 | **F4** | Página `/regras` (2 abas) + audit de edição | F3 | Pendente |
 | **F5** | Conferência passa a ler regras do banco; Lince/reports-vex consomem `/api/regras/lancamento` | F3, F4 | Pendente |
-| **F6** | Serviço (download-notas-de-servico) migrado p/ mesma esteira; fontes futuras (SEFAZ DistDFe, e-mail, APIs pagas) | F1–F5 | Pendente |
+| **F6** | Serviço (download-notas-de-servico) migrado p/ mesma esteira; fontes futuras (e-mail fornecedor, APIs pagas) | F1–F5 | Pendente |
 | **F7** | Paralelo 2 semanas → desligar `.vbs`/jobs do PC (conferência); escritas continuam no PC | F1–F2 | Pendente |
 
 ## 9. O que já está feito (base)
@@ -249,11 +255,12 @@ procedural; todas as tabelas de decisão migram para o Postgres.
 
 | Item | Decisão | Status |
 |---|---|---|
-| Certificado A1 (DistDFe) | Empresa tem? Onde guardar (VPS, permissão)? | A levantar |
-| e2doc como fonte de NFs | Verificar se NFs fiscais estão arquivadas lá e com que índices | A validar |
+| Certificado A1 (DistDFe) | Empresa **não tem** — DistDFe descartado; cobertura vem de SIEG + Z01 + attachments + caches (+ futuras: e-mail, API paga) | **Decidido** |
+| e2doc como fonte | **Não se aplica** — NFs não são arquivadas no e2doc (fora de escopo) | **Decidido** |
 | ExecAuto/REST de escrita TOTVS | Se existir, até lançamento sai do PC — investigação separada | A investigar |
 | SIEG na VPS | Cookies por CNPJ? Rate limit diário? Login 2FA? | A testar em produção |
-| Escopo "conferir mais do que lançamos" | Conferência cobre notas lançadas por humano também (já cobre hoje via SF1) — confirmar espécies | Confirmado parcial |
+| Escopo da conferência | **Tudo que foi lançado** — bot e humano (SF1 é fonte completa); ciclo curto com dedup, não mais diário | **Decidido** |
+| Intervalo do ciclo | Alvo inicial 30–60 min — ajustável por regra/config na página | A calibrar no piloto |
 | Regra "parcial" do Lince | Itens especiais/DIFAL dependem de dados do grid/XML — conferir que todos os inputs existem via REST (D1_TES leitura ok; `tes_atual` do grid → ler SF4/SD1) | A validar |
 
 > **Regra de ouro** (herdada do projeto): nenhum item novo entra em produção
