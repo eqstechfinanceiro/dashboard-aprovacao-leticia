@@ -112,10 +112,11 @@ A conferência roda em **intervalo curto** (configurável; alvo inicial
 
 | # | Item | Status |
 |---|---|---|
-| 4.1 | Portar queries `totvs_mercadoria_api.py` (SF1/SA2 + SD1/SB1) para `lib/conferencia/totvs.ts` (EQS + BRATEC, espécies configuráveis) | Pendente |
-| 4.2 | Portar `comparator.py` para `lib/conferencia/comparator.ts` — regras informativas × divergentes vindas do banco (§6) | Pendente |
-| 4.3 | `lib/conferencia/fontes.ts` — registry de fontes XML/PDF (§5) | Pendente |
-| 4.4 | Worker `syncConferencia()` no warm cycle (ou cron próprio): descobrir docs → baixar fonte → comparar → gravar `fiscal_notas`/`fiscal_runs` | Pendente |
+| 4.1 | Portar queries `totvs_mercadoria_api.py` (SF1/SA2 + SD1/SB1) para `lib/conferencia/totvs.ts` (EQS + BRATEC, espécies configuráveis) | **Feito (F1)** |
+| 4.2 | Portar `comparator.py` para `lib/conferencia/comparator.ts` — regras informativas × divergentes vindas do banco (§6) | **Feito (F1)** — hardcoded por ora; **correção deliberada:** legado aplicava regra EQS em nota BRATEC (`EMPRESA='EQS'` fixo); agora a empresa vem do header |
+| 4.3 | `lib/conferencia/fontes.ts` — registry de fontes XML/PDF (§5) | **Feito (F1)** — cadeia `fiscal_doc_cache` → `Z01_XMLNFE` → SIEG; XML persistido em `fiscal_doc_cache` por chave |
+| 4.4 | Worker `syncConferencia()` no warm cycle (45min): descobrir docs → baixar fonte → comparar → gravar `fiscal_notas`/`fiscal_runs` | **Feito (F1)** — janela móvel 14d por `F1_DTDIGIT` (`CONFERENCIA_JANELA_DIAS`), teto `CONFERENCIA_MAX_NFS=250`, retry exponencial (30min→24h) em `conferencia_tentativas`/`conferencia_next_retry` |
+| 4.4b | Observabilidade do ciclo na página fiscal | **Feito** — tabela `conferencia_state` (linha única: fase, elegíveis/conferidas, contagens, fontes, doc atual, últimas 150 linhas de log) + `GET /api/fiscal/ciclo` + card na página com progress bar, fase, chips de fonte, fila consolidada e painel de logs (poll 20s) |
 | 4.5 | Backfill: reconciliar `fiscal_notas` legado × SF1 real — marcar notas nunca conferidas | Pendente |
 | 4.6 | Desligar `.vbs` do PC quando paridade provada (2 semanas em paralelo) | Pendente |
 
@@ -125,6 +126,25 @@ A conferência roda em **intervalo curto** (configurável; alvo inicial
   resultado campo a campo até 100% igual antes de ligar em produção.
 - Métrica de sucesso: 0 notas `pendente` por falta de fonte após 72h;
   divergências = conjunto idêntico ao do PC.
+
+**Validação F1 em produção (06/out):**
+- Ciclo real na VPS: `total=1471 conferidas=10 → 3 match via SIEG + 7 falha_tecnica`
+  (SIEG não tinha as NFs — retry agendado); `puladas=22` prova dedup/backoff.
+- Comparador exercido com dado real (NF 42429): todos os checks corretos,
+  única divergência `Origem CST 041×060` — paridade exata com o Python.
+- Quirks descobertos: `Z01_XMLNFE` (memo) sozinho em `fields` dá HTTP 500 —
+  precisa de outra coluna junto; `down.sieg.com` responde 302 → host real do
+  zip (`down2.sieg.com/api/download/zip-txt`) — `requests` seguia sozinho, o
+  client Node precisa seguir redirect manualmente; cookie `COFRE.AUTH` é
+  validado por `getInfoCompanyHub` (qualquer JSON sem `error` = válido);
+  login Playwright headless funciona na VPS (Chromium já instalado).
+- **Ciclo observado end-to-end (06/out 17h, run 34):** 2415 NFs na janela,
+  250 elegíveis → 99 match / **138 divergentes** / 13 falhas / 8 puladas;
+  fontes `sieg:192 + z01_xmlnfe:45` — cadeia de fallback exercida em volume
+  real. Estado ao vivo visível durante o ciclo via `/api/fiscal/ciclo`.
+- Atenção: 138 divergentes num único ciclo é volume alto — revisar se são
+  divergências reais ou regra ainda calibrando (ex.: campos informativos
+  marcando divergente). Alimenta o trabalho de F3 (regras no banco).
 
 ## 5. Bloco 2 — Fontes múltiplas de XML/PDF
 
@@ -215,7 +235,7 @@ procedural; todas as tabelas de decisão migram para o Postgres.
 
 | Fase | Conteúdo | Depende de | Status |
 |---|---|---|---|
-| **F1** | Conferência mercadoria na VPS: portar queries + comparator (regras hardcoded ainda) + ledger em `fiscal_notas` + SIEG na VPS | — | Pendente |
+| **F1** | Conferência mercadoria na VPS: portar queries + comparator (regras hardcoded ainda) + ledger em `fiscal_notas` + SIEG na VPS | — | **Concluída** (deployado + ciclo real validado) |
 | **F2** | Registry de fontes: SIEG + Z01_XMLNFE + VExpenses + cache launcher; métricas por fonte | F1 | Pendente |
 | **F3** | Tabelas de regras + seed a partir de `tes_rules.py` + endpoints de leitura + paridade automatizada | — (paralelo a F1) | Pendente |
 | **F4** | Página `/regras` (2 abas) + audit de edição | F3 | Pendente |
@@ -237,11 +257,11 @@ procedural; todas as tabelas de decisão migram para o Postgres.
 
 ## 10. Pendente — checklist de execução
 
-- [ ] `lib/conferencia/totvs.ts` — queries SF1/SD1 com espécies e empresas configuráveis
-- [ ] `lib/conferencia/comparator.ts` — port fiel do `comparator.py`
-- [ ] `lib/conferencia/fontes.ts` — registry + cache `fiscal_docs`
-- [ ] Login SIEG headless na VPS + renovação de cookie (reuso do handler)
-- [ ] `syncConferencia()` no worker + watermark + backoff de `falha_tecnica`
+- [x] `lib/conferencia/totvs.ts` — queries SF1/SD1 com espécies e empresas configuráveis
+- [x] `lib/conferencia/comparator.ts` — port fiel do `comparator.py` (+ fix empresa BRATEC)
+- [x] `lib/conferencia/fontes.ts` — registry + cache `fiscal_doc_cache`
+- [x] Login SIEG headless na VPS + renovação de cookie (reuso do handler)
+- [x] `syncConferencia()` no worker + watermark + backoff de `falha_tecnica`
 - [ ] Tabelas `regras_*` + seed exato de `tes_rules.py` + `comparator` defaults
 - [ ] `GET /api/regras/{lancamento,conferencia}` com secret escopado
 - [ ] Página `/regras` — abas Lançamento/Conferência + audit
@@ -258,7 +278,7 @@ procedural; todas as tabelas de decisão migram para o Postgres.
 | Certificado A1 (DistDFe) | Empresa **não tem** — DistDFe descartado; cobertura vem de SIEG + Z01 + attachments + caches (+ futuras: e-mail, API paga) | **Decidido** |
 | e2doc como fonte | **Não se aplica** — NFs não são arquivadas no e2doc (fora de escopo) | **Decidido** |
 | ExecAuto/REST de escrita TOTVS | Se existir, até lançamento sai do PC — investigação separada | A investigar |
-| SIEG na VPS | Cookies por CNPJ? Rate limit diário? Login 2FA? | A testar em produção |
+| SIEG na VPS | **Funcionando** — login headless renova `COFRE.AUTH`; observar rate limit e quota de downloads nos próximos ciclos | Resolvido (monitorar) |
 | Escopo da conferência | **Tudo que foi lançado** — bot e humano (SF1 é fonte completa); ciclo curto com dedup, não mais diário | **Decidido** |
 | Intervalo do ciclo | Alvo inicial 30–60 min — ajustável por regra/config na página | A calibrar no piloto |
 | Regra "parcial" do Lince | Itens especiais/DIFAL dependem de dados do grid/XML — conferir que todos os inputs existem via REST (D1_TES leitura ok; `tes_atual` do grid → ler SF4/SD1) | A validar |
