@@ -95,6 +95,37 @@ export async function existeNoE2Doc(args: {
   }
 }
 
+export interface PastaE2Doc {
+  indices: Record<string, string>;
+  documentos: { modelo: string; existeDoc: boolean; id?: string }[];
+}
+
+/** Consulta as pastas do CPF na pasta-modelo — leitura usada p/ conferir o que
+ *  realmente chegou no e2doc após um envio. */
+export async function consultarPastasE2Doc(cpf: string, modeloPasta: EnvioE2Doc['modeloPasta']): Promise<PastaE2Doc[]> {
+  const { token } = await autenticar();
+  const resp = await fetch(`${API_BASE}/Consulta/Consultar`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      token,
+      param: 'EstEc=9000',
+      flags: '0',
+      modelo: modeloPasta,
+      indices: [{ label: 'CPF', operador: 'IGUAL', valor: cpf }],
+    }),
+    signal: AbortSignal.timeout(60_000),
+  });
+  if (!resp.ok) throw new Error(`E2DOC consulta → ${resp.status}`);
+  const data: any = await resp.json().catch(() => ({}));
+  return (data.pastas || []).map((p: any) => ({
+    indices: Object.fromEntries((p.indices || []).map((i: any) => [i.label, String(i.valor || '').trim()])),
+    documentos: (p.documentos || []).map((d: any) => ({
+      modelo: d.modelo, existeDoc: !!d.existeDoc, id: d.id || d.idDocumento,
+    })),
+  }));
+}
+
 export interface EnvioE2Doc {
   cpf: string;
   nome: string;

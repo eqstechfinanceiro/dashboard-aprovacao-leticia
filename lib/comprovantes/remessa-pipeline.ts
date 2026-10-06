@@ -29,6 +29,12 @@ export interface RemessaSelection {
   dir: string;                       // pasta absoluta com os uploads
   files: { name: string; kind: 'pdf' | 'txt' }[];
   phase: 'analise' | 'envio';
+  /** Competência e2doc 'MM/YYYY' escolhida pelo usuário; sem ela, deriva do
+   *  pagamento (FOL → competência = mês anterior). */
+  competencia?: string;
+  /** Quando presente, a fase de envio processa só esses comprovantes_envios.id
+   *  (envio de teste / seletivo). Vazio/ausente = todos os 'pronto'. */
+  onlyEnvioIds?: number[];
 }
 
 // ---------- Índice de funcionários ----------
@@ -319,12 +325,20 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
   const outDir = join(process.env.COMPROVANTES_OUTPUT_DIR || join(process.cwd(), 'comprovantes-output'), String(run.id));
   mkdirSync(outDir, { recursive: true });
 
-  // Itens prontos gravados na análise
-  const itens = await sql`
-    SELECT * FROM comprovantes_envios
-    WHERE run_id = ${run.id} AND status IN ('pronto','divergencia')
-    ORDER BY source_file, page_num, (meta->>'slot')::int NULLS FIRST
-  `;
+  // Itens prontos gravados na análise (ou subconjunto envio seletivo/teste)
+  const onlyIds = sel.onlyEnvioIds?.filter((n) => Number.isFinite(n)) || [];
+  const itens = onlyIds.length
+    ? await sql`
+        SELECT * FROM comprovantes_envios
+        WHERE run_id = ${run.id} AND id = ANY(${onlyIds})
+          AND status IN ('pronto','divergencia')
+        ORDER BY source_file, page_num, (meta->>'slot')::int NULLS FIRST
+      `
+    : await sql`
+        SELECT * FROM comprovantes_envios
+        WHERE run_id = ${run.id} AND status IN ('pronto','divergencia')
+        ORDER BY source_file, page_num, (meta->>'slot')::int NULLS FIRST
+      `;
 
   // Carrega cada PDF uma vez só
   const docCache = new Map<string, PDFDocument>();
@@ -365,13 +379,16 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
       writeFileSync(generatedPath, pdfBytes);
       resumo.gerados++;
 
-      // Competência/destino: data de pagamento do comprovante (fallback: mês anterior ao run)
+      // Competência/destino: data de pagamento do comprovante (fallback: mês
+      // anterior ao run). O usuário pode forçar a competência e2doc no run.
       const dtPag = comp.dataPagamento || hoje.toISOString().slice(0, 10);
       const [anoVigente, mesNum] = [dtPag.slice(0, 4), dtPag.slice(5, 7)];
       const mesVigente = retornarMes(mesNum);
       const spec = specPorTipo('FOL', mesVigente)!;
       const destinoPath = buildDestinoPath(spec, anoVigente, mesVigente, dtPag.slice(8, 10), null);
-      const competencia = competenciaFolha(mesNum, anoVigente);
+      const competencia = /^\d{2}\/\d{4}$/.test(sel.competencia || '')
+        ? sel.competencia!
+        : competenciaFolha(mesNum, anoVigente);
 
       // Dedup completo (SP + e2doc)
       let duplicado = false;

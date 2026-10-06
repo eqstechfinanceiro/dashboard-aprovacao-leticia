@@ -29,6 +29,7 @@ const inactive_alerts_1 = require("../lib/sync/inactive-alerts");
 const notifications_1 = require("../lib/sync/notifications");
 const totvs_1 = require("../lib/impacto/totvs");
 const totvs_2 = require("../lib/boletos/totvs");
+const sync_2 = require("../lib/conferencia/sync");
 const settings_1 = require("../lib/db/settings");
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
 const WARM_INTERVAL_MS = 45 * 60 * 1000;
@@ -225,6 +226,17 @@ async function warmCycle() {
         catch (e) {
             failed = true;
             await logError(runId, 'warm', 'boletos-se2', e?.message || String(e), true);
+        }
+        // Conferência de mercadoria — SF1×XML (Z01/SIEG) por ledger, janela 14d
+        try {
+            const conf = await (0, sync_2.syncConferencia)();
+            meta.conferencia = `notas:${conf.total} conf:${conf.conferidas} ok:${conf.match} div:${conf.divergentes} falha:${conf.falhas} skip:${conf.puladas} fontes:${JSON.stringify(conf.fontes)}${conf.error ? ' !err' : ''}`;
+            if (conf.error)
+                failed = true;
+        }
+        catch (e) {
+            failed = true;
+            await logError(runId, 'warm', 'conferencia', e?.message || String(e), true);
         }
         await finishRun(runId, failed ? 'error' : 'done', meta);
         console.log('[WARM] ciclo', failed ? 'com erros' : 'ok');

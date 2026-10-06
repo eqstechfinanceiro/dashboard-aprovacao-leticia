@@ -205,6 +205,7 @@ export default function AutomacaoComprovantesPage() {
   const [remUploading, setRemUploading] = useState(false);
   const [remUpload, setRemUpload] = useState<{ uploadId: string; files: { name: string; size: number; kind: string; banco?: string | null }[] } | null>(null);
   const [remError, setRemError] = useState<string | null>(null);
+  const [remComp, setRemComp] = useState('');
   const [confirming, setConfirming] = useState<number | null>(null);
 
   // Funcionários
@@ -405,7 +406,7 @@ export default function AutomacaoComprovantesPage() {
       const resp = await fetch('/api/comprovantes/runs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'remessa', uploadId: remUpload.uploadId }),
+          body: JSON.stringify({ mode: 'remessa', uploadId: remUpload.uploadId, competencia: remComp || undefined }),
       });
       const data = await resp.json();
       if (resp.ok) {
@@ -829,6 +830,19 @@ export default function AutomacaoComprovantesPage() {
                   {remFiles.length} arquivo{remFiles.length > 1 ? 's' : ''} selecionado{remFiles.length > 1 ? 's' : ''}
                   <span className="text-gray-400"> — {remFiles.filter((f) => /\.pdf$/i.test(f.name)).length} PDF, {remFiles.filter((f) => /\.txt$/i.test(f.name)).length} TXT</span>
                 </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <label className="text-xs font-medium text-gray-600">Competência e2doc</label>
+              <input
+                value={remComp}
+                onChange={(e) => setRemComp(e.target.value)}
+                placeholder="MM/AAAA — vazio usa o mês anterior ao pagamento"
+                className="w-64 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+              {remComp && !/^\d{2}\/\d{4}$/.test(remComp) && (
+                <span className="text-[11px] text-red-500">formato MM/AAAA</span>
               )}
             </div>
 

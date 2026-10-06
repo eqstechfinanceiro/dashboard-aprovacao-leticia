@@ -5,6 +5,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isE2DocSendEnabled = isE2DocSendEnabled;
 exports.existeNoE2Doc = existeNoE2Doc;
+exports.consultarPastasE2Doc = consultarPastasE2Doc;
 exports.enviarComprovante = enviarComprovante;
 const crypto_1 = require("crypto");
 const settings_1 = require("../db/settings");
@@ -91,6 +92,32 @@ async function existeNoE2Doc(args) {
     catch {
         return false;
     }
+}
+/** Consulta as pastas do CPF na pasta-modelo — leitura usada p/ conferir o que
+ *  realmente chegou no e2doc após um envio. */
+async function consultarPastasE2Doc(cpf, modeloPasta) {
+    const { token } = await autenticar();
+    const resp = await fetch(`${API_BASE}/Consulta/Consultar`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            token,
+            param: 'EstEc=9000',
+            flags: '0',
+            modelo: modeloPasta,
+            indices: [{ label: 'CPF', operador: 'IGUAL', valor: cpf }],
+        }),
+        signal: AbortSignal.timeout(60000),
+    });
+    if (!resp.ok)
+        throw new Error(`E2DOC consulta → ${resp.status}`);
+    const data = await resp.json().catch(() => ({}));
+    return (data.pastas || []).map((p) => ({
+        indices: Object.fromEntries((p.indices || []).map((i) => [i.label, String(i.valor || '').trim()])),
+        documentos: (p.documentos || []).map((d) => ({
+            modelo: d.modelo, existeDoc: !!d.existeDoc, id: d.id || d.idDocumento,
+        })),
+    }));
 }
 async function enviarComprovante(envio) {
     const protocolo = (0, crypto_1.randomUUID)();

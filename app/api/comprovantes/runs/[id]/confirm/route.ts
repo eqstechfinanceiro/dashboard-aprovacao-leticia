@@ -19,10 +19,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const session = token ? await verifyToken(token) : null;
   if (!session) return NextResponse.json({ error: 'não autenticado' }, { status: 401 });
 
-  const { action } = await request.json().catch(() => ({}));
+  const { action, envioIds } = await request.json().catch(() => ({}));
   if (action !== 'confirmar' && action !== 'cancelar') {
     return NextResponse.json({ error: "action deve ser 'confirmar' ou 'cancelar'" }, { status: 400 });
   }
+  const onlyEnvioIds = Array.isArray(envioIds)
+    ? envioIds.filter((n: any) => Number.isFinite(n)).map(Number)
+    : undefined;
 
   const rows = await sql`SELECT id, status, selection FROM comprovantes_runs WHERE id = ${id}`;
   const run = rows[0];
@@ -36,7 +39,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ ok: true, status: 'cancelado' });
   }
 
-  const sel = { ...(run.selection as any), phase: 'envio' };
+  const sel = { ...(run.selection as any), phase: 'envio', ...(onlyEnvioIds?.length ? { onlyEnvioIds } : {}) };
   await sql`UPDATE comprovantes_runs
     SET status='queued', selection=${JSON.stringify(sel)}::jsonb, started_at=NULL, finished_at=NULL
     WHERE id=${id}`;

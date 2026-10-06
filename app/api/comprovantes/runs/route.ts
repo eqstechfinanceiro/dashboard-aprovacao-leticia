@@ -20,7 +20,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'DB not available' }, { status: 503 });
   const body = await request.json().catch(() => ({}));
-  const { source = 'eqs', year, month, bank, date, files, mode, uploadId } = body;
+  const { source = 'eqs', year, month, bank, date, files, mode, uploadId, competencia } = body;
 
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   const session = token ? await verifyToken(token) : null;
@@ -59,7 +59,8 @@ export async function POST(request: NextRequest) {
     if (dup.length > 0) {
       return NextResponse.json({ runId: dup[0].id, deduplicated: true, status: dup[0].status });
     }
-    const selection = { sig, dir, files: remFiles.map(({ name, kind }) => ({ name, kind })), phase: 'analise' };
+    const compSel = typeof competencia === 'string' && /^\d{2}\/\d{4}$/.test(competencia) ? competencia : undefined;
+    const selection = { sig, dir, files: remFiles.map(({ name, kind }) => ({ name, kind })), phase: 'analise', competencia: compSel };
     const runId = await createRun({
       source: 'remessa',
       selection: selection as any,
