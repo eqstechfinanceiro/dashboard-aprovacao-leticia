@@ -12,7 +12,7 @@ import { recordStatusTransition } from './reports';
 export const AUTO_APPROVE_KEY = 'auto_approve_enabled';
 export const AUTO_APPROVE_COMMENT = 'Despesa aprovada automaticamente pelo Aery Bot';
 const CARD_PAYMENT_METHOD_ID = '627401'; // cartão corporativo → FATURA
-const DEFAULT_APPROVER_ID = 891904;
+export const DEFAULT_APPROVER_ID = 891904; // Letícia — etapa 1 do fluxo VExpenses
 
 export async function isAutoApproveEnabled(): Promise<boolean> {
   const v = await getSetting<boolean>(AUTO_APPROVE_KEY);

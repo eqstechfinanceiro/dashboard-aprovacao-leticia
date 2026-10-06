@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AUTO_APPROVE_COMMENT = exports.AUTO_APPROVE_KEY = void 0;
+exports.DEFAULT_APPROVER_ID = exports.AUTO_APPROVE_COMMENT = exports.AUTO_APPROVE_KEY = void 0;
 exports.isAutoApproveEnabled = isAutoApproveEnabled;
 exports.findAutoApprovableReports = findAutoApprovableReports;
 exports.runAutoApprove = runAutoApprove;
@@ -17,7 +17,7 @@ const reports_1 = require("./reports");
 exports.AUTO_APPROVE_KEY = 'auto_approve_enabled';
 exports.AUTO_APPROVE_COMMENT = 'Despesa aprovada automaticamente pelo Aery Bot';
 const CARD_PAYMENT_METHOD_ID = '627401'; // cartão corporativo → FATURA
-const DEFAULT_APPROVER_ID = 891904;
+exports.DEFAULT_APPROVER_ID = 891904; // Letícia — etapa 1 do fluxo VExpenses
 async function isAutoApproveEnabled() {
     const v = await (0, settings_1.getSetting)(exports.AUTO_APPROVE_KEY);
     return v === true;
@@ -238,7 +238,7 @@ async function runAutoApprove(approverId) {
     result.waiting_next_step = waitingNextStep.length;
     // Only ever approve as this user — if the report already moved to a step
     // where she isn't an approver, the API answers 422 and we skip it.
-    const approver = approverId ?? DEFAULT_APPROVER_ID;
+    const approver = approverId ?? exports.DEFAULT_APPROVER_ID;
     for (const r of ready) {
         try {
             const statusAfter = await approveReportAsBot(r.id, approver);

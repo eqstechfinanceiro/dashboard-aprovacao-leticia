@@ -11,6 +11,8 @@ import {
   RefreshCw,
   Hourglass,
   FileCheck,
+  Sigma,
+  ClipboardCheck,
   Package,
   Wrench,
   Repeat,
@@ -156,6 +158,8 @@ export default function PendenciasPanel() {
   const [periodo, setPeriodo] = useState<PeriodoEmissao>('all');
   const [mesCustom, setMesCustom] = useState('');
   const [exporting, setExporting] = useState(false);
+  const [aprovar, setAprovar] = useState<{ count: number } | null>(null);
+  const [aprovarErro, setAprovarErro] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -171,7 +175,22 @@ export default function PendenciasPanel() {
     }
   };
 
-  useEffect(() => { load(); }, []);
+  // Fila de aprovação da Letícia — endpoint separado porque depende da camada
+  // VExpenses (mais lenta que o Postgres dos cards principais).
+  const loadAprovar = async () => {
+    try {
+      const res = await fetch('/api/pendencias/aprovar', { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const j = await res.json();
+      setAprovar({ count: j.count ?? 0 });
+      setAprovarErro(false);
+    } catch {
+      setAprovar(null);
+      setAprovarErro(true);
+    }
+  };
+
+  useEffect(() => { load(); loadAprovar(); }, []);
 
   const reports = useMemo(() => {
     if (!data) return [];
@@ -223,6 +242,12 @@ export default function PendenciasPanel() {
       pendente: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PENDENTE'),
       parcial: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PARCIAL'),
     },
+    // União dos dois cards sem dupla contagem: PARCIAL de qualquer meio + V.
+    soma: {
+      total: bucketOf(reports, (r) => r.state === 'PARCIAL' || r.meipag === 'V'),
+      itau: bucketOf(reports, (r) => r.state === 'PARCIAL' && r.meipag === 'I'),
+      vex: bucketOf(reports, (r) => r.meipag === 'V'),
+    },
   }), [reports]);
 
   const sdsByEmpresa = useMemo(() => {
@@ -268,13 +293,16 @@ export default function PendenciasPanel() {
       '',
       `${hoje} - EQS ENGENHARIA`,
       '',
-      `CAIXAS A SEREM CONFERIDOS: ${c.total.count}, totalizando R$ ${fmt(c.total.valor)}`,
+      `CAIXAS PARCIAIS: ${c.total.count}, totalizando R$ ${fmt(c.total.valor)}`,
       `- ITAU - ${c.itau.count}, totalizando R$ ${fmt(c.itau.valor)}`,
       `- VEX - ${c.vex.count}, totalizando R$ ${fmt(c.vex.valor)}`,
       '',
-      `CAIXAS A SEREM LANÇADOS (SIGA): ${l.total.count}, totalizando R$ ${fmt(l.total.valor)}`,
+      `CAIXAS PENDENTES (SIGA): ${l.total.count}, totalizando R$ ${fmt(l.total.valor)}`,
       `- PARCIAIS - ${l.parcial.count}, totalizando R$ ${fmt(l.parcial.valor)}`,
       `- PENDENTES - ${l.pendente.count}, totalizando R$ ${fmt(l.pendente.valor)}`,
+      '',
+      `TOTAL CAIXAS: ${agilitas.soma.total.count}, totalizando R$ ${fmt(agilitas.soma.total.valor)}`,
+      ...(aprovar ? [`PARA APROVAR (etapa Letícia): ${aprovar.count} caixas`] : []),
     ];
     const text = lines.join('\n');
     let ok = false;
@@ -319,13 +347,15 @@ export default function PendenciasPanel() {
       );
 
       const resumo = [
-        { Setor: 'Gestão de Caixa', Indicador: 'Caixas a conferir', Quantidade: a.conferir.total.count, 'Valor (R$)': a.conferir.total.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · Itaú', Quantidade: a.conferir.itau.count, 'Valor (R$)': a.conferir.itau.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · VEX', Quantidade: a.conferir.vex.count, 'Valor (R$)': a.conferir.vex.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'A conferir · Outros', Quantidade: a.conferir.outros.count, 'Valor (R$)': a.conferir.outros.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'Caixas a lançar (SIGA)', Quantidade: a.lancar.total.count, 'Valor (R$)': a.lancar.total.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'A lançar · Pendentes', Quantidade: a.lancar.pendente.count, 'Valor (R$)': a.lancar.pendente.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'A lançar · Parciais', Quantidade: a.lancar.parcial.count, 'Valor (R$)': a.lancar.parcial.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Caixas parciais', Quantidade: a.conferir.total.count, 'Valor (R$)': a.conferir.total.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Parciais · Itaú', Quantidade: a.conferir.itau.count, 'Valor (R$)': a.conferir.itau.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Parciais · VEX', Quantidade: a.conferir.vex.count, 'Valor (R$)': a.conferir.vex.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Parciais · Outros', Quantidade: a.conferir.outros.count, 'Valor (R$)': a.conferir.outros.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Caixas pendentes (SIGA)', Quantidade: a.lancar.total.count, 'Valor (R$)': a.lancar.total.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Pendentes · Pendentes', Quantidade: a.lancar.pendente.count, 'Valor (R$)': a.lancar.pendente.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Pendentes · Parciais', Quantidade: a.lancar.parcial.count, 'Valor (R$)': a.lancar.parcial.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Total caixas (parciais + pendentes)', Quantidade: a.soma.total.count, 'Valor (R$)': a.soma.total.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Caixas para aprovar (etapa Letícia)', Quantidade: aprovar?.count ?? 0, 'Valor (R$)': null },
         { Setor: 'Entrada de Notas', Indicador: 'Notas a lançar (contábil)', Quantidade: sdsTotal.count, 'Valor (R$)': sdsTotal.valor },
       ];
       const wsResumo = XLSX.utils.json_to_sheet(resumo);
@@ -456,11 +486,11 @@ export default function PendenciasPanel() {
 
       {/* Cards Agilitas — Gestão de Caixa */}
       {(setor === 'all' || setor === 'caixa') && (<>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-t-4 border-t-amber-500 bg-amber-50/40">
           <CardContent className="px-4 pb-4 pt-4 text-center">
             <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-amber-700">
-              <span className="rounded-full bg-amber-100 p-1"><Hourglass className="h-4 w-4" /></span> Caixas a conferir
+              <span className="rounded-full bg-amber-100 p-1"><Hourglass className="h-4 w-4" /></span> Caixas parciais
             </div>
             <div className="mt-2 text-3xl font-bold text-amber-700">{a.conferir.total.count}</div>
             <div className="text-sm font-medium text-gray-700">R$ {fmt(a.conferir.total.valor)}</div>
@@ -487,7 +517,7 @@ export default function PendenciasPanel() {
         <Card className="border-t-4 border-t-blue-500 bg-blue-50/40">
           <CardContent className="px-4 pb-4 pt-4 text-center">
             <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-blue-700">
-              <span className="rounded-full bg-blue-100 p-1"><FileCheck className="h-4 w-4" /></span> Caixas a lançar (SIGA)
+              <span className="rounded-full bg-blue-100 p-1"><FileCheck className="h-4 w-4" /></span> Caixas pendentes
             </div>
             <div className="mt-2 text-3xl font-bold text-blue-700">{a.lancar.total.count}</div>
             <div className="text-sm font-medium text-gray-700">R$ {fmt(a.lancar.total.valor)}</div>
@@ -502,6 +532,52 @@ export default function PendenciasPanel() {
               </div>
             </div>
             <p className="mt-3 text-[10px] text-gray-400">Caixas VExpenses com itens pendentes</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-t-4 border-t-violet-500 bg-violet-50/40">
+          <CardContent className="px-4 pb-4 pt-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-violet-700">
+              <span className="rounded-full bg-violet-100 p-1"><Sigma className="h-4 w-4" /></span> Total caixas
+            </div>
+            <div className="mt-2 text-3xl font-bold text-violet-700">{a.soma.total.count}</div>
+            <div className="text-sm font-medium text-gray-700">R$ {fmt(a.soma.total.valor)}</div>
+            <div className="mt-3 space-y-1 text-xs text-gray-500">
+              <div className="flex justify-between">
+                <span>VEXPENSES</span>
+                <span>{a.soma.vex.count} — R$ {fmt(a.soma.vex.valor)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>ITAÚ</span>
+                <span>{a.soma.itau.count} — R$ {fmt(a.soma.itau.valor)}</span>
+              </div>
+            </div>
+            <p className="mt-3 text-[10px] text-gray-400">Parciais + pendentes, sem dupla contagem</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-t-4 border-t-emerald-500 bg-emerald-50/40">
+          <CardContent className="px-4 pb-4 pt-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              <span className="rounded-full bg-emerald-100 p-1"><ClipboardCheck className="h-4 w-4" /></span> Caixas para aprovar
+            </div>
+            <div className="mt-2 text-3xl font-bold text-emerald-700">
+              {aprovar ? aprovar.count : aprovarErro ? '—' : <Loader2 className="inline h-6 w-6 animate-spin" />}
+            </div>
+            <div className="text-sm font-medium text-gray-700">
+              {aprovarErro ? 'falha ao carregar' : '\u00A0'}
+            </div>
+            <div className="mt-3 space-y-1 text-xs text-gray-500">
+              <div className="flex justify-between">
+                <span>VEXPENSES</span>
+                <span>etapa Letícia</span>
+              </div>
+            </div>
+            <p className="mt-3 text-[10px]">
+              <a href="/aprovacao-dinamica" className="text-emerald-600 underline-offset-2 hover:underline">
+                Abrir aprovação dinâmica →
+              </a>
+            </p>
           </CardContent>
         </Card>
 
