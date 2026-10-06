@@ -128,13 +128,25 @@ async function processarEnvio(ctx, pagina, funcionario, tipoEfetivo, nomeArquivo
         pedido: pagina.pedido, modeloDocumento: spec.modeloDocumento, competencia: competenciaEnvio,
         destinoPath, destinoFilename: fileName, generatedPdfPath: generatedPath,
     };
-    if (duplicado) {
+    // Dedup é por entrega completa: arquivo no SharePoint E doc no e2doc.
+    // Se o SP já tem o arquivo mas o e2doc ficou de fora (ex.: run anterior
+    // falhou no passo e2doc), segue para o envio e2doc sem re-upload de SP.
+    const elegivelE2Doc = !!(spec.enviaE2Doc && spec.modeloDocumento && funcionario && cpfEfetivo);
+    let jaNoE2Doc = !elegivelE2Doc;
+    if (duplicado && elegivelE2Doc) {
+        jaNoE2Doc = await (0, e2doc_1.existeNoE2Doc)({
+            cpf: cpfEfetivo, competencia: competenciaEnvio,
+            modeloDocumento: spec.modeloDocumento, modeloPasta: spec.modeloPasta,
+            banco, pedido: pagina.pedido,
+        });
+    }
+    if (duplicado && jaNoE2Doc) {
         resumo.duplicados++;
         await (0, db_1.insertEnvio)({ ...envioBase, status: 'duplicado' });
         return;
     }
     // Upload SharePoint destino (gateado)
-    if (uploadEnabled) {
+    if (uploadEnabled && !duplicado) {
         try {
             await (0, sharepoint_1.uploadFile)(DESTINO, destinoPath, fileName, pdfBytes);
             ctx.caches.destFiles.get(destinoPath)?.add(fileName);

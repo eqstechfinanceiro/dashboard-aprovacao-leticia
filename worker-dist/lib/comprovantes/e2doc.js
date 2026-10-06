@@ -4,6 +4,7 @@
 // Em dry-run, retorna sucesso simulado sem chamar nenhum endpoint de envio.
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isE2DocSendEnabled = isE2DocSendEnabled;
+exports.existeNoE2Doc = existeNoE2Doc;
 exports.enviarComprovante = enviarComprovante;
 const crypto_1 = require("crypto");
 const settings_1 = require("../db/settings");
@@ -50,6 +51,46 @@ async function autenticar() {
 }
 function usuarioAtual() {
     return process.env.E2DOC_LOGIN || '';
+}
+/** Consulta se já existe doc do modelo na pasta CPF+COMPETÊNCIA(+BANCO/PEDIDO).
+ *  Usado pela dedup quando o arquivo já está no SharePoint mas o e2doc pode
+ *  ter ficado de fora (falha numa run anterior). Erro de consulta → false
+ *  (fail-open: o envio subsequente falha e marca e2doc_erro, recuperável). */
+async function existeNoE2Doc(args) {
+    try {
+        const { token } = await autenticar();
+        const resp = await fetch(`${API_BASE}/Consulta/Consultar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                token,
+                param: 'EstEc=9000',
+                flags: '0',
+                modelo: args.modeloPasta,
+                indices: [{ label: 'CPF', operador: 'IGUAL', valor: args.cpf }],
+            }),
+            signal: AbortSignal.timeout(60000),
+        });
+        if (!resp.ok)
+            return false;
+        const data = await resp.json().catch(() => ({}));
+        const idx = (p, label) => String((p.indices || []).find((i) => i.label === label)?.valor || '').trim();
+        for (const pasta of data.pastas || []) {
+            if (idx(pasta, 'COMPETÊNCIA') !== args.competencia)
+                continue;
+            if (args.banco && idx(pasta, 'BANCO') && idx(pasta, 'BANCO') !== args.banco)
+                continue;
+            if (args.pedido && idx(pasta, 'PEDIDO') && idx(pasta, 'PEDIDO') !== args.pedido)
+                continue;
+            const docs = pasta.documentos || [];
+            if (docs.some((d) => d.modelo === args.modeloDocumento && d.existeDoc))
+                return true;
+        }
+        return false;
+    }
+    catch {
+        return false;
+    }
 }
 async function enviarComprovante(envio) {
     const protocolo = (0, crypto_1.randomUUID)();
