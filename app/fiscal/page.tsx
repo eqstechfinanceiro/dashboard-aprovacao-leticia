@@ -155,6 +155,22 @@ export default function FiscalPage() {
   const [importing, setImporting] = useState(false);
   const [importManual, setImportManual] = useState({ doc: '', serie: '', filial: '', fornecedor: '', cnpj: '', valor: '', emissao: '' });
   const importIsPdf = !!importFile && /\.pdf$/i.test(importFile.name);
+  const [ciclo, setCiclo] = useState<{ state?: any; runs?: any[]; fila?: any[]; erros?: any[] } | null>(null);
+  const [logsOpen, setLogsOpen] = useState(false);
+
+  const loadCiclo = useCallback(async () => {
+    try {
+      const r = await fetch('/api/fiscal/ciclo');
+      const b = await r.json();
+      if (r.ok) setCiclo(b);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    loadCiclo();
+    const t = setInterval(loadCiclo, 20000);
+    return () => clearInterval(t);
+  }, [loadCiclo]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -304,6 +320,90 @@ export default function FiscalPage() {
           </a>
         </div>
       </div>
+
+      {/* Ciclo de conferência — observabilidade do worker na VPS */}
+      {(() => {
+        const s = ciclo?.state || {};
+        const running = ['totvs', 'sieg_prep', 'conferindo'].includes(s.fase);
+        const pct = s.elegiveis > 0 ? Math.round((100 * (s.conferidas || 0)) / s.elegiveis) : (running ? 0 : 100);
+        const proxCiclo = s.finished_at ? new Date(new Date(s.finished_at).getTime() + 45 * 60000) : null;
+        const filaMap = Object.fromEntries((ciclo?.fila || []).map((f: any) => [f.review_status, f.n]));
+        return (
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <RefreshCw className={cn('h-4 w-4', running ? 'animate-spin text-blue-500' : 'text-muted-foreground')} />
+                  Ciclo de conferência (VPS — a cada ~45min)
+                </CardTitle>
+                <Button variant="ghost" size="sm" onClick={() => setLogsOpen((v) => !v)}>
+                  {logsOpen ? 'Ocultar logs' : 'Ver logs'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3 text-sm flex-wrap">
+                <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-semibold',
+                  running ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600')}>
+                  {running
+                    ? s.fase === 'totvs' ? 'Consultando TOTVS…' : s.fase === 'sieg_prep' ? 'Registrando chaves no SIEG…' : 'Conferindo…'
+                    : 'Ocioso'}
+                </span>
+                {running && s.elegiveis > 0 && (
+                  <span className="text-muted-foreground">{s.conferidas}/{s.elegiveis} notas</span>
+                )}
+                {s.current_doc && <span className="text-muted-foreground">atual: NF {s.current_doc}</span>}
+                {!running && s.finished_at && (
+                  <span className="text-muted-foreground">
+                    último ciclo {new Date(s.finished_at).toLocaleString('pt-BR')}
+                    {proxCiclo && ` · próximo ~${proxCiclo.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`}
+                  </span>
+                )}
+                {s.error && <span className="text-red-600 text-xs">erro: {s.error}</span>}
+              </div>
+              <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                <div
+                  className={cn('h-full rounded-full transition-all', running ? 'bg-blue-500' : 'bg-green-500')}
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="flex gap-4 text-xs text-muted-foreground flex-wrap">
+                <span><b className="text-green-600">{s.match || 0}</b> ok</span>
+                <span><b className="text-amber-600">{s.divergentes || 0}</b> divergentes</span>
+                <span><b className="text-gray-500">{s.falhas || 0}</b> falhas técnicas</span>
+                <span><b>{s.puladas || 0}</b> puladas (dedup)</span>
+                <span><b>{s.total || 0}</b> NFs na janela {s.janela_dias ? `(${s.janela_dias}d)` : ''}</span>
+                {Object.entries(s.fontes || {}).map(([f, n]: any) => (
+                  <span key={f} className="rounded bg-slate-100 px-1.5 py-0.5">fonte {f}: <b>{String(n)}</b></span>
+                ))}
+                {Object.keys(filaMap).length > 0 && (
+                  <span className="ml-auto">
+                    fila total: {Object.entries(filaMap).map(([k, v]: any) => `${STATUS_LABEL[k] || k} ${v}`).join(' · ')}
+                  </span>
+                )}
+              </div>
+              {logsOpen && (
+                <div className="rounded-lg border bg-slate-950 text-slate-100 p-3 max-h-72 overflow-y-auto">
+                  <pre className="text-[11px] leading-relaxed whitespace-pre-wrap font-mono">
+                    {(s.log || []).map((l: any, i: number) =>
+                      `${new Date(l.t).toLocaleTimeString('pt-BR')} ${l.m}`
+                    ).join('\n') || 'sem logs ainda'}
+                  </pre>
+                  {(ciclo?.erros || []).length > 0 && (
+                    <div className="mt-2 pt-2 border-t border-slate-700">
+                      {ciclo!.erros!.map((e: any, i: number) => (
+                        <p key={i} className="text-[11px] text-red-300 font-mono">
+                          {new Date(e.created_at).toLocaleTimeString('pt-BR')} [{e.context}] {e.error}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Resumo do tipo selecionado (só na fila de trabalho) */}
       {view === 'fila' && (
