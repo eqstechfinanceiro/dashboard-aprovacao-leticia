@@ -238,9 +238,11 @@ export default function PendenciasPanel() {
       outros: bucketOf(reports, (r) => r.state === 'PARCIAL' && r.meipag !== 'I' && r.meipag !== 'V'),
     },
     lancar: {
-      total: bucketOf(reports, (r) => r.meipag === 'V'),
-      pendente: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PENDENTE'),
-      parcial: bucketOf(reports, (r) => r.meipag === 'V' && r.state === 'PARCIAL'),
+      // PENDENTE = caixa nunca lançado (na fila só existe PENDENTE VExpenses).
+      total: bucketOf(reports, (r) => r.state === 'PENDENTE'),
+      itens: reports
+        .filter((r) => r.state === 'PENDENTE')
+        .reduce((s, r) => s + (r.pending || 0), 0),
     },
     // União dos dois cards sem dupla contagem: PARCIAL de qualquer meio + V.
     soma: {
@@ -298,8 +300,7 @@ export default function PendenciasPanel() {
       `- VEX - ${c.vex.count}, totalizando R$ ${fmt(c.vex.valor)}`,
       '',
       `CAIXAS PENDENTES (SIGA): ${l.total.count}, totalizando R$ ${fmt(l.total.valor)}`,
-      `- PARCIAIS - ${l.parcial.count}, totalizando R$ ${fmt(l.parcial.valor)}`,
-      `- PENDENTES - ${l.pendente.count}, totalizando R$ ${fmt(l.pendente.valor)}`,
+      `- ITENS PENDENTES - ${l.itens}`,
       '',
       `TOTAL CAIXAS: ${agilitas.soma.total.count}, totalizando R$ ${fmt(agilitas.soma.total.valor)}`,
       ...(aprovar ? [`PARA APROVAR (etapa Letícia): ${aprovar.count} caixas`] : []),
@@ -352,8 +353,7 @@ export default function PendenciasPanel() {
         { Setor: 'Gestão de Caixa', Indicador: 'Parciais · VEX', Quantidade: a.conferir.vex.count, 'Valor (R$)': a.conferir.vex.valor },
         { Setor: 'Gestão de Caixa', Indicador: 'Parciais · Outros', Quantidade: a.conferir.outros.count, 'Valor (R$)': a.conferir.outros.valor },
         { Setor: 'Gestão de Caixa', Indicador: 'Caixas pendentes (SIGA)', Quantidade: a.lancar.total.count, 'Valor (R$)': a.lancar.total.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'Pendentes · Pendentes', Quantidade: a.lancar.pendente.count, 'Valor (R$)': a.lancar.pendente.valor },
-        { Setor: 'Gestão de Caixa', Indicador: 'Pendentes · Parciais', Quantidade: a.lancar.parcial.count, 'Valor (R$)': a.lancar.parcial.valor },
+        { Setor: 'Gestão de Caixa', Indicador: 'Pendentes · Itens a lançar', Quantidade: a.lancar.itens, 'Valor (R$)': null },
         { Setor: 'Gestão de Caixa', Indicador: 'Total caixas (parciais + pendentes)', Quantidade: a.soma.total.count, 'Valor (R$)': a.soma.total.valor },
         { Setor: 'Gestão de Caixa', Indicador: 'Caixas para aprovar (etapa Letícia)', Quantidade: aprovar?.count ?? 0, 'Valor (R$)': null },
         { Setor: 'Entrada de Notas', Indicador: 'Notas a lançar (contábil)', Quantidade: sdsTotal.count, 'Valor (R$)': sdsTotal.valor },
@@ -523,15 +523,15 @@ export default function PendenciasPanel() {
             <div className="text-sm font-medium text-gray-700">R$ {fmt(a.lancar.total.valor)}</div>
             <div className="mt-3 space-y-1 text-xs text-gray-500">
               <div className="flex justify-between">
-                <span>PENDENTES</span>
-                <span>{a.lancar.pendente.count} — R$ {fmt(a.lancar.pendente.valor)}</span>
+                <span>VEXPENSES</span>
+                <span>{a.lancar.total.count} — R$ {fmt(a.lancar.total.valor)}</span>
               </div>
               <div className="flex justify-between">
-                <span>PARCIAIS</span>
-                <span>{a.lancar.parcial.count} — R$ {fmt(a.lancar.parcial.valor)}</span>
+                <span>ITENS PENDENTES</span>
+                <span>{a.lancar.itens}</span>
               </div>
             </div>
-            <p className="mt-3 text-[10px] text-gray-400">Caixas VExpenses com itens pendentes</p>
+            <p className="mt-3 text-[10px] text-gray-400">Nada lançado ainda — fila do SIGA</p>
           </CardContent>
         </Card>
 

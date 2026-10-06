@@ -3,10 +3,10 @@ import { sql } from '@/lib/db/neon';
 
 export const dynamic = 'force-dynamic';
 
-// "A conferir" = reports PARCIAIS na tela Agilitas (lançamento iniciado,
+// "Parciais" = reports PARCIAIS na tela Agilitas (lançamento iniciado,
 // aguardando conferência) — conta TODOS os meios de pagamento.
-// "A lançar" (SIGA) = reports meipag='V' PENDENTE + PARCIAL — a fila de
-// lançamento do Protheus só cobre os caixas VExpenses.
+// "Pendentes" = reports PENDENTE — na fila só existe PENDENTE VExpenses
+// (Itaú pendente é backlog fora da fila SIGA e nem chega aqui).
 // Ambos somam o valor TOTAL do caixa (não só itens pendentes).
 // A tabela lista só a fila acionável: PARCIAIS (todos os meios) + caixas VEX.
 // Itaú PENDENTE é backlog histórico fora da fila SIGA — não entra na lista.
@@ -33,6 +33,41 @@ function bucket(rows: ReportRow[], pred: (r: ReportRow) => boolean) {
     count: sel.length,
     valor: sel.reduce((s, r) => s + (Number(r.total) || 0), 0),
   };
+}
+
+// Snapshot diário da fila de lançamento: a profundidade da fila não é
+// reconstruível com precisão antes do tracking de RESOLVIDO (~21/09), então
+// gravamos um ponto por dia/empresa — a linha "em aberto" vira exata dali pra
+// frente. Fire-and-forget: nunca quebra a resposta.
+let snapshotPromise: Promise<unknown> | null = null;
+function snapshotFila() {
+  if (!sql) return;
+  snapshotPromise ??= (async () => {
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS public.entrada_fila_snapshot (
+          dia date NOT NULL,
+          empresa text NOT NULL,
+          qtd int NOT NULL,
+          valor numeric NOT NULL,
+          captured_at timestamptz NOT NULL DEFAULT now(),
+          PRIMARY KEY (dia, empresa)
+        )
+      `;
+      await sql`
+        INSERT INTO public.entrada_fila_snapshot (dia, empresa, qtd, valor)
+        SELECT (now() AT TIME ZONE 'America/Sao_Paulo')::date, upper(empresa), COUNT(*), COALESCE(SUM(valmerc), 0)
+        FROM z01.totvs_sds_notas
+        WHERE status = 'P' AND fila = 'CONTABIL'
+        GROUP BY upper(empresa)
+        ON CONFLICT (dia, empresa) DO UPDATE
+        SET qtd = EXCLUDED.qtd, valor = EXCLUDED.valor, captured_at = now()
+      `;
+    } catch (e) {
+      console.error('[API Pendencias] snapshot fila falhou:', e);
+      snapshotPromise = null; // permite retry na próxima chamada
+    }
+  })();
 }
 
 export async function GET() {
@@ -90,6 +125,20 @@ export async function GET() {
       ? reports.reduce((m, r) => (r.synced_at > m ? r.synced_at : m), reports[0].synced_at)
       : null;
 
+    // Categorias em aberto (classificação + espécie) — análogo ao
+    // "Top 5 naturezas" do PowerBI, com os campos que o sync traz.
+    const topCategorias = await sql`
+      SELECT classificacao, especi,
+             COUNT(*) AS count,
+             COALESCE(SUM(valmerc), 0) AS valmerc
+      FROM z01.totvs_sds_notas
+      WHERE status = 'P' AND fila = 'CONTABIL'
+      GROUP BY classificacao, especi
+      ORDER BY valmerc DESC
+    `;
+
+    snapshotFila();
+
     return NextResponse.json({
       geradoEm: new Date().toISOString(),
       syncedAt,
@@ -131,6 +180,12 @@ export async function GET() {
           chaveNf: n.chavenf,
         })),
       },
+      topCategorias: topCategorias.map((r: any) => ({
+        classificacao: r.classificacao,
+        especie: r.especi,
+        count: Number(r.count),
+        valmerc: Number(r.valmerc),
+      })),
     });
   } catch (error) {
     console.error('[API Pendencias] Erro:', error);
