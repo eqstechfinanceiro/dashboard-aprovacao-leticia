@@ -6,6 +6,24 @@ export const dynamic = 'force-dynamic';
 
 const EXTENSION_SECRET = process.env.VEXPENSES_EXTENSION_SECRET || '';
 
+// A extensão Chrome chama este endpoint de chrome-extension://<id> — precisa de CORS.
+// A autenticação é pelo `secret` no body (não cookies), então refletir a origin é seguro.
+function corsHeaders(origin: string | null) {
+  const headers: Record<string, string> = {
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+  };
+  if (origin && origin.startsWith('chrome-extension://')) {
+    headers['Access-Control-Allow-Origin'] = origin;
+  }
+  return headers;
+}
+
+export async function OPTIONS(request: NextRequest) {
+  return new NextResponse(null, { status: 204, headers: corsHeaders(request.headers.get('origin')) });
+}
+
 async function ensureTokenTable() {
   if (!sql) return;
   await sql`
@@ -35,8 +53,9 @@ async function ensureTokenTable() {
 }
 
 export async function POST(request: NextRequest) {
+  const cors = corsHeaders(request.headers.get('origin'));
   if (!sql) {
-    return NextResponse.json({ error: 'Database not available' }, { status: 503 });
+    return NextResponse.json({ error: 'Database not available' }, { status: 503, headers: cors });
   }
 
   let body: {
@@ -53,17 +72,17 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: 'JSON inválido' }, { status: 400 });
+    return NextResponse.json({ error: 'JSON inválido' }, { status: 400, headers: cors });
   }
 
   if (!body.laravel_token) {
-    return NextResponse.json({ error: 'laravel_token é obrigatório' }, { status: 400 });
+    return NextResponse.json({ error: 'laravel_token é obrigatório' }, { status: 400, headers: cors });
   }
 
   // Fail-closed: sem secret configurado no servidor, ninguém atualiza o token —
   // este endpoint controla as credenciais de todas as chamadas ao VExpenses.
   if (!EXTENSION_SECRET || body.secret !== EXTENSION_SECRET) {
-    return NextResponse.json({ error: 'Não autorizado' }, { status: 403 });
+    return NextResponse.json({ error: 'Não autorizado' }, { status: 403, headers: cors });
   }
 
   const expiresAt = body.expires_at
@@ -109,7 +128,7 @@ export async function POST(request: NextRequest) {
   }
   clearLaravelTokenCache();
 
-  return NextResponse.json({ ok: true, expires_at: expiresAt, source_label: sourceLabel });
+  return NextResponse.json({ ok: true, expires_at: expiresAt, source_label: sourceLabel }, { headers: cors });
 }
 
 export async function GET() {
