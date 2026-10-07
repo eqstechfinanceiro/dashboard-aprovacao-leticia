@@ -42,6 +42,8 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/itau', ['ferramentas-itau']],
   ['/api/resultados', ['resultados']],
   ['/api/pendencias', ['pendencias']],
+  ['/api/impacto', ['impacto-financeiro']],
+  ['/api/boletos', ['boletos']],
   ['/api/cartorios', ['cartorios']],
   ['/api/quinzena', ['quinzena-dinamica', 'controle', 'configuracoes']],
   ['/api/fechamento', ['fechamento', 'configuracoes']],
@@ -50,6 +52,9 @@ const API_MODULE_MAP: [string, string[]][] = [
   ['/api/analytics/visao-geral', ['dashboard']],
   ['/api/pipeline/status', ['configuracoes']],
   ['/api/sync-expenses', ['quinzena-dinamica']],
+  ['/api/sync-health', ['sync-health', 'configuracoes']],
+  ['/api/audit-log', ['audit-log', 'configuracoes']],
+  ['/api/fiscal', ['fiscal', 'configuracoes']],
   ['/api/vexpenses', VEXPENSES_MODULES],
 ];
 
@@ -73,6 +78,74 @@ export async function middleware(request: NextRequest) {
 
   if (isPublicApi) {
     return NextResponse.next();
+  }
+
+  // Automação interna (sync-worker / cron externo): segredo compartilhado dá
+  // acesso às APIs como identidade sintética de sistema. Fail-closed: sem
+  // CRON_SECRET configurado, nada passa.
+  const cronSecret = process.env.CRON_SECRET;
+  const providedCron = request.headers.get('x-cron-secret');
+  if (cronSecret && providedCron === cronSecret && pathname.startsWith('/api/')) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'autopilot@interno');
+    requestHeaders.set('x-user-name', 'Fechamento automático');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Importador fiscal local (automações Python): segredo dedicado, escopo
+  // estrito a POST /api/fiscal/import. Fail-closed igual ao cron.
+  const fiscalSecret = process.env.FISCAL_IMPORT_SECRET;
+  const providedFiscal = request.headers.get('x-fiscal-secret');
+  if (
+    fiscalSecret &&
+    providedFiscal === fiscalSecret &&
+    pathname === '/api/fiscal/import' &&
+    request.method === 'POST'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'fiscal-import@interno');
+    requestHeaders.set('x-user-name', 'Importador fiscal');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // protheus-reports-vex: leitura da classificação fiscal dos comprovantes.
+  // Escopo estrito a GET /api/aprovacao-dinamica/doc-classification.
+  const docSecret = process.env.DOC_CLASSIFICATION_SECRET;
+  const providedDoc = request.headers.get('x-doc-class-secret');
+  if (
+    docSecret &&
+    providedDoc === docSecret &&
+    pathname === '/api/aprovacao-dinamica/doc-classification' &&
+    request.method === 'GET'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'protheus-reports@interno');
+    requestHeaders.set('x-user-name', 'Protheus Reports VEX');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Lince (bot TOTVS): lookup de regras TES por fornecedor×produto.
+  // Escopo estrito a GET /api/fiscal/tes-regras/lookup. Fail-closed.
+  const linceSecret = process.env.LINCE_TES_SECRET;
+  const providedLince = request.headers.get('x-lince-tes-secret');
+  if (
+    linceSecret &&
+    providedLince === linceSecret &&
+    pathname === '/api/fiscal/tes-regras/lookup' &&
+    request.method === 'GET'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'lince-bot@interno');
+    requestHeaders.set('x-user-name', 'Lince TOTVS');
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   if (isPublicPath) {
@@ -181,6 +254,7 @@ export async function middleware(request: NextRequest) {
   requestHeaders.set('x-user-id', String(payload.id));
   requestHeaders.set('x-user-role', String(payload.role));
   requestHeaders.set('x-user-email', String(payload.email));
+  requestHeaders.set('x-user-name', String(payload.name ?? ''));
 
   return NextResponse.next({
     request: { headers: requestHeaders },
