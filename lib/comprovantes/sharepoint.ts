@@ -523,6 +523,32 @@ async function uploadFileInner(site: SpSiteConfig, folderPath: string, fileName:
   if (res !== 'ok') throw new Error(`Upload falhou ${fileName}: ${res}`);
 }
 
+async function deleteServerRelative(site: SpSiteConfig, kind: 'File' | 'Folder', p: string): Promise<void> {
+  return withCrashRetry(site, async () => {
+    const digest = await getFormDigest(site);
+    await ensureConnected(site);
+    const url = `${SITE_URL}${site.sitePath}/_api/web/Get${kind}ByServerRelativeUrl('${esc(p)}')`;
+    const res = await page!.evaluate(async ({ u, d }: { u: string; d: string }) => {
+      const resp = await fetch(u, {
+        method: 'POST',
+        headers: { Accept: 'application/json;odata=nometadata', 'X-RequestDigest': d, 'X-HTTP-Method': 'DELETE', 'IF-MATCH': '*' },
+      });
+      return resp.ok ? 'ok' : `ERR ${resp.status}: ${(await resp.text()).substring(0, 200)}`;
+    }, { u: url, d: digest });
+    if (res !== 'ok') throw new Error(`Delete falhou ${p}: ${res}`);
+  });
+}
+
+export async function deleteFile(site: SpSiteConfig, filePath: string): Promise<void> {
+  const p = filePath.startsWith('/') ? filePath : `${site.libraryRoot}/${filePath}`;
+  return deleteServerRelative(site, 'File', p);
+}
+
+export async function deleteFolder(site: SpSiteConfig, folderPath: string): Promise<void> {
+  const p = folderPath.startsWith('/') ? folderPath : `${site.libraryRoot}/${folderPath}`;
+  return deleteServerRelative(site, 'Folder', p);
+}
+
 export async function fileExists(site: SpSiteConfig, filePath: string): Promise<boolean> {
   const p = filePath.startsWith('/') ? filePath : `${site.libraryRoot}/${filePath}`;
   try {

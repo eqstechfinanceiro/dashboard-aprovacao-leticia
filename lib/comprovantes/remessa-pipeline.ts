@@ -19,7 +19,7 @@ import { listAllFuncionarios, type Funcionario } from './funcionarios';
 import { enviarComprovante, existeNoE2Doc } from './e2doc';
 import { getSetting } from '../db/settings';
 import { updateRunProgress, insertEnvio, finishRun, failRun, type RunRow } from './db';
-import { parseCnab, BANCO_NOME, type CnabEntry, type CnabFile } from './cnab';
+import { parseCnab, BANCO_NOME, BANCO_E2DOC, type CnabEntry, type CnabFile } from './cnab';
 import { analisarFolhaPdf, fragmentarComprovante, type ComprovanteFolha, type FolhaAnalise } from './folha-pdf';
 
 const DESTINO = SP_SITES.destino;
@@ -211,9 +211,12 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
       resumo.warnings.push(...analise.warnings);
       if (analise.formato === 'desconhecido') resumo.formatoNaoReconhecido++;
 
-      const BANCO_POR_FORMATO: Record<string, string> = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO', bb_pag: 'BANCO DO BRASIL' };
+      // Índice BANCO do e2doc usa o rótulo do dicionário (BANCO_E2DOC), não o
+      // nome de exibição do CNAB — 'BB (BANCO DO BRASIL)' é rejeitado, 'BB' passa.
+      const BANCO_POR_FORMATO: Record<string, string> = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO', bb_pag: 'BB' };
       const bancoTxt = cnabs.find((c) => BANCO_NOME[c.banco] && f.name.toUpperCase().includes(BANCO_NOME[c.banco].split(' ')[0]));
-      const bancoItem = bancoTxt?.bancoNome || BANCO_POR_FORMATO[analise.formato] || null;
+      const bancoItem = (bancoTxt ? (BANCO_E2DOC[bancoTxt.banco] || bancoTxt.bancoNome) : null)
+        || BANCO_POR_FORMATO[analise.formato] || null;
 
       for (const comp of analise.comprovantes) {
         const base = { runId: run.id, sourceFile: f.name, pageNum: comp.pageNum };

@@ -33,6 +33,17 @@ export const BANCO_NOME: Record<string, string> = {
   '104': 'CEF',
 };
 
+/** Valor do índice BANCO no e2doc — o dicionário é estrito e rejeita (400)
+ *  qualquer rótulo fora da lista dele ('BB (BANCO DO BRASIL)' falha; 'BB' passa).
+ *  Verificado em produção: 001→BB, 237→BRADESCO, 341→ITAU. */
+export const BANCO_E2DOC: Record<string, string> = {
+  '001': 'BB',
+  '237': 'BRADESCO',
+  '341': 'ITAU',
+  '033': 'SANTANDER',
+  '104': 'CEF',
+};
+
 function onlyDigits(s: string): string {
   return s.replace(/\D/g, '');
 }
