@@ -101,6 +101,17 @@ export default function BoletosPanel() {
   const [flagsOpen, setFlagsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [venctoDe, setVenctoDe] = useState('');
+  const [venctoAte, setVenctoAte] = useState('');
+  const [emissaoDe, setEmissaoDe] = useState('');
+  const [emissaoAte, setEmissaoAte] = useState('');
+  const [baixaDe, setBaixaDe] = useState('');
+  const [baixaAte, setBaixaAte] = useState('');
+  const [fornecedor, setFornecedor] = useState('');
+  const [fornecedorDeb, setFornecedorDeb] = useState('');
+  const [valorMin, setValorMin] = useState('');
+  const [valorMax, setValorMax] = useState('');
+  const [maisFiltros, setMaisFiltros] = useState(false);
   const flagsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -116,17 +127,37 @@ export default function BoletosPanel() {
     return () => clearTimeout(t);
   }, [busca]);
 
+  useEffect(() => {
+    const t = setTimeout(() => setFornecedorDeb(fornecedor), 400);
+    return () => clearTimeout(t);
+  }, [fornecedor]);
+
+  const buildParams = useCallback(() => {
+    const p = new URLSearchParams();
+    if (empresa) p.set('empresas', empresa);
+    if (status) p.set('status', status);
+    if (flagsSel.length) p.set('flags', flagsSel.join(','));
+    if (buscaDeb) p.set('q', buscaDeb);
+    p.set('so_flags', soFlags ? '1' : '0');
+    if (venctoDe) p.set('vencto_de', venctoDe);
+    if (venctoAte) p.set('vencto_ate', venctoAte);
+    if (emissaoDe) p.set('emissao_de', emissaoDe);
+    if (emissaoAte) p.set('emissao_ate', emissaoAte);
+    if (baixaDe) p.set('baixa_de', baixaDe);
+    if (baixaAte) p.set('baixa_ate', baixaAte);
+    if (fornecedorDeb) p.set('fornecedor', fornecedorDeb);
+    if (valorMin) p.set('valor_min', valorMin);
+    if (valorMax) p.set('valor_max', valorMax);
+    return p;
+  }, [empresa, status, flagsSel, buscaDeb, soFlags,
+      venctoDe, venctoAte, emissaoDe, emissaoAte, baixaDe, baixaAte,
+      fornecedorDeb, valorMin, valorMax]);
+
   const carregar = useCallback(async () => {
     setLoading(true);
     setErro(null);
     try {
-      const p = new URLSearchParams();
-      if (empresa) p.set('empresas', empresa);
-      if (status) p.set('status', status);
-      if (flagsSel.length) p.set('flags', flagsSel.join(','));
-      if (buscaDeb) p.set('q', buscaDeb);
-      p.set('so_flags', soFlags ? '1' : '0');
-      const r = await fetch(`/api/boletos?${p}`);
+      const r = await fetch(`/api/boletos?${buildParams()}`);
       const j = await r.json();
       if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
       setData(j);
@@ -135,7 +166,7 @@ export default function BoletosPanel() {
     } finally {
       setLoading(false);
     }
-  }, [empresa, status, flagsSel, buscaDeb, soFlags]);
+  }, [buildParams]);
 
   useEffect(() => { carregar(); }, [carregar]);
 
@@ -163,13 +194,7 @@ export default function BoletosPanel() {
   const exportar = async () => {
     setExporting(true);
     try {
-      const p = new URLSearchParams();
-      if (empresa) p.set('empresas', empresa);
-      if (status) p.set('status', status);
-      if (flagsSel.length) p.set('flags', flagsSel.join(','));
-      if (buscaDeb) p.set('q', buscaDeb);
-      p.set('so_flags', soFlags ? '1' : '0');
-      const r = await fetch(`/api/boletos/exportar-xlsx?${p}`);
+      const r = await fetch(`/api/boletos/exportar-xlsx?${buildParams()}`);
       if (!r.ok) {
         const j = await r.json().catch(() => ({}));
         throw new Error(j.error || `HTTP ${r.status}`);
@@ -190,11 +215,23 @@ export default function BoletosPanel() {
     }
   };
 
+  const fmtIntervalo = (de: string, ate: string) =>
+    `${de ? de.split('-').reverse().join('/') : '…'} → ${ate ? ate.split('-').reverse().join('/') : '…'}`;
+
+  const filtrosAvancados = [
+    venctoDe || venctoAte ? `Vencto ${fmtIntervalo(venctoDe, venctoAte)}` : null,
+    emissaoDe || emissaoAte ? `Emissão ${fmtIntervalo(emissaoDe, emissaoAte)}` : null,
+    baixaDe || baixaAte ? `Baixa ${fmtIntervalo(baixaDe, baixaAte)}` : null,
+    fornecedorDeb ? `Fornecedor: ${fornecedorDeb}` : null,
+    valorMin || valorMax ? `Valor ${valorMin || '0'}–${valorMax || '∞'}` : null,
+  ].filter(Boolean) as string[];
+
   const filtrosAtivos = [
     empresa || 'Todas empresas',
     status === 'aberto' ? 'Em aberto' : status === 'baixado' ? 'Baixados' : 'Todos os status',
     flagsSel.length ? `${flagsSel.length} tipo(s) de inconsistência` : 'Todos os tipos',
     buscaDeb ? `Busca: "${buscaDeb}"` : null,
+    ...filtrosAvancados,
     soFlags ? 'Somente com inconsistência' : 'Incluindo sem inconsistência',
   ].filter(Boolean) as string[];
 
@@ -325,12 +362,95 @@ export default function BoletosPanel() {
           <input type="checkbox" checked={soFlags} onChange={(e) => setSoFlags(e.target.checked)} />
           Somente com inconsistência
         </label>
+        <button
+          type="button"
+          onClick={() => setMaisFiltros((o) => !o)}
+          className={`flex items-center gap-1 px-3 py-1.5 text-sm rounded-lg border hover:bg-muted ${
+            maisFiltros || filtrosAvancados.length ? 'border-blue-400 text-blue-700' : 'border-border'
+          }`}
+        >
+          Filtros avançados{filtrosAvancados.length ? ` (${filtrosAvancados.length})` : ''}
+          <ChevronDown className={`h-3.5 w-3.5 opacity-60 transition-transform ${maisFiltros ? 'rotate-180' : ''}`} />
+        </button>
         {data && (
           <span className="text-xs text-muted-foreground ml-auto">
             {data.totais.qtd} título(s) · {data.totais.abertos} abertos · {fmtBRL(data.totais.valorAberto)} em aberto
           </span>
         )}
       </div>
+
+      {/* filtros avançados */}
+      {maisFiltros && (
+        <div className="flex items-end gap-3 flex-wrap rounded-lg border border-border bg-muted/30 p-3">
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase text-muted-foreground font-medium">Vencimento</span>
+            <div className="flex items-center gap-1.5">
+              <input type="date" value={venctoDe} onChange={(e) => setVenctoDe(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+              <span className="text-xs text-muted-foreground">até</span>
+              <input type="date" value={venctoAte} onChange={(e) => setVenctoAte(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase text-muted-foreground font-medium">Emissão</span>
+            <div className="flex items-center gap-1.5">
+              <input type="date" value={emissaoDe} onChange={(e) => setEmissaoDe(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+              <span className="text-xs text-muted-foreground">até</span>
+              <input type="date" value={emissaoAte} onChange={(e) => setEmissaoAte(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase text-muted-foreground font-medium">Baixa</span>
+            <div className="flex items-center gap-1.5">
+              <input type="date" value={baixaDe} onChange={(e) => setBaixaDe(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+              <span className="text-xs text-muted-foreground">até</span>
+              <input type="date" value={baixaAte} onChange={(e) => setBaixaAte(e.target.value)}
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background" />
+            </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase text-muted-foreground font-medium">Fornecedor</span>
+            <input
+              value={fornecedor}
+              onChange={(e) => setFornecedor(e.target.value)}
+              placeholder="Nome ou código…"
+              list="fornecedores-list"
+              className="px-3 py-1.5 text-sm rounded-lg border border-border bg-background w-56"
+            />
+            <datalist id="fornecedores-list">
+              {(data?.fornecedores || []).map((f) => <option key={f} value={f} />)}
+            </datalist>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] uppercase text-muted-foreground font-medium">Valor (R$)</span>
+            <div className="flex items-center gap-1.5">
+              <input type="number" value={valorMin} onChange={(e) => setValorMin(e.target.value)}
+                placeholder="mín" min="0" step="0.01"
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background w-24" />
+              <span className="text-xs text-muted-foreground">até</span>
+              <input type="number" value={valorMax} onChange={(e) => setValorMax(e.target.value)}
+                placeholder="máx" min="0" step="0.01"
+                className="px-2 py-1.5 text-sm rounded-lg border border-border bg-background w-24" />
+            </div>
+          </div>
+          {filtrosAvancados.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                setVenctoDe(''); setVenctoAte(''); setEmissaoDe(''); setEmissaoAte('');
+                setBaixaDe(''); setBaixaAte(''); setFornecedor(''); setValorMin(''); setValorMax('');
+              }}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs rounded-lg text-muted-foreground hover:bg-muted"
+            >
+              <X className="h-3.5 w-3.5" /> limpar
+            </button>
+          )}
+        </div>
+      )}
 
       {/* tabela */}
       <Card>

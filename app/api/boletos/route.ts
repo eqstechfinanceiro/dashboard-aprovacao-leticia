@@ -17,6 +17,16 @@ export async function GET(request: NextRequest) {
     const status = p.get('status') || ''; // 'aberto' | 'baixado' | ''
     const busca = (p.get('q') || '').trim();
     const soComFlags = p.get('so_flags') !== '0'; // default: só inconsistentes
+    const dt = (v: string | null) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v! : null);
+    const venctoDe = dt(p.get('vencto_de'));
+    const venctoAte = dt(p.get('vencto_ate'));
+    const emissaoDe = dt(p.get('emissao_de'));
+    const emissaoAte = dt(p.get('emissao_ate'));
+    const baixaDe = dt(p.get('baixa_de'));
+    const baixaAte = dt(p.get('baixa_ate'));
+    const fornecedor = (p.get('fornecedor') || '').trim();
+    const valorMin = parseFloat(p.get('valor_min') || '');
+    const valorMax = parseFloat(p.get('valor_max') || '');
     const limit = Math.min(parseInt(p.get('limit') || '500', 10) || 500, 5000);
 
     const conds: string[] = [];
@@ -27,6 +37,18 @@ export async function GET(request: NextRequest) {
     if (flagTipos.length) {
       conds.push(`EXISTS (SELECT 1 FROM jsonb_array_elements(flags) f WHERE f->>'tipo' IN (${flagTipos.map((f) => `'${esc(f)}'`).join(',')}))`);
     }
+    if (venctoDe) conds.push(`vencto_real >= '${venctoDe}'`);
+    if (venctoAte) conds.push(`vencto_real <= '${venctoAte}'`);
+    if (emissaoDe) conds.push(`emissao >= '${emissaoDe}'`);
+    if (emissaoAte) conds.push(`emissao <= '${emissaoAte}'`);
+    if (baixaDe) conds.push(`baixa >= '${baixaDe}'`);
+    if (baixaAte) conds.push(`baixa <= '${baixaAte}'`);
+    if (fornecedor) {
+      const f = esc(fornecedor);
+      conds.push(`(fornecedor_nome ILIKE '%${f}%' OR fornecedor ILIKE '%${f}%')`);
+    }
+    if (Number.isFinite(valorMin)) conds.push(`valor >= ${valorMin}`);
+    if (Number.isFinite(valorMax)) conds.push(`valor <= ${valorMax}`);
     if (busca) {
       const b = esc(busca);
       conds.push(`(num ILIKE '%${b}%' OR fornecedor ILIKE '%${b}%' OR fornecedor_nome ILIKE '%${b}%' OR lindig ILIKE '%${b}%')`);

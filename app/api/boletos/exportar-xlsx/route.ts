@@ -34,6 +34,16 @@ export async function GET(request: NextRequest) {
   const status = p.get('status') || '';
   const busca = (p.get('q') || '').trim();
   const soComFlags = p.get('so_flags') !== '0';
+  const dt = (v: string | null) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v! : null);
+  const venctoDe = dt(p.get('vencto_de'));
+  const venctoAte = dt(p.get('vencto_ate'));
+  const emissaoDe = dt(p.get('emissao_de'));
+  const emissaoAte = dt(p.get('emissao_ate'));
+  const baixaDe = dt(p.get('baixa_de'));
+  const baixaAte = dt(p.get('baixa_ate'));
+  const fornecedor = (p.get('fornecedor') || '').trim();
+  const valorMin = parseFloat(p.get('valor_min') || '');
+  const valorMax = parseFloat(p.get('valor_max') || '');
   const limit = Math.min(parseInt(p.get('limit') || '5000', 10) || 5000, 20000);
 
   const conds: string[] = [];
@@ -44,6 +54,18 @@ export async function GET(request: NextRequest) {
   if (flagTipos.length) {
     conds.push(`EXISTS (SELECT 1 FROM jsonb_array_elements(flags) f WHERE f->>'tipo' IN (${flagTipos.map((f) => `'${esc(f)}'`).join(',')}))`);
   }
+  if (venctoDe) conds.push(`vencto_real >= '${venctoDe}'`);
+  if (venctoAte) conds.push(`vencto_real <= '${venctoAte}'`);
+  if (emissaoDe) conds.push(`emissao >= '${emissaoDe}'`);
+  if (emissaoAte) conds.push(`emissao <= '${emissaoAte}'`);
+  if (baixaDe) conds.push(`baixa >= '${baixaDe}'`);
+  if (baixaAte) conds.push(`baixa <= '${baixaAte}'`);
+  if (fornecedor) {
+    const f = esc(fornecedor);
+    conds.push(`(fornecedor_nome ILIKE '%${f}%' OR fornecedor ILIKE '%${f}%')`);
+  }
+  if (Number.isFinite(valorMin)) conds.push(`valor >= ${valorMin}`);
+  if (Number.isFinite(valorMax)) conds.push(`valor <= ${valorMax}`);
   if (busca) {
     const b = esc(busca);
     conds.push(`(num ILIKE '%${b}%' OR fornecedor ILIKE '%${b}%' OR fornecedor_nome ILIKE '%${b}%' OR lindig ILIKE '%${b}%')`);
@@ -124,6 +146,12 @@ export async function GET(request: NextRequest) {
     status === 'aberto' ? 'Em aberto' : status === 'baixado' ? 'Baixados' : 'Todos os status',
     flagTipos.length ? `Tipos: ${flagTipos.map((f) => FLAG_LABEL[f] || f).join(', ')}` : 'Todos os tipos',
     busca ? `Busca: "${busca}"` : null,
+    fornecedor ? `Fornecedor: "${fornecedor}"` : null,
+    venctoDe || venctoAte ? `Vencto: ${venctoDe || '…'}→${venctoAte || '…'}` : null,
+    emissaoDe || emissaoAte ? `Emissão: ${emissaoDe || '…'}→${emissaoAte || '…'}` : null,
+    baixaDe || baixaAte ? `Baixa: ${baixaDe || '…'}→${baixaAte || '…'}` : null,
+    Number.isFinite(valorMin) || Number.isFinite(valorMax)
+      ? `Valor: ${Number.isFinite(valorMin) ? `≥${valorMin}` : ''}${Number.isFinite(valorMax) ? ` ≤${valorMax}` : ''}` : null,
     soComFlags ? 'somente com inconsistência' : 'incluindo sem inconsistência',
   ].filter(Boolean).join(' · ');
 
@@ -252,7 +280,14 @@ export async function GET(request: NextRequest) {
     action: 'boletos.exportar_xlsx',
     entity_type: 'boletos_titulo',
     entity_id: '-',
-    details: { empresas, status, flags: flagTipos, q: busca, so_flags: soComFlags, total: titulos.rows.length },
+    details: {
+      empresas, status, flags: flagTipos, q: busca, so_flags: soComFlags,
+      fornecedor, vencto_de: venctoDe, vencto_ate: venctoAte,
+      emissao_de: emissaoDe, emissao_ate: emissaoAte,
+      baixa_de: baixaDe, baixa_ate: baixaAte,
+      valor_min: valorMin, valor_max: valorMax,
+      total: titulos.rows.length,
+    },
   });
 
   const fname = `boletos-inconsistencias-${new Date().toISOString().slice(0, 10)}.xlsx`;
