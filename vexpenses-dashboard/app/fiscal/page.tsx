@@ -131,6 +131,18 @@ function flatChecks(checks: FiscalNota['checks']): Check[] {
   return checks as Check[];
 }
 
+// Tipos de divergência de uma nota: sufixo do field sem o prefixo "Item X · ",
+// agrupado com contagem — [['TES', 2], ['Valor Total', 1]]
+function divTipos(checks: Check[]): [string, number][] {
+  const m = new Map<string, number>();
+  for (const c of checks) {
+    if (c.match) continue;
+    const t = (c.field.split('·').pop() || c.field).trim() || c.field;
+    m.set(t, (m.get(t) || 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
 export default function FiscalPage() {
   const [view, setView] = useState<'fila' | 'historico'>('fila');
   const [tipo, setTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
@@ -138,7 +150,8 @@ export default function FiscalPage() {
   const [histStatus, setHistStatus] = useState<string>('confirmado_erro');
   const [histMode, setHistMode] = useState<'lista' | 'kanban'>('lista');
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[] } | null>(null);
+  const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[]; div_tipos?: string[] } | null>(null);
+  const [divFiltro, setDivFiltro] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -176,11 +189,12 @@ export default function FiscalPage() {
     setLoading(true);
     setError(null);
     try {
+      const divParam = divFiltro ? `&div=${encodeURIComponent(divFiltro)}` : '';
       const url = view === 'historico'
         ? histMode === 'kanban'
-          ? `/api/fiscal/fila?scope=kanban&status=all&limit=1000`
-          : `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500`
-        : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500`;
+          ? `/api/fiscal/fila?scope=kanban&status=all&limit=1000${divParam}`
+          : `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500${divParam}`
+        : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500${divParam}`;
       const res = await fetch(url);
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
@@ -190,7 +204,7 @@ export default function FiscalPage() {
     } finally {
       setLoading(false);
     }
-  }, [view, tipo, status, histStatus, histMode]);
+  }, [view, tipo, status, histStatus, histMode, divFiltro]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -479,6 +493,31 @@ export default function FiscalPage() {
         </div>
       )}
 
+      {/* Filtro por tipo de divergência (impostos, valor total, TES...) */}
+      {(data?.div_tipos?.length || divFiltro) ? (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground">Tipo de divergência:</span>
+          <select
+            className="rounded-md border bg-white px-2 py-1.5 text-sm"
+            value={divFiltro}
+            onChange={(e) => setDivFiltro(e.target.value)}
+          >
+            <option value="">Todas</option>
+            {[
+              ...(data?.div_tipos || []),
+              ...(divFiltro && !(data?.div_tipos || []).includes(divFiltro) ? [divFiltro] : []),
+            ].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          {divFiltro && (
+            <button className="text-xs text-blue-600 hover:underline" onClick={() => setDivFiltro('')}>
+              limpar
+            </button>
+          )}
+        </div>
+      ) : null}
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
       )}
@@ -528,7 +567,9 @@ export default function FiscalPage() {
                       <span className="text-xs text-muted-foreground">{cards.length}</span>
                     </div>
                     <div className="space-y-2">
-                      {cards.map((n) => (
+                      {cards.map((n) => {
+                        const dts = divTipos(flatChecks(n.checks));
+                        return (
                         <div
                           key={n.id}
                           draggable
@@ -549,6 +590,11 @@ export default function FiscalPage() {
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5" title={n.fornecedor || ''}>
                             {n.fornecedor || '—'}
                           </p>
+                          {dts.length > 0 && (
+                            <p className="text-[10px] text-amber-700 truncate" title={dts.map(([t, c]) => c > 1 ? `${t} ×${c}` : t).join(', ')}>
+                              {dts.map(([t, c]) => c > 1 ? `${t} ×${c}` : t).join(', ')}
+                            </p>
+                          )}
                           <div className="flex items-center justify-between mt-1">
                             <span className="text-xs font-semibold">{fmtBRL(n.valor)}</span>
                             <div className="flex gap-1.5">
@@ -643,7 +689,8 @@ export default function FiscalPage() {
                             </div>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                       {cards.length === 0 && (
                         <p className="text-[11px] text-muted-foreground text-center py-4">—</p>
                       )}
@@ -697,6 +744,14 @@ export default function FiscalPage() {
                               {falhas.length || '?'} divergência(s)
                             </span>
                           )}
+                          {divTipos(checks).map(([t, c]) => (
+                            <span
+                              key={t}
+                              className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800"
+                            >
+                              {t}{c > 1 ? ` ×${c}` : ''}
+                            </span>
+                          ))}
                           {n.auto_status === 'erro' && (
                             <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">falha técnica</span>
                           )}

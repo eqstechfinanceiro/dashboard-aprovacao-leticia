@@ -1,0 +1,131 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { sql } from '@/lib/db/neon';
+import { ensureFiscalTables } from '@/lib/fiscal/fiscal-db';
+
+export const dynamic = 'force-dynamic';
+
+// GET /api/fiscal/fila?tipo=mercadoria|servico&status=pendente|auto_ok|...&from=&to=&q=
+// Fila de trabalho do setor fiscal. Sem params: resumo do dia (últimos runs +
+// contagens por status) + notas pendentes.
+export async function GET(request: NextRequest) {
+  if (!sql) return NextResponse.json({ error: 'Banco de dados não disponível' }, { status: 503 });
+  await ensureFiscalTables();
+
+  const sp = request.nextUrl.searchParams;
+  const tipo = sp.get('tipo') || 'all';
+  const status = sp.get('status') || 'all';
+  // scope=fila (default em uso) → fila de trabalho do fiscal, sem as
+  // finalizadas — exceto quando `status` pede explicitamente uma finalizada
+  // (visão individual das confirmadas OK/erro). scope=historico → só erros
+  // confirmados + canceladas. scope=kanban → colunas do quadro (pendentes,
+  // falhas técnicas e decisões humanas — auto_ok fica fora).
+  const scope = sp.get('scope') || 'all';
+  const from = sp.get('from') || null;
+  const to = sp.get('to') || null;
+  const q = (sp.get('q') || '').trim().toLowerCase();
+  // div: tipo de divergência (sufixo do field do check — ex.: 'TES',
+  // 'Valor Total', 'ICMS Item'). Filtra notas que têm ao menos um check
+  // com match=false desse tipo.
+  const div = (sp.get('div') || '').trim();
+  const runId = sp.get('run_id') ? parseInt(sp.get('run_id')!, 10) : null;
+  const limit = Math.min(parseInt(sp.get('limit') || '300', 10) || 300, 1000);
+
+  try {
+    const runs = await sql`
+      SELECT id, tipo, date_from::text, date_to::text, hostname, total_notas,
+             matches, divergentes, erros, pendentes, relatorio_nome,
+             push_version, created_at
+      FROM fiscal_runs ORDER BY created_at DESC LIMIT 20
+    `;
+
+    const resumo = await sql`
+      SELECT tipo, review_status, COUNT(*)::int AS n
+      FROM fiscal_notas GROUP BY tipo, review_status
+    `;
+
+    const ultimaEmissao = await sql`
+      SELECT tipo, MAX(emissao)::text AS max_emissao FROM fiscal_notas GROUP BY tipo
+    `;
+
+    const notas = await sql`
+      SELECT n.id, n.run_id, n.tipo, n.doc, n.serie, n.filial, n.fornecedor,
+             n.cnpj, n.valor, n.emissao::text, n.chave_acesso, n.auto_status,
+             n.auto_resumo, n.checks, n.extra, n.review_status, n.reviewed_by,
+             n.reviewed_at, n.review_nota, n.erro_tipo, n.erro_descricao,
+             n.cancelled_by, n.cancelled_at, n.cancel_motivo,
+             n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at
+      FROM fiscal_notas n
+      WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
+        AND (${status} = 'all' OR n.review_status = ${status})
+        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
+             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
+        AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
+        AND (${runId}::int IS NULL OR n.run_id = ${runId})
+        AND (${q} = '' OR
+             lower(n.doc) LIKE ${'%' + q + '%'} OR
+             lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'} OR
+             lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
+        AND (${div} = '' OR EXISTS (
+          SELECT 1
+          FROM jsonb_array_elements(COALESCE(n.checks, '[]'::jsonb)) c,
+               LATERAL jsonb_array_elements(
+                 CASE WHEN jsonb_typeof(c) = 'array' THEN c ELSE jsonb_build_array(c) END
+               ) cc
+          WHERE (cc->>'match')::boolean = false
+            AND btrim(substring(cc->>'field' from '([^·]+)$')) = ${div}
+        ))
+      ORDER BY
+        CASE WHEN ${scope} = 'historico' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
+             THEN n.reviewed_at END DESC NULLS LAST,
+        CASE n.review_status WHEN 'pendente' THEN 0 ELSE 1 END,
+        n.emissao DESC NULLS LAST, n.doc DESC
+      LIMIT ${limit}
+    `;
+
+    // Tipos de divergência presentes no conjunto filtrado (menos o próprio
+    // filtro `div`) — alimenta o dropdown da página.
+    const divTipos = await sql`
+      SELECT DISTINCT btrim(substring(cc->>'field' from '([^·]+)$')) AS t
+      FROM fiscal_notas n,
+           LATERAL jsonb_array_elements(COALESCE(n.checks, '[]'::jsonb)) c,
+           LATERAL jsonb_array_elements(
+             CASE WHEN jsonb_typeof(c) = 'array' THEN c ELSE jsonb_build_array(c) END
+           ) cc
+      WHERE (cc->>'match')::boolean = false
+        AND (${tipo} = 'all' OR n.tipo = ${tipo})
+        AND (${status} = 'all' OR n.review_status = ${status})
+        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
+             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
+        AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
+        AND (${runId}::int IS NULL OR n.run_id = ${runId})
+        AND (${q} = '' OR
+             lower(n.doc) LIKE ${'%' + q + '%'} OR
+             lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'} OR
+             lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
+      ORDER BY t
+    `;
+
+    const resumoMap: Record<string, Record<string, number>> = {};
+    for (const r of resumo) {
+      resumoMap[r.tipo] = resumoMap[r.tipo] || {};
+      resumoMap[r.tipo][r.review_status] = r.n;
+    }
+
+    return NextResponse.json({
+      runs: runs,
+      resumo: resumoMap,
+      ultima_emissao: ultimaEmissao,
+      notas: notas,
+      div_tipos: divTipos.map((r: any) => r.t),
+      total_retornado: notas.length,
+    });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
+  }
+}
