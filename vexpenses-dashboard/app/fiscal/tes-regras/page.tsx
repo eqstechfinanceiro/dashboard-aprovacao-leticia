@@ -131,7 +131,7 @@ export default function TesRegrasPage() {
           { icon: <AlertTriangle size={16} />, label: 'Forn. sem CNPJ resolvido', v: stats.forn_sem_cnpj ?? '—', danger: true },
         ].map((s, i) => (
           <Card key={i}>
-            <CardContent className="px-5 py-4 flex items-center gap-3">
+            <CardContent className="px-5 pb-4 pt-4 flex items-center gap-3">
               <div className={cn('text-slate-400 shrink-0', s.danger && Number(s.v) > 0 && 'text-amber-500')}>{s.icon}</div>
               <div className="min-w-0">
                 <div className="text-xl font-semibold leading-6">{s.v}</div>
