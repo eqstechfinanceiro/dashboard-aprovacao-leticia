@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const session = token ? await verifyToken(token) : null;
   if (!session) return NextResponse.json({ error: 'não autenticado' }, { status: 401 });
 
-  const { action, envioIds } = await request.json().catch(() => ({}));
+  const { action, envioIds, forcarCompetencia } = await request.json().catch(() => ({}));
   if (action !== 'confirmar' && action !== 'cancelar') {
     return NextResponse.json({ error: "action deve ser 'confirmar' ou 'cancelar'" }, { status: 400 });
   }
@@ -37,6 +37,29 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   if (action === 'cancelar') {
     await sql`UPDATE comprovantes_runs SET status='cancelado', finished_at=NOW() WHERE id=${id}`;
     return NextResponse.json({ ok: true, status: 'cancelado' });
+  }
+
+  // Guarda de competência: a competência e2doc de folha é o mês ANTERIOR ao
+  // pagamento. Se a informada diverge das datas de pagamento dos comprovantes
+  // (calculadas na análise), exige confirmação explícita — erro aqui indexa
+  // o documento na competência errada no e2doc.
+  const competenciaSel = typeof (run.selection as any)?.competencia === 'string'
+    ? (run.selection as any).competencia
+    : null;
+  if (competenciaSel && forcarCompetencia !== true) {
+    const esperadas = (await sql`
+      SELECT DISTINCT meta->>'competenciaEsperada' AS ce
+      FROM comprovantes_envios
+      WHERE run_id = ${id} AND meta->>'competenciaEsperada' IS NOT NULL
+    `).map((r: any) => r.ce).filter(Boolean) as string[];
+    if (esperadas.length > 0 && !esperadas.includes(competenciaSel)) {
+      return NextResponse.json({
+        error: `Competência ${competenciaSel} diverge das datas de pagamento dos comprovantes (esperada: ${esperadas.join(' ou ')}). Para folha, a competência e2doc é o mês anterior ao pagamento.`,
+        code: 'competencia_divergente',
+        informada: competenciaSel,
+        esperada: esperadas,
+      }, { status: 409 });
+    }
   }
 
   const sel = { ...(run.selection as any), phase: 'envio', ...(onlyEnvioIds?.length ? { onlyEnvioIds } : {}) };

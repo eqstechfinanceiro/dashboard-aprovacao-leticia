@@ -197,6 +197,7 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
 
     let totalPages = 0;
     let pagesDone = 0;
+    const compEsperadas = new Set<string>();
     for (const f of pdfs) {
       const buf = readFileSync(join(sel.dir, f.name));
       const analise: FolhaAnalise = await analisarFolhaPdf(buf, f.name, (done, total) => {
@@ -220,7 +221,13 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
 
       for (const comp of analise.comprovantes) {
         const base = { runId: run.id, sourceFile: f.name, pageNum: comp.pageNum };
-        const meta = { slot: comp.slot, crop: comp.crop, agencia: comp.agencia, conta: comp.conta, valor: comp.valor, pagadorRef: comp.pagadorRef, dataPagamento: comp.dataPagamento, warnings: [] as string[] };
+        // Competência e2doc de folha = mês ANTERIOR ao pagamento — calculada
+        // aqui pra auditar divergência contra a competência informada no run.
+        const compEsperada = comp.dataPagamento && /^\d{4}-\d{2}-\d{2}$/.test(comp.dataPagamento)
+          ? competenciaFolha(comp.dataPagamento.slice(5, 7), comp.dataPagamento.slice(0, 4))
+          : null;
+        if (compEsperada) compEsperadas.add(compEsperada);
+        const meta = { slot: comp.slot, crop: comp.crop, agencia: comp.agencia, conta: comp.conta, valor: comp.valor, pagadorRef: comp.pagadorRef, dataPagamento: comp.dataPagamento, competenciaEsperada: compEsperada, warnings: [] as string[] };
 
         // TXT pair (quando há TXT)
         let txtPair: (CnabEntry & { _file: string }) | null = null;
@@ -301,13 +308,25 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
     for (const e of poolCnab) {
       if (usados.has(e)) continue;
       resumo.txtSemPdf++;
+      const compEsp = e.dataPagamento && /^\d{4}-\d{2}-\d{2}$/.test(e.dataPagamento)
+        ? competenciaFolha(e.dataPagamento.slice(5, 7), e.dataPagamento.slice(0, 4))
+        : null;
+      if (compEsp) compEsperadas.add(compEsp);
       await insertEnvio({
         runId: run.id, sourceFile: e._file, pageNum: 0,
         nome: e.nome, cpf: e.cpf, tipoPagamento: 'FOL',
         status: 'txt_sem_pdf',
-        meta: { agencia: e.agencia, conta: e.conta, valor: e.valor, dataPagamento: e.dataPagamento },
+        meta: { agencia: e.agencia, conta: e.conta, valor: e.valor, dataPagamento: e.dataPagamento, competenciaEsperada: compEsp },
         error: 'presente no TXT mas nenhum comprovante correspondente no PDF',
       });
+    }
+
+    // Competência informada diverge das datas de pagamento dos comprovantes —
+    // erro de operador que envia índice errado ao e2doc (folha = mês anterior).
+    if (sel.competencia && compEsperadas.size > 0 && !compEsperadas.has(sel.competencia)) {
+      resumo.warnings.unshift(
+        `competencia_divergente: informada ${sel.competencia}, mas as datas de pagamento indicam ${[...compEsperadas].join(' ou ')}`
+      );
     }
 
     resumo.warnings = resumo.warnings.slice(0, 50);

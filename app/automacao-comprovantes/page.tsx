@@ -422,19 +422,30 @@ export default function AutomacaoComprovantesPage() {
     }
   };
 
-  const confirmRemessa = async (id: number, action: 'confirmar' | 'cancelar') => {
+  const confirmRemessa = async (id: number, action: 'confirmar' | 'cancelar', forcarCompetencia = false) => {
     setConfirming(id);
     try {
       const resp = await fetch(`/api/comprovantes/runs/${id}/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...(forcarCompetencia ? { forcarCompetencia: true } : {}) }),
       });
       if (resp.ok) {
         loadRuns();
         loadRunDetail(id);
       } else {
         const d = await resp.json().catch(() => ({}));
+        if (resp.status === 409 && d.code === 'competencia_divergente') {
+          const ok = window.confirm(
+            `ATENÇÃO — competência provavelmente errada.\n\n` +
+            `Informada: ${d.informada}\nEsperada pelas datas de pagamento: ${(d.esperada || []).join(' ou ')}\n\n` +
+            `Para folha, a competência no e2doc é o MÊS ANTERIOR ao pagamento. ` +
+            `Enviar com a competência errada indexa os documentos no mês errado.\n\n` +
+            `Confirma mesmo assim enviar com ${d.informada}?`
+          );
+          if (ok) return confirmRemessa(id, action, true);
+          return;
+        }
         alert(d.error || 'Falha na confirmação');
       }
     } finally {
@@ -834,11 +845,11 @@ export default function AutomacaoComprovantesPage() {
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
-              <label className="text-xs font-medium text-gray-600">Competência e2doc</label>
+              <label className="text-xs font-medium text-gray-600">Competência e2doc (mês da folha, não do pagamento)</label>
               <input
                 value={remComp}
                 onChange={(e) => setRemComp(e.target.value)}
-                placeholder="MM/AAAA — vazio usa o mês anterior ao pagamento"
+                placeholder="MM/AAAA — vazio usa o mês anterior ao pagamento (recomendado)"
                 className="w-64 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
               {remComp && !/^\d{2}\/\d{4}$/.test(remComp) && (
