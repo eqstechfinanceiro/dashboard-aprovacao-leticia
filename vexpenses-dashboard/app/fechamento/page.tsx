@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, ReactNode } from 'react';
+import { useTableSort, SortIcon } from '@/lib/table-sort';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -101,8 +102,17 @@ interface FechoResponse {
   };
   statusPanel: {
     aberto: number;
+    enviado: number;
     aprovado: number;
     totalGeral: number;
+  };
+  caixas: {
+    fechados: { nome: string; valor: number }[];
+    emAprovacao: { nome: string; valor: number }[];
+    abertos: { nome: string; valor: number }[];
+    totalFechados: number;
+    totalEmAprovacao: number;
+    totalAbertos: number;
   };
   exportadoEm: string;
 }
@@ -158,8 +168,31 @@ export default function FechamentoPage() {
   const [membersLoading, setMembersLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncedAt, setSyncedAt] = useState<string | null>(null);
+  const [globalSync, setGlobalSync] = useState<{ warm?: string | null; tokenAt?: string | null; warmError?: { at: string; error: string; stale?: boolean } | null; coldError?: { at: string; error: string; stale?: boolean } | null } | null>(null);
+  const [extratoAte, setExtratoAte] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [syncProgress, setSyncProgress] = useState<{ step: string; current: number; total: number; percent: number } | null>(null);
+
+  const MES_ORDER = useMemo(() => ['janeiro', 'fevereiro', 'marco', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'], []);
+  const fechSort = useTableSort(data?.fechamento ?? [], useMemo(() => ({
+    mes: (m: MonthAggregation) => m.ano * 100 + Math.max(0, MES_ORDER.indexOf(m.mes.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''))),
+  }), [MES_ORDER]));
+  const extratoSort = useTableSort(data?.extrato ? [...data.extrato].reverse() : [], useMemo(() => ({
+    data: (r: ExtratoRow) => new Date(r.data).getTime() || 0,
+  }), []));
+  const prestSort = useTableSort(data?.prestacaoContas ?? [], useMemo(() => ({
+    data: (r: PrestacaoRow) => new Date(r.data).getTime() || 0,
+  }), []));
+  const Th = ({ s, k, className, children }: { s: { sortKey: string | null; sortDir: 'asc' | 'desc'; toggleSort: (k: string) => void }; k: string; className?: string; children: ReactNode }) => (
+    <TableHead
+      onClick={() => s.toggleSort(k)}
+      className={`${className ?? ''} cursor-pointer select-none hover:bg-gray-100`}
+      title="Clique para ordenar"
+    >
+      {children}
+      <SortIcon active={s.sortKey === k} dir={s.sortDir} />
+    </TableHead>
+  );
 
   // Fetch team members on mount
   React.useEffect(() => {
@@ -240,6 +273,8 @@ export default function FechamentoPage() {
       if (res.ok) {
         const json = await res.json();
         setSyncedAt(json.syncedAt || null);
+        setGlobalSync(json.globalSync || null);
+        setExtratoAte(json.extratoAte || null);
       }
     } catch (e) {
       console.error('Error fetching sync status:', e);
@@ -333,7 +368,8 @@ export default function FechamentoPage() {
     const corCinzaMedio = 'D5D8DC';     // Cinza borda
     const corBranco = 'FFFFFF';
 
-    const fmtBRL = '#"R$ "\\ #,##0.00';
+    // Moeda BRL de verdade: número com formato "R$" #.##0,00 (locale pt-BR no Excel)
+    const fmtBRL = '"R$" #,##0.00';
 
     const styleTitle = {
       font: { bold: true, sz: 16, color: { rgb: corBranco } },
@@ -389,26 +425,31 @@ export default function FechamentoPage() {
     const styleResumoValue = {
       font: { bold: true, sz: 11, color: { rgb: corPrimaria } },
       alignment: { horizontal: 'right', vertical: 'center' },
-      numberFormat: fmtBRL,
+      numFmt: fmtBRL,
     };
     const styleStatusAberto = {
       font: { bold: true, sz: 10, color: { rgb: corLaranja } },
       alignment: { horizontal: 'right', vertical: 'center' },
-      numberFormat: fmtBRL,
+      numFmt: fmtBRL,
     };
     const styleStatusAprovado = {
       font: { bold: true, sz: 10, color: { rgb: corVerde } },
       alignment: { horizontal: 'right', vertical: 'center' },
-      numberFormat: fmtBRL,
+      numFmt: fmtBRL,
     };
-    const styleMoneyGreen = { ...styleCellRight, font: { sz: 10, color: { rgb: corVerde } }, numberFormat: fmtBRL };
-    const styleMoneyRed = { ...styleCellRight, font: { sz: 10, color: { rgb: corVermelho } }, numberFormat: fmtBRL };
-    const styleMoneyBlue = { ...styleCellRight, font: { sz: 10, color: { rgb: corSecundaria } }, numberFormat: fmtBRL };
-    const styleMoneyOrange = { ...styleCellRight, font: { sz: 10, color: { rgb: corLaranja } }, numberFormat: fmtBRL };
+    const styleStatusEnviado = {
+      font: { bold: true, sz: 10, color: { rgb: corSecundaria } },
+      alignment: { horizontal: 'right', vertical: 'center' },
+      numFmt: fmtBRL,
+    };
+    const styleMoneyGreen = { ...styleCellRight, font: { sz: 10, color: { rgb: corVerde } }, numFmt: fmtBRL };
+    const styleMoneyRed = { ...styleCellRight, font: { sz: 10, color: { rgb: corVermelho } }, numFmt: fmtBRL };
+    const styleMoneyBlue = { ...styleCellRight, font: { sz: 10, color: { rgb: corSecundaria } }, numFmt: fmtBRL };
+    const styleMoneyOrange = { ...styleCellRight, font: { sz: 10, color: { rgb: corLaranja } }, numFmt: fmtBRL };
     const styleMoneyBold = {
       ...styleCellRight,
       font: { bold: true, sz: 10, color: { rgb: corPrimaria } },
-      numberFormat: fmtBRL,
+      numFmt: fmtBRL,
     };
 
     // -- Sheet 1: FECHAMENTO --
@@ -441,6 +482,7 @@ export default function FechamentoPage() {
     wsData.push([]);
     wsData.push(['STATUS DOS RELATÓRIOS', '', '']);
     wsData.push(['Aberto', '', data.statusPanel.aberto]);
+    wsData.push(['Em aprovação', '', data.statusPanel.enviado]);
     wsData.push(['Aprovado', '', data.statusPanel.aprovado]);
     wsData.push(['Total Geral', '', data.statusPanel.totalGeral]);
     wsData.push([]);
@@ -513,7 +555,7 @@ export default function FechamentoPage() {
       if (c < 2) {
         ws[addr].s = styleTotalLabel;
       } else {
-        ws[addr].s = { ...styleTotalRow, numberFormat: fmtBRL };
+        ws[addr].s = { ...styleTotalRow, numFmt: fmtBRL };
       }
     }
 
@@ -550,6 +592,7 @@ export default function FechamentoPage() {
     rowIdx++;
     const statusItems = [
       { label: 'Aberto', value: data.statusPanel.aberto, style: styleStatusAberto },
+      { label: 'Em aprovação', value: data.statusPanel.enviado, style: styleStatusEnviado },
       { label: 'Aprovado', value: data.statusPanel.aprovado, style: styleStatusAprovado },
       { label: 'Total Geral', value: data.statusPanel.totalGeral, style: { ...styleResumoValue, font: { bold: true, sz: 11, color: { rgb: corPrimaria } } } },
     ];
@@ -559,6 +602,62 @@ export default function FechamentoPage() {
       const cValue = XLSX.utils.encode_cell({ r: rowIdx, c: 2 });
       if (ws[cValue]) ws[cValue].s = item.style;
       rowIdx++;
+    }
+
+    // CAIXAS — à direita dos resumos (colunas E:G), mesmo início vertical
+    const merges = ws['!merges']!;
+    const caixaTitle = { font: { bold: true, sz: 12, color: { rgb: corBranco } }, fill: { fgColor: { rgb: corPrimaria } }, alignment: { horizontal: 'left', vertical: 'center' } };
+    const styleCaixaSub = (cor: string) => ({ font: { bold: true, sz: 10, color: { rgb: cor } }, alignment: { horizontal: 'left', vertical: 'center' } });
+    const styleCaixaName = { font: { sz: 10 }, alignment: { horizontal: 'left', vertical: 'center' } };
+    let rowC = totalRowIdx + 2;
+    // Título da seção (E:G)
+    for (let c = 4; c <= 6; c++) {
+      const addr = XLSX.utils.encode_cell({ r: rowC, c });
+      if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+      ws[addr].s = caixaTitle;
+    }
+    ws[XLSX.utils.encode_cell({ r: rowC, c: 4 })].v = 'CAIXAS';
+    merges.push({ s: { r: rowC, c: 4 }, e: { r: rowC, c: 6 } });
+    rowC++;
+    const writeCaixaBlock = (titulo: string, lista: { nome: string; valor: number }[], total: number, cor: string) => {
+      // Subtítulo
+      for (let c = 4; c <= 6; c++) {
+        const addr = XLSX.utils.encode_cell({ r: rowC, c });
+        if (!ws[addr]) ws[addr] = { t: 's', v: '' };
+        ws[addr].s = styleCaixaSub(cor);
+      }
+      ws[XLSX.utils.encode_cell({ r: rowC, c: 4 })].v = titulo;
+      ws[XLSX.utils.encode_cell({ r: rowC, c: 6 })].v = 'Valor';
+      merges.push({ s: { r: rowC, c: 4 }, e: { r: rowC, c: 5 } });
+      rowC++;
+      if (lista.length === 0) {
+        ws[XLSX.utils.encode_cell({ r: rowC, c: 4 })] = { t: 's', v: '(nenhum)', s: { font: { italic: true, sz: 9, color: { rgb: '999999' } } } };
+        merges.push({ s: { r: rowC, c: 4 }, e: { r: rowC, c: 5 } });
+        rowC++;
+      }
+      for (const cx of lista) {
+        ws[XLSX.utils.encode_cell({ r: rowC, c: 4 })] = { t: 's', v: cx.nome, s: styleCaixaName };
+        ws[XLSX.utils.encode_cell({ r: rowC, c: 5 })] = { t: 's', v: '', s: styleCaixaName };
+        ws[XLSX.utils.encode_cell({ r: rowC, c: 6 })] = { t: 'n', v: cx.valor, s: { ...styleMoneyBold, font: { bold: false, sz: 10, color: { rgb: cor } } } };
+        merges.push({ s: { r: rowC, c: 4 }, e: { r: rowC, c: 5 } });
+        rowC++;
+      }
+      // Total
+      ws[XLSX.utils.encode_cell({ r: rowC, c: 4 })] = { t: 's', v: `Total ${titulo.toLowerCase()}`, s: styleCaixaSub(cor) };
+      ws[XLSX.utils.encode_cell({ r: rowC, c: 5 })] = { t: 's', v: '', s: styleCaixaSub(cor) };
+      ws[XLSX.utils.encode_cell({ r: rowC, c: 6 })] = { t: 'n', v: total, s: { ...styleResumoValue, font: { bold: true, sz: 11, color: { rgb: cor } } } };
+      merges.push({ s: { r: rowC, c: 4 }, e: { r: rowC, c: 5 } });
+      rowC += 2;
+    };
+    writeCaixaBlock('Fechados', data.caixas?.fechados || [], data.caixas?.totalFechados || 0, corVerde);
+    writeCaixaBlock('Em aprovação', data.caixas?.emAprovacao || [], data.caixas?.totalEmAprovacao || 0, corSecundaria);
+    writeCaixaBlock('Abertos', data.caixas?.abertos || [], data.caixas?.totalAbertos || 0, corLaranja);
+
+    // Estende o range do sheet — células manuais fora do aoa original não entram no arquivo sem isso
+    const refRange = XLSX.utils.decode_range(ws['!ref']!);
+    if (rowC - 1 > refRange.e.r) {
+      refRange.e.r = rowC - 1;
+      ws['!ref'] = XLSX.utils.encode_range(refRange);
     }
 
     rowIdx++; // skip blank
@@ -663,7 +762,9 @@ export default function FechamentoPage() {
       for (let c = 0; c <= 20; c++) {
         const addr = XLSX.utils.encode_cell({ r, c });
         if (!wsPrest[addr]) continue;
-        if (c === 19) {
+        if (c === 18) {
+          wsPrest[addr].s = { ...styleCellRight, numFmt: fmtBRL };
+        } else if (c === 19) {
           wsPrest[addr].s = styleMoneyBold;
         } else if (c === 8) {
           const st = (String(wsPrest[addr].v || '')).toUpperCase();
@@ -776,6 +877,31 @@ export default function FechamentoPage() {
                   Dados podem estar desatualizados. Clique em "Atualizar Dados" para sincronizar.
                 </span>
               )}
+              {extratoAte && (
+                <span className="flex items-center gap-1 text-gray-400" title="Cobertura do extrato mantida pelo worker global">
+                  Extrato global até {new Date(extratoAte).toLocaleDateString('pt-BR')}
+                </span>
+              )}
+              {(() => {
+                const errs = [globalSync?.warmError, globalSync?.coldError].filter(Boolean) as { at: string; error: string; stale?: boolean }[];
+                if (errs.length === 0) return null;
+                const allStale = errs.every(e => e.stale);
+                if (allStale) {
+                  return (
+                    <span className="flex items-center gap-1 text-amber-500" title={`Último erro às ${new Date(errs[0].at).toLocaleString('pt-BR')}: ${errs[0].error}`}>
+                      <Clock className="h-3 w-3" />
+                      Token renovado às {globalSync?.tokenAt ? new Date(globalSync.tokenAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--'} — próximo ciclo automático confirma
+                    </span>
+                  );
+                }
+                const e = errs.find(x => !x.stale) || errs[0];
+                return (
+                  <span className="flex items-center gap-1 text-red-500" title={e.error}>
+                    <AlertCircle className="h-3 w-3" />
+                    Sync automático com erro: {(e.error || '').slice(0, 60)}
+                  </span>
+                );
+              })()}
               {syncMessage && (
                 <span className={syncMessage.startsWith('Erro') ? 'text-red-600' : syncMessage.includes('Aviso') ? 'text-yellow-600' : 'text-green-600'}>
                   {syncMessage}
@@ -851,7 +977,7 @@ export default function FechamentoPage() {
                   )}
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '10px', margin: 0, opacity: 0.7 }}>vExpenses Dashboard</p>
+                  <p style={{ fontSize: '10px', margin: 0, opacity: 0.7 }}>Aery</p>
                   <p style={{ fontSize: '10px', margin: '2px 0 0 0', opacity: 0.7 }}>
                     {formatTimestamp(data.exportadoEm)}
                   </p>
@@ -893,12 +1019,13 @@ export default function FechamentoPage() {
             {/* Status panel for print */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
+              gridTemplateColumns: 'repeat(4, 1fr)',
               gap: '10px',
               marginBottom: '20px',
             }}>
               {[
                 { label: 'Aberto', value: data.statusPanel.aberto, color: '#D35400', bg: '#FDF2E9' },
+                { label: 'Em aprovação', value: data.statusPanel.enviado, color: '#2E86C1', bg: '#EBF5FB' },
                 { label: 'Aprovado', value: data.statusPanel.aprovado, color: '#1E8449', bg: '#E9F7EF' },
                 { label: 'Total Geral', value: data.statusPanel.totalGeral, color: '#1E3A5F', bg: '#F2F2F2' },
               ].map((item, i) => (
@@ -965,13 +1092,13 @@ export default function FechamentoPage() {
           </div>
 
           {/* Status Panel — screen only */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 print:hidden">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 print:hidden">
             <Card>
               <CardContent className="pt-4 pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="text-xs text-gray-500">Aberto</p>
-                    <p className="text-lg font-semibold text-orange-600">
+                    <p className="break-words text-lg font-semibold leading-tight text-orange-600">
                       {formatBRL(data.statusPanel.aberto)}
                     </p>
                   </div>
@@ -983,10 +1110,25 @@ export default function FechamentoPage() {
             </Card>
             <Card>
               <CardContent className="pt-4 pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs text-gray-500">Em aprovação</p>
+                    <p className="break-words text-lg font-semibold leading-tight text-blue-600">
+                      {formatBRL(data.statusPanel.enviado)}
+                    </p>
+                  </div>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    Enviado
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="text-xs text-gray-500">Aprovado</p>
-                    <p className="text-lg font-semibold text-green-600">
+                    <p className="break-words text-lg font-semibold leading-tight text-green-600">
                       {formatBRL(data.statusPanel.aprovado)}
                     </p>
                   </div>
@@ -998,10 +1140,10 @@ export default function FechamentoPage() {
             </Card>
             <Card>
               <CardContent className="pt-4 pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="text-xs text-gray-500">Total Geral</p>
-                    <p className="text-lg font-semibold text-gray-900">
+                    <p className="break-words text-lg font-semibold leading-tight text-gray-900">
                       {formatBRL(data.statusPanel.totalGeral)}
                     </p>
                   </div>
@@ -1026,18 +1168,18 @@ export default function FechamentoPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="font-semibold">Ano</TableHead>
-                      <TableHead className="font-semibold">Mês</TableHead>
-                      <TableHead className="text-right font-semibold">Carga</TableHead>
-                      <TableHead className="text-right font-semibold">Transferência</TableHead>
-                      <TableHead className="text-right font-semibold">Taxa</TableHead>
-                      <TableHead className="text-right font-semibold">Prest. Contas</TableHead>
-                      <TableHead className="text-right font-semibold">Saldo</TableHead>
-                      <TableHead className="text-right font-semibold">Acumulado</TableHead>
+                      <Th s={fechSort} k="ano" className="font-semibold">Ano</Th>
+                      <Th s={fechSort} k="mes" className="font-semibold">Mês</Th>
+                      <Th s={fechSort} k="carga" className="text-right font-semibold">Carga</Th>
+                      <Th s={fechSort} k="transferencia" className="text-right font-semibold">Transferência</Th>
+                      <Th s={fechSort} k="taxa" className="text-right font-semibold">Taxa</Th>
+                      <Th s={fechSort} k="prestacao_contas" className="text-right font-semibold">Prest. Contas</Th>
+                      <Th s={fechSort} k="saldo" className="text-right font-semibold">Saldo</Th>
+                      <Th s={fechSort} k="acumulado" className="text-right font-semibold">Acumulado</Th>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.fechamento.map((m, i) => (
+                    {fechSort.sortedRows.map((m, i) => (
                       <TableRow key={`${m.ano}-${m.mes}`}>
                         <TableCell className="font-medium">{m.ano}</TableCell>
                         <TableCell className="capitalize">{m.mes.toLowerCase()}</TableCell>
@@ -1094,14 +1236,14 @@ export default function FechamentoPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-white print:static">
                     <TableRow>
-                      <TableHead className="font-semibold">Data</TableHead>
-                      <TableHead className="font-semibold">Tipo</TableHead>
-                      <TableHead className="font-semibold">Descrição</TableHead>
-                      <TableHead className="text-right font-semibold">Valor</TableHead>
+                      <Th s={extratoSort} k="data" className="font-semibold">Data</Th>
+                      <Th s={extratoSort} k="tipo" className="font-semibold">Tipo</Th>
+                      <Th s={extratoSort} k="descricao" className="font-semibold">Descrição</Th>
+                      <Th s={extratoSort} k="valor" className="text-right font-semibold">Valor</Th>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.extrato.slice().reverse().map((row, i) => (
+                    {extratoSort.sortedRows.map((row, i) => (
                       <TableRow key={i}>
                         <TableCell className="whitespace-nowrap text-sm">{formatDateShort(row.data)}</TableCell>
                         <TableCell>
@@ -1142,16 +1284,16 @@ export default function FechamentoPage() {
                 <Table>
                   <TableHeader className="sticky top-0 bg-white print:static">
                     <TableRow>
-                      <TableHead className="font-semibold">Data</TableHead>
-                      <TableHead className="font-semibold">Relatório</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold">Descrição</TableHead>
-                      <TableHead className="font-semibold">Tipo</TableHead>
-                      <TableHead className="text-right font-semibold">Valor</TableHead>
+                      <Th s={prestSort} k="data" className="font-semibold">Data</Th>
+                      <Th s={prestSort} k="nome_relatorio" className="font-semibold">Relatório</Th>
+                      <Th s={prestSort} k="status" className="font-semibold">Status</Th>
+                      <Th s={prestSort} k="descricao_despesa" className="font-semibold">Descrição</Th>
+                      <Th s={prestSort} k="tipo_despesa" className="font-semibold">Tipo</Th>
+                      <Th s={prestSort} k="valor_total" className="text-right font-semibold">Valor</Th>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.prestacaoContas.map((row, i) => (
+                    {prestSort.sortedRows.map((row, i) => (
                       <TableRow key={i}>
                         <TableCell className="whitespace-nowrap text-sm">{formatDateShort(row.data)}</TableCell>
                         <TableCell className="text-sm font-medium">{row.nome_relatorio}</TableCell>
@@ -1161,6 +1303,7 @@ export default function FechamentoPage() {
                             className={
                               row.status === 'Aprovado' || row.status === 'APROVADO' ? 'bg-green-50 text-green-700 border-green-200' :
                               row.status === 'Aberto' || row.status === 'ABERTO' ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                              row.status === 'Enviado' || row.status === 'ENVIADO' ? 'bg-blue-50 text-blue-700 border-blue-200' :
                               'bg-gray-50 text-gray-700 border-gray-200'
                             }
                           >
@@ -1189,7 +1332,7 @@ export default function FechamentoPage() {
               justifyContent: 'space-between',
             }}>
               <p style={{ fontSize: '9px', color: '#999', margin: 0 }}>
-                Relatório gerado pelo Dashboard vExpenses
+                Relatório gerado pelo Aery
               </p>
               <p style={{ fontSize: '9px', color: '#999', margin: 0 }}>
                 {formatTimestamp(data.exportadoEm)}
@@ -1202,7 +1345,7 @@ export default function FechamentoPage() {
       {/* Empty state */}
       {!data && !loading && !error && (
         <Card className="print:hidden">
-          <CardContent className="py-12 flex flex-col items-center">
+          <CardContent className="py-12 pt-12 flex flex-col items-center">
             <User className="h-12 w-12 text-gray-300 mb-3" />
             <p className="text-gray-500 text-sm">
               Selecione um colaborador acima para visualizar o fechamento
@@ -1237,13 +1380,13 @@ function SummaryCard({
   const bgClass = highlight ? 'bg-blue-50 border-blue-200' : '';
 
   return (
-    <Card className={bgClass}>
-      <CardContent className="pt-4 pb-4">
-        <div className="flex items-center justify-between mb-1">
-          <p className="text-xs text-gray-500 font-medium">{title}</p>
-          <span className="text-gray-400">{icon}</span>
+    <Card className={`h-full ${bgClass}`}>
+      <CardContent className="flex h-full flex-col justify-center pt-4 pb-4">
+        <div className="flex items-center justify-between gap-2 mb-1">
+          <p className="min-w-0 text-xs text-gray-500 font-medium">{title}</p>
+          <span className="flex-shrink-0 text-gray-400">{icon}</span>
         </div>
-        <p className={`text-lg font-bold ${colorClass}`}>
+        <p className={`break-words text-lg font-bold leading-tight ${colorClass}`}>
           {formatBRL(value)}
         </p>
       </CardContent>

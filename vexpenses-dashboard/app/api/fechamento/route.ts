@@ -71,13 +71,16 @@ interface FechoResponse {
   };
   statusPanel: {
     aberto: number;
+    enviado: number;
     aprovado: number;
     totalGeral: number;
   };
   caixas: {
     fechados: { nome: string; valor: number }[];
+    emAprovacao: { nome: string; valor: number }[];
     abertos: { nome: string; valor: number }[];
     totalFechados: number;
+    totalEmAprovacao: number;
     totalAbertos: number;
   };
   exportadoEm: string;
@@ -519,12 +522,17 @@ export async function GET(request: NextRequest) {
     const saldoDisponivel = totalCarga + totalTransferencia + totalTaxa;
     const fechamentoPrestacao = saldoDisponivel - totalPrestacao;
 
-    // Status panel (Aberto = ABERTO + ENVIADO + REABERTO; Aprovado = APROVADO + PAGO)
+    // Status panel — ENVIADO não é caixa aberto: já foi prestado pelo
+    // funcionário e aguarda aprovação (mesma semântica do Visão Geral).
+    // Aberto = ABERTO + REABERTO; Em aprovação = ENVIADO; Aprovado = resto.
     const abertoTotal = prestacaoContas
       .filter(p => {
         const st = (p.status || '').toUpperCase();
-        return st === 'ABERTO' || st === 'ENVIADO' || st === 'REABERTO';
+        return st === 'ABERTO' || st === 'REABERTO';
       })
+      .reduce((s, p) => s + p.valor_total, 0);
+    const enviadoTotal = prestacaoContas
+      .filter(p => (p.status || '').toUpperCase() === 'ENVIADO')
       .reduce((s, p) => s + p.valor_total, 0);
     const aprovadoTotal = prestacaoContas
       .filter(p => {
@@ -534,7 +542,7 @@ export async function GET(request: NextRequest) {
       .reduce((s, p) => s + p.valor_total, 0);
 
     // Caixas por relatório (relatório = "caixa" do mês, ex.: "CAIXA 02/2026")
-    // Fechado = mesmo critério do painel "Aprovado"; Aberto = ABERTO/ENVIADO/REABERTO
+    // Aberto = ABERTO/REABERTO; Em aprovação = ENVIADO; Fechado = resto (menos REPROVADO)
     const caixaMap = new Map<number, { nome: string; status: string; valor: number }>();
     for (const p of prestacaoContas) {
       const st = (p.status || '').toUpperCase();
@@ -558,8 +566,12 @@ export async function GET(request: NextRequest) {
       .filter(c => c.status !== 'ABERTO' && c.status !== 'ENVIADO' && c.status !== 'REABERTO')
       .map(c => ({ nome: c.nome, valor: c.valor }))
       .sort(caixaSort);
+    const caixasEmAprovacao = [...caixaMap.values()]
+      .filter(c => c.status === 'ENVIADO')
+      .map(c => ({ nome: c.nome, valor: c.valor }))
+      .sort(caixaSort);
     const caixasAbertos = [...caixaMap.values()]
-      .filter(c => c.status === 'ABERTO' || c.status === 'ENVIADO' || c.status === 'REABERTO')
+      .filter(c => c.status === 'ABERTO' || c.status === 'REABERTO')
       .map(c => ({ nome: c.nome, valor: c.valor }))
       .sort(caixaSort);
 
@@ -629,13 +641,16 @@ export async function GET(request: NextRequest) {
       },
       statusPanel: {
         aberto: abertoTotal,
+        enviado: enviadoTotal,
         aprovado: aprovadoTotal,
-        totalGeral: abertoTotal + aprovadoTotal,
+        totalGeral: abertoTotal + enviadoTotal + aprovadoTotal,
       },
       caixas: {
         fechados: caixasFechados,
+        emAprovacao: caixasEmAprovacao,
         abertos: caixasAbertos,
         totalFechados: caixasFechados.reduce((s, c) => s + c.valor, 0),
+        totalEmAprovacao: caixasEmAprovacao.reduce((s, c) => s + c.valor, 0),
         totalAbertos: caixasAbertos.reduce((s, c) => s + c.valor, 0),
       },
       exportadoEm: new Date().toISOString(),
