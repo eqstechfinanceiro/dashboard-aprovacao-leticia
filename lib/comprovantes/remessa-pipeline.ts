@@ -349,13 +349,39 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
     return s.has(name);
   };
 
+  // Pool de envio: e2doc (4 calls HTTP/doc) é o gargalo — I/O paralelo.
+  // SharePoint fica serializado via mutex (página Playwright única) e com
+  // espaçamento mínimo + retry com backoff em 429 (throttle do SP).
+  const CONCURRENCY = 6;
+  const SP_MIN_GAP_MS = 700;
+  let spLock: Promise<void> = Promise.resolve();
+  let spLast = 0;
+  const spUploadOnce = async (path: string, name: string, buf: Buffer) => {
+    const gap = Date.now() - spLast;
+    if (gap < SP_MIN_GAP_MS) await new Promise((r) => setTimeout(r, SP_MIN_GAP_MS - gap));
+    let lastErr: unknown;
+    for (let tent = 0; tent < 4; tent++) {
+      try {
+        await uploadFile(DESTINO, path, name, buf);
+        spLast = Date.now();
+        return;
+      } catch (err) {
+        lastErr = err;
+        const is429 = /429|throttl/i.test(String(err));
+        if (!is429 || tent === 3) throw err;
+        await new Promise((r) => setTimeout(r, 4000 * (tent + 1)));
+      }
+    }
+    throw lastErr;
+  };
+  const spUpload = (path: string, name: string, buf: Buffer) => {
+    const p = spLock.then(() => spUploadOnce(path, name, buf));
+    spLock = p.then(() => undefined, () => undefined);
+    return p;
+  };
+
   let done = 0;
-  for (const it of itens as any[]) {
-    done++;
-    await updateRunProgress(run.id, {
-      phase: 'processing', currentFileName: it.source_file, pageNum: it.page_num,
-      pagesProcessed: done, totalPages: itens.length,
-    });
+  const processItem = async (it: any) => {
     const meta = it.meta || {};
 
     try {
@@ -403,17 +429,17 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
       if (duplicado && jaNoE2Doc) {
         resumo.duplicados++;
         await sql`UPDATE comprovantes_envios SET status='duplicado', destino_path=${destinoPath}, destino_filename=${fileName}, generated_pdf_path=${generatedPath} WHERE id=${it.id}`;
-        continue;
+        return;
       }
 
       if (uploadEnabled && !duplicado) {
         try {
-          await uploadFile(DESTINO, destinoPath, fileName, pdfBytes);
+          await spUpload(destinoPath, fileName, pdfBytes);
           destFiles.get(destinoPath)?.add(fileName);
         } catch (err) {
           resumo.erros++;
           await sql`UPDATE comprovantes_envios SET status='erro', error=${`upload SP falhou: ${String(err).substring(0, 300)}`} WHERE id=${it.id}`;
-          continue;
+          return;
         }
       }
 
@@ -427,7 +453,7 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
       if (!envio.ok) {
         resumo.erros++;
         await sql`UPDATE comprovantes_envios SET status='e2doc_erro', error=${envio.error || 'falha E2DOC'}, generated_pdf_path=${generatedPath} WHERE id=${it.id}`;
-        continue;
+        return;
       }
       resumo.enviados++;
       await sql`UPDATE comprovantes_envios SET
@@ -439,7 +465,22 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
       resumo.erros++;
       await sql`UPDATE comprovantes_envios SET status='erro', error=${String(err).substring(0, 300)} WHERE id=${it.id}`;
     }
-  }
+    done++;
+    if (done % 25 === 0 || done === itens.length) {
+      await updateRunProgress(run.id, {
+        phase: 'processing', currentFileName: it.source_file, pageNum: it.page_num,
+        pagesProcessed: done, totalPages: itens.length,
+      }).catch(() => {});
+    }
+  };
+
+  let idx = 0;
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, itens.length) }, async () => {
+    while (idx < itens.length) {
+      const it = itens[idx++];
+      await processItem(it);
+    }
+  }));
 
   await finishRun(run.id, resumo);
   try {
