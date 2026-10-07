@@ -5,11 +5,13 @@
 //    fornecidas pelo pagador' casa com o 'seu número' do CNAB).
 //  - bradesco_rt: Bradesco "Comprovante de Pagamento / Crédito em Conta Real
 //    Time", 1 por página, CPF do favorecido embutido.
+//  - bb_pag: Banco do Brasil "PAG SALARIO C/CTA" (1/página, CPF/CNPJ explícito)
+//    e "COMPROVANTE DE TRANSFERENCIA" (BB→BB, sem CPF — casa por nome/conta).
 //  - desconhecido: qualquer outro — vira warning, não é enviado.
 
 import { PDFDocument } from 'pdf-lib';
 
-export type FolhaFormato = 'itau_folha' | 'bradesco_rt' | 'desconhecido';
+export type FolhaFormato = 'itau_folha' | 'bradesco_rt' | 'bb_pag' | 'desconhecido';
 
 export interface ComprovanteFolha {
   pageNum: number;          // 1-based
@@ -80,6 +82,71 @@ function extrairItau(bloco: string): Partial<ComprovanteFolha> {
   };
 }
 
+/**
+ * Reconstrói linhas visuais agrupando items do pdfjs por coordenada Y.
+ * O texto do BB vem fragmentado palavra a palavra — join('\n') quebra os
+ * campos. Tolerância ~3pt de variação de baseline.
+ */
+function linhasVisuais(items: any[]): string[] {
+  const groups: { y: number; parts: { x: number; s: string }[] }[] = [];
+  for (const it of items) {
+    const y = it.transform?.[5];
+    const x = it.transform?.[4];
+    if (typeof y !== 'number' || typeof x !== 'number' || !it.str) continue;
+    let g = groups.find((g) => Math.abs(g.y - y) < 3);
+    if (!g) { g = { y, parts: [] }; groups.push(g); }
+    g.parts.push({ x, s: it.str });
+  }
+  return groups
+    .sort((a, b) => b.y - a.y)
+    .map((g) => g.parts.sort((a, b) => a.x - b.x).map((p) => p.s).join('').replace(/\s+/g, ' ').trim())
+    .filter(Boolean);
+}
+
+/** Campos do comprovante BB — "PAG SALARIO C/CTA" ou "COMPROVANTE DE TRANSFERENCIA". */
+function extrairBb(linhas: string[]): Partial<ComprovanteFolha> {
+  const txt = linhas.join('\n');
+  const isTransf = /COMPROVANTE\s+DE\s+TRANSFERENCIA/i.test(txt);
+  const line = (re: RegExp) => { const l = linhas.find((l) => re.test(l)); return l ? re.exec(l)?.[1]?.trim() || null : null; };
+
+  // Beneficiário: PAG → linha 'BENEFICIARIO: X'; TRANSF → 'CLIENTE: X' após 'TRANSFERIDO PARA:'
+  let nome = line(/^BENEFICIARIO:\s*(.+)$/i);
+  if (!nome && isTransf) {
+    const idx = linhas.findIndex((l) => /TRANSFERIDO PARA/i.test(l));
+    const cli = idx >= 0 ? linhas.slice(idx + 1).find((l) => /^CLIENTE:\s*(.+)$/i.test(l)) : null;
+    nome = cli ? /^CLIENTE:\s*(.+)$/i.exec(cli)![1].trim() : null;
+  }
+
+  // Agência+conta do beneficiário: última linha 'AGENCIA: x CONTA: y' do bloco
+  // (a primeira é do pagador). TRANSF: dentro do bloco 'TRANSFERIDO PARA'.
+  const agLinhas = linhas.filter((l) => /AGENCIA:/i.test(l));
+  const agBenef = agLinhas[agLinhas.length - 1] || '';
+  const ag = /AGENCIA:\s*([\d\-Xx]+)/i.exec(agBenef);
+  const cta = /CONTA:\s*([\d.]+)\s*-\s*([\dXx]+)/i.exec(agBenef);
+
+  const cpfRaw = line(/^CPF\/CNPJ:\s*([\d.\-\/]+)/i);
+  const cpf = cpfRaw ? cpfRaw.replace(/\D/g, '') : null;
+  const valorRaw = line(/VALOR\s*TOTAL\s*:?\s*([\d.,]+)/i) || line(/\bVALOR\s*:?\s*([\d.,]+)/i);
+  const dataRaw = line(/DATA D[OA] (?:PAGAMENTO|TRANSFERENCIA)\s*:?\s*(\d{2}[\/.]\d{2}[\/.]\d{4})/i);
+  const ref = line(/NR\.?\s*DOCUMENTO\s*:?\s*([\d.]+)/i);
+
+  return {
+    nome: nome?.replace(/\s+/g, ' ') || null,
+    cpf: cpf && cpf.length === 11 ? cpf : null,
+    agencia: ag ? onlyDigitsLocal(ag[1]) || null : null,
+    contaNumero: cta ? onlyDigitsLocal(cta[1]) || null : null,
+    contaDv: cta ? cta[2].toUpperCase() : null,
+    conta: cta ? `${onlyDigitsLocal(cta[1])}-${cta[2].toUpperCase()}` : null,
+    valor: valorRaw ? parseValorBR(valorRaw) : null,
+    dataPagamento: dataRaw ? parseDataBR(dataRaw) : null,
+    pagadorRef: ref,
+  };
+}
+
+function onlyDigitsLocal(s: string): string {
+  return s.replace(/\D/g, '').replace(/^0+/, '');
+}
+
 /** Campos do comprovante Bradesco Real Time. */
 function extrairBradesco(bloco: string): Partial<ComprovanteFolha> {
   const fav = /Favorecido:\s*\n?\s*([\s\S]+?)\s*(?:\||CPF:)/i.exec(bloco);
@@ -134,6 +201,8 @@ export async function analisarFolhaPdf(
 
       const isItau = /SISPAG\s+SALARIOS/i.test(fullText) || cuts.length > 0;
       const isBradesco = /Real Time/i.test(fullText) && /Favorecido:/i.test(fullText);
+      const isBb = /PAG\s*SALARIO/i.test(fullText)
+        || (/COMPROVANTE\s+DE\s+TRANSFERENCIA/i.test(fullText) && /BANCO\s+DO\s+BRASIL/i.test(fullText));
 
       if (isItau) {
         formato = formato === 'desconhecido' ? 'itau_folha' : formato;
@@ -170,6 +239,20 @@ export async function analisarFolhaPdf(
         } as ComprovanteFolha);
         if (!extra.nome || !extra.cpf) {
           warnings.push(`${fileName} p${i}: Bradesco sem favorecido/CPF extraído`);
+        }
+        continue;
+      }
+
+      if (isBb) {
+        formato = formato === 'desconhecido' ? 'bb_pag' : formato;
+        const extra = extrairBb(linhasVisuais(items));
+        comprovantes.push({
+          pageNum: i, slot: 0, crop: null,
+          ...extra,
+        } as ComprovanteFolha);
+        // Transferência BB→BB não carrega CPF — nome é o mínimo aceitável
+        if (!extra.nome) {
+          warnings.push(`${fileName} p${i}: BB sem beneficiário extraído`);
         }
         continue;
       }

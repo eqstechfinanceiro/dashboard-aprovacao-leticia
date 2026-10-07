@@ -211,7 +211,7 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
       resumo.warnings.push(...analise.warnings);
       if (analise.formato === 'desconhecido') resumo.formatoNaoReconhecido++;
 
-      const BANCO_POR_FORMATO: Record<string, string> = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO' };
+      const BANCO_POR_FORMATO: Record<string, string> = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO', bb_pag: 'BANCO DO BRASIL' };
       const bancoTxt = cnabs.find((c) => BANCO_NOME[c.banco] && f.name.toUpperCase().includes(BANCO_NOME[c.banco].split(' ')[0]));
       const bancoItem = bancoTxt?.bancoNome || BANCO_POR_FORMATO[analise.formato] || null;
 
