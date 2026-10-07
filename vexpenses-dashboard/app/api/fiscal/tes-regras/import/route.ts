@@ -1,53 +1,150 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as XLSX from 'xlsx-js-style';
 import { sql } from '@/lib/db/neon';
-import { ensureTesRegrasTable, normCnpj, normProd } from '@/lib/fiscal/tes-regras';
+import { ensureTesRegrasTable, normCnpj, canonProd, normA2, normLoja } from '@/lib/fiscal/tes-regras';
 import { AUTH_COOKIE, verifyToken } from '@/lib/auth/auth';
+import { genericQuery, EMPRESAS } from '@/lib/impacto/totvs';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
 /**
- * POST multipart — arquivo .xlsx/.csv/.txt com colunas de fornecedor + produto + tes.
- * Headers aceitos (case-insensitive, com ou sem acento):
- *   fornecedor: cnpj|fornecedor_cnpj|cnpj_fornecedor|emitente|codigo_fornecedor
- *   produto:    produto|item|codigo|cod_produto|produto_codigo|material
- *   tes:        tes|tes_nova|nova_tes|tipo_entrada
- *   opcionais:  nome|fornecedor_nome|razao ; desc|descricao|produto_desc ;
- *               empresa ; loja (ignorada por ora)
- * Linhas sem tes/cnpj/produto válidos são reportadas como erro e puladas.
+ * POST multipart — importa as listas de parametrização TES.
+ *
+ * Formatos aceitos:
+ *  - XLSX com abas `fornecedores` (Forn/Cliente + Loja → SA2) e/ou `produtos`
+ *    (Produto + Desc Produto → SB1). É o formato da planilha oficial do Fiscal.
+ *  - CSV/TXT com ?lista=fornecedores|produtos — colunas equivalentes.
+ *
+ * Fornecedores: a importação resolve o CNPJ via SA2 (A2_CGC) consultando o
+ * TOTVS das duas empresas — é esse CNPJ que o bot casa com o <emit> do XML.
+ * Códigos não encontrados ficam com cnpj NULL e são reportados.
  */
 
-const H_FORN = ['cnpj', 'fornecedor_cnpj', 'cnpj_fornecedor', 'emitente', 'codigo_fornecedor', 'cpf', 'cnpjcpf'];
-const H_PROD = ['produto', 'item', 'codigo', 'cod_produto', 'produto_codigo', 'material', 'codigo_produto', 'cod_item'];
-const H_TES = ['tes', 'tes_nova', 'nova_tes', 'tipo_entrada', 'tip_entrada', 'tes_destino'];
-const H_NOME = ['nome', 'fornecedor_nome', 'razao', 'razao_social', 'fornecedor', 'nome_fornecedor'];
-const H_DESC = ['desc', 'descricao', 'produto_desc', 'descricao_produto', 'item_desc'];
-const H_EMP = ['empresa', 'emp'];
-
 const normHeader = (h: string) =>
-  h.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+  String(h).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
 
-function mapCols(headerRow: string[]): Record<string, number> {
-  const find = (keys: string[]) =>
-    headerRow.findIndex((h) => keys.includes(normHeader(h)));
-  return {
-    cnpj: find(H_FORN),
-    produto: find(H_PROD),
-    tes: find(H_TES),
-    nome: find(H_NOME),
-    desc: find(H_DESC),
-    empresa: find(H_EMP),
-  };
-}
+interface FornRow { a2: string; loja: string }
+interface ProdRow { produto: string; descricao: string }
 
 function parseCsv(text: string): string[][] {
   const first = text.split(/\r?\n/, 1)[0] || '';
   const sep = (first.match(/;/g)?.length || 0) >= (first.match(/,/g)?.length || 0) ? ';' : ',';
-  return text
-    .split(/\r?\n/)
-    .filter((l) => l.trim())
+  return text.split(/\r?\n/).filter((l) => l.trim())
     .map((l) => l.split(sep).map((c) => c.trim().replace(/^"|"$/g, '')));
+}
+
+function rowsToForns(rows: string[][]): FornRow[] {
+  if (!rows.length) return [];
+  // header: "Forn/Cliente","Loja" — ou sem header (cod;loja)
+  const h = rows[0].map(normHeader);
+  const iCod = h.findIndex((x) => ['forncliente', 'fornecedor', 'codigo', 'cod', 'a2cod'].includes(x));
+  const iLoja = h.findIndex((x) => x === 'loja');
+  const hasHeader = iCod >= 0;
+  const out: FornRow[] = [];
+  for (const r of rows.slice(hasHeader ? 1 : 0)) {
+    const a2 = normA2(hasHeader ? (r[iCod] || '') : (r[0] || ''));
+    const loja = normLoja(hasHeader ? (r[iLoja >= 0 ? iLoja : 1] || '01') : (r[1] || '01'));
+    if (a2) out.push({ a2, loja: loja || '01' });
+  }
+  return out;
+}
+
+function rowsToProds(rows: string[][]): ProdRow[] {
+  if (!rows.length) return [];
+  const h = rows[0].map(normHeader);
+  const iCod = h.findIndex((x) => ['produto', 'codigo', 'cod', 'item', 'material'].includes(x));
+  const iDesc = h.findIndex((x) => ['descproduto', 'descricao', 'desc', 'descricao_produto'].includes(x));
+  const hasHeader = iCod >= 0;
+  const out: ProdRow[] = [];
+  for (const r of rows.slice(hasHeader ? 1 : 0)) {
+    const produto = canonProd(hasHeader ? (r[iCod] || '') : (r[0] || ''));
+    const descricao = hasHeader && iDesc >= 0 ? (r[iDesc] || '') : (r[1] || '');
+    if (produto) out.push({ produto, descricao });
+  }
+  return out;
+}
+
+/** Mapa (a2_cod|a2_loja) → {cnpj, nome, empresa} consultando SA2 das 2 empresas.
+ *  A2_COD é char(6) — a planilha traz '557' e o SA2 tem '000557': o IN inclui
+ *  a forma com padding e o match final é por chave canônica sem zeros à esq.
+ *  NÃO escaneia o SA2 inteiro (97k linhas/empresa) — consulta direta em lotes. */
+async function resolverSa2(forns: FornRow[]) {
+  const canonA2 = (s: string) => normA2(s).replace(/^0+/, '') || '0';
+  const wanted = new Map(forns.map((f) => [`${canonA2(f.a2)}|${f.loja}`, `${f.a2}|${f.loja}`]));
+  const found = new Map<string, { cnpj: string; nome: string; empresa: string }>();
+
+  // formas aceitas no IN: código como veio + padded 6
+  const forms = new Set<string>();
+  for (const f of forns) {
+    forms.add(f.a2);
+    if (/^\d+$/.test(f.a2) && f.a2.length < 6) forms.add(f.a2.padStart(6, '0'));
+  }
+  const codes = [...forms];
+  const CHUNK = 150;
+
+  for (const [empresa, tenantId] of Object.entries(EMPRESAS)) {
+    for (let i = 0; i < codes.length; i += CHUNK) {
+      const inList = codes.slice(i, i + CHUNK).map((c) => `'${c}'`).join(',');
+      const d: any = await genericQuery(tenantId, {
+        tables: 'SA2',
+        fields: 'A2_COD,A2_LOJA,A2_CGC,A2_NOME',
+        where: `SA2.D_E_L_E_T_=' ' AND A2_COD IN (${inList})`,
+        pageSize: String(CHUNK * 4),
+      }).catch(() => null);
+      for (const o of d?.items || d?.objects || []) {
+        const key = `${canonA2(String(o.A2_COD || o.a2_cod || ''))}|${normLoja(String(o.A2_LOJA ?? o.a2_loja ?? '01'))}`;
+        const origKey = wanted.get(key);
+        if (origKey && !found.has(origKey)) {
+          found.set(origKey, { cnpj: normCnpj(o.A2_CGC || o.a2_cgc || ''), nome: String(o.A2_NOME || o.a2_nome || '').trim(), empresa });
+        }
+      }
+    }
+    if (found.size === wanted.size) break;
+  }
+  return found;
+}
+
+async function importarFornecedores(forns: FornRow[], user: string | null) {
+  const sa2 = await resolverSa2(forns);
+  let inseridos = 0, atualizados = 0;
+  const naoResolvidos: string[] = [];
+  for (const f of forns) {
+    const hit = sa2.get(`${f.a2}|${f.loja}`);
+    const empresa = hit?.empresa || '*';
+    if (!hit?.cnpj) naoResolvidos.push(`${f.a2}/${f.loja}`);
+    try {
+      const r = await sql.query(
+        `INSERT INTO lince_tes_fornecedores (empresa,a2_cod,a2_loja,cnpj,nome,created_by)
+         VALUES ($1,$2,$3,$4,$5,$6)
+         ON CONFLICT (empresa,a2_cod,a2_loja) DO UPDATE SET
+           cnpj=COALESCE(EXCLUDED.cnpj,lince_tes_fornecedores.cnpj),
+           nome=COALESCE(EXCLUDED.nome,lince_tes_fornecedores.nome),
+           ativo=TRUE, updated_at=NOW()
+         RETURNING (xmax = 0) AS inserted`,
+        [empresa, f.a2, f.loja, hit?.cnpj || null, hit?.nome || null, user]);
+      r.rows[0]?.inserted ? inseridos++ : atualizados++;
+    } catch { /* ignora linha problemática */ }
+  }
+  return { inseridos, atualizados, naoResolvidos };
+}
+
+async function importarProdutos(prods: ProdRow[], user: string | null) {
+  let inseridos = 0, atualizados = 0;
+  for (const p of prods) {
+    try {
+      const r = await sql.query(
+        `INSERT INTO lince_tes_produtos (produto,descricao,created_by)
+         VALUES ($1,$2,$3)
+         ON CONFLICT (produto) DO UPDATE SET
+           descricao=COALESCE(EXCLUDED.descricao,lince_tes_produtos.descricao),
+           ativo=TRUE, updated_at=NOW()
+         RETURNING (xmax = 0) AS inserted`,
+        [p.produto, p.descricao || null, user]);
+      r.rows[0]?.inserted ? inseridos++ : atualizados++;
+    } catch { /* ignora */ }
+  }
+  return { inseridos, atualizados };
 }
 
 export async function POST(request: NextRequest) {
@@ -62,65 +159,49 @@ export async function POST(request: NextRequest) {
   if (!(file instanceof File)) return NextResponse.json({ error: 'arquivo ausente' }, { status: 400 });
 
   const buf = Buffer.from(await file.arrayBuffer());
-  let rows: string[][];
+  const listaParam = request.nextUrl.searchParams.get('lista');
+  const resultado: any = { ok: true };
+  let importou = false;
+
   if (/\.(xlsx|xls)$/i.test(file.name)) {
     const wb = XLSX.read(buf, { type: 'buffer' });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    rows = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, defval: '', raw: false })
-      .map((r) => r.map((c) => String(c ?? '').trim()));
+    for (const sheet of wb.SheetNames) {
+      const rows = XLSX.utils.sheet_to_json<string[]>(wb.Sheets[sheet], { header: 1, defval: '', raw: false })
+        .map((r) => r.map((c) => String(c ?? '').trim()));
+      const name = sheet.toLowerCase();
+      if (name.includes('fornec')) {
+        const forns = rowsToForns(rows);
+        resultado.fornecedores = await importarFornecedores(forns, user);
+        importou = true;
+      } else if (name.includes('prod')) {
+        resultado.produtos = await importarProdutos(rowsToProds(rows), user);
+        importou = true;
+      }
+    }
+    if (!importou) {
+      // XLSX de aba única sem nome reconhecível — infere pela lista param ou header
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json<string[]>(ws, { header: 1, defval: '', raw: false })
+        .map((r) => r.map((c) => String(c ?? '').trim()));
+      if (listaParam === 'fornecedores') {
+        resultado.fornecedores = await importarFornecedores(rowsToForns(rows), user); importou = true;
+      } else if (listaParam === 'produtos') {
+        resultado.produtos = await importarProdutos(rowsToProds(rows), user); importou = true;
+      }
+    }
   } else {
-    rows = parseCsv(buf.toString('utf8'));
-  }
-  if (rows.length < 2) return NextResponse.json({ error: 'arquivo vazio ou sem linhas' }, { status: 400 });
-
-  const cols = mapCols(rows[0]);
-  if (cols.cnpj < 0 || cols.produto < 0 || cols.tes < 0) {
-    return NextResponse.json(
-      { error: 'colunas obrigatórias não encontradas (cnpj, produto, tes)', header: rows[0] },
-      { status: 400 },
-    );
-  }
-
-  let inseridos = 0, atualizados = 0;
-  const erros: { linha: number; motivo: string; raw: string }[] = [];
-  const empresaDef = String(form!.get('empresa') || '*').toUpperCase();
-
-  for (let i = 1; i < rows.length; i++) {
-    const r = rows[i];
-    const cnpj = normCnpj(r[cols.cnpj] || '');
-    const produto = normProd(r[cols.produto] || '');
-    const tes = String(r[cols.tes] || '').trim().toUpperCase();
-    const empresa = cols.empresa >= 0 && r[cols.empresa]
-      ? String(r[cols.empresa]).trim().toUpperCase() : empresaDef;
-    if (!cnpj || cnpj.length < 11 || !produto || !tes) {
-      if (r.some((c) => c)) erros.push({ linha: i + 1, motivo: 'cnpj/produto/tes inválido', raw: r.join(' | ').slice(0, 120) });
-      continue;
-    }
-    try {
-      const res = await sql.query(
-        `INSERT INTO lince_tes_regras
-           (empresa, fornecedor_cnpj, fornecedor_nome, produto, produto_desc, tes, created_by)
-         VALUES ($1,$2,$3,$4,$5,$6,$7)
-         ON CONFLICT (empresa, fornecedor_cnpj, produto)
-         DO UPDATE SET tes = EXCLUDED.tes,
-                       fornecedor_nome = COALESCE(EXCLUDED.fornecedor_nome, lince_tes_regras.fornecedor_nome),
-                       produto_desc = COALESCE(EXCLUDED.produto_desc, lince_tes_regras.produto_desc),
-                       ativo = TRUE, updated_at = NOW()
-         RETURNING (xmax = 0) AS inserted`,
-        [empresa, cnpj,
-         cols.nome >= 0 ? r[cols.nome] || null : null,
-         produto,
-         cols.desc >= 0 ? r[cols.desc] || null : null,
-         tes, user]);
-      res.rows[0]?.inserted ? inseridos++ : atualizados++;
-    } catch (e: any) {
-      erros.push({ linha: i + 1, motivo: String(e?.message || e).slice(0, 120), raw: r.join(' | ').slice(0, 120) });
+    const rows = parseCsv(buf.toString('utf8'));
+    if (listaParam === 'fornecedores') {
+      resultado.fornecedores = await importarFornecedores(rowsToForns(rows), user); importou = true;
+    } else if (listaParam === 'produtos') {
+      resultado.produtos = await importarProdutos(rowsToProds(rows), user); importou = true;
     }
   }
 
-  return NextResponse.json({
-    ok: true, inseridos, atualizados,
-    erros: erros.slice(0, 50), totalErros: erros.length,
-    linhasProcessadas: rows.length - 1,
-  });
+  if (!importou) {
+    return NextResponse.json({
+      error: 'Nenhuma aba/lista reconhecida. Use XLSX com abas "fornecedores"+"produtos" ou CSV com ?lista=',
+    }, { status: 400 });
+  }
+  return NextResponse.json(resultado);
 }

@@ -1,26 +1,43 @@
 import { sql } from '../db/neon';
 
 /**
- * Regras de TES por (fornecedor × produto) consumidas pelo Lince ao lançar
- * a NF de entrada. O bot consulta esta tabela com cache curto (~60s) —
- * edições aqui passam a valer quase em tempo real.
+ * Parametrização do Lince — crédito de ICMS (matriz).
  *
- * Match do produto: o Lince normaliza ambos os lados (trim + upper) e testa
- * o código SB1 (grid SIGA) e o cProd do XML — então o código pode ser o
- * interno (SB1) ou o do fornecedor (cProd).
+ * A regra do Fiscal é:  SE fornecedor ∈ LISTA_FORNECEDORES (SA2)
+ *                    E  produto    ∈ LISTA_PRODUTOS (SB1)
+ *                    E  TES calculada ∈ MAPA (405/403/421)
+ *                    ENTÃO substitui por 449/448/450.
+ *
+ * São duas listas independentes + um mapa de substituição — NÃO pares
+ * fornecedor×produto. O bot conhece o fornecedor pelo CNPJ do XML (<emit>),
+ * então fornecedores guardam a2_cod/a2_loja (cadastro) E o cnpj resolvido
+ * via TOTVS SA2 (A2_CGC) na importação.
  */
+
 let ensured = false;
 export async function ensureTesRegrasTable() {
   if (ensured || !sql) return;
   await sql`
-    CREATE TABLE IF NOT EXISTS lince_tes_regras (
+    CREATE TABLE IF NOT EXISTS lince_tes_fornecedores (
       id SERIAL PRIMARY KEY,
       empresa TEXT NOT NULL DEFAULT '*',
-      fornecedor_cnpj TEXT NOT NULL,
-      fornecedor_nome TEXT,
-      produto TEXT NOT NULL,
-      produto_desc TEXT,
-      tes TEXT NOT NULL,
+      a2_cod TEXT NOT NULL,
+      a2_loja TEXT NOT NULL DEFAULT '01',
+      cnpj TEXT,
+      nome TEXT,
+      ativo BOOLEAN NOT NULL DEFAULT TRUE,
+      created_by TEXT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (empresa, a2_cod, a2_loja)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS lince_tes_forn_cnpj ON lince_tes_fornecedores (cnpj) WHERE ativo AND cnpj IS NOT NULL`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS lince_tes_produtos (
+      id SERIAL PRIMARY KEY,
+      produto TEXT NOT NULL UNIQUE,
+      descricao TEXT,
       ativo BOOLEAN NOT NULL DEFAULT TRUE,
       created_by TEXT,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -28,29 +45,34 @@ export async function ensureTesRegrasTable() {
     )
   `;
   await sql`
-    CREATE UNIQUE INDEX IF NOT EXISTS lince_tes_regras_uk
-    ON lince_tes_regras (empresa, fornecedor_cnpj, produto)
+    CREATE TABLE IF NOT EXISTS lince_tes_mapa (
+      id SERIAL PRIMARY KEY,
+      empresa TEXT NOT NULL DEFAULT 'EQS',
+      tes_origem TEXT NOT NULL,
+      tes_destino TEXT NOT NULL,
+      ativo BOOLEAN NOT NULL DEFAULT TRUE,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (empresa, tes_origem)
+    )
   `;
   await sql`
-    CREATE INDEX IF NOT EXISTS lince_tes_regras_lookup
-    ON lince_tes_regras (fornecedor_cnpj, produto) WHERE ativo
+    INSERT INTO lince_tes_mapa (empresa, tes_origem, tes_destino) VALUES
+      ('EQS', '405', '449'),
+      ('EQS', '403', '448'),
+      ('EQS', '421', '450')
+    ON CONFLICT (empresa, tes_origem) DO NOTHING
   `;
   ensured = true;
 }
 
 export const normCnpj = (s: string) => (s || '').replace(/\D/g, '');
-export const normProd = (s: string) => (s || '').trim().toUpperCase();
-
-export interface TesRegra {
-  id: number;
-  empresa: string;
-  fornecedor_cnpj: string;
-  fornecedor_nome: string | null;
-  produto: string;
-  produto_desc: string | null;
-  tes: string;
-  ativo: boolean;
-  created_by: string | null;
-  created_at: string;
-  updated_at: string;
-}
+/** Código de produto canônico — casa SB1 e cProd independente de zeros/caso. */
+export const canonProd = (s: string) => {
+  const p = (s || '').trim().toUpperCase();
+  return p.replace(/^0+/, '') || p;
+};
+export const normA2 = (s: string) => (s || '').trim().toUpperCase();
+export const normLoja = (s: string) => {
+  const l = String(s || '').trim();
+  return /^\d+$/.test(l) ? l.padStart(2, '0') : l.toUpperCase();
+};
