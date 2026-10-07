@@ -75,6 +75,7 @@ interface FechoResponse {
     aprovado: number;
     totalGeral: number;
   };
+  cartaoExcluido: { despesas: number; total: number };
   caixas: {
     fechados: { nome: string; valor: number; status: string }[];
     emAprovacao: { nome: string; valor: number; status: string }[];
@@ -383,6 +384,8 @@ export async function GET(request: NextRequest) {
     // 3. Fetch REPORTS + EXPENSES from Neon DB (prestacao_reports + prestacao_expenses)
     let userReports: any[] = [];
     let prestacaoContas: PrestacaoRow[] = [];
+    let cartaoDespesas = 0;
+    let cartaoTotal = 0;
 
     if (sql && colaboradorId) {
       try {
@@ -413,13 +416,18 @@ export async function GET(request: NextRequest) {
           FROM prestacao_expenses e
           JOIN prestacao_reports r ON e.report_id = r.id
           WHERE r.user_id = ${colaboradorId}
-            AND COALESCE(e.raw_data->>'payment_method_id', '0') NOT IN ('627401')
           ORDER BY e.date DESC
         `;
 
-        const caixaExpenses = (expenseRows as any[]).filter(
-          (row: any) => !isFaturaOrCartao(row.report_name || '')
-        );
+        const caixaExpenses = (expenseRows as any[]).filter((row: any) => {
+          const pm = String(row.raw_data?.payment_method_id ?? '0');
+          const excl = pm === '627401' || isFaturaOrCartao(row.report_name || '');
+          if (excl) {
+            cartaoDespesas++;
+            cartaoTotal += Number(row.value) || 0;
+          }
+          return !excl;
+        });
 
         prestacaoContas = caixaExpenses.map((row: any) => {
           const raw = row.raw_data || {};
@@ -652,6 +660,7 @@ export async function GET(request: NextRequest) {
         saldoCartao,
         fechamentoFinal: fechamentoPrestacao - saldoCartao,
       },
+      cartaoExcluido: { despesas: cartaoDespesas, total: cartaoTotal },
       statusPanel: {
         aberto: abertoTotal,
         enviado: enviadoTotal,

@@ -106,6 +106,7 @@ interface FechoResponse {
     aprovado: number;
     totalGeral: number;
   };
+  cartaoExcluido?: { despesas: number; total: number };
   caixas: {
     fechados: { nome: string; valor: number; status?: string }[];
     emAprovacao: { nome: string; valor: number; status?: string }[];
@@ -1276,9 +1277,14 @@ export default function FechamentoPage() {
           {/* PREST. CONTAS Table — screen only, hidden in print */}
           <Card className="print:hidden">
             <CardHeader className="print:py-2">
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 flex-wrap">
                 <FileText className="h-5 w-5" />
                 Prestação de Contas ({data.prestacaoContas.length} despesas)
+                {data.cartaoExcluido && data.cartaoExcluido.despesas > 0 && (
+                  <span className="text-xs font-normal text-muted-foreground">
+                    · {data.cartaoExcluido.despesas} despesas de cartão/fatura ({formatBRL(data.cartaoExcluido.total)}) não entram na prestação
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="print:py-1">
