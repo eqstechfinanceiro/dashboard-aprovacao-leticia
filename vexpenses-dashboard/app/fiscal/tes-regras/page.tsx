@@ -61,7 +61,7 @@ export default function TesRegrasPage() {
     setSaving(true);
     await fetch('/api/fiscal/tes-regras', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...item, lista }),
+      body: JSON.stringify({ ...item, lista, ativo: !item.ativo }),
     });
     setSaving(false); load(page);
   };

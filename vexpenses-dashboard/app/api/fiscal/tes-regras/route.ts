@@ -33,14 +33,16 @@ export async function GET(request: NextRequest) {
   const vals: any[] = [];
   if (ativo === '1' || ativo === '0') { vals.push(ativo === '1'); conds.push(`ativo = $${vals.length}`); }
   if (q) {
-    const like = `%${q}%`;
-    vals.push(like, `%${normCnpj(q)}%`, `%${canonProd(q)}%`);
-    if (lista === 'fornecedores')
-      conds.push(`(nome ILIKE $${vals.length - 2} OR a2_cod ILIKE $${vals.length - 2} OR cnpj LIKE $${vals.length - 1})`);
-    else if (lista === 'produtos')
-      conds.push(`(descricao ILIKE $${vals.length - 2} OR produto ILIKE $${vals.length - 2})`);
-    else
-      conds.push(`(tes_origem ILIKE $${vals.length - 2} OR tes_destino ILIKE $${vals.length - 2})`);
+    vals.push(`%${q}%`);
+    const n = vals.length;
+    if (lista === 'fornecedores') {
+      vals.push(`%${normCnpj(q)}%`);
+      conds.push(`(nome ILIKE $${n} OR a2_cod ILIKE $${n} OR cnpj LIKE $${n + 1})`);
+    } else if (lista === 'produtos') {
+      conds.push(`(descricao ILIKE $${n} OR produto ILIKE $${n})`);
+    } else {
+      conds.push(`(tes_origem ILIKE $${n} OR tes_destino ILIKE $${n})`);
+    }
   }
   const where = conds.length ? `WHERE ${conds.join(' AND ')}` : '';
   const order = lista === 'fornecedores' ? 'nome NULLS LAST, a2_cod, a2_loja'
