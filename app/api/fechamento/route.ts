@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
-import { apiCache } from '@/lib/neon-cache';
+import { sql } from '@/lib/db/neon';
+import { apiCache } from '@/lib/db/neon-cache';
+import { getScopeForRequest, normalizeName as scopeNormalizeName } from '@/lib/auth/scope';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,8 +71,17 @@ interface FechoResponse {
   };
   statusPanel: {
     aberto: number;
+    enviado: number;
     aprovado: number;
     totalGeral: number;
+  };
+  caixas: {
+    fechados: { nome: string; valor: number; status: string }[];
+    emAprovacao: { nome: string; valor: number; status: string }[];
+    abertos: { nome: string; valor: number; status: string }[];
+    totalFechados: number;
+    totalEmAprovacao: number;
+    totalAbertos: number;
   };
   exportadoEm: string;
 }
@@ -106,15 +117,84 @@ function getReportPeriodFromDate(reportName: string, fallbackDate: string): { an
   return { ano: getAno(fallbackDate), mes: getMesNome(fallbackDate) };
 }
 
+// payment_method_id → descrição, espelho de GET /v3/payment-methods da conta.
+// O raw_data da despesa guarda só o id — sem este mapa a coluna sai vazia.
+const PAYMENT_METHODS: Record<string, string> = {
+  '627401': 'Cartão Corporativo Itaú',
+  '627508': 'Cartão VExpenses',
+  '627721': 'Saque VExpenses',
+  '627726': 'Desconto Colaborador',
+  '627741': 'Tarifa de Saque',
+  '630113': 'Recurso Próprio',
+  '668240': 'Pix VExpenses',
+};
+
 function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, ' ');
 }
 
-function getFirstNameLastName(fullName: string): { firstName: string; lastName: string } {
-  const parts = fullName.trim().split(/\s+/);
-  const firstName = parts[0] || '';
-  const lastName = parts.length > 1 ? parts[parts.length - 1] : firstName;
-  return { firstName, lastName };
+// Prepositions/articles that should be ignored when matching name parts
+const NAME_STOPWORDS = new Set(['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'as', 'os']);
+
+// Extract all significant name parts (excluding prepositions/articles)
+// e.g. "Everson Esteves dos Santos" -> ["everson", "esteves", "santos"]
+function getSignificantNameParts(fullName: string): string[] {
+  const parts = fullName.trim().toLowerCase().split(/\s+/);
+  return parts.filter(p => p.length > 1 && !NAME_STOPWORDS.has(p));
+}
+
+// Filters extrato rows to those belonging to `colaboradorName`.
+// Strict: all significant name parts must appear in `usuario`.
+// Fallback (safe): when strict match finds nothing (e.g. card holder name
+// registered differently in VExpenses — "Francielly Felix Cavalcante de
+// Andrade" vs extrato "Francielly Cavalcante Santos de Andrade"), pick the
+// usuario that shares the FIRST name and the most parts — only if it's a
+// unique winner. Never risks merging two different people.
+function matchExtratoUsuario<T extends { usuario?: string | null }>(
+  candidateRows: T[],
+  colaboradorName: string,
+  context: string
+): T[] {
+  const significantParts = getSignificantNameParts(colaboradorName);
+  const normalizedParts = significantParts.map(p => p.toLowerCase());
+  const firstName = normalizedParts[0] || normalizeName(colaboradorName).split(' ')[0];
+
+  // Strict: require ALL significant parts
+  let rows = candidateRows.filter(row => {
+    const usuarioLower = (row.usuario || '').toLowerCase();
+    return normalizedParts.every(p => usuarioLower.includes(p));
+  });
+  if (rows.length > 0) return rows;
+
+  // Fallback: first name must match + best part score + unique winner
+  if (normalizedParts.length >= 2 && firstName) {
+    const scored = new Map<string, { score: number; rows: T[] }>();
+    for (const r of candidateRows) {
+      const u = (r.usuario || '').toLowerCase().trim();
+      const uParts = new Set(getSignificantNameParts(r.usuario || ''));
+      if (!uParts.has(firstName)) continue;
+      let score = 0;
+      for (const p of normalizedParts) if (uParts.has(p)) score++;
+      const cur = scored.get(u) || { score: 0, rows: [] };
+      cur.score = Math.max(cur.score, score);
+      cur.rows.push(r);
+      scored.set(u, cur);
+    }
+    let best = '';
+    let bestScore = 0;
+    let tie = false;
+    for (const [u, entry] of scored) {
+      if (entry.score > bestScore) { bestScore = entry.score; best = u; tie = false; }
+      else if (entry.score === bestScore) { tie = true; }
+    }
+    // Require: majority of parts + strictly unique winner
+    if (best && !tie && bestScore >= Math.max(2, Math.ceil(normalizedParts.length / 2))) {
+      console.warn(`[Fechamento] ${context}: fallback de nome "${colaboradorName}" -> "${best}" (score ${bestScore}/${normalizedParts.length})`);
+      return scored.get(best)!.rows;
+    }
+    console.warn(`[Fechamento] ${context}: nenhum match seguro para "${colaboradorName}" (partes: ${normalizedParts.join(', ')})`);
+  }
+  return [];
 }
 
 // Parse report name to extract month/year (e.g. "CAIXA 10/2025" -> {ano: 2025, mes: 'OUTUBRO'})
@@ -185,6 +265,21 @@ export async function GET(request: NextRequest) {
       colaboradorId = teamMember.id;
     }
 
+    // Escopo de gestor: só permite consultar membros do próprio escopo
+    const scope = await getScopeForRequest(request);
+    if (scope) {
+      const inScope =
+        (colaboradorId !== null && scope.memberIds.has(colaboradorId)) ||
+        (colaboradorName !== '' && scope.names.has(scopeNormalizeName(colaboradorName))) ||
+        (colaboradorCpf !== null && scope.cpfs.has(colaboradorCpf.replace(/\D/g, '').padStart(11, '0')));
+      if (!inScope) {
+        return NextResponse.json(
+          { error: 'Colaborador fora do seu escopo de gestão' },
+          { status: 403 }
+        );
+      }
+    }
+
     if (!colaboradorName) {
       return NextResponse.json(
         { error: 'Colaborador não encontrado' },
@@ -193,27 +288,93 @@ export async function GET(request: NextRequest) {
     }
 
     // 2. Fetch EXTRATO from Neon DB (extrato_movimentacao)
+    // Use ALL significant name parts to avoid mixing users with same first/last name
     let extratoRows: ExtratoRow[] = [];
     if (sql) {
       try {
-        const { firstName, lastName } = getFirstNameLastName(colaboradorName);
-        const rows = await sql`
-          SELECT
-            data::text as data,
-            hora,
-            codigo_transacao,
-            usuario,
-            tipo,
-            descricao,
-            valor,
-            is_snapshot
-          FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstName + '%'})
-            AND unaccent(usuario) ILIKE unaccent(${'%' + lastName + '%'})
-            AND is_snapshot = false
-          ORDER BY data ASC, hora ASC
-        `;
-        extratoRows = rows as ExtratoRow[];
+        const significantParts = getSignificantNameParts(colaboradorName);
+        // Strategy 1: Require ALL significant name parts to match
+        // e.g. "Everson Esteves dos Santos" -> WHERE usuario ILIKE '%everson%' AND ILIKE '%esteves%' AND ILIKE '%santos%'
+        if (significantParts.length >= 2) {
+          // Build dynamic WHERE with all parts — use tagged template with AND conditions
+          // We can't easily do dynamic AND with neon tagged templates, so we fetch a superset
+          // and filter in JS. But for 2-3 parts, we can construct the query.
+          // Actually, neon supports building queries with .append() or we can use raw SQL.
+          // Simplest: fetch by first part, then filter in JS by all parts.
+          const firstPart = significantParts[0];
+          const candidateRows = await sql`
+            SELECT
+              data::text as data,
+              hora,
+              codigo_transacao,
+              usuario,
+              tipo,
+              descricao,
+              valor,
+              is_snapshot
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstPart + '%'})
+              AND is_snapshot = false
+            ORDER BY data ASC, hora ASC
+          `;
+          // Strict all-parts match, with safe first-name fallback
+          extratoRows = matchExtratoUsuario(candidateRows as ExtratoRow[], colaboradorName, 'extrato');
+
+          // Verify uniqueness: if multiple distinct usuario names matched, log a warning
+          if (extratoRows.length > 0) {
+            const distinctUsers = new Set(extratoRows.map(r => r.usuario?.toLowerCase().trim()));
+            if (distinctUsers.size > 1) {
+              console.warn(`[Fechamento] Multiple users matched for "${colaboradorName}" (parts: ${significantParts.join(', ')}): ${[...distinctUsers].join(', ')}. Using exact match.`);
+              // Try exact normalized match first
+              const targetNormalized = normalizeName(colaboradorName);
+              const exactMatches = extratoRows.filter(r => normalizeName(r.usuario || '') === targetNormalized);
+              if (exactMatches.length > 0) {
+                extratoRows = exactMatches;
+              } else {
+                // Fall back to the most similar user name
+                const targetParts = new Set(significantParts.map(p => p.toLowerCase()));
+                const userScores = new Map<string, number>();
+                for (const r of extratoRows) {
+                  const u = (r.usuario || '').toLowerCase().trim();
+                  const uParts = new Set(getSignificantNameParts(r.usuario || ''));
+                  let score = 0;
+                  for (const p of targetParts) {
+                    if (uParts.has(p)) score++;
+                  }
+                  userScores.set(u, Math.max(userScores.get(u) || 0, score));
+                }
+                let bestUser = '';
+                let bestScore = 0;
+                for (const [u, s] of userScores) {
+                  if (s > bestScore) { bestScore = s; bestUser = u; }
+                }
+                if (bestUser) {
+                  console.warn(`[Fechamento] Selected best match: "${bestUser}" (score: ${bestScore}/${significantParts.length})`);
+                  extratoRows = extratoRows.filter(r => (r.usuario || '').toLowerCase().trim() === bestUser);
+                }
+              }
+            }
+          }
+        } else {
+          // Only one significant part — use it but warn about potential ambiguity
+          const onlyPart = significantParts[0] || colaboradorName.trim().split(/\s+/)[0];
+          const rows = await sql`
+            SELECT
+              data::text as data,
+              hora,
+              codigo_transacao,
+              usuario,
+              tipo,
+              descricao,
+              valor,
+              is_snapshot
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + onlyPart + '%'})
+              AND is_snapshot = false
+            ORDER BY data ASC, hora ASC
+          `;
+          extratoRows = rows as ExtratoRow[];
+        }
       } catch (dbErr) {
         console.error('[Fechamento] Error querying extrato_movimentacao:', dbErr);
       }
@@ -235,7 +396,10 @@ export async function GET(request: NextRequest) {
         userReports = reportRows as any[];
 
         // Fetch expenses joined with reports from Neon DB
-        // Exclude Cartão Itaú payment method (627401) — covers FATURA and ITAU-related expenses
+        // Exclude Cartão Itaú payment method (627401) AND FATURA/CARTÃO-named
+        // reports — card-invoice expenses are not caixa prestação (same rule
+        // as quinzena-complete somase; a pm filter alone misses other card
+        // methods like 627508 "Cartao VExpenses").
         const expenseRows = await sql`
           SELECT
             e.id as despesa_id,
@@ -253,7 +417,11 @@ export async function GET(request: NextRequest) {
           ORDER BY e.date DESC
         `;
 
-        prestacaoContas = (expenseRows as any[]).map((row: any) => {
+        const caixaExpenses = (expenseRows as any[]).filter(
+          (row: any) => !isFaturaOrCartao(row.report_name || '')
+        );
+
+        prestacaoContas = caixaExpenses.map((row: any) => {
           const raw = row.raw_data || {};
           const valor = Number(row.value) || 0;
           const convertedValue = Number(raw.converted_value) || valor;
@@ -272,7 +440,8 @@ export async function GET(request: NextRequest) {
             reembolsavel: raw.reimbursable ? 'Sim' : 'Não',
             anotacao: raw.observation || '',
             centro_custos: '',
-            forma_pagamento: raw.payment_method?.data?.description || raw.payment_method_name || raw.payment_method?.data?.name || '',
+            forma_pagamento: raw.payment_method?.data?.description || raw.payment_method_name || raw.payment_method?.data?.name
+              || PAYMENT_METHODS[String(raw.payment_method_id ?? '')] || '',
             projeto: '',
             percentual_projeto: 1,
             moeda_relatorio: raw.original_currency_iso || 'BRL',
@@ -366,12 +535,17 @@ export async function GET(request: NextRequest) {
     const saldoDisponivel = totalCarga + totalTransferencia + totalTaxa;
     const fechamentoPrestacao = saldoDisponivel - totalPrestacao;
 
-    // Status panel (Aberto = ABERTO + ENVIADO + REABERTO; Aprovado = APROVADO + PAGO)
+    // Status panel — ENVIADO não é caixa aberto: já foi prestado pelo
+    // funcionário e aguarda aprovação (mesma semântica do Visão Geral).
+    // Aberto = ABERTO + REABERTO; Em aprovação = ENVIADO; Aprovado = resto.
     const abertoTotal = prestacaoContas
       .filter(p => {
         const st = (p.status || '').toUpperCase();
-        return st === 'ABERTO' || st === 'ENVIADO' || st === 'REABERTO';
+        return st === 'ABERTO' || st === 'REABERTO';
       })
+      .reduce((s, p) => s + p.valor_total, 0);
+    const enviadoTotal = prestacaoContas
+      .filter(p => (p.status || '').toUpperCase() === 'ENVIADO')
       .reduce((s, p) => s + p.valor_total, 0);
     const aprovadoTotal = prestacaoContas
       .filter(p => {
@@ -380,22 +554,84 @@ export async function GET(request: NextRequest) {
       })
       .reduce((s, p) => s + p.valor_total, 0);
 
+    // Caixas por relatório (relatório = "caixa" do mês, ex.: "CAIXA 02/2026")
+    // Aberto = ABERTO/REABERTO; Em aprovação = ENVIADO; Fechado = resto (menos REPROVADO)
+    const caixaMap = new Map<number, { nome: string; status: string; valor: number }>();
+    for (const p of prestacaoContas) {
+      const st = (p.status || '').toUpperCase();
+      if (st === 'REPROVADO') continue;
+      const cur = caixaMap.get(p.relatorio_id) || { nome: p.nome_relatorio || `Relatório ${p.relatorio_id}`, status: st, valor: 0 };
+      cur.valor += p.valor_total;
+      caixaMap.set(p.relatorio_id, cur);
+    }
+    const caixaSort = (a: { nome: string }, b: { nome: string }) => {
+      const pa = getReportPeriod(a.nome);
+      const pb = getReportPeriod(b.nome);
+      if (pa && pb) {
+        if (pa.ano !== pb.ano) return pa.ano - pb.ano;
+        return MESES_PT.indexOf(pa.mes) - MESES_PT.indexOf(pb.mes);
+      }
+      if (pa) return -1;
+      if (pb) return 1;
+      return a.nome.localeCompare(b.nome);
+    };
+    const caixasFechados = [...caixaMap.values()]
+      .filter(c => c.status !== 'ABERTO' && c.status !== 'ENVIADO' && c.status !== 'REABERTO')
+      .map(c => ({ nome: c.nome, valor: c.valor, status: c.status }))
+      .sort(caixaSort);
+    const caixasEmAprovacao = [...caixaMap.values()]
+      .filter(c => c.status === 'ENVIADO')
+      .map(c => ({ nome: c.nome, valor: c.valor, status: c.status }))
+      .sort(caixaSort);
+    const caixasAbertos = [...caixaMap.values()]
+      .filter(c => c.status === 'ABERTO' || c.status === 'REABERTO')
+      .map(c => ({ nome: c.nome, valor: c.valor, status: c.status }))
+      .sort(caixaSort);
+
     // 8. Try to get saldo cartão from last extrato snapshot
+    // Use same robust matching as extrato: require all significant name parts
     let saldoCartao = 0;
     if (sql) {
       try {
-        const { firstName: fn, lastName: ln } = getFirstNameLastName(colaboradorName);
-        const snapshotRows = await sql`
-          SELECT valor
-          FROM extrato_movimentacao
-          WHERE unaccent(usuario) ILIKE unaccent(${'%' + fn + '%'})
-            AND unaccent(usuario) ILIKE unaccent(${'%' + ln + '%'})
-            AND is_snapshot = true
-          ORDER BY data DESC
-          LIMIT 1
-        `;
-        if (snapshotRows.length > 0) {
-          saldoCartao = Number((snapshotRows[0] as any).valor) || 0;
+        const significantParts = getSignificantNameParts(colaboradorName);
+        if (significantParts.length >= 2) {
+          const firstPart = significantParts[0];
+          const candidateSnapshots = await sql`
+            SELECT valor, usuario
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + firstPart + '%'})
+              AND is_snapshot = true
+            ORDER BY data DESC
+          `;
+          const filteredSnapshots = matchExtratoUsuario(candidateSnapshots as any[], colaboradorName, 'saldo cartão');
+          // If multiple users matched, pick exact or best match
+          if (filteredSnapshots.length > 0) {
+            const distinctUsers = new Set(filteredSnapshots.map(r => (r.usuario || '').toLowerCase().trim()));
+            if (distinctUsers.size > 1) {
+              const targetNormalized = normalizeName(colaboradorName);
+              const exact = filteredSnapshots.filter(r => normalizeName(r.usuario || '') === targetNormalized);
+              if (exact.length > 0) {
+                saldoCartao = Number(exact[0].valor) || 0;
+              } else {
+                saldoCartao = Number(filteredSnapshots[0].valor) || 0;
+              }
+            } else {
+              saldoCartao = Number(filteredSnapshots[0].valor) || 0;
+            }
+          }
+        } else {
+          const onlyPart = significantParts[0] || colaboradorName.trim().split(/\s+/)[0];
+          const snapshotRows = await sql`
+            SELECT valor
+            FROM extrato_movimentacao
+            WHERE unaccent(usuario) ILIKE unaccent(${'%' + onlyPart + '%'})
+              AND is_snapshot = true
+            ORDER BY data DESC
+            LIMIT 1
+          `;
+          if (snapshotRows.length > 0) {
+            saldoCartao = Number((snapshotRows[0] as any).valor) || 0;
+          }
         }
       } catch (e) {
         console.error('[Fechamento] Error fetching saldo cartao snapshot:', e);
@@ -418,8 +654,17 @@ export async function GET(request: NextRequest) {
       },
       statusPanel: {
         aberto: abertoTotal,
+        enviado: enviadoTotal,
         aprovado: aprovadoTotal,
-        totalGeral: abertoTotal + aprovadoTotal,
+        totalGeral: abertoTotal + enviadoTotal + aprovadoTotal,
+      },
+      caixas: {
+        fechados: caixasFechados,
+        emAprovacao: caixasEmAprovacao,
+        abertos: caixasAbertos,
+        totalFechados: caixasFechados.reduce((s, c) => s + c.valor, 0),
+        totalEmAprovacao: caixasEmAprovacao.reduce((s, c) => s + c.valor, 0),
+        totalAbertos: caixasAbertos.reduce((s, c) => s + c.valor, 0),
       },
       exportadoEm: new Date().toISOString(),
     };
