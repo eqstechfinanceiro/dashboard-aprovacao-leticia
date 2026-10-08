@@ -104,16 +104,17 @@ async function upsertNota(runId: number, nota: {
   doc: string; serie: string; filial: string; fornecedor: string; cnpj: string;
   valor: number | null; emissao: string | null; chave: string;
   autoStatus: string; autoResumo: string; checks: unknown; extra: unknown;
-  tentativas: number; nextRetry: Date | null; cstOnly?: boolean;
+  tentativas: number; nextRetry: Date | null; cstOnly?: boolean; tipo?: string;
 }): Promise<number> {
   const reviewStatus = computeReviewStatus(nota.autoStatus as any, nota.cstOnly === true);
+  const tipo = nota.tipo || 'mercadoria';
   const res = await sql`
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
        chave_acesso, auto_status, auto_resumo, checks, extra, review_status,
        conferencia_tentativas, conferencia_next_retry)
     VALUES
-      (${runId}, 'mercadoria', ${trim(nota.doc).slice(0, 60)}, ${nul(nota.serie)},
+      (${runId}, ${tipo}, ${trim(nota.doc).slice(0, 60)}, ${nul(nota.serie)},
        ${nul(nota.filial)}, ${nul(nota.fornecedor)}, ${nul(nota.cnpj)},
        ${nota.valor}, ${nota.emissao}, ${nul(nota.chave)},
        ${nota.autoStatus}, ${nul(nota.autoResumo)},
@@ -152,6 +153,34 @@ async function anexarXml(notaId: number, xml: string, chave: string) {
   }
 }
 
+// Notas de despesa VExpenses são lançadas no TOTVS como SPED (espécie de
+// mercadoria) e entrariam na fila misturadas. O elo confiável é a chave NF-e:
+// a despesa guarda a chave em raw_data.observation (com espaços). Quem casa
+// vira tipo='vexpenses' e carrega expense_id/report_id no extra — o vínculo
+// "a qual relatório pertence" que o SD1 mostra.
+interface VexLink { expense_id: number; report_id: number | null; report_name: string | null }
+
+async function loadVexChaves(): Promise<Map<string, VexLink>> {
+  const m = new Map<string, VexLink>();
+  try {
+    const rows = await sql`
+      SELECT e.id AS expense_id, e.report_id, rp.name AS report_name,
+             regexp_replace(COALESCE(e.raw_data->>'observation', ''), '[^0-9]', '', 'g') AS chave
+      FROM prestacao_expenses e
+      LEFT JOIN prestacao_reports rp ON rp.id = e.report_id
+      WHERE e.raw_data->>'observation' ~ '[0-9]{4}'`;
+    for (const r of rows as any[]) {
+      const c = String(r.chave || '');
+      if (/^\d{44}$/.test(c) && !m.has(c)) {
+        m.set(c, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
+      }
+    }
+  } catch (e: any) {
+    console.warn('[conferencia] falha ao carregar chaves vexpenses:', e?.message);
+  }
+  return m;
+}
+
 export interface ConferenciaResult {
   runId: number | null;
   total: number;
@@ -184,12 +213,12 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     const fromStr = ymd(dateFrom);
     const toStr = ymd(dateTo);
 
-    // Ledger: linhas existentes de mercadoria → dedup por chave natural.
+    // Ledger: linhas existentes (mercadoria + vexpenses reclassificadas) → dedup.
     const ledger = new Map<string, LedgerRow>();
     const rows = await sql`
       SELECT id, doc, serie, filial, emissao, fornecedor, review_status,
              conferencia_tentativas, conferencia_next_retry
-      FROM fiscal_notas WHERE tipo='mercadoria'`;
+      FROM fiscal_notas WHERE tipo IN ('mercadoria', 'vexpenses')`;
     for (const r of rows) {
       const em = r.emissao ? new Date(r.emissao).toISOString().slice(0, 10) : '1900-01-01';
       ledger.set(dedupKey(r.doc, r.serie, r.filial, em, r.fornecedor), {
@@ -218,6 +247,25 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     const runId = out.runId ?? 0; // RETURNING sempre devolve id; 0 é fallback defensivo
 
     if (!nfs.length) return out;
+
+    // Chaves NF-e amarradas a despesas VExpenses — classifica tipo e já
+    // reclassifica retroativamente notas que entraram como mercadoria.
+    const vexChaves = await loadVexChaves();
+    if (vexChaves.size) {
+      const rec = await sql`
+        UPDATE fiscal_notas n SET tipo='vexpenses', updated_at=NOW()
+        WHERE n.tipo='mercadoria' AND n.chave_acesso = ANY(${[...vexChaves.keys()]})
+          AND NOT EXISTS (
+            SELECT 1 FROM fiscal_notas x
+            WHERE x.tipo='vexpenses' AND x.doc=n.doc
+              AND COALESCE(x.serie,'')=COALESCE(n.serie,'')
+              AND COALESCE(x.filial,'')=COALESCE(n.filial,'')
+              AND COALESCE(x.emissao,'1900-01-01'::date)=COALESCE(n.emissao,'1900-01-01'::date)
+              AND COALESCE(x.fornecedor,'')=COALESCE(n.fornecedor,''))
+        RETURNING n.id`;
+      const n = Array.isArray(rec) ? rec.length : 0;
+      if (n) console.log(`[conferencia] ${n} nota(s) reclassificadas mercadoria→vexpenses`);
+    }
 
     const maxNfs = opts.maxNfs ?? MAX_NFS_CICLO;
 
@@ -264,6 +312,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       const ex = ledger.get(k);
       const tent = (ex?.conferencia_tentativas ?? 0) + 1;
       const chave = trim(h.f1_chvnfe);
+      const vex = vexChaves.get(chave) || null;
 
       const base = {
         doc: trim(h.f1_doc), serie: trim(h.f1_serie), filial: trim(h.f1_filial),
@@ -273,6 +322,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       const extraBase = {
         empresa: h._empresa, usuario: h.f1_userlgi || null,
         f1_dtdigit: trim(h.f1_dtdigit), itens_totvs: nf.items.length,
+        ...(vex ? { vexpenses: { expense_id: vex.expense_id, report_id: vex.report_id, report_name: vex.report_name } } : {}),
       };
 
       let xmlRes = null;
@@ -288,7 +338,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
           { conferidas: out.conferidas + 1, falhas: out.falhas + 1, current_doc: base.doc },
           `[${i}/${elegiveis.length}] NF ${base.doc} s/${base.serie} — XML não obtido (tentativa ${tent}, retry ${nextRetry.toISOString().slice(11, 16)}Z)`);
         await upsertNota(runId, {
-          ...base,
+          ...base, tipo: vex ? 'vexpenses' : 'mercadoria',
           autoStatus: 'erro',
           autoResumo: 'XML não obtido em nenhuma fonte (cache/Z01/SIEG)',
           checks: [{ field: 'XML', expected: 'NF-e', actual: chave ? 'não obtido' : 'sem chave na SF1', match: false }],
@@ -308,7 +358,8 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       } catch (e: any) {
         const nextRetry = new Date(now + RETRY_BASE_MIN * 60_000);
         await upsertNota(runId, {
-          ...base, autoStatus: 'erro', autoResumo: `comparação falhou: ${e?.message}`,
+          ...base, tipo: vex ? 'vexpenses' : 'mercadoria',
+          autoStatus: 'erro', autoResumo: `comparação falhou: ${e?.message}`,
           checks: null, extra: { ...extraBase, fonte_xml: xmlRes.fonte, tentativa: tent },
           tentativas: tent, nextRetry,
         });
@@ -319,7 +370,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
 
       const autoStatus = cmp.status === 'MATCH' ? 'match' : 'divergente';
       const notaId = await upsertNota(runId, {
-        ...base, autoStatus, autoResumo: cmp.summary,
+        ...base, tipo: vex ? 'vexpenses' : 'mercadoria', autoStatus, autoResumo: cmp.summary,
         checks: [...cmp.header_checks, ...cmp.item_checks.flat()],
         extra: {
           ...extraBase, fonte_xml: xmlRes.fonte, mismatch_count: cmp.mismatch_count,

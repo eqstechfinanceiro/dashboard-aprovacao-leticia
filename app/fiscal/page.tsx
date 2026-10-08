@@ -801,8 +801,9 @@ export default function FiscalPage() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-medium text-sm">NF {n.doc}</span>
                           {n.serie && <span className="text-xs text-muted-foreground">série {n.serie}</span>}
-                          {view === 'historico' && (
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                          {(view === 'historico' || n.tipo === 'vexpenses') && (
+                            <span className={cn('rounded-full px-2 py-0.5 text-xs',
+                              n.tipo === 'vexpenses' ? 'bg-violet-100 text-violet-700 font-medium' : 'bg-slate-100 text-slate-600')}>
                               {n.tipo === 'servico' ? 'Serviço' : n.tipo === 'vexpenses' ? 'VExpenses' : 'Mercadoria'}
                             </span>
                           )}
@@ -904,6 +905,11 @@ export default function FiscalPage() {
 
                         {n.chave_acesso && (
                           <p className="text-xs text-muted-foreground">Chave: {n.chave_acesso}</p>
+                        )}
+                        {n.extra?.vexpenses && (
+                          <p className="text-xs text-violet-700">
+                            VExpenses — relatório <span className="font-medium">{n.extra.vexpenses.report_name || `#${n.extra.vexpenses.report_id}`}</span> (despesa #{n.extra.vexpenses.expense_id})
+                          </p>
                         )}
                         <a
                           href={`/api/fiscal/portal-link?id=${n.id}`}
