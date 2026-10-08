@@ -11,6 +11,7 @@ exports.compareNf = compareNf;
  * Aqui a empresa vem do header (_empresa) e fica registrada em meta.empresa.
  */
 const tes_rules_1 = require("./tes-rules");
+const tes_override_1 = require("./tes-override");
 exports.TOLERANCE = 0.02;
 const _toFloat = (v) => {
     if (v === null || v === undefined || v === '')
@@ -60,7 +61,7 @@ function deriveCtrlImposto(xmlItem) {
         return 'Apenas o IPI';
     return 'Nenhum imposto';
 }
-function compareNf(totvsHeader, totvsItems, xmlData) {
+function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
     const empresa = _normStr(totvsHeader._empresa) || 'EQS';
     const headerChecks = [];
     const itemChecks = [];
@@ -192,6 +193,15 @@ function compareNf(totvsHeader, totvsItems, xmlData) {
                 icms_aliq_xml: xi.p_icms || null,
             });
             expectedTes = r.tes;
+            // Parametrização lince_tes_regras — o bot aplica esse override depois de
+            // definir_tes (cred ICMS: fornecedor+produto+TES nas listas do banco).
+            // Sem isso a conferência esperava a TES padrão e falhava nos dois
+            // sentidos: override certo virava divergência, override faltando virava match.
+            if (tesOverride && expectedTes) {
+                const ov = (0, tes_override_1.resolverTesOverride)(tesOverride, xmlData.emit_cnpj || totvsHeader.a2_cgc, [totvsItem.d1_cod, xmlItem.c_prod], expectedTes);
+                if (ov.tes)
+                    expectedTes = ov.tes;
+            }
             tesMatch = expectedTes ? expectedTes === totvsTes : true;
         }
         itemChk('TES', expectedTes || totvsTes, totvsTes, tesMatch);
@@ -254,12 +264,18 @@ function compareNf(totvsHeader, totvsItems, xmlData) {
     const allChecks = [...headerChecks, ...itemChecks.flat()];
     const mismatchCount = allChecks.filter((c) => !c.match).length;
     const status = mismatchCount === 0 ? 'MATCH' : 'MISMATCH';
+    const falhas = allChecks.filter((c) => !c.match);
+    const cstOnly = falhas.length > 0 &&
+        falhas.every((c) => (c.field.split('·').pop() || c.field).trim() === 'Origem CST');
     return {
         status,
         header_checks: headerChecks,
         item_checks: itemChecks,
-        summary: mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
+        summary: cstOnly
+            ? `${mismatchCount} divergência(s) apenas de Origem CST (aviso)`
+            : mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
         mismatch_count: mismatchCount,
         empresa,
+        cst_only: cstOnly,
     };
 }

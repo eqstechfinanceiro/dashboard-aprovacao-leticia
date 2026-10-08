@@ -19,6 +19,7 @@ import { ensureFiscalTables, computeReviewStatus } from '../fiscal/fiscal-db';
 import { fetchMercadoriaNfs } from './totvs';
 import { ensureDocCacheTable, cacheHasChaves, prepararSieg, obterXmlNfe } from './fontes';
 import { compareNf } from './comparator';
+import { carregarTesOverride } from './tes-override';
 
 const DOCS_DIR = () => path.join(process.cwd(), 'private-downloads', 'fiscal');
 const JANELA_DIAS = Math.max(2, parseInt(process.env.CONFERENCIA_JANELA_DIAS || '14', 10));
@@ -302,7 +303,8 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       out.fontes[xmlRes.fonte] = (out.fontes[xmlRes.fonte] || 0) + 1;
       let cmp;
       try {
-        cmp = compareNf(h, nf.items, xmlRes.parsed);
+        const tesOvr = await carregarTesOverride(h._empresa || 'EQS');
+        cmp = compareNf(h, nf.items, xmlRes.parsed, tesOvr);
       } catch (e: any) {
         const nextRetry = new Date(now + RETRY_BASE_MIN * 60_000);
         await upsertNota(runId, {

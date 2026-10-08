@@ -9,6 +9,7 @@
 import {
   definirTes, precisaZerarIcms, precisaZerarIcmsSt, precisaZerarIpi,
 } from './tes-rules';
+import { resolverTesOverride, type TesOverrideCfg } from './tes-override';
 import type { NfeXml, NfeXmlItem } from './xml-parser';
 
 export const TOLERANCE = 0.02;
@@ -79,6 +80,7 @@ export function compareNf(
   totvsHeader: Record<string, any>,
   totvsItems: Record<string, any>[],
   xmlData: NfeXml,
+  tesOverride?: TesOverrideCfg,
 ): CompareResult {
   const empresa = _normStr(totvsHeader._empresa) || 'EQS';
   const headerChecks: Check[] = [];
@@ -229,6 +231,19 @@ export function compareNf(
         icms_aliq_xml: xi.p_icms || null,
       });
       expectedTes = r.tes;
+      // Parametrização lince_tes_regras — o bot aplica esse override depois de
+      // definir_tes (cred ICMS: fornecedor+produto+TES nas listas do banco).
+      // Sem isso a conferência esperava a TES padrão e falhava nos dois
+      // sentidos: override certo virava divergência, override faltando virava match.
+      if (tesOverride && expectedTes) {
+        const ov = resolverTesOverride(
+          tesOverride,
+          xmlData.emit_cnpj || totvsHeader.a2_cgc,
+          [totvsItem.d1_cod, (xmlItem as NfeXmlItem).c_prod],
+          expectedTes,
+        );
+        if (ov.tes) expectedTes = ov.tes;
+      }
       tesMatch = expectedTes ? expectedTes === totvsTes : true;
     }
     itemChk('TES', expectedTes || totvsTes, totvsTes, tesMatch);

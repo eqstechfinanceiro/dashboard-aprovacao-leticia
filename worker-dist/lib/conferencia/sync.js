@@ -25,6 +25,7 @@ const fiscal_db_1 = require("../fiscal/fiscal-db");
 const totvs_1 = require("./totvs");
 const fontes_1 = require("./fontes");
 const comparator_1 = require("./comparator");
+const tes_override_1 = require("./tes-override");
 const DOCS_DIR = () => path_1.default.join(process.cwd(), 'private-downloads', 'fiscal');
 const JANELA_DIAS = Math.max(2, parseInt(process.env.CONFERENCIA_JANELA_DIAS || '14', 10));
 const MAX_NFS_CICLO = Math.max(1, parseInt(process.env.CONFERENCIA_MAX_NFS || '250', 10));
@@ -95,7 +96,7 @@ function dedupKey(doc, serie, filial, emissao, fornecedor) {
     return [trim(doc), trim(serie), trim(filial), emissao || '1900-01-01', trim(fornecedor)].join('|');
 }
 async function upsertNota(runId, nota) {
-    const reviewStatus = (0, fiscal_db_1.computeReviewStatus)(nota.autoStatus);
+    const reviewStatus = (0, fiscal_db_1.computeReviewStatus)(nota.autoStatus, nota.cstOnly === true);
     const res = await (0, neon_1.sql) `
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
@@ -192,7 +193,7 @@ async function syncConferencia(opts = {}) {
             return out;
         const maxNfs = opts.maxNfs ?? MAX_NFS_CICLO;
         // Elegíveis = sem linha | pendente | falha_tecnica com retry vencido.
-        const TERMINAL = new Set(['auto_ok', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
+        const TERMINAL = new Set(['auto_ok', 'auto_ok_aviso', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
         const now = Date.now();
         const elegiveis = nfs.filter((nf) => {
             const h = nf.header;
@@ -274,7 +275,8 @@ async function syncConferencia(opts = {}) {
             out.fontes[xmlRes.fonte] = (out.fontes[xmlRes.fonte] || 0) + 1;
             let cmp;
             try {
-                cmp = (0, comparator_1.compareNf)(h, nf.items, xmlRes.parsed);
+                const tesOvr = await (0, tes_override_1.carregarTesOverride)(h._empresa || 'EQS');
+                cmp = (0, comparator_1.compareNf)(h, nf.items, xmlRes.parsed, tesOvr);
             }
             catch (e) {
                 const nextRetry = new Date(now + RETRY_BASE_MIN * 60000);
@@ -295,7 +297,7 @@ async function syncConferencia(opts = {}) {
                     ...extraBase, fonte_xml: xmlRes.fonte, mismatch_count: cmp.mismatch_count,
                     chave_xml: xmlRes.parsed.chave || null, tentativa: tent,
                 },
-                tentativas: 0, nextRetry: null,
+                tentativas: 0, nextRetry: null, cstOnly: cmp.cst_only === true,
             });
             if (autoStatus !== 'match') {
                 await anexarXml(notaId, xmlRes.xml, chave || 'sem-chave');
@@ -307,10 +309,12 @@ async function syncConferencia(opts = {}) {
             out.conferidas++;
             if (autoStatus !== 'match' || i % 10 === 0 || i === elegiveis.length) {
                 await setState({ conferidas: out.conferidas, match: out.match, divergentes: out.divergentes, falhas: out.falhas, fontes: JSON.stringify(out.fontes), current_doc: base.doc }, autoStatus !== 'match'
-                    ? `[${i}/${elegiveis.length}] NF ${base.doc} — DIVERGENTE (${cmp.mismatch_count} × ${xmlRes.fonte})`
+                    ? cmp.cst_only
+                        ? `[${i}/${elegiveis.length}] NF ${base.doc} — AVISO CST (${cmp.mismatch_count} × ${xmlRes.fonte})`
+                        : `[${i}/${elegiveis.length}] NF ${base.doc} — DIVERGENTE (${cmp.mismatch_count} × ${xmlRes.fonte})`
                     : `[${i}/${elegiveis.length}] ${out.match} ok / ${out.divergentes} div / ${out.falhas} falhas`);
             }
-            ledger.set(k, { id: notaId, key: k, review_status: (0, fiscal_db_1.computeReviewStatus)(autoStatus), conferencia_tentativas: 0, conferencia_next_retry: null });
+            ledger.set(k, { id: notaId, key: k, review_status: (0, fiscal_db_1.computeReviewStatus)(autoStatus, cmp.cst_only === true), conferencia_tentativas: 0, conferencia_next_retry: null });
         }
         if (out.runId) {
             await (0, neon_1.sql) `
