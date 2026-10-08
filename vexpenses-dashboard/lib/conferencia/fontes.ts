@@ -1,20 +1,22 @@
 /**
  * Fontes de documento da conferência — cadeia:
- *   1. fiscal_doc_cache (Postgres — XML já obtido antes)
+ *   1. fiscal_doc_cache (Postgres — XML já obtido antes, inclui uploads do bot)
  *   2. Z01_XMLNFE (XML embutido na tabela Z01 do TOTVS — zero custo, mesmo genericQuery)
  *   3. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
- * Todo XML obtido de 2-3 é persistido no cache pra não baixar de novo.
+ *   4. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
+ * Todo XML obtido de 2-4 é persistido no cache pra não baixar de novo.
  */
 import { sql } from '../db/neon';
 import { fetchZ01XmlByChave } from './totvs';
 import { garantirAutenticacao, baixarXmlSieg, preAdicionarChaves } from './sieg';
+import { baixarXmlMeudanfe, meudanfeEnabled } from './meudanfe';
 import { parseNfeXml } from './xml-parser';
 import type { NfeXml } from './xml-parser';
 
 export interface XmlResult {
   xml: string;
   parsed: NfeXml;
-  fonte: 'cache' | 'z01_xmlnfe' | 'sieg';
+  fonte: 'cache' | 'z01_xmlnfe' | 'sieg' | 'meudanfe';
 }
 
 let cacheEnsured = false;
@@ -68,7 +70,16 @@ export async function prepararSieg(chaves: string[]): Promise<number> {
  * Obtém o XML da NF pela chave — cache → Z01 → SIEG.
  * Retorna { xml, parsed, fonte } ou null se nenhuma fonte produziu XML parseável.
  */
-export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean } = {}): Promise<XmlResult | null> {
+/** Persiste XML obtido por fonte externa (ex.: upload do bot Lince via /api/fiscal/doc-cache). */
+export async function salvarXmlCache(chaveAcesso: string, xml: string, fonte: string): Promise<boolean> {
+  const chave = (chaveAcesso || '').trim();
+  if (!/^\d{44}$/.test(chave) || !xml || !xml.includes('<')) return false;
+  await ensureDocCacheTable();
+  await cachePut(chave, xml, fonte);
+  return true;
+}
+
+export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean; meudanfe?: boolean } = {}): Promise<XmlResult | null> {
   const chave = (chaveAcesso || '').trim();
   if (chave.length !== 44) return null;
 
@@ -96,6 +107,17 @@ export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean } 
           await cachePut(chave, xml, 'sieg');
           return { xml, parsed, fonte: 'sieg' };
         }
+      }
+    }
+  }
+
+  if (opts.meudanfe !== false && meudanfeEnabled()) {
+    const xml = await baixarXmlMeudanfe(chave);
+    if (xml) {
+      const parsed = parseNfeXml(xml);
+      if (parsed) {
+        await cachePut(chave, xml, 'meudanfe');
+        return { xml, parsed, fonte: 'meudanfe' };
       }
     }
   }

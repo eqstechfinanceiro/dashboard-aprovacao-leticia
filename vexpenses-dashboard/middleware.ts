@@ -95,14 +95,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // Importador fiscal local (automações Python): segredo dedicado, escopo
-  // estrito a POST /api/fiscal/import. Fail-closed igual ao cron.
+  // estrito a POST /api/fiscal/import e POST /api/fiscal/doc-cache
+  // (upload de XMLs obtidos por fontes internas, ex.: bot Lince). Fail-closed.
   const fiscalSecret = process.env.FISCAL_IMPORT_SECRET;
   const providedFiscal = request.headers.get('x-fiscal-secret');
   if (
     fiscalSecret &&
     providedFiscal === fiscalSecret &&
-    pathname === '/api/fiscal/import' &&
-    request.method === 'POST'
+    request.method === 'POST' &&
+    (pathname === '/api/fiscal/import' || pathname === '/api/fiscal/doc-cache')
   ) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-id', '0');

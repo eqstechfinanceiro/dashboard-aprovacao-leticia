@@ -3,17 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ensureDocCacheTable = ensureDocCacheTable;
 exports.cacheHasChaves = cacheHasChaves;
 exports.prepararSieg = prepararSieg;
+exports.salvarXmlCache = salvarXmlCache;
 exports.obterXmlNfe = obterXmlNfe;
 /**
  * Fontes de documento da conferência — cadeia:
- *   1. fiscal_doc_cache (Postgres — XML já obtido antes)
+ *   1. fiscal_doc_cache (Postgres — XML já obtido antes, inclui uploads do bot)
  *   2. Z01_XMLNFE (XML embutido na tabela Z01 do TOTVS — zero custo, mesmo genericQuery)
  *   3. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
- * Todo XML obtido de 2-3 é persistido no cache pra não baixar de novo.
+ *   4. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
+ * Todo XML obtido de 2-4 é persistido no cache pra não baixar de novo.
  */
 const neon_1 = require("../db/neon");
 const totvs_1 = require("./totvs");
 const sieg_1 = require("./sieg");
+const meudanfe_1 = require("./meudanfe");
 const xml_parser_1 = require("./xml-parser");
 let cacheEnsured = false;
 async function ensureDocCacheTable() {
@@ -70,6 +73,15 @@ async function prepararSieg(chaves) {
  * Obtém o XML da NF pela chave — cache → Z01 → SIEG.
  * Retorna { xml, parsed, fonte } ou null se nenhuma fonte produziu XML parseável.
  */
+/** Persiste XML obtido por fonte externa (ex.: upload do bot Lince via /api/fiscal/doc-cache). */
+async function salvarXmlCache(chaveAcesso, xml, fonte) {
+    const chave = (chaveAcesso || '').trim();
+    if (!/^\d{44}$/.test(chave) || !xml || !xml.includes('<'))
+        return false;
+    await ensureDocCacheTable();
+    await cachePut(chave, xml, fonte);
+    return true;
+}
 async function obterXmlNfe(chaveAcesso, opts = {}) {
     const chave = (chaveAcesso || '').trim();
     if (chave.length !== 44)
@@ -97,6 +109,16 @@ async function obterXmlNfe(chaveAcesso, opts = {}) {
                     await cachePut(chave, xml, 'sieg');
                     return { xml, parsed, fonte: 'sieg' };
                 }
+            }
+        }
+    }
+    if (opts.meudanfe !== false && (0, meudanfe_1.meudanfeEnabled)()) {
+        const xml = await (0, meudanfe_1.baixarXmlMeudanfe)(chave);
+        if (xml) {
+            const parsed = (0, xml_parser_1.parseNfeXml)(xml);
+            if (parsed) {
+                await cachePut(chave, xml, 'meudanfe');
+                return { xml, parsed, fonte: 'meudanfe' };
             }
         }
     }
