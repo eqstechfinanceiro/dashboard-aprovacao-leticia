@@ -28,6 +28,9 @@ export interface CompareResult {
   summary: string;
   mismatch_count: number;
   empresa: string;
+  // true quando a ÚNICA divergência da nota é Origem CST (item) —
+  // vira aviso/auto_ok_aviso em vez de pendente.
+  cst_only: boolean;
 }
 
 const _toFloat = (v: any): number => {
@@ -296,12 +299,18 @@ export function compareNf(
   const allChecks = [...headerChecks, ...itemChecks.flat()];
   const mismatchCount = allChecks.filter((c) => !c.match).length;
   const status = mismatchCount === 0 ? 'MATCH' : 'MISMATCH';
+  const falhas = allChecks.filter((c) => !c.match);
+  const cstOnly = falhas.length > 0 &&
+    falhas.every((c) => (c.field.split('·').pop() || c.field).trim() === 'Origem CST');
   return {
     status,
     header_checks: headerChecks,
     item_checks: itemChecks,
-    summary: mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
+    summary: cstOnly
+      ? `${mismatchCount} divergência(s) apenas de Origem CST (aviso)`
+      : mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
     mismatch_count: mismatchCount,
     empresa,
+    cst_only: cstOnly,
   };
 }

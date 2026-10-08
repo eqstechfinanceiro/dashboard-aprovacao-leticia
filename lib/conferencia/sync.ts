@@ -103,9 +103,9 @@ async function upsertNota(runId: number, nota: {
   doc: string; serie: string; filial: string; fornecedor: string; cnpj: string;
   valor: number | null; emissao: string | null; chave: string;
   autoStatus: string; autoResumo: string; checks: unknown; extra: unknown;
-  tentativas: number; nextRetry: Date | null;
+  tentativas: number; nextRetry: Date | null; cstOnly?: boolean;
 }): Promise<number> {
-  const reviewStatus = computeReviewStatus(nota.autoStatus as any);
+  const reviewStatus = computeReviewStatus(nota.autoStatus as any, nota.cstOnly === true);
   const res = await sql`
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
@@ -221,7 +221,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     const maxNfs = opts.maxNfs ?? MAX_NFS_CICLO;
 
     // Elegíveis = sem linha | pendente | falha_tecnica com retry vencido.
-    const TERMINAL = new Set(['auto_ok', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
+    const TERMINAL = new Set(['auto_ok', 'auto_ok_aviso', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
     const now = Date.now();
     const elegiveis = nfs.filter((nf) => {
       const h = nf.header;
@@ -323,7 +323,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
           ...extraBase, fonte_xml: xmlRes.fonte, mismatch_count: cmp.mismatch_count,
           chave_xml: xmlRes.parsed.chave || null, tentativa: tent,
         },
-        tentativas: 0, nextRetry: null,
+        tentativas: 0, nextRetry: null, cstOnly: cmp.cst_only === true,
       });
       if (autoStatus !== 'match') {
         await anexarXml(notaId, xmlRes.xml, chave || 'sem-chave');
@@ -336,10 +336,12 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
         await setState(
           { conferidas: out.conferidas, match: out.match, divergentes: out.divergentes, falhas: out.falhas, fontes: JSON.stringify(out.fontes), current_doc: base.doc },
           autoStatus !== 'match'
-            ? `[${i}/${elegiveis.length}] NF ${base.doc} — DIVERGENTE (${cmp.mismatch_count} × ${xmlRes.fonte})`
+            ? cmp.cst_only
+              ? `[${i}/${elegiveis.length}] NF ${base.doc} — AVISO CST (${cmp.mismatch_count} × ${xmlRes.fonte})`
+              : `[${i}/${elegiveis.length}] NF ${base.doc} — DIVERGENTE (${cmp.mismatch_count} × ${xmlRes.fonte})`
             : `[${i}/${elegiveis.length}] ${out.match} ok / ${out.divergentes} div / ${out.falhas} falhas`);
       }
-      ledger.set(k, { id: notaId, key: k, review_status: computeReviewStatus(autoStatus as any), conferencia_tentativas: 0, conferencia_next_retry: null });
+      ledger.set(k, { id: notaId, key: k, review_status: computeReviewStatus(autoStatus as any, cmp.cst_only === true), conferencia_tentativas: 0, conferencia_next_retry: null });
     }
 
     if (out.runId) {

@@ -13,6 +13,7 @@ export const runtime = 'nodejs';
 
 const STATUS_LABEL: Record<string, string> = {
   auto_ok: 'Conferida (auto)',
+  auto_ok_aviso: 'Conferida c/ aviso (CST)',
   pendente: 'Pendente',
   falha_tecnica: 'Falha técnica',
   confirmado_ok: 'Confirmada OK',
@@ -42,7 +43,11 @@ export async function GET(request: NextRequest) {
   const from = sp.get('from') || null;
   const to = sp.get('to') || null;
   const q = (sp.get('q') || '').trim().toLowerCase();
+  const empresa = (sp.get('empresa') || '').trim().toUpperCase();
+  const div = (sp.get('div') || '').trim();
   const limit = Math.min(parseInt(sp.get('limit') || '1000', 10) || 1000, 5000);
+  // Paridade com /fila: 'auto_ok' inclui as aprovadas com aviso de CST.
+  const statusList = status === 'auto_ok' ? ['auto_ok', 'auto_ok_aviso'] : [status];
 
   const notas: any[] = await sql`
     SELECT n.id, n.tipo, n.doc, n.serie, n.filial, n.fornecedor, n.cnpj,
@@ -52,8 +57,9 @@ export async function GET(request: NextRequest) {
            n.cancel_motivo, n.created_at
     FROM fiscal_notas n
     WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
-      AND (${status} = 'all' OR n.review_status = ${status})
+      AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
       AND (${scope} <> 'fila' OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+      AND (${empresa} = '' OR upper(COALESCE(n.extra->>'empresa', '')) = ${empresa})
       AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
       AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
       AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
@@ -61,6 +67,15 @@ export async function GET(request: NextRequest) {
            lower(n.doc) LIKE ${'%' + q + '%'} OR
            lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'} OR
            lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
+      AND (${div} = '' OR EXISTS (
+        SELECT 1
+        FROM jsonb_array_elements(COALESCE(n.checks, '[]'::jsonb)) c,
+             LATERAL jsonb_array_elements(
+               CASE WHEN jsonb_typeof(c) = 'array' THEN c ELSE jsonb_build_array(c) END
+             ) cc
+        WHERE (cc->>'match')::boolean = false
+          AND btrim(substring(cc->>'field' from '([^·]+)$')) = ${div}
+      ))
     ORDER BY n.emissao DESC NULLS LAST, n.doc DESC
     LIMIT ${limit}
   `;
@@ -105,10 +120,12 @@ export async function GET(request: NextRequest) {
   const sCancel = { ...sCellC, font: { sz: 10, color: { rgb: '7F8C8D' } } };
   const sPend = { ...sCellC, font: { sz: 10, bold: true, color: { rgb: corLaranja } } };
   const sOk = { ...sCellC, font: { sz: 10, color: { rgb: corVerde } } };
+  const sAviso = { ...sCellC, font: { sz: 10, bold: true, color: { rgb: 'B7950B' } } };
 
   const statusStyle = (s: string) =>
     s === 'confirmado_erro' ? sErro :
     s === 'cancelado' ? sCancel :
+    s === 'auto_ok_aviso' ? sAviso :
     s === 'pendente' || s === 'falha_tecnica' ? sPend : sOk;
 
   const escopoLabel =

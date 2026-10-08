@@ -49,7 +49,7 @@ interface FiscalNota {
   auto_resumo: string | null;
   checks: Check[] | Check[][] | null;
   extra: Record<string, any> | null;
-  review_status: 'auto_ok' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro' | 'cancelado';
+  review_status: 'auto_ok' | 'auto_ok_aviso' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro' | 'cancelado';
   reviewed_by: string | null;
   reviewed_at: string | null;
   cancelled_by: string | null;
@@ -90,6 +90,7 @@ const ERRO_OPCOES: { value: string; label: string }[] = [
 
 const STATUS_LABEL: Record<string, string> = {
   auto_ok: 'Conferida (auto)',
+  auto_ok_aviso: 'Conferida c/ aviso',
   pendente: 'Pendente',
   falha_tecnica: 'Falha técnica',
   confirmado_ok: 'Confirmada OK',
@@ -99,6 +100,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const STATUS_STYLE: Record<string, string> = {
   auto_ok: 'bg-green-100 text-green-700',
+  auto_ok_aviso: 'bg-yellow-100 text-yellow-800',
   pendente: 'bg-amber-100 text-amber-700',
   falha_tecnica: 'bg-gray-200 text-gray-600',
   confirmado_ok: 'bg-blue-100 text-blue-700',
@@ -131,6 +133,18 @@ function flatChecks(checks: FiscalNota['checks']): Check[] {
   return checks as Check[];
 }
 
+// Tipos de divergência de uma nota: sufixo do field sem o prefixo "Item X · ",
+// agrupado com contagem — [['TES', 2], ['Valor Total', 1]]
+function divTipos(checks: Check[]): [string, number][] {
+  const m = new Map<string, number>();
+  for (const c of checks) {
+    if (c.match) continue;
+    const t = (c.field.split('·').pop() || c.field).trim() || c.field;
+    m.set(t, (m.get(t) || 0) + 1);
+  }
+  return [...m.entries()].sort((a, b) => b[1] - a[1]);
+}
+
 export default function FiscalPage() {
   const [view, setView] = useState<'fila' | 'historico'>('fila');
   const [tipo, setTipo] = useState<'mercadoria' | 'servico' | 'vexpenses'>('mercadoria');
@@ -138,7 +152,13 @@ export default function FiscalPage() {
   const [histStatus, setHistStatus] = useState<string>('confirmado_erro');
   const [histMode, setHistMode] = useState<'lista' | 'kanban'>('lista');
   const [dragOver, setDragOver] = useState<string | null>(null);
-  const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[] } | null>(null);
+  const [data, setData] = useState<{ runs: FiscalRun[]; resumo: Record<string, Record<string, number>>; notas: FiscalNota[]; div_tipos?: string[] } | null>(null);
+  const [divFiltro, setDivFiltro] = useState('');
+  const [q, setQ] = useState('');
+  const [qInput, setQInput] = useState('');
+  const [emissaoFrom, setEmissaoFrom] = useState('');
+  const [emissaoTo, setEmissaoTo] = useState('');
+  const [empresa, setEmpresa] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
@@ -176,11 +196,17 @@ export default function FiscalPage() {
     setLoading(true);
     setError(null);
     try {
+      const divParam = divFiltro ? `&div=${encodeURIComponent(divFiltro)}` : '';
+      const qParam = q ? `&q=${encodeURIComponent(q)}` : '';
+      const fromParam = emissaoFrom ? `&from=${emissaoFrom}` : '';
+      const toParam = emissaoTo ? `&to=${emissaoTo}` : '';
+      const empParam = empresa ? `&empresa=${encodeURIComponent(empresa)}` : '';
+      const extraParams = `${divParam}${qParam}${fromParam}${toParam}${empParam}`;
       const url = view === 'historico'
         ? histMode === 'kanban'
-          ? `/api/fiscal/fila?scope=kanban&status=all&limit=1000`
-          : `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500`
-        : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500`;
+          ? `/api/fiscal/fila?scope=kanban&status=all&limit=1000${extraParams}`
+          : `/api/fiscal/fila?scope=historico&status=${histStatus}&limit=500${extraParams}`
+        : `/api/fiscal/fila?scope=fila&tipo=${tipo}&status=${status}&limit=500${extraParams}`;
       const res = await fetch(url);
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
@@ -190,7 +216,13 @@ export default function FiscalPage() {
     } finally {
       setLoading(false);
     }
-  }, [view, tipo, status, histStatus, histMode]);
+  }, [view, tipo, status, histStatus, histMode, divFiltro, q, emissaoFrom, emissaoTo, empresa]);
+
+  // Debounce da busca — digita e filtra sem apertar Enter.
+  useEffect(() => {
+    const t = setTimeout(() => setQ(qInput.trim()), 350);
+    return () => clearTimeout(t);
+  }, [qInput]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -261,9 +293,13 @@ export default function FiscalPage() {
     }
   };
 
+  const exportExtra =
+    `${q ? `&q=${encodeURIComponent(q)}` : ''}${emissaoFrom ? `&from=${emissaoFrom}` : ''}` +
+    `${emissaoTo ? `&to=${emissaoTo}` : ''}${empresa ? `&empresa=${encodeURIComponent(empresa)}` : ''}` +
+    `${divFiltro ? `&div=${encodeURIComponent(divFiltro)}` : ''}`;
   const exportUrl = view === 'historico'
-    ? `/api/fiscal/exportar-xlsx?scope=historico&status=${histStatus}`
-    : `/api/fiscal/exportar-xlsx?scope=fila&tipo=${tipo}&status=${status}`;
+    ? `/api/fiscal/exportar-xlsx?scope=historico&status=${histStatus}${exportExtra}`
+    : `/api/fiscal/exportar-xlsx?scope=fila&tipo=${tipo}&status=${status}${exportExtra}`;
 
   const resumoTipo = data?.resumo?.[tipo] || {};
   const latestRun = data?.runs?.find((r) => r.tipo === tipo);
@@ -310,6 +346,11 @@ export default function FiscalPage() {
           <History className="h-4 w-4 mr-2" /> Histórico
         </Button>
         <div className="ml-auto flex gap-2">
+          <a href="/fiscal/tes-regras">
+            <Button variant="outline" type="button">
+              <ExternalLink className="h-4 w-4 mr-2" /> Regras TES
+            </Button>
+          </a>
           <Button variant="outline" onClick={() => { setImportTipo(view === 'fila' ? tipo : 'mercadoria'); setImportOpen(true); }}>
             <Upload className="h-4 w-4 mr-2" /> Importar nota
           </Button>
@@ -407,7 +448,7 @@ export default function FiscalPage() {
 
       {/* Resumo do tipo selecionado (só na fila de trabalho) */}
       {view === 'fila' && (
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Clock className="h-4 w-4 text-amber-500" />Pendentes</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold text-amber-600">{resumoTipo.pendente || 0}</div></CardContent>
@@ -415,6 +456,10 @@ export default function FiscalPage() {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Conferidas (auto)</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold text-green-600">{resumoTipo.auto_ok || 0}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-yellow-600" />Com aviso (CST)</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-bold text-yellow-600">{resumoTipo.auto_ok_aviso || 0}</div></CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-blue-500" />Confirmadas OK</CardTitle></CardHeader>
@@ -439,7 +484,7 @@ export default function FiscalPage() {
       {/* Filtro de status — fila: estados de trabalho; histórico: erros/canceladas */}
       {view === 'fila' ? (
         <div className="flex gap-2 flex-wrap">
-          {['pendente', 'auto_ok', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'all'].map((s) => (
+          {['pendente', 'auto_ok', 'auto_ok_aviso', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'all'].map((s) => (
             <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
               {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
             </Button>
@@ -473,6 +518,80 @@ export default function FiscalPage() {
           ))}
         </div>
       )}
+
+      {/* Filtros — busca, período de emissão, empresa e tipo de divergência */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <input
+          type="text"
+          className="rounded-md border bg-white px-3 py-1.5 text-sm w-64"
+          placeholder="Buscar NF, fornecedor ou chave…"
+          value={qInput}
+          onChange={(e) => setQInput(e.target.value)}
+        />
+        <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          Emissão
+          <input
+            type="date"
+            className="rounded-md border bg-white px-2 py-1.5 text-sm"
+            value={emissaoFrom}
+            onChange={(e) => setEmissaoFrom(e.target.value)}
+          />
+          até
+          <input
+            type="date"
+            className="rounded-md border bg-white px-2 py-1.5 text-sm"
+            value={emissaoTo}
+            onChange={(e) => setEmissaoTo(e.target.value)}
+          />
+        </label>
+        <select
+          className="rounded-md border bg-white px-2 py-1.5 text-sm"
+          value={empresa}
+          onChange={(e) => setEmpresa(e.target.value)}
+        >
+          <option value="">Todas as empresas</option>
+          <option value="EQS">EQS</option>
+          <option value="BRATEC">BRATEC</option>
+        </select>
+        {(q || emissaoFrom || emissaoTo || empresa || divFiltro) && (
+          <button
+            className="text-xs text-blue-600 hover:underline"
+            onClick={() => { setQInput(''); setQ(''); setEmissaoFrom(''); setEmissaoTo(''); setEmpresa(''); setDivFiltro(''); }}
+          >
+            Limpar filtros
+          </button>
+        )}
+        {data && (
+          <span className="text-xs text-muted-foreground ml-auto">
+            {data.notas.length} nota(s)
+          </span>
+        )}
+      </div>
+
+      {/* Filtro por tipo de divergência (impostos, valor total, TES...) */}
+      {(data?.div_tipos?.length || divFiltro) ? (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground">Tipo de divergência:</span>
+          <select
+            className="rounded-md border bg-white px-2 py-1.5 text-sm"
+            value={divFiltro}
+            onChange={(e) => setDivFiltro(e.target.value)}
+          >
+            <option value="">Todas</option>
+            {[
+              ...(data?.div_tipos || []),
+              ...(divFiltro && !(data?.div_tipos || []).includes(divFiltro) ? [divFiltro] : []),
+            ].map((t) => (
+              <option key={t} value={t}>{t}</option>
+            ))}
+          </select>
+          {divFiltro && (
+            <button className="text-xs text-blue-600 hover:underline" onClick={() => setDivFiltro('')}>
+              limpar
+            </button>
+          )}
+        </div>
+      ) : null}
 
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>
@@ -523,7 +642,9 @@ export default function FiscalPage() {
                       <span className="text-xs text-muted-foreground">{cards.length}</span>
                     </div>
                     <div className="space-y-2">
-                      {cards.map((n) => (
+                      {cards.map((n) => {
+                        const dts = divTipos(flatChecks(n.checks));
+                        return (
                         <div
                           key={n.id}
                           draggable
@@ -544,6 +665,11 @@ export default function FiscalPage() {
                           <p className="text-[11px] text-muted-foreground truncate mt-0.5" title={n.fornecedor || ''}>
                             {n.fornecedor || '—'}
                           </p>
+                          {dts.length > 0 && (
+                            <p className="text-[10px] text-amber-700 truncate" title={dts.map(([t, c]) => c > 1 ? `${t} ×${c}` : t).join(', ')}>
+                              {dts.map(([t, c]) => c > 1 ? `${t} ×${c}` : t).join(', ')}
+                            </p>
+                          )}
                           <div className="flex items-center justify-between mt-1">
                             <span className="text-xs font-semibold">{fmtBRL(n.valor)}</span>
                             <div className="flex gap-1.5">
@@ -638,7 +764,8 @@ export default function FiscalPage() {
                             </div>
                           )}
                         </div>
-                      ))}
+                        );
+                      })}
                       {cards.length === 0 && (
                         <p className="text-[11px] text-muted-foreground text-center py-4">—</p>
                       )}
@@ -692,6 +819,14 @@ export default function FiscalPage() {
                               {falhas.length || '?'} divergência(s)
                             </span>
                           )}
+                          {divTipos(checks).map(([t, c]) => (
+                            <span
+                              key={t}
+                              className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-800"
+                            >
+                              {t}{c > 1 ? ` ×${c}` : ''}
+                            </span>
+                          ))}
                           {n.auto_status === 'erro' && (
                             <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs text-orange-700">falha técnica</span>
                           )}
@@ -820,6 +955,25 @@ export default function FiscalPage() {
                               variant="destructive"
                               disabled={acting === n.id}
                               onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'tes_errado', descricao: n.auto_resumo || '' })}
+                            >
+                              <XCircle className="h-4 w-4 mr-1" /> Confirmar erro
+                            </Button>
+                          </div>
+                        )}
+
+                        {/* Aviso CST: já auto-aprovada, mas o revisor pode escalar
+                            pra erro se o aviso esconder problema real. */}
+                        {view === 'fila' && n.review_status === 'auto_ok_aviso' && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="text-xs text-yellow-700">
+                              Aprovada automaticamente — divergência apenas de Origem CST
+                            </span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-600 hover:text-red-700"
+                              disabled={acting === n.id}
+                              onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'outro', descricao: n.auto_resumo || '' })}
                             >
                               <XCircle className="h-4 w-4 mr-1" /> Confirmar erro
                             </Button>

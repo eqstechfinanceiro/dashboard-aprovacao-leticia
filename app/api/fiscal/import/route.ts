@@ -5,6 +5,7 @@ import { sql } from '@/lib/db/neon';
 import {
   ensureFiscalTables,
   computeReviewStatus,
+  isCstOnlyDivergence,
   sweepOldFiscalDocs,
   FISCAL_TIPOS,
   AUTO_STATUS,
@@ -125,7 +126,7 @@ export async function POST(request: NextRequest) {
 
   for (const n of valid) {
     const autoStatus = n.auto_status as string;
-    const reviewStatus = computeReviewStatus(autoStatus as any);
+    const reviewStatus = computeReviewStatus(autoStatus as any, isCstOnlyDivergence(n.checks));
     const res = await sql`
       INSERT INTO fiscal_notas
         (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,

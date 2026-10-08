@@ -26,7 +26,7 @@ export type FiscalTipo = (typeof FISCAL_TIPOS)[number];
 export const AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'] as const;
 export type AutoStatus = (typeof AUTO_STATUS)[number];
 
-export const REVIEW_STATUS = ['auto_ok', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'] as const;
+export const REVIEW_STATUS = ['auto_ok', 'auto_ok_aviso', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'] as const;
 export type ReviewStatus = (typeof REVIEW_STATUS)[number];
 
 // Categorias de erro confirmado → coluna `erro` de resultados_conferencias.
@@ -116,10 +116,32 @@ export async function ensureFiscalTables(): Promise<void> {
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancel_motivo TEXT`;
 }
 
-export function computeReviewStatus(autoStatus: AutoStatus): ReviewStatus {
+// cstOnly: todas as divergências são "Origem CST" — campo informativo que o
+// fiscal já validou como ruído. Auto-aprova com aviso em vez de pendente.
+export function computeReviewStatus(autoStatus: AutoStatus, cstOnly = false): ReviewStatus {
   if (autoStatus === 'match') return 'auto_ok';
   if (autoStatus === 'erro') return 'falha_tecnica'; // download/parse — não é erro fiscal
+  if (autoStatus === 'divergente' && cstOnly) return 'auto_ok_aviso';
   return 'pendente';
+}
+
+// Detecta nos checks persistidos (flat ou por item) se todas as divergências
+// são só "Origem CST" — usado pelo import legado e pelo backfill.
+export function isCstOnlyDivergence(checks: unknown): boolean {
+  if (!checks) return false;
+  const flat: any[] = [];
+  // Aceita os dois shapes persistidos: array flat / array-por-item / CompareResult.
+  const arr: any[] = Array.isArray(checks)
+    ? checks
+    : (checks as any).header_checks || (checks as any).item_checks
+      ? [...((checks as any).header_checks || []), ...((checks as any).item_checks || [])]
+      : [];
+  for (const c of arr) {
+    if (Array.isArray(c)) flat.push(...c); else flat.push(c);
+  }
+  const falhas = flat.filter((c) => c && c.match === false);
+  return falhas.length > 0 &&
+    falhas.every((c) => (String(c.field || '').split('·').pop() || '').trim() === 'Origem CST');
 }
 
 export const FISCAL_DOCS_DIR = () =>
