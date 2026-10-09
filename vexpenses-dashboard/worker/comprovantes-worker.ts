@@ -14,6 +14,7 @@ loadEnv({ path: path.resolve(process.cwd(), '.env.local') });
 import { sql } from '../lib/db/neon';
 import { claimNextRun, ensureComprovantesTables } from '../lib/comprovantes/db';
 import { processRun } from '../lib/comprovantes/pipeline';
+import { processRemessaRun } from '../lib/comprovantes/remessa-pipeline';
 import { closeSpBrowser } from '../lib/comprovantes/sharepoint';
 
 const POLL_MS = 10 * 1000;
@@ -33,7 +34,8 @@ async function tick() {
     const run = await claimNextRun();
     if (!run) return;
     console.log(`[comprovantes] run #${run.id} iniciado: ${run.source} ${run.year}/${run.month_folder}/${run.bank}/${run.date_folder}`);
-    await processRun(run);
+    if (run.source === 'remessa') await processRemessaRun(run);
+    else await processRun(run);
     console.log(`[comprovantes] run #${run.id} finalizado`);
   } finally {
     releaseLock();

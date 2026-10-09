@@ -95,6 +95,15 @@ export async function consultarPorNomeSeguro(nomeComprovante: string): Promise<F
   return null;
 }
 
+/** Carga completa p/ índices em memória (remessa de folha casa milhares de
+ *  comprovantes — 1 query no início do run em vez de 1 por comprovante). */
+export async function listAllFuncionarios(): Promise<Funcionario[]> {
+  const rows = await getPool().query(
+    'SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios'
+  );
+  return rows.rows.map(mapRow);
+}
+
 /**
  * Mapa cpf → situacao do RH (eqs_funcionarios) para merge no cadastro da
  * quinzena. Demissões e afastamentos (PERÍCIA, CONTRATO SUSPENSO, …) são

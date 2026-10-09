@@ -78,6 +78,11 @@ const STATUS_ENVIO: Record<string, { label: string; cls: string }> = {
   tipo_incorreto: { label: 'Tipo desconhecido', cls: 'bg-red-100 text-red-700' },
   e2doc_erro: { label: 'Erro E2DOC', cls: 'bg-red-100 text-red-700' },
   erro: { label: 'Erro', cls: 'bg-red-100 text-red-700' },
+  // Remessa de folha
+  pronto: { label: 'Pronto p/ envio', cls: 'bg-emerald-100 text-emerald-700' },
+  sem_funcionario: { label: 'Funcionário não encontrado', cls: 'bg-orange-100 text-orange-700' },
+  homonimo_ambiguo: { label: 'Homônimo ambíguo', cls: 'bg-orange-100 text-orange-700' },
+  txt_sem_pdf: { label: 'No TXT, sem comprovante', cls: 'bg-amber-100 text-amber-700' },
 };
 
 const RUN_STATUS: Record<string, { label: string; cls: string }> = {
@@ -85,6 +90,8 @@ const RUN_STATUS: Record<string, { label: string; cls: string }> = {
   running: { label: 'Processando', cls: 'bg-blue-100 text-blue-700' },
   done: { label: 'Concluído', cls: 'bg-emerald-100 text-emerald-700' },
   error: { label: 'Erro', cls: 'bg-red-100 text-red-700' },
+  aguardando_confirmacao: { label: 'Aguardando confirmação', cls: 'bg-violet-100 text-violet-700' },
+  cancelado: { label: 'Cancelado', cls: 'bg-gray-100 text-gray-500' },
 };
 
 const PHASE_LABEL: Record<string, string> = {
@@ -173,7 +180,7 @@ function GateSwitch({ label, desc, enabled, onToggle, danger }: {
 // ---------- Página ----------
 
 export default function AutomacaoComprovantesPage() {
-  const [tab, setTab] = useState<'processar' | 'runs' | 'funcionarios'>('processar');
+  const [tab, setTab] = useState<'processar' | 'remessa' | 'runs' | 'funcionarios'>('processar');
 
   // Árvore SharePoint: key `${site}|${path}` → NodeState
   const [tree, setTree] = useState<Record<string, NodeState>>({});
@@ -192,6 +199,14 @@ export default function AutomacaoComprovantesPage() {
   const [activeRun, setActiveRun] = useState<{ run: RunRow; envios: EnvioRow[] } | null>(null);
   const [expandedRun, setExpandedRun] = useState<number | null>(null);
   const [starting, setStarting] = useState(false);
+
+  // Remessa de folha (upload de PDFs + TXTs CNAB)
+  const [remFiles, setRemFiles] = useState<File[]>([]);
+  const [remUploading, setRemUploading] = useState(false);
+  const [remUpload, setRemUpload] = useState<{ uploadId: string; files: { name: string; size: number; kind: string; banco?: string | null }[] } | null>(null);
+  const [remError, setRemError] = useState<string | null>(null);
+  const [remComp, setRemComp] = useState('');
+  const [confirming, setConfirming] = useState<number | null>(null);
 
   // Funcionários
   const [funcQ, setFuncQ] = useState('');
@@ -360,6 +375,81 @@ export default function AutomacaoComprovantesPage() {
       }
     } finally {
       setStarting(false);
+    }
+  };
+
+  // ---------- Remessa de folha ----------
+
+  const uploadRemessa = async () => {
+    if (!remFiles.length) return;
+    setRemUploading(true);
+    setRemError(null);
+    try {
+      const fd = new FormData();
+      remFiles.forEach((f) => fd.append('files', f));
+      const resp = await fetch('/api/comprovantes/remessa/upload', { method: 'POST', body: fd });
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
+      setRemUpload(data);
+    } catch (err) {
+      setRemError(String(err));
+      setRemUpload(null);
+    } finally {
+      setRemUploading(false);
+    }
+  };
+
+  const startRemessa = async () => {
+    if (!remUpload) return;
+    setStarting(true);
+    try {
+      const resp = await fetch('/api/comprovantes/runs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode: 'remessa', uploadId: remUpload.uploadId, competencia: remComp || undefined }),
+      });
+      const data = await resp.json();
+      if (resp.ok) {
+        setExpandedRun(data.runId);
+        loadRunDetail(data.runId);
+        loadRuns();
+        setTab('runs');
+      } else {
+        setRemError(data.error || 'Falha ao enfileirar');
+      }
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  const confirmRemessa = async (id: number, action: 'confirmar' | 'cancelar', forcarCompetencia = false) => {
+    setConfirming(id);
+    try {
+      const resp = await fetch(`/api/comprovantes/runs/${id}/confirm`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...(forcarCompetencia ? { forcarCompetencia: true } : {}) }),
+      });
+      if (resp.ok) {
+        loadRuns();
+        loadRunDetail(id);
+      } else {
+        const d = await resp.json().catch(() => ({}));
+        if (resp.status === 409 && d.code === 'competencia_divergente') {
+          const ok = window.confirm(
+            `ATENÇÃO — competência provavelmente errada.\n\n` +
+            `Informada: ${d.informada}\nEsperada pelas datas de pagamento: ${(d.esperada || []).join(' ou ')}\n\n` +
+            `Para folha, a competência no e2doc é o MÊS ANTERIOR ao pagamento. ` +
+            `Enviar com a competência errada indexa os documentos no mês errado.\n\n` +
+            `Confirma mesmo assim enviar com ${d.informada}?`
+          );
+          if (ok) return confirmRemessa(id, action, true);
+          return;
+        }
+        alert(d.error || 'Falha na confirmação');
+      }
+    } finally {
+      setConfirming(null);
     }
   };
 
@@ -589,7 +679,7 @@ export default function AutomacaoComprovantesPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
-        {([['processar', 'Processar', Play], ['runs', 'Execuções', History], ['funcionarios', 'Funcionários', Users]] as const).map(([key, label, Icon]) => (
+        {([['processar', 'Processar', Play], ['remessa', 'Remessa Folha', FileSpreadsheet], ['runs', 'Execuções', History], ['funcionarios', 'Funcionários', Users]] as const).map(([key, label, Icon]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -726,6 +816,98 @@ export default function AutomacaoComprovantesPage() {
         </div>
       )}
 
+      {/* TAB: Remessa de folha — upload de PDFs + TXTs CNAB, análise antes do envio */}
+      {tab === 'remessa' && (
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileSpreadsheet className="w-4 h-4 text-blue-500" /> Remessa de folha → e2doc
+            </CardTitle>
+            <p className="text-xs text-gray-400">
+              Suba os PDFs de remessa (Itaú 2/pág., Bradesco 1/pág.) e, opcionalmente, os TXTs CNAB de conferência.
+              Funcionários são resolvidos pelo cadastro (conta → CPF → nome); o TXT serve de conferência cruzada.
+              Nada é enviado sem a sua confirmação após a análise.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="border-2 border-dashed border-gray-200 rounded-xl p-5">
+              <input
+                type="file" multiple accept=".pdf,.txt"
+                onChange={(e) => { setRemFiles([...(e.target.files || [])]); setRemUpload(null); }}
+                className="text-sm text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-600 file:text-sm file:font-medium hover:file:bg-blue-100"
+              />
+              {remFiles.length > 0 && !remUpload && (
+                <div className="mt-3 text-xs text-gray-500">
+                  {remFiles.length} arquivo{remFiles.length > 1 ? 's' : ''} selecionado{remFiles.length > 1 ? 's' : ''}
+                  <span className="text-gray-400"> — {remFiles.filter((f) => /\.pdf$/i.test(f.name)).length} PDF, {remFiles.filter((f) => /\.txt$/i.test(f.name)).length} TXT</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              <label className="text-xs font-medium text-gray-600">Competência e2doc (mês da folha, não do pagamento)</label>
+              <input
+                value={remComp}
+                onChange={(e) => setRemComp(e.target.value)}
+                placeholder="MM/AAAA — vazio usa o mês anterior ao pagamento (recomendado)"
+                className="w-64 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+              {remComp && !/^\d{2}\/\d{4}$/.test(remComp) && (
+                <span className="text-[11px] text-red-500">formato MM/AAAA</span>
+              )}
+            </div>
+
+            {remError && (
+              <div className="text-xs text-red-600 bg-red-50 rounded-lg p-2.5 flex gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" /> {remError}
+              </div>
+            )}
+
+            {remUpload && (
+              <div className="rounded-xl border border-gray-200 divide-y divide-gray-100">
+                <div className="px-4 py-2.5 text-xs font-medium text-gray-500 bg-gray-50/60 rounded-t-xl flex justify-between">
+                  <span>Arquivos recebidos</span>
+                  <button onClick={() => { setRemUpload(null); setRemFiles([]); }} className="text-gray-400 hover:text-red-500">descartar</button>
+                </div>
+                {remUpload.files.map((f) => (
+                  <div key={f.name} className="flex items-center gap-3 px-4 py-2">
+                    {f.kind === 'pdf' ? <FileText className="w-4 h-4 text-red-400" /> : <FileSpreadsheet className="w-4 h-4 text-emerald-500" />}
+                    <span className="text-sm text-gray-700 flex-1 truncate">{f.name}</span>
+                    {f.banco && <Badge className="bg-blue-100 text-blue-700 border-0 text-[10px]">{f.banco}</Badge>}
+                    <Badge className={`border-0 text-[10px] ${f.kind === 'pdf' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                      {f.kind.toUpperCase()}
+                    </Badge>
+                    <span className="text-[10px] text-gray-300">{(f.size / 1024).toFixed(0)}KB</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              {!remUpload ? (
+                <button
+                  onClick={uploadRemessa}
+                  disabled={!remFiles.length || remUploading}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 disabled:bg-gray-300"
+                >
+                  {remUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FolderOpen className="w-4 h-4" />}
+                  Enviar arquivos
+                </button>
+              ) : (
+                <button
+                  onClick={startRemessa}
+                  disabled={starting}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:bg-gray-300"
+                >
+                  {starting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                  Analisar remessa
+                </button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* TAB: Execuções */}
       {tab === 'runs' && (
         <Card>
@@ -797,6 +979,54 @@ export default function AutomacaoComprovantesPage() {
                       {expanded && (
                         <div className="px-4 pb-4 pt-1 bg-gray-50/60">
                           {r.error && <div className="text-xs text-red-600 bg-red-50 rounded p-2 mb-2">{r.error}</div>}
+
+                          {/* Análise de remessa aguardando confirmação do usuário */}
+                          {r.status === 'aguardando_confirmacao' && (() => {
+                            const a = (r.result?.analise || {}) as any;
+                            const problemas = (a.semFuncionario ?? 0) + (a.homonimos ?? 0) + (a.divergentes ?? 0) + (a.txtSemPdf ?? 0);
+                            return (
+                              <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
+                                <div className="text-sm font-semibold text-violet-800 flex items-center gap-2 mb-2">
+                                  <AlertTriangle className="w-4 h-4" /> Análise concluída — revise antes de enviar
+                                </div>
+                                <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-600 mb-3">
+                                  <span><b className="text-emerald-600">{a.prontos ?? 0}</b> prontos p/ envio</span>
+                                  {(a.divergentes ?? 0) > 0 && <span><b className="text-red-600">{a.divergentes}</b> divergentes (valor)</span>}
+                                  {(a.semFuncionario ?? 0) > 0 && <span><b className="text-orange-600">{a.semFuncionario}</b> funcionário não encontrado</span>}
+                                  {(a.homonimos ?? 0) > 0 && <span><b className="text-orange-600">{a.homonimos}</b> homônimos ambíguos</span>}
+                                  {(a.semParTxt ?? 0) > 0 && <span><b className="text-amber-600">{a.semParTxt}</b> no PDF sem par no TXT</span>}
+                                  {(a.txtSemPdf ?? 0) > 0 && <span><b className="text-amber-600">{a.txtSemPdf}</b> no TXT sem comprovante</span>}
+                                  <span className="text-gray-400">{a.comprovantes ?? 0} comprovantes · {a.txtEntries ?? 0} linhas TXT</span>
+                                </div>
+                                {(a.warnings || []).length > 0 && (
+                                  <div className="text-[11px] text-amber-700 bg-amber-50 rounded-lg p-2 mb-3 max-h-24 overflow-y-auto font-mono">
+                                    {a.warnings.map((w: string, i: number) => <div key={i}>{w}</div>)}
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <button
+                                    onClick={() => confirmRemessa(r.id, 'confirmar')}
+                                    disabled={confirming === r.id}
+                                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 disabled:bg-gray-300"
+                                  >
+                                    {confirming === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                    Enviar {a.prontos ?? 0} comprovantes ao e2doc
+                                  </button>
+                                  <button
+                                    onClick={() => confirmRemessa(r.id, 'cancelar')}
+                                    disabled={confirming === r.id}
+                                    className="px-3 py-2 rounded-lg border border-gray-300 text-xs text-gray-600 hover:bg-gray-100"
+                                  >
+                                    Cancelar
+                                  </button>
+                                  {problemas > 0 && (
+                                    <span className="text-[11px] text-gray-500 ml-2">somente os prontos são enviados; problemas ficam registrados</span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })()}
+
                           {activeRun?.run?.id === r.id ? (
                             activeRun.envios.length === 0 ? (
                               <div className="text-xs text-gray-400 py-3">
