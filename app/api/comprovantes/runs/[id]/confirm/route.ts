@@ -39,10 +39,15 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     return NextResponse.json({ ok: true, status: 'cancelado' });
   }
 
-  // Guarda de competência: a competência e2doc de folha é o mês ANTERIOR ao
-  // pagamento. Se a informada diverge das datas de pagamento dos comprovantes
-  // (calculadas na análise), exige confirmação explícita — erro aqui indexa
-  // o documento na competência errada no e2doc.
+  // Guarda de competência: folha indexa no mês ANTERIOR ao pagamento; férias
+  // (e adiantamentos) no MÊS do pagamento. Se a informada diverge das datas
+  // de pagamento dos comprovantes (calculadas na análise já com a regra do
+  // tipo do run), exige confirmação explícita — erro aqui indexa o documento
+  // na competência errada no e2doc.
+  const tipoRun = (run.selection as any)?.tipo === 'FER' ? 'FER' : 'FOL';
+  const regraCompetencia = tipoRun === 'FER'
+    ? 'Para férias, a competência no e2doc é o MÊS DO PAGAMENTO.'
+    : 'Para folha, a competência no e2doc é o MÊS ANTERIOR ao pagamento.';
   const competenciaSel = typeof (run.selection as any)?.competencia === 'string'
     ? (run.selection as any).competencia
     : null;
@@ -54,10 +59,12 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     `).map((r: any) => r.ce).filter(Boolean) as string[];
     if (esperadas.length > 0 && !esperadas.includes(competenciaSel)) {
       return NextResponse.json({
-        error: `Competência ${competenciaSel} diverge das datas de pagamento dos comprovantes (esperada: ${esperadas.join(' ou ')}). Para folha, a competência e2doc é o mês anterior ao pagamento.`,
+        error: `Competência ${competenciaSel} diverge das datas de pagamento dos comprovantes (esperada: ${esperadas.join(' ou ')}). ${regraCompetencia}`,
         code: 'competencia_divergente',
         informada: competenciaSel,
         esperada: esperadas,
+        tipo: tipoRun,
+        regra: regraCompetencia,
       }, { status: 409 });
     }
   }

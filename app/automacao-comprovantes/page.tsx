@@ -18,7 +18,7 @@ interface SpFile { name: string; size: number; url: string; timeLastModified: st
 interface TreeResp { path: string; folders: string[]; files: SpFile[]; error?: string; cached?: boolean; cached_at?: string; warning?: string }
 interface RunRow {
   id: number; source: string; year: string | null; month_folder: string | null; bank: string | null; date_folder: string | null;
-  label: string | null; status: string; progress: any; result: any; error: string | null;
+  label: string | null; status: string; progress: any; result: any; error: string | null; selection?: any;
   created_by: string | null; created_at: string; started_at: string | null; finished_at: string | null;
 }
 interface EnvioRow {
@@ -206,6 +206,7 @@ export default function AutomacaoComprovantesPage() {
   const [remUpload, setRemUpload] = useState<{ uploadId: string; files: { name: string; size: number; kind: string; banco?: string | null }[] } | null>(null);
   const [remError, setRemError] = useState<string | null>(null);
   const [remComp, setRemComp] = useState('');
+  const [remTipo, setRemTipo] = useState<'FOL' | 'FER'>('FOL');
   const [confirming, setConfirming] = useState<number | null>(null);
 
   // Funcionários
@@ -391,6 +392,8 @@ export default function AutomacaoComprovantesPage() {
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
       setRemUpload(data);
+      // Sugestão pelo nome do arquivo (FERIA* → férias) — o usuário confirma.
+      if ((data.files || []).some((f: any) => /FERIA/i.test(f.name))) setRemTipo('FER');
     } catch (err) {
       setRemError(String(err));
       setRemUpload(null);
@@ -406,7 +409,7 @@ export default function AutomacaoComprovantesPage() {
       const resp = await fetch('/api/comprovantes/runs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mode: 'remessa', uploadId: remUpload.uploadId, competencia: remComp || undefined }),
+          body: JSON.stringify({ mode: 'remessa', uploadId: remUpload.uploadId, competencia: remComp || undefined, tipo: remTipo }),
       });
       const data = await resp.json();
       if (resp.ok) {
@@ -439,7 +442,7 @@ export default function AutomacaoComprovantesPage() {
           const ok = window.confirm(
             `ATENÇÃO — competência provavelmente errada.\n\n` +
             `Informada: ${d.informada}\nEsperada pelas datas de pagamento: ${(d.esperada || []).join(' ou ')}\n\n` +
-            `Para folha, a competência no e2doc é o MÊS ANTERIOR ao pagamento. ` +
+            `${d.regra || 'Confira a competência esperada para o tipo de pagamento deste run.'} ` +
             `Enviar com a competência errada indexa os documentos no mês errado.\n\n` +
             `Confirma mesmo assim enviar com ${d.informada}?`
           );
@@ -679,7 +682,7 @@ export default function AutomacaoComprovantesPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-gray-200">
-        {([['processar', 'Processar', Play], ['remessa', 'Remessa Folha', FileSpreadsheet], ['runs', 'Execuções', History], ['funcionarios', 'Funcionários', Users]] as const).map(([key, label, Icon]) => (
+        {([['processar', 'Processar', Play], ['remessa', 'Remessa', FileSpreadsheet], ['runs', 'Execuções', History], ['funcionarios', 'Funcionários', Users]] as const).map(([key, label, Icon]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -821,10 +824,11 @@ export default function AutomacaoComprovantesPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <FileSpreadsheet className="w-4 h-4 text-blue-500" /> Remessa de folha → e2doc
+              <FileSpreadsheet className="w-4 h-4 text-blue-500" /> Remessa de comprovantes → e2doc
             </CardTitle>
             <p className="text-xs text-gray-400">
               Suba os PDFs de remessa (Itaú 2/pág., Bradesco 1/pág.) e, opcionalmente, os TXTs CNAB de conferência.
+              Escolha o tipo de pagamento (proventos ou férias) — ele define o documento no e2doc e a pasta no SharePoint.
               Funcionários são resolvidos pelo cadastro (conta → CPF → nome); o TXT serve de conferência cruzada.
               Nada é enviado sem a sua confirmação após a análise.
             </p>
@@ -844,12 +848,40 @@ export default function AutomacaoComprovantesPage() {
               )}
             </div>
 
+            {/* Tipo de pagamento — define doc e2doc, pasta SP e regra de competência */}
+            <div>
+              <label className="text-xs font-medium text-gray-600 block mb-1.5">Tipo de pagamento</label>
+              <div className="flex gap-2">
+                {([
+                  { v: 'FOL' as const, label: 'Proventos (folha)', dest: 'e2doc: doc PROVENTOS · competência = mês anterior ao pagamento · SP: Comprovante DP/PROVENTOS/PAGTOS MANUAIS' },
+                  { v: 'FER' as const, label: 'Férias', dest: 'e2doc: doc FÉRIAS · competência = mês do pagamento · SP: Comprovante DP/FERIAS' },
+                ]).map((o) => (
+                  <button
+                    key={o.v}
+                    onClick={() => setRemTipo(o.v)}
+                    className={`flex-1 max-w-xs px-4 py-2.5 rounded-xl border-2 text-left transition-colors ${
+                      remTipo === o.v
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 bg-white hover:border-gray-300'
+                    }`}
+                  >
+                    <div className={`text-sm font-semibold ${remTipo === o.v ? 'text-blue-700' : 'text-gray-700'}`}>{o.label}</div>
+                    <div className={`text-[11px] mt-0.5 ${remTipo === o.v ? 'text-blue-600' : 'text-gray-400'}`}>{o.dest}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 flex-wrap">
-              <label className="text-xs font-medium text-gray-600">Competência e2doc (mês da folha, não do pagamento)</label>
+              <label className="text-xs font-medium text-gray-600">
+                Competência e2doc ({remTipo === 'FER' ? 'mês do pagamento' : 'mês da folha, não do pagamento'})
+              </label>
               <input
                 value={remComp}
                 onChange={(e) => setRemComp(e.target.value)}
-                placeholder="MM/AAAA — vazio usa o mês anterior ao pagamento (recomendado)"
+                placeholder={remTipo === 'FER'
+                  ? 'MM/AAAA — vazio usa o mês do pagamento (recomendado)'
+                  : 'MM/AAAA — vazio usa o mês anterior ao pagamento (recomendado)'}
                 className="w-64 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
               />
               {remComp && !/^\d{2}\/\d{4}$/.test(remComp) && (
@@ -984,10 +1016,14 @@ export default function AutomacaoComprovantesPage() {
                           {r.status === 'aguardando_confirmacao' && (() => {
                             const a = (r.result?.analise || {}) as any;
                             const problemas = (a.semFuncionario ?? 0) + (a.homonimos ?? 0) + (a.divergentes ?? 0) + (a.txtSemPdf ?? 0);
+                            const tipoRun = r.selection?.tipo === 'FER' ? 'FER' : 'FOL';
                             return (
                               <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
                                 <div className="text-sm font-semibold text-violet-800 flex items-center gap-2 mb-2">
                                   <AlertTriangle className="w-4 h-4" /> Análise concluída — revise antes de enviar
+                                  <Badge className={`border-0 text-[11px] ${tipoRun === 'FER' ? 'bg-teal-100 text-teal-700' : 'bg-blue-100 text-blue-700'}`}>
+                                    {tipoRun === 'FER' ? 'FÉRIAS → Comprovante DP/FERIAS' : 'PROVENTOS → PAGTOS MANUAIS'}
+                                  </Badge>
                                 </div>
                                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-600 mb-3">
                                   <span><b className="text-emerald-600">{a.prontos ?? 0}</b> prontos p/ envio</span>

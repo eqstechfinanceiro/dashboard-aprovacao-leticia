@@ -200,8 +200,18 @@ async function processRemessaAnalise(run, sel) {
             await (0, neon_1.sql) `UPDATE comprovantes_runs SET status='aguardando_confirmacao' WHERE id=${run.id}`;
             return;
         }
+        // Tipo do run: 'FER' → doc FÉRIAS / competência do mês do pagamento;
+        // 'FOL' (default) → PROVENTOS / competência = mês anterior.
+        const tipo = sel.tipo === 'FER' ? 'FER' : 'FOL';
+        // Adiantamento (vale/quinzena) e férias são indexados no mês DO pagamento —
+        // diferente da folha mensal, que fecha o mês anterior.
+        const mesDoPagamento = tipo === 'FER' || sel.files.some((f) => /adto|adiant/i.test(f.name));
+        const esperadaDe = (dt) => dt && /^\d{4}-\d{2}-\d{2}$/.test(dt)
+            ? (mesDoPagamento ? `${dt.slice(5, 7)}/${dt.slice(0, 4)}` : (0, pdf_1.competenciaFolha)(dt.slice(5, 7), dt.slice(0, 4)))
+            : null;
         let totalPages = 0;
         let pagesDone = 0;
+        const compEsperadas = new Set();
         for (const f of pdfs) {
             const buf = (0, fs_1.readFileSync)((0, path_1.join)(sel.dir, f.name));
             const analise = await (0, folha_pdf_1.analisarFolhaPdf)(buf, f.name, (done, total) => {
@@ -216,12 +226,20 @@ async function processRemessaAnalise(run, sel) {
             resumo.warnings.push(...analise.warnings);
             if (analise.formato === 'desconhecido')
                 resumo.formatoNaoReconhecido++;
-            const BANCO_POR_FORMATO = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO' };
+            // Índice BANCO do e2doc usa o rótulo do dicionário (BANCO_E2DOC), não o
+            // nome de exibição do CNAB — 'BB (BANCO DO BRASIL)' é rejeitado, 'BB' passa.
+            const BANCO_POR_FORMATO = { itau_folha: 'ITAU', bradesco_rt: 'BRADESCO', bradesco_multipag: 'BRADESCO', bb_pag: 'BB' };
             const bancoTxt = cnabs.find((c) => cnab_1.BANCO_NOME[c.banco] && f.name.toUpperCase().includes(cnab_1.BANCO_NOME[c.banco].split(' ')[0]));
-            const bancoItem = bancoTxt?.bancoNome || BANCO_POR_FORMATO[analise.formato] || null;
+            const bancoItem = (bancoTxt ? (cnab_1.BANCO_E2DOC[bancoTxt.banco] || bancoTxt.bancoNome) : null)
+                || BANCO_POR_FORMATO[analise.formato] || null;
             for (const comp of analise.comprovantes) {
                 const base = { runId: run.id, sourceFile: f.name, pageNum: comp.pageNum };
-                const meta = { slot: comp.slot, crop: comp.crop, agencia: comp.agencia, conta: comp.conta, valor: comp.valor, pagadorRef: comp.pagadorRef, dataPagamento: comp.dataPagamento, warnings: [] };
+                // Competência e2doc de folha = mês ANTERIOR ao pagamento — calculada
+                // aqui pra auditar divergência contra a competência informada no run.
+                const compEsperada = esperadaDe(comp.dataPagamento);
+                if (compEsperada)
+                    compEsperadas.add(compEsperada);
+                const meta = { slot: comp.slot, crop: comp.crop, agencia: comp.agencia, conta: comp.conta, valor: comp.valor, pagadorRef: comp.pagadorRef, dataPagamento: comp.dataPagamento, competenciaEsperada: compEsperada, warnings: [] };
                 // TXT pair (quando há TXT)
                 let txtPair = null;
                 if (poolCnab.length) {
@@ -266,7 +284,7 @@ async function processRemessaAnalise(run, sel) {
                         else {
                             resumo.homonimos++;
                             await (0, db_1.insertEnvio)({
-                                ...base, nome: comp.nome, cpf: comp.cpf || txtPair?.cpf, tipoPagamento: 'FOL',
+                                ...base, nome: comp.nome, cpf: comp.cpf || txtPair?.cpf, tipoPagamento: tipo,
                                 status: 'homonimo_ambiguo', meta: { ...meta, candidatos: porNome.map((x) => ({ cpf: x.cpf, nome: x.nome, cc: x.cc })) },
                                 error: `${porNome.length} funcionários com nome compatível: ${porNome.map((x) => `${x.nome} (${x.cpf})`).join('; ').substring(0, 240)}`,
                             });
@@ -293,7 +311,7 @@ async function processRemessaAnalise(run, sel) {
                 if (!func) {
                     resumo.semFuncionario++;
                     await (0, db_1.insertEnvio)({
-                        ...base, nome: comp.nome, cpf: comp.cpf || txtPair?.cpf, tipoPagamento: 'FOL',
+                        ...base, nome: comp.nome, cpf: comp.cpf || txtPair?.cpf, tipoPagamento: tipo,
                         status: 'sem_funcionario', meta: { ...meta, warnings },
                         error: `funcionário não encontrado (ag ${comp.agencia || '-'} cta ${comp.conta || '-'})`,
                     });
@@ -304,7 +322,7 @@ async function processRemessaAnalise(run, sel) {
                 await (0, db_1.insertEnvio)({
                     ...base,
                     chave: null, cpf: func.cpf, nome: func.nome, regiao: func.regiao, cc: func.cc,
-                    tipoPagamento: 'FOL', banco: bancoItem,
+                    tipoPagamento: tipo, banco: bancoItem,
                     status: divergente ? 'divergencia' : 'pronto',
                     meta: { ...meta, via, warnings, txt: txtPair ? { nome: txtPair.nome, valor: txtPair.valor, cpf: txtPair.cpf, file: txtPair._file } : null },
                     error: warnings.filter((w) => w !== 'sem_par_txt').join('; ') || (warnings.includes('sem_par_txt') ? 'sem par no TXT' : null),
@@ -316,13 +334,21 @@ async function processRemessaAnalise(run, sel) {
             if (usados.has(e))
                 continue;
             resumo.txtSemPdf++;
+            const compEsp = esperadaDe(e.dataPagamento);
+            if (compEsp)
+                compEsperadas.add(compEsp);
             await (0, db_1.insertEnvio)({
                 runId: run.id, sourceFile: e._file, pageNum: 0,
-                nome: e.nome, cpf: e.cpf, tipoPagamento: 'FOL',
+                nome: e.nome, cpf: e.cpf, tipoPagamento: tipo,
                 status: 'txt_sem_pdf',
-                meta: { agencia: e.agencia, conta: e.conta, valor: e.valor, dataPagamento: e.dataPagamento },
+                meta: { agencia: e.agencia, conta: e.conta, valor: e.valor, dataPagamento: e.dataPagamento, competenciaEsperada: compEsp },
                 error: 'presente no TXT mas nenhum comprovante correspondente no PDF',
             });
+        }
+        // Competência informada diverge das datas de pagamento dos comprovantes —
+        // erro de operador que envia índice errado ao e2doc (folha = mês anterior).
+        if (sel.competencia && compEsperadas.size > 0 && !compEsperadas.has(sel.competencia)) {
+            resumo.warnings.unshift(`competencia_divergente: informada ${sel.competencia}, mas as datas de pagamento indicam ${[...compEsperadas].join(' ou ')}`);
         }
         resumo.warnings = resumo.warnings.slice(0, 50);
         await (0, neon_1.sql) `UPDATE comprovantes_runs SET result = ${JSON.stringify({ analise: resumo })}::jsonb, status = 'aguardando_confirmacao', finished_at = NOW() WHERE id = ${run.id}`;
@@ -333,6 +359,7 @@ async function processRemessaAnalise(run, sel) {
 }
 // ---------- FASE 2: envio ----------
 async function processRemessaEnvio(run, sel) {
+    const tipo = sel.tipo === 'FER' ? 'FER' : 'FOL';
     const hoje = new Date();
     const dataFormatada = hoje.toISOString().slice(0, 10);
     const uploadEnabled = (await (0, settings_1.getSetting)('comprovantes_upload_enabled')) === true;
@@ -426,11 +453,20 @@ async function processRemessaEnvio(run, sel) {
             const dtPag = comp.dataPagamento || hoje.toISOString().slice(0, 10);
             const [anoVigente, mesNum] = [dtPag.slice(0, 4), dtPag.slice(5, 7)];
             const mesVigente = (0, pdf_1.retornarMes)(mesNum);
-            const spec = (0, pdf_1.specPorTipo)('FOL', mesVigente);
+            const spec = (0, pdf_1.specPorTipo)(tipo, mesVigente);
+            if (!spec) {
+                resumo.erros++;
+                await (0, neon_1.sql) `UPDATE comprovantes_envios SET status='erro', error=${`tipo de pagamento '${tipo}' sem spec de destino`} WHERE id=${it.id}`;
+                return;
+            }
             const destinoPath = (0, pdf_1.buildDestinoPath)(spec, anoVigente, mesVigente, dtPag.slice(8, 10), null);
+            // FER e adiantamento indexam na competência do próprio mês de pagamento;
+            // FOL fecha o mês anterior.
+            const mesDoPagamento = tipo === 'FER' || sel.files.some((f) => /adto|adiant/i.test(f.name));
+            const competenciaDefault = mesDoPagamento ? `${mesNum}/${anoVigente}` : (0, pdf_1.competenciaFolha)(mesNum, anoVigente);
             const competencia = /^\d{2}\/\d{4}$/.test(sel.competencia || '')
                 ? sel.competencia
-                : (0, pdf_1.competenciaFolha)(mesNum, anoVigente);
+                : (meta.competenciaEsperada || competenciaDefault);
             // Dedup completo (SP + e2doc)
             let duplicado = false;
             try {
