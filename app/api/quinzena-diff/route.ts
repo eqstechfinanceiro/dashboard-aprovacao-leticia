@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
     const baseUrl = internalBase(request);
     const apiRes = await fetch(
       `${baseUrl}/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}&forceCalc=true`,
-      { headers: { cookie: request.headers.get('cookie') || '' } }
+      { headers: { cookie: request.headers.get('cookie') || '' }, cache: 'no-store' }
     );
     if (!apiRes.ok) {
       return NextResponse.json(

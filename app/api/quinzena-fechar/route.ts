@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { internalBase } from '@/lib/internal-fetch';
-import { writeFileSync, mkdirSync } from 'fs';
+import { mkdirSync, createWriteStream, statSync } from 'fs';
+import { Readable } from 'stream';
+import { pipeline } from 'stream/promises';
 import path from 'path';
 import { getScopeForRequest } from '@/lib/auth/scope';
 import { sql } from '@/lib/db/neon';
@@ -136,10 +138,20 @@ export async function POST(req: NextRequest) {
         error: `Quinzena ${frozenNow ? 'congelada' : 'ja estava congelada'}, mas a exportacao falhou: ${eb.error || expRes.status}`,
       }, { status: 500 });
     }
-    const buf = Buffer.from(await expRes.arrayBuffer());
     const dir = path.join(process.cwd(), 'private-downloads');
     mkdirSync(dir, { recursive: true });
-    writeFileSync(path.join(dir, filename), buf);
+    const filePath = path.join(dir, filename);
+    if (!expRes.body) {
+      return NextResponse.json(
+        { ok: false, aborted: 'export', frozen_now: frozenNow, error: `Quinzena ${frozenNow ? 'congelada' : 'ja estava congelada'}, mas a exportacao falhou: resposta sem corpo` },
+        { status: 500 }
+      );
+    }
+    await pipeline(
+      Readable.fromWeb(expRes.body as unknown as import('stream/web').ReadableStream),
+      createWriteStream(filePath)
+    );
+    const bytes = statSync(filePath).size;
     steps.push('export');
 
     // ---- 4. Notificacao + audit -------------------------------------------------
@@ -150,7 +162,7 @@ export async function POST(req: NextRequest) {
       body: `${frozenNow ? `${rowsFrozen} colaboradores congelados` : 'Ja estava congelada'}. Planilha gerada para download.`,
       link: downloadUrl,
       dedupKey: `quinzena:${year}-${month}-Q${quinzena}`,
-      details: { year, month, quinzena, bytes: buf.length },
+      details: { year, month, quinzena, bytes },
     });
 
     await logAudit(req, {
@@ -158,7 +170,7 @@ export async function POST(req: NextRequest) {
       entity_id: `${year}-${month}-${quinzena}`,
       details: {
         frozen_now: frozenNow, rows_frozen: rowsFrozen,
-        file: filename, bytes: buf.length, notified,
+        file: filename, bytes, notified,
         precheck_warnings: precheck.summary?.warnings ?? 0,
       },
     });

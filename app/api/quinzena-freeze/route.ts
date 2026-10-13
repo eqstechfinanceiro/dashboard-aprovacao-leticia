@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     if (cronHdr) fwdHeaders['x-cron-secret'] = cronHdr;
     const apiRes = await fetch(
       `${baseUrl}/api/quinzena-complete?year=${year}&month=${month}&quinzena=${quinzena}`,
-      { headers: fwdHeaders }
+      { headers: fwdHeaders, cache: 'no-store' }
     );
 
     if (!apiRes.ok) {
