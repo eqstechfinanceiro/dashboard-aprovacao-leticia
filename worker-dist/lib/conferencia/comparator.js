@@ -102,8 +102,10 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
     // ICMS/IPI total — informativos (TOTVS zera por regra de TES)
     info('Vlr. ICMS', _toFloat(totvsHeader.f1_valicms).toFixed(2), (xmlData.total?.vICMS ?? 0).toFixed(2));
     info('Vlr. IPI', _toFloat(totvsHeader.f1_valipi).toFixed(2), (xmlData.total?.vIPI ?? 0).toFixed(2));
-    // ICMS-ST — valida por TES do primeiro item
-    const totvsIcmst = _toFloat(totvsHeader.f1_icmst);
+    // ICMS-ST — valida por TES do primeiro item.
+    // O SF1 guarda o ST retido em F1_ICMSRET (F1_ICMST não existe na base) —
+    // ler só ICMST reportava "lançado zerado" em nota com ST (falso divergente).
+    const totvsIcmst = _toFloat(totvsHeader.f1_icmst) || _toFloat(totvsHeader.f1_icmsret);
     const xmlIcmst = xmlData.total?.vST ?? 0;
     let icmstMatch;
     if (totvsItems.length && xmlData.items.length) {
