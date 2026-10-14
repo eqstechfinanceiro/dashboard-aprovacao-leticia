@@ -144,6 +144,38 @@ async function anexarXml(notaId, xml, chave) {
 }
 async function loadVexChaves() {
     const m = new Map();
+    const add = (chave, link) => {
+        const c = String(chave || '').replace(/\D/g, '');
+        if (/^\d{44}$/.test(c) && !m.has(c))
+            m.set(c, link);
+    };
+    try {
+        const rows = await (0, neon_1.sql) `
+      SELECT z.chvnfe AS chave, e.id AS expense_id, e.report_id, rp.name AS report_name
+      FROM z01.totvs_z01_items z
+      LEFT JOIN prestacao_expenses e ON e.id::text = z.vexpenses_id
+      LEFT JOIN prestacao_reports rp ON rp.id = e.report_id
+      WHERE z.chvnfe ~ '^[0-9]{44}$'`;
+        for (const r of rows) {
+            add(r.chave, { expense_id: r.expense_id ?? null, report_id: r.report_id ?? null, report_name: r.report_name || null });
+        }
+    }
+    catch (e) {
+        console.warn('[conferencia] falha ao carregar chaves vexpenses (z01):', e?.message);
+    }
+    try {
+        const rows = await (0, neon_1.sql) `
+      SELECT dc.chave_acesso AS chave, dc.expense_id, dc.report_id, rp.name AS report_name
+      FROM expense_doc_classification dc
+      LEFT JOIN prestacao_reports rp ON rp.id = dc.report_id
+      WHERE dc.chave_acesso ~ '^[0-9]{44}$'`;
+        for (const r of rows) {
+            add(r.chave, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
+        }
+    }
+    catch (e) {
+        console.warn('[conferencia] falha ao carregar chaves vexpenses (doc_class):', e?.message);
+    }
     try {
         const rows = await (0, neon_1.sql) `
       SELECT e.id AS expense_id, e.report_id, rp.name AS report_name,
@@ -152,14 +184,11 @@ async function loadVexChaves() {
       LEFT JOIN prestacao_reports rp ON rp.id = e.report_id
       WHERE e.raw_data->>'observation' ~ '[0-9]{4}'`;
         for (const r of rows) {
-            const c = String(r.chave || '');
-            if (/^\d{44}$/.test(c) && !m.has(c)) {
-                m.set(c, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
-            }
+            add(r.chave, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
         }
     }
     catch (e) {
-        console.warn('[conferencia] falha ao carregar chaves vexpenses:', e?.message);
+        console.warn('[conferencia] falha ao carregar chaves vexpenses (observation):', e?.message);
     }
     return m;
 }

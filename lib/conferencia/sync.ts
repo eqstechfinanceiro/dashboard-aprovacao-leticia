@@ -154,14 +154,48 @@ async function anexarXml(notaId: number, xml: string, chave: string) {
 }
 
 // Notas de despesa VExpenses são lançadas no TOTVS como SPED (espécie de
-// mercadoria) e entrariam na fila misturadas. O elo confiável é a chave NF-e:
-// a despesa guarda a chave em raw_data.observation (com espaços). Quem casa
-// vira tipo='vexpenses' e carrega expense_id/report_id no extra — o vínculo
-// "a qual relatório pertence" que o SD1 mostra.
-interface VexLink { expense_id: number; report_id: number | null; report_name: string | null }
+// mercadoria) e entrariam na fila misturadas. O elo confiável é a chave NF-e,
+// carregada de 3 fontes (primeira que acha ganha):
+//   1. z01.totvs_z01_items.chvnfe — itens de despesa lançados no TOTVS pela
+//      automação protheus-reports-vex (elo direto despesa↔chave↔doc)
+//   2. expense_doc_classification.chave_acesso — chave lida do anexo da
+//      despesa por OCR (Gemini) ou classificação humana
+//   3. raw_data.observation — chave digitada na observação (legado, raro)
+// Quem casa vira tipo='vexpenses' e carrega expense_id/report_id no extra —
+// o vínculo "a qual relatório pertence" que o SD1 mostra.
+interface VexLink { expense_id: number | null; report_id: number | null; report_name: string | null }
 
 async function loadVexChaves(): Promise<Map<string, VexLink>> {
   const m = new Map<string, VexLink>();
+  const add = (chave: any, link: VexLink) => {
+    const c = String(chave || '').replace(/\D/g, '');
+    if (/^\d{44}$/.test(c) && !m.has(c)) m.set(c, link);
+  };
+  try {
+    const rows = await sql`
+      SELECT z.chvnfe AS chave, e.id AS expense_id, e.report_id, rp.name AS report_name
+      FROM z01.totvs_z01_items z
+      LEFT JOIN prestacao_expenses e ON e.id::text = z.vexpenses_id
+      LEFT JOIN prestacao_reports rp ON rp.id = e.report_id
+      WHERE z.chvnfe ~ '^[0-9]{44}$'`;
+    for (const r of rows as any[]) {
+      add(r.chave, { expense_id: r.expense_id ?? null, report_id: r.report_id ?? null, report_name: r.report_name || null });
+    }
+  } catch (e: any) {
+    console.warn('[conferencia] falha ao carregar chaves vexpenses (z01):', e?.message);
+  }
+  try {
+    const rows = await sql`
+      SELECT dc.chave_acesso AS chave, dc.expense_id, dc.report_id, rp.name AS report_name
+      FROM expense_doc_classification dc
+      LEFT JOIN prestacao_reports rp ON rp.id = dc.report_id
+      WHERE dc.chave_acesso ~ '^[0-9]{44}$'`;
+    for (const r of rows as any[]) {
+      add(r.chave, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
+    }
+  } catch (e: any) {
+    console.warn('[conferencia] falha ao carregar chaves vexpenses (doc_class):', e?.message);
+  }
   try {
     const rows = await sql`
       SELECT e.id AS expense_id, e.report_id, rp.name AS report_name,
@@ -170,13 +204,10 @@ async function loadVexChaves(): Promise<Map<string, VexLink>> {
       LEFT JOIN prestacao_reports rp ON rp.id = e.report_id
       WHERE e.raw_data->>'observation' ~ '[0-9]{4}'`;
     for (const r of rows as any[]) {
-      const c = String(r.chave || '');
-      if (/^\d{44}$/.test(c) && !m.has(c)) {
-        m.set(c, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
-      }
+      add(r.chave, { expense_id: r.expense_id, report_id: r.report_id, report_name: r.report_name || null });
     }
   } catch (e: any) {
-    console.warn('[conferencia] falha ao carregar chaves vexpenses:', e?.message);
+    console.warn('[conferencia] falha ao carregar chaves vexpenses (observation):', e?.message);
   }
   return m;
 }
