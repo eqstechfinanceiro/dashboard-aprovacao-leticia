@@ -129,9 +129,31 @@ export async function POST(request: NextRequest) {
 
   await ensureFiscalTables();
 
+  // Elo por chave: o sync grava fornecedor como código SA2 e o XML traz o nome —
+  // sem isso a mesma NF duplicava na fila. Casada → atualiza a linha existente.
+  let res: any[] = [];
+  if (dados.chave_acesso && /^\d{44}$/.test(dados.chave_acesso)) {
+    res = await sql`
+      UPDATE fiscal_notas SET
+        tipo = ${tipo},
+        cnpj = COALESCE(${dados.cnpj}, cnpj),
+        valor = COALESCE(${dados.valor}, valor),
+        review_status = 'confirmado_erro',
+        reviewed_by = ${reviewer},
+        reviewed_at = NOW(),
+        erro_tipo = ${erroTipo},
+        erro_descricao = ${motivo},
+        cancelled_by = NULL,
+        cancelled_at = NULL,
+        cancel_motivo = NULL,
+        updated_at = NOW()
+      WHERE chave_acesso = ${dados.chave_acesso} AND tipo IN ('mercadoria', 'vexpenses')
+      RETURNING id, review_status, resultados_id`;
+  }
+
   // Upsert na mesma chave de dedup da importação automática — se a nota já
   // estava na fila, a decisão humana é aplicada nela em vez de duplicar.
-  const res = await sql`
+  if (!res.length) res = await sql`
     INSERT INTO fiscal_notas
       (tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao, chave_acesso,
        auto_status, auto_resumo, checks, review_status,

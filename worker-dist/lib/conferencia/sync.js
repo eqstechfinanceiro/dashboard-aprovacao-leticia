@@ -98,6 +98,38 @@ function dedupKey(doc, serie, filial, emissao, fornecedor) {
 async function upsertNota(runId, nota) {
     const reviewStatus = (0, fiscal_db_1.computeReviewStatus)(nota.autoStatus, nota.cstOnly === true);
     const tipo = nota.tipo || 'mercadoria';
+    // Elo por chave: o fornecedor é gravado em formatos diferentes conforme a
+    // fonte (código SA2 no sync, xNome no import de XML) e a constraint por
+    // fornecedor criava linhas duplicadas da mesma NF. Chave casada → UPDATE na
+    // linha existente sem tocar nas colunas da constraint.
+    if (/^\d{44}$/.test(nota.chave || '')) {
+        const found = await (0, neon_1.sql) `
+      SELECT id FROM fiscal_notas
+      WHERE chave_acesso = ${nota.chave} AND tipo IN ('mercadoria', 'vexpenses')
+      ORDER BY id DESC LIMIT 1`;
+        if (found[0]) {
+            const id = found[0].id;
+            await (0, neon_1.sql) `
+        UPDATE fiscal_notas SET
+          tipo = ${tipo},
+          run_id = ${runId},
+          cnpj = COALESCE(${nul(nota.cnpj)}, cnpj),
+          valor = COALESCE(${nota.valor}, valor),
+          auto_status = ${nota.autoStatus},
+          auto_resumo = COALESCE(${nul(nota.autoResumo)}, auto_resumo),
+          checks = COALESCE(${nota.checks ? JSON.stringify(nota.checks) : null}::jsonb, checks),
+          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra),
+          review_status = CASE
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
+            ELSE ${reviewStatus}
+          END,
+          conferencia_tentativas = ${nota.tentativas},
+          conferencia_next_retry = ${nota.nextRetry ? nota.nextRetry.toISOString() : null},
+          updated_at = NOW()
+        WHERE id = ${id}`;
+            return id;
+        }
+    }
     const res = await (0, neon_1.sql) `
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
@@ -213,18 +245,31 @@ async function syncConferencia(opts = {}) {
         const fromStr = ymd(dateFrom);
         const toStr = ymd(dateTo);
         // Ledger: linhas existentes (mercadoria + vexpenses reclassificadas) → dedup.
+        // Indexa por dedupKey E por 'C:'+chave — linhas gravadas com fornecedor em
+        // formato divergente (nome vs código SA2) continuam deduplicando pela chave.
+        // id DESC: em grupos duplicados, a linha mais nova vence como canônica.
         const ledger = new Map();
         const rows = await (0, neon_1.sql) `
-      SELECT id, doc, serie, filial, emissao, fornecedor, review_status,
+      SELECT id, doc, serie, filial, emissao, fornecedor, chave_acesso, review_status,
              conferencia_tentativas, conferencia_next_retry
-      FROM fiscal_notas WHERE tipo IN ('mercadoria', 'vexpenses')`;
+      FROM fiscal_notas WHERE tipo IN ('mercadoria', 'vexpenses')
+      ORDER BY id DESC`;
         for (const r of rows) {
             const em = r.emissao ? new Date(r.emissao).toISOString().slice(0, 10) : '1900-01-01';
-            ledger.set(dedupKey(r.doc, r.serie, r.filial, em, r.fornecedor), {
-                id: r.id, key: '', review_status: r.review_status,
+            const row = {
+                id: r.id,
+                key: dedupKey(r.doc, r.serie, r.filial, em, r.fornecedor),
+                review_status: r.review_status,
                 conferencia_tentativas: r.conferencia_tentativas ?? 0,
                 conferencia_next_retry: r.conferencia_next_retry,
-            });
+            };
+            ledger.set(row.key, row);
+            const ck = trim(r.chave_acesso);
+            if (/^\d{44}$/.test(ck)) {
+                const k2 = `C:${ck}`;
+                if (!ledger.has(k2))
+                    ledger.set(k2, row);
+            }
         }
         await setState({ fase: 'totvs', janela_dias: janela, total: 0, conferidas: 0, match: 0, divergentes: 0, falhas: 0, puladas: 0, fontes: '{}', current_doc: null, error: null, log: '[]', started_at: new Date().toISOString(), finished_at: null }, `ciclo iniciado — janela ${janela}d (${fromStr}~${toStr})`);
         const { nfs, errors } = await (0, totvs_1.fetchMercadoriaNfs)(fromStr, toStr, 'SPED');
@@ -265,10 +310,16 @@ async function syncConferencia(opts = {}) {
         // Elegíveis = sem linha | pendente | falha_tecnica com retry vencido.
         const TERMINAL = new Set(['auto_ok', 'auto_ok_aviso', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
         const now = Date.now();
+        const keyFor = (h) => {
+            const ck = trim(h.f1_chvnfe);
+            return /^\d{44}$/.test(ck)
+                ? `C:${ck}`
+                : dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece);
+        };
         const elegiveis = nfs.filter((nf) => {
             const h = nf.header;
-            const k = dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece);
-            const ex = ledger.get(k);
+            const k = keyFor(h);
+            const ex = ledger.get(k) || ledger.get(dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece));
             if (!ex)
                 return true;
             if (TERMINAL.has(ex.review_status)) {
@@ -307,8 +358,8 @@ async function syncConferencia(opts = {}) {
             i++;
             const h = nf.header;
             const emissao = isoDate(h.f1_emissao);
-            const k = dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, emissao, h.f1_fornece);
-            const ex = ledger.get(k);
+            const k = keyFor(h);
+            const ex = ledger.get(k) || ledger.get(dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, emissao, h.f1_fornece));
             const tent = (ex?.conferencia_tentativas ?? 0) + 1;
             const chave = trim(h.f1_chvnfe);
             const vex = vexChaves.get(chave) || null;

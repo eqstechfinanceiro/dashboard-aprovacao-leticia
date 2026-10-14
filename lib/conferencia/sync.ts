@@ -108,6 +108,38 @@ async function upsertNota(runId: number, nota: {
 }): Promise<number> {
   const reviewStatus = computeReviewStatus(nota.autoStatus as any, nota.cstOnly === true);
   const tipo = nota.tipo || 'mercadoria';
+  // Elo por chave: o fornecedor é gravado em formatos diferentes conforme a
+  // fonte (código SA2 no sync, xNome no import de XML) e a constraint por
+  // fornecedor criava linhas duplicadas da mesma NF. Chave casada → UPDATE na
+  // linha existente sem tocar nas colunas da constraint.
+  if (/^\d{44}$/.test(nota.chave || '')) {
+    const found = await sql`
+      SELECT id FROM fiscal_notas
+      WHERE chave_acesso = ${nota.chave} AND tipo IN ('mercadoria', 'vexpenses')
+      ORDER BY id DESC LIMIT 1`;
+    if (found[0]) {
+      const id = found[0].id as number;
+      await sql`
+        UPDATE fiscal_notas SET
+          tipo = ${tipo},
+          run_id = ${runId},
+          cnpj = COALESCE(${nul(nota.cnpj)}, cnpj),
+          valor = COALESCE(${nota.valor}, valor),
+          auto_status = ${nota.autoStatus},
+          auto_resumo = COALESCE(${nul(nota.autoResumo)}, auto_resumo),
+          checks = COALESCE(${nota.checks ? JSON.stringify(nota.checks) : null}::jsonb, checks),
+          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra),
+          review_status = CASE
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
+            ELSE ${reviewStatus}
+          END,
+          conferencia_tentativas = ${nota.tentativas},
+          conferencia_next_retry = ${nota.nextRetry ? nota.nextRetry.toISOString() : null},
+          updated_at = NOW()
+        WHERE id = ${id}`;
+      return id;
+    }
+  }
   const res = await sql`
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
@@ -245,18 +277,30 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     const toStr = ymd(dateTo);
 
     // Ledger: linhas existentes (mercadoria + vexpenses reclassificadas) → dedup.
+    // Indexa por dedupKey E por 'C:'+chave — linhas gravadas com fornecedor em
+    // formato divergente (nome vs código SA2) continuam deduplicando pela chave.
+    // id DESC: em grupos duplicados, a linha mais nova vence como canônica.
     const ledger = new Map<string, LedgerRow>();
     const rows = await sql`
-      SELECT id, doc, serie, filial, emissao, fornecedor, review_status,
+      SELECT id, doc, serie, filial, emissao, fornecedor, chave_acesso, review_status,
              conferencia_tentativas, conferencia_next_retry
-      FROM fiscal_notas WHERE tipo IN ('mercadoria', 'vexpenses')`;
+      FROM fiscal_notas WHERE tipo IN ('mercadoria', 'vexpenses')
+      ORDER BY id DESC`;
     for (const r of rows) {
       const em = r.emissao ? new Date(r.emissao).toISOString().slice(0, 10) : '1900-01-01';
-      ledger.set(dedupKey(r.doc, r.serie, r.filial, em, r.fornecedor), {
-        id: r.id, key: '', review_status: r.review_status,
+      const row: LedgerRow = {
+        id: r.id,
+        key: dedupKey(r.doc, r.serie, r.filial, em, r.fornecedor),
+        review_status: r.review_status,
         conferencia_tentativas: r.conferencia_tentativas ?? 0,
         conferencia_next_retry: r.conferencia_next_retry,
-      });
+      };
+      ledger.set(row.key, row);
+      const ck = trim(r.chave_acesso);
+      if (/^\d{44}$/.test(ck)) {
+        const k2 = `C:${ck}`;
+        if (!ledger.has(k2)) ledger.set(k2, row);
+      }
     }
 
     await setState(
@@ -303,10 +347,16 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     // Elegíveis = sem linha | pendente | falha_tecnica com retry vencido.
     const TERMINAL = new Set(['auto_ok', 'auto_ok_aviso', 'confirmado_ok', 'confirmado_erro', 'cancelado']);
     const now = Date.now();
+    const keyFor = (h: any) => {
+      const ck = trim(h.f1_chvnfe);
+      return /^\d{44}$/.test(ck)
+        ? `C:${ck}`
+        : dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece);
+    };
     const elegiveis = nfs.filter((nf) => {
       const h = nf.header;
-      const k = dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece);
-      const ex = ledger.get(k);
+      const k = keyFor(h);
+      const ex = ledger.get(k) || ledger.get(dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, isoDate(h.f1_emissao), h.f1_fornece));
       if (!ex) return true;
       if (TERMINAL.has(ex.review_status)) { out.puladas++; return false; }
       if (ex.review_status === 'falha_tecnica' && ex.conferencia_next_retry) {
@@ -339,8 +389,8 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       i++;
       const h = nf.header;
       const emissao = isoDate(h.f1_emissao);
-      const k = dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, emissao, h.f1_fornece);
-      const ex = ledger.get(k);
+      const k = keyFor(h);
+      const ex = ledger.get(k) || ledger.get(dedupKey(h.f1_doc, h.f1_serie, h.f1_filial, emissao, h.f1_fornece));
       const tent = (ex?.conferencia_tentativas ?? 0) + 1;
       const chave = trim(h.f1_chvnfe);
       const vex = vexChaves.get(chave) || null;

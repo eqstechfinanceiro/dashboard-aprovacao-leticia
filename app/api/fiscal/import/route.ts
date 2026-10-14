@@ -127,7 +127,30 @@ export async function POST(request: NextRequest) {
   for (const n of valid) {
     const autoStatus = n.auto_status as string;
     const reviewStatus = computeReviewStatus(autoStatus as any, isCstOnlyDivergence(n.checks));
-    const res = await sql`
+    const chave = cleanStr(n.chave_acesso, 60);
+    // Elo por chave: fornecedor varia de formato entre fontes (nome XML vs
+    // código SA2) e a constraint por fornecedor duplicava a mesma NF.
+    let res: any[] = [];
+    if (chave && /^\d{44}$/.test(chave)) {
+      res = await sql`
+        UPDATE fiscal_notas SET
+          run_id = ${runId},
+          cnpj = COALESCE(${cleanStr(n.cnpj, 20)}, cnpj),
+          valor = COALESCE(${cleanNum(n.valor)}, valor),
+          auto_status = ${autoStatus},
+          auto_resumo = ${cleanStr(n.auto_resumo, 500)},
+          checks = COALESCE(${n.checks ? JSON.stringify(n.checks) : null}::jsonb, checks),
+          extra = COALESCE(${n.extra ? JSON.stringify(n.extra) : null}::jsonb, extra),
+          review_status = CASE
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro')
+              THEN review_status
+            ELSE ${reviewStatus}
+          END,
+          updated_at = NOW()
+        WHERE tipo = ${run.tipo} AND chave_acesso = ${chave}
+        RETURNING id, false AS was_inserted, review_status`;
+    }
+    if (!res.length) res = await sql`
       INSERT INTO fiscal_notas
         (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
          chave_acesso, auto_status, auto_resumo, checks, extra, review_status)
