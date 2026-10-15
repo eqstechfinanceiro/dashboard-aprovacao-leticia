@@ -104,6 +104,28 @@
       font-size: 12px;
       margin-top: 10px;
     }
+    .tools-section {
+      border-top: 1px solid #e2e8f0;
+      margin-top: 14px;
+      padding-top: 12px;
+    }
+    .tools-title {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .btn-tool { background: #0f766e; color: white; }
+    .btn-tool:hover { opacity: 0.9; }
+    .btn-tool:disabled { opacity: 0.6; cursor: default; }
+    .tools-hint {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 6px;
+      line-height: 1.4;
+    }
     .footer {
       text-align: center;
       padding: 10px;
@@ -155,6 +177,13 @@
 
     <button class="btn btn-primary" id="syncBtn">Sincronizar Agora</button>
     <button class="btn btn-secondary" id="saveBtn">Salvar Configurações</button>
+
+    <div class="tools-section">
+      <div class="tools-title">Ferramentas</div>
+      <button class="btn btn-tool" id="bradescoBotBtn">Bot Bradesco — marcar de 50 em 50</button>
+      <div class="tools-hint">Abra a grade de conciliação do Bradesco nesta aba e clique — o painel aparece na página.</div>
+      <div id="toolMsg" style="display:none;"></div>
+    </div>
   </div>
 
   <div class="footer">

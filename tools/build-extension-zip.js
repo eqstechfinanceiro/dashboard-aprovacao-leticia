@@ -15,6 +15,7 @@ const FILES = [
   'background.js',
   'popup.html',
   'popup.js',
+  'bradesco-bot.js',
   'icon16.png',
   'icon48.png',
   'icon128.png',

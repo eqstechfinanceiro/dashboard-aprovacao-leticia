@@ -23,6 +23,17 @@ Extrai automaticamente o cookie `laravel_token` (httpOnly) do `app.vexpenses.com
 - **URL do Dashboard**: `http://179.199.149.43:3000` (já vem pré-configurada)
 - **Secret**: opcional, se você configurou `VEXPENSES_EXTENSION_SECRET` no `.env`
 
+## Ferramentas — Bot Bradesco 50 em 50
+
+O popup da extensão tem um botão **"Bot Bradesco — marcar de 50 em 50"**:
+
+1. Abra a grade de conciliação no internet banking do Bradesco
+2. Clique no ícone da Aery → botão **Bot Bradesco**
+3. O painel flutuante aparece na página (arrastável, com botão fechar)
+4. Funciona em lote: Marcar 50 → Desmarcar e avançar → Voltar → Reiniciar
+5. **MODO TESTE** (ligado por padrão) só destaca as caixas em laranja sem clicar — desmarque para clicar de verdade
+6. Se a grade estiver num iframe inacessível, o painel aparece dentro do próprio frame da grade
+
 ## Como funciona
 
 1. Ao visitar `app.vexpenses.com`, lê os cookies `laravel_token`/`laravel_session`
