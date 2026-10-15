@@ -104,14 +104,43 @@ async function upsertNota(runId, nota) {
     // linha existente sem tocar nas colunas da constraint.
     if (/^\d{44}$/.test(nota.chave || '')) {
         const found = await (0, neon_1.sql) `
-      SELECT id FROM fiscal_notas
-      WHERE chave_acesso = ${nota.chave} AND tipo IN ('mercadoria', 'vexpenses')
-      ORDER BY id DESC LIMIT 1`;
-        if (found[0]) {
-            const id = found[0].id;
+      SELECT id, tipo, review_status, review_nota, reviewed_by, reviewed_at,
+             doc_path, doc_nome, resultados_id
+      FROM fiscal_notas
+      WHERE chave_acesso = ${nota.chave} AND tipo IN ('mercadoria', 'vexpenses', 'serviço')
+      ORDER BY id`;
+        if (found.length) {
+            // Dup cross-tipo (mesma chave como mercadoria+vexpenses): a linha do tipo
+            // alvo é a canônica — as outras herdam review/doc nela e são removidas,
+            // senão o flip de tipo viola fiscal_notas_tipo_chave_uq.
+            const target = found.find((r) => r.tipo === 'vexpenses') ||
+                found.find((r) => r.tipo === tipo) ||
+                found[found.length - 1];
+            const id = target.id;
+            const rank = (s) => (s === 'confirmado_erro' ? 0 : s === 'confirmado_ok' ? 1 : 2);
+            const stales = found
+                .filter((r) => r.id !== id)
+                .sort((a, b) => rank(a.review_status) - rank(b.review_status));
+            for (const stale of stales) {
+                await (0, neon_1.sql) `
+          UPDATE fiscal_notas SET
+            review_status = CASE
+              WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
+              WHEN ${stale.review_status ?? null} IN ('confirmado_ok', 'confirmado_erro') THEN ${stale.review_status ?? null}
+              ELSE review_status END,
+            review_nota = COALESCE(review_nota, ${stale.review_nota ?? null}),
+            reviewed_by = COALESCE(reviewed_by, ${stale.reviewed_by ?? null}),
+            reviewed_at = COALESCE(reviewed_at, ${stale.reviewed_at ?? null}),
+            doc_path = COALESCE(doc_path, ${stale.doc_path ?? null}),
+            doc_nome = COALESCE(doc_nome, ${stale.doc_nome ?? null}),
+            resultados_id = COALESCE(resultados_id, ${stale.resultados_id ?? null}),
+            updated_at = NOW()
+          WHERE id = ${id}`;
+                await (0, neon_1.sql) `DELETE FROM fiscal_notas WHERE id = ${stale.id}`;
+            }
             await (0, neon_1.sql) `
         UPDATE fiscal_notas SET
-          tipo = ${tipo},
+          tipo = CASE WHEN tipo = 'vexpenses' THEN 'vexpenses' ELSE ${tipo} END,
           run_id = ${runId},
           cnpj = COALESCE(${nul(nota.cnpj)}, cnpj),
           valor = COALESCE(${nota.valor}, valor),
@@ -296,16 +325,45 @@ async function syncConferencia(opts = {}) {
         WHERE n.tipo='mercadoria' AND n.chave_acesso = ANY(${[...vexChaves.keys()]})
           AND NOT EXISTS (
             SELECT 1 FROM fiscal_notas x
-            WHERE x.tipo='vexpenses' AND x.doc=n.doc
-              AND COALESCE(x.serie,'')=COALESCE(n.serie,'')
-              AND COALESCE(x.filial,'')=COALESCE(n.filial,'')
-              AND COALESCE(x.emissao,'1900-01-01'::date)=COALESCE(n.emissao,'1900-01-01'::date)
-              AND COALESCE(x.fornecedor,'')=COALESCE(n.fornecedor,''))
+            WHERE x.tipo='vexpenses' AND x.chave_acesso = n.chave_acesso)
         RETURNING n.id`;
             const n = Array.isArray(rec) ? rec.length : 0;
             if (n)
                 console.log(`[conferencia] ${n} nota(s) reclassificadas mercadoria→vexpenses`);
         }
+        // Dup residual cross-tipo: mesma chave como mercadoria E vexpenses (o import
+        // legado insere 'mercadoria' sem casar a linha vex — scoping por tipo). A
+        // linha vex é a canônica e herda review/doc da dup antes de removê-la —
+        // senão o flip acima violaria fiscal_notas_tipo_chave_uq no próximo ciclo.
+        const collapsed = await (0, neon_1.sql) `
+      WITH d AS (
+        SELECT n.id, n.review_status, n.review_nota, n.reviewed_by, n.reviewed_at,
+               n.doc_path, n.doc_nome, n.resultados_id, v.id AS keeper
+        FROM fiscal_notas n
+        JOIN fiscal_notas v ON v.tipo='vexpenses' AND v.chave_acesso = n.chave_acesso
+        WHERE n.tipo='mercadoria' AND n.chave_acesso IS NOT NULL
+      ), upd AS (
+        UPDATE fiscal_notas k SET
+          review_status = CASE
+            WHEN k.review_status IN ('confirmado_ok','confirmado_erro') THEN k.review_status
+            WHEN d.review_status IN ('confirmado_ok','confirmado_erro') THEN d.review_status
+            WHEN k.review_status IN ('pendente','falha_tecnica') THEN d.review_status
+            ELSE k.review_status END,
+          review_nota = COALESCE(k.review_nota, d.review_nota),
+          reviewed_by = COALESCE(k.reviewed_by, d.reviewed_by),
+          reviewed_at = COALESCE(k.reviewed_at, d.reviewed_at),
+          doc_path = COALESCE(k.doc_path, d.doc_path),
+          doc_nome = COALESCE(k.doc_nome, d.doc_nome),
+          resultados_id = COALESCE(k.resultados_id, d.resultados_id),
+          updated_at = NOW()
+        FROM d WHERE k.id = d.keeper
+        RETURNING d.id AS stale_id
+      )
+      DELETE FROM fiscal_notas n WHERE n.id IN (SELECT stale_id FROM upd)
+      RETURNING n.id`;
+        const nCollapsed = Array.isArray(collapsed) ? collapsed.length : 0;
+        if (nCollapsed)
+            console.log(`[conferencia] ${nCollapsed} dup(s) cross-tipo (mesma chave mercadoria+vexpenses) consolidadas`);
         const maxNfs = opts.maxNfs ?? MAX_NFS_CICLO;
         // Elegíveis = sem linha | pendente | falha_tecnica com retry vencido.
         const TERMINAL = new Set(['auto_ok', 'auto_ok_aviso', 'confirmado_ok', 'confirmado_erro', 'cancelado']);

@@ -147,7 +147,12 @@ export async function POST(request: NextRequest) {
         cancelled_at = NULL,
         cancel_motivo = NULL,
         updated_at = NOW()
-      WHERE chave_acesso = ${dados.chave_acesso} AND tipo IN ('mercadoria', 'vexpenses')
+      WHERE id = (
+        SELECT id FROM fiscal_notas
+        WHERE chave_acesso = ${dados.chave_acesso} AND tipo IN ('mercadoria', 'vexpenses')
+        ORDER BY (tipo = ${tipo}) DESC, id DESC
+        LIMIT 1
+      )
       RETURNING id, review_status, resultados_id`;
   }
 

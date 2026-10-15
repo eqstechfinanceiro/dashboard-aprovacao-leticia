@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
             ELSE ${reviewStatus}
           END,
           updated_at = NOW()
-        WHERE tipo = ${run.tipo} AND chave_acesso = ${chave}
+        WHERE chave_acesso = ${chave} AND tipo IN ('mercadoria', 'vexpenses')
         RETURNING id, false AS was_inserted, review_status`;
     }
     if (!res.length) res = await sql`
