@@ -229,7 +229,9 @@ export async function GET(request: NextRequest) {
     let colaboradorCpf: string | null = null;
     let colaboradorId: number | null = userId ? parseInt(userId) : null;
 
-    const cacheKey = 'team-members:include';
+    // Same canonical cache key as /api/vexpenses/team-members (include=null) —
+    // a separate key caused stale divergent snapshots and false "não encontrado".
+    const cacheKey = 'team-members:null';
     const cachedTM = await apiCache.get<any>(cacheKey);
     let teamMembers: any[] = [];
 
@@ -257,6 +259,25 @@ export async function GET(request: NextRequest) {
       teamMember = teamMembers.find((m: any) => normalizeName(m.name) === normalized);
       if (!teamMember) {
         teamMember = teamMembers.find((m: any) => normalizeName(m.name).includes(normalized));
+      }
+    }
+
+    // Not in the cached list (e.g. member created minutes ago) — fetch directly by id
+    if (!teamMember && colaboradorId !== null && Number.isFinite(colaboradorId)) {
+      try {
+        const singleRes = await fetch(`${API_URL}/v2/team-members/${colaboradorId}`, {
+          headers: { 'Authorization': API_KEY, 'Accept': 'application/json' },
+          signal: AbortSignal.timeout(30000),
+        });
+        if (singleRes.ok) {
+          const singleData = await singleRes.json();
+          teamMember = singleData?.data || null;
+          if (teamMember) {
+            console.log(`[Fechamento] member ${colaboradorId} fetched directly (absent from cached list)`);
+          }
+        }
+      } catch (singleErr) {
+        console.error('[Fechamento] direct member fetch failed:', singleErr);
       }
     }
 
