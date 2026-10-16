@@ -3,7 +3,7 @@ import { jwtVerify } from 'jose';
 import { AUTH_COOKIE, HREF_TO_MODULES, canAccessModule } from '@/lib/auth/auth';
 
 const PUBLIC_PATHS = ['/login', '/change-password', '/auto-login'];
-const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login', '/api/health'];
+const PUBLIC_API_PREFIXES = ['/api/auth', '/api/vexpenses/update-laravel-token', '/api/vexpenses/keepalive', '/api/pipeline/cron', '/api/auto-login', '/api/health', '/api/version'];
 
 // GETs com side-effect global (disparam sync) ou dados brutos sem escopo —
 // bloqueados para gestores mesmo em leitura.
@@ -95,14 +95,15 @@ export async function middleware(request: NextRequest) {
   }
 
   // Importador fiscal local (automações Python): segredo dedicado, escopo
-  // estrito a POST /api/fiscal/import. Fail-closed igual ao cron.
+  // estrito a POST /api/fiscal/import e POST /api/fiscal/doc-cache
+  // (upload de XMLs obtidos por fontes internas, ex.: bot Lince). Fail-closed.
   const fiscalSecret = process.env.FISCAL_IMPORT_SECRET;
   const providedFiscal = request.headers.get('x-fiscal-secret');
   if (
     fiscalSecret &&
     providedFiscal === fiscalSecret &&
-    pathname === '/api/fiscal/import' &&
-    request.method === 'POST'
+    request.method === 'POST' &&
+    (pathname === '/api/fiscal/import' || pathname === '/api/fiscal/doc-cache')
   ) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set('x-user-id', '0');
@@ -127,6 +128,24 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-user-role', 'admin');
     requestHeaders.set('x-user-email', 'protheus-reports@interno');
     requestHeaders.set('x-user-name', 'Protheus Reports VEX');
+    return NextResponse.next({ request: { headers: requestHeaders } });
+  }
+
+  // Lince (bot TOTVS): lookup de regras TES por fornecedor×produto.
+  // Escopo estrito a GET /api/fiscal/tes-regras/lookup. Fail-closed.
+  const linceSecret = process.env.LINCE_TES_SECRET;
+  const providedLince = request.headers.get('x-lince-tes-secret');
+  if (
+    linceSecret &&
+    providedLince === linceSecret &&
+    pathname === '/api/fiscal/tes-regras/lookup' &&
+    request.method === 'GET'
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-user-id', '0');
+    requestHeaders.set('x-user-role', 'admin');
+    requestHeaders.set('x-user-email', 'lince-bot@interno');
+    requestHeaders.set('x-user-name', 'Lince TOTVS');
     return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
