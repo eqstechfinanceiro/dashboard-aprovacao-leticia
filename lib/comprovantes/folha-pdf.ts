@@ -5,13 +5,15 @@
 //    fornecidas pelo pagador' casa com o 'seu número' do CNAB).
 //  - bradesco_rt: Bradesco "Comprovante de Pagamento / Crédito em Conta Real
 //    Time", 1 por página, CPF do favorecido embutido.
+//  - bradesco_multipag: Bradesco Multipag "Comprovante de Pagamento / Crédito
+//    em Conta Salário", 1 por página, 'Funcionário: NOME CPF: …' embutido.
 //  - bb_pag: Banco do Brasil "PAG SALARIO C/CTA" (1/página, CPF/CNPJ explícito)
 //    e "COMPROVANTE DE TRANSFERENCIA" (BB→BB, sem CPF — casa por nome/conta).
 //  - desconhecido: qualquer outro — vira warning, não é enviado.
 
 import { PDFDocument } from 'pdf-lib';
 
-export type FolhaFormato = 'itau_folha' | 'bradesco_rt' | 'bb_pag' | 'desconhecido';
+export type FolhaFormato = 'itau_folha' | 'bradesco_rt' | 'bradesco_multipag' | 'bb_pag' | 'desconhecido';
 
 export interface ComprovanteFolha {
   pageNum: number;          // 1-based
@@ -169,6 +171,46 @@ function extrairBradesco(bloco: string): Partial<ComprovanteFolha> {
   };
 }
 
+/** Campos do comprovante Bradesco Multipag ("Crédito em Conta Salário", 1/pág). */
+function extrairBradescoMultipag(linhas: string[]): Partial<ComprovanteFolha> {
+  const line = (re: RegExp) => { const l = linhas.find((l) => re.test(l)); return l ? re.exec(l)?.[1]?.trim() || null : null; };
+
+  // 'Funcionário: NOME CPF: 138.162.236-48' — nome e CPF na mesma linha
+  const funcLine = linhas.find((l) => /Funcion[aá]rio\s*:/i.test(l)) || '';
+  let nome: string | null = null;
+  let cpf: string | null = null;
+  const fn = /Funcion[aá]rio\s*:\s*(.+?)\s*CPF\s*:\s*([\d.\-]+)/i.exec(funcLine);
+  if (fn) {
+    nome = fn[1]; cpf = fn[2].replace(/\D/g, '');
+  } else {
+    nome = /Funcion[aá]rio\s*:\s*(.+)$/i.exec(funcLine)?.[1]?.trim() || null;
+    const c = /CPF\s*:\s*([\d.\-]+)/i.exec(funcLine) || /CPF\s*:\s*([\d.\-]+)/i.exec(linhas.join('\n'));
+    if (c) cpf = c[1].replace(/\D/g, '');
+  }
+
+  // Agência/conta do FAVORECIDO — 'Conta de Débito Agência: …' é da empresa
+  const agLinha = linhas.find((l) => /Ag[êe]ncia\s*:/i.test(l) && !/d[ée]bito/i.test(l)) || '';
+  const ag = /Ag[êe]ncia\s*:\s*(\d+)/i.exec(agLinha);
+  const cta = /Conta\s*:\s*(\d+)\s*-\s*(\w)/i.exec(agLinha);
+
+  const val = line(/Valor \(R\$\)\s*:\s*([\d.,]+)/i);
+  const dtLinha = linhas.find((l) => /Pagamento\s*:/i.test(l) && /\d{2}\/\d{2}\/\d{4}/.test(l));
+  const dt = dtLinha ? /(\d{2}\/\d{2}\/\d{4})/.exec(dtLinha)?.[1] : null;
+  const ref = line(/N[úu]mero de Pagamento\s*:\s*(\d+)/i);
+
+  return {
+    nome: nome?.replace(/\s+/g, ' ') || null,
+    cpf: cpf && cpf.length === 11 ? cpf : null,
+    agencia: ag ? onlyDigitsLocal(ag[1]) || null : null,
+    contaNumero: cta ? onlyDigitsLocal(cta[1]) || null : null,
+    contaDv: cta ? cta[2].toUpperCase() : null,
+    conta: cta ? `${onlyDigitsLocal(cta[1])}-${cta[2].toUpperCase()}` : null,
+    valor: val ? parseValorBR(val) : null,
+    dataPagamento: dt ? parseDataBR(dt) : null,
+    pagadorRef: ref,
+  };
+}
+
 async function loadPdfJs(buffer: Buffer) {
   const dynamicImport = new Function('s', 'return import(s)') as (s: string) => Promise<any>;
   const pdfjs = await dynamicImport('pdfjs-dist/legacy/build/pdf.mjs');
@@ -201,6 +243,8 @@ export async function analisarFolhaPdf(
 
       const isItau = /SISPAG\s+SALARIOS/i.test(fullText) || cuts.length > 0;
       const isBradesco = /Real Time/i.test(fullText) && /Favorecido:/i.test(fullText);
+      const isMultipag = /Multipag\s+Bradesco/i.test(fullText)
+        || (/Cr[ée]dito em Conta Sal[aá]rio/i.test(fullText) && /Funcion[aá]rio\s*:/i.test(fullText));
       const isBb = /PAG\s*SALARIO/i.test(fullText)
         || (/COMPROVANTE\s+DE\s+TRANSFERENCIA/i.test(fullText) && /BANCO\s+DO\s+BRASIL/i.test(fullText));
 
@@ -243,6 +287,19 @@ export async function analisarFolhaPdf(
         continue;
       }
 
+      if (isMultipag) {
+        formato = formato === 'desconhecido' ? 'bradesco_multipag' : formato;
+        const extra = extrairBradescoMultipag(linhasVisuais(items));
+        comprovantes.push({
+          pageNum: i, slot: 0, crop: null,
+          ...extra,
+        } as ComprovanteFolha);
+        if (!extra.cpf && !extra.conta) {
+          warnings.push(`${fileName} p${i}: Multipag sem CPF/conta extraído`);
+        }
+        continue;
+      }
+
       if (isBb) {
         formato = formato === 'desconhecido' ? 'bb_pag' : formato;
         const extra = extrairBb(linhasVisuais(items));
@@ -273,6 +330,96 @@ export async function analisarFolhaPdf(
  * Fragmenta: retorna um PDF novo com a página cortada na região do comprovante
  * (CropBox — conteúdo original preservado, só a janela visível muda).
  */
+// ---------- FGTS — "Comprovante de pagamento QR Code" (Sispag Itaú → PIX Caixa) ----------
+// A página é uma guia FGTS paga via PIX QR do pix-qrcode.caixa.gov.br: o recebedor
+// é sempre CEF/CAIXA — sem nome nem CPF do funcionário, que sai só da remessa .rem.
+// O PDF "GERAL" do Sispag vem misto (transferências, fornecedores, FGTS), então a
+// análise filtra: só páginas QR-code de recebedor Caixa viram comprovantes.
+
+export interface ComprovanteFgts {
+  pageNum: number;
+  valor: number | null;
+  dataPagamento: string | null;   // 'Pagamento efetuado em DD/MM/YYYY' → ISO
+  vencimento: string | null;      // 'data de vencimento' → ISO
+  identificadorQr: string | null; // UUID do QR dinâmico Caixa
+  autenticacao: string | null;
+  controle: string | null;
+}
+
+export interface FgtsAnalise {
+  totalPages: number;
+  fgtsPages: ComprovanteFgts[];   // só páginas PIX QR + recebedor Caixa
+  outrasPages: number;            // resto do PDF misto (contador p/ resumo)
+  warnings: string[];
+}
+
+function isPaginaFgtsQr(fullText: string): boolean {
+  if (!/Comprovante de pagamento QR Code/i.test(fullText)) return false;
+  return /CAIXA ECONOMICA FEDERAL/i.test(fullText)
+    || /CEF MATRIZ/i.test(fullText)
+    || /00\.360\.305/.test(fullText);
+}
+
+function extrairFgtsQr(txt: string): Omit<ComprovanteFgts, 'pageNum'> {
+  const g = (re: RegExp) => re.exec(txt)?.[1]?.trim() || null;
+  const valorRaw = g(/valor da transa[çc][ãa]o\s*:?\s*(?:R\$\s*)?([\d.,]+)/i)
+    || g(/valor do documento\s*:?\s*(?:R\$\s*)?([\d.,]+)/i)
+    || g(/valor final\s*:?\s*(?:R\$\s*)?([\d.,]+)/i);
+  const dtRaw = g(/pagamento efetuado em\s*(\d{2}\/\d{2}\/\d{4})/i)
+    || g(/data do pagamento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i);
+  const vencRaw = g(/data de vencimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i);
+  return {
+    valor: valorRaw ? parseValorBR(valorRaw) : null,
+    dataPagamento: dtRaw ? parseDataBR(dtRaw) : null,
+    vencimento: vencRaw ? parseDataBR(vencRaw) : null,
+    identificadorQr: g(/identificador do QR Code\s*:?\s*\n?\s*([0-9a-f-]{20,})/i),
+    autenticacao: g(/autentica[çc][ãa]o do comprovante\s*:?\s*\n?\s*([A-F0-9]{16,})/i),
+    controle: g(/\bcontrole\s*:?\s*\n?\s*(\d{6,})/i),
+  };
+}
+
+export async function analisarFgtsPdf(
+  buffer: Buffer,
+  fileName: string,
+  onPageDone?: (done: number, total: number) => void,
+): Promise<FgtsAnalise> {
+  const warnings: string[] = [];
+  const doc = await loadPdfJs(buffer);
+  const fgtsPages: ComprovanteFgts[] = [];
+  let outrasPages = 0;
+
+  try {
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const items = (await page.getTextContent()).items as any[];
+      const fullText = items.map((it) => it.str ?? '').join('\n');
+      onPageDone?.(i, doc.numPages);
+
+      if (!isPaginaFgtsQr(fullText)) { outrasPages++; continue; }
+
+      // Campos em linhas visuais (rótulo e valor na mesma linha do layout) —
+      // o texto cru do pdfjs pode separar células em items distintos.
+      const txt = linhasVisuais(items).join('\n') || fullText;
+      const extra = extrairFgtsQr(txt);
+      if (extra.valor == null) {
+        const retry = extrairFgtsQr(fullText);
+        extra.valor = retry.valor;
+        extra.dataPagamento = extra.dataPagamento || retry.dataPagamento;
+        extra.vencimento = extra.vencimento || retry.vencimento;
+        extra.identificadorQr = extra.identificadorQr || retry.identificadorQr;
+      }
+      fgtsPages.push({ pageNum: i, ...extra });
+      if (extra.valor == null) warnings.push(`${fileName} p${i}: página QR/CEF sem valor extraído`);
+      if (!extra.dataPagamento) warnings.push(`${fileName} p${i}: sem 'Pagamento efetuado em'`);
+    }
+  } finally {
+    await doc.destroy();
+  }
+
+  if (fgtsPages.length === 0) warnings.push(`${fileName}: nenhuma página FGTS (PIX QR Caixa) reconhecida`);
+  return { totalPages: doc.numPages, fgtsPages, outrasPages, warnings };
+}
+
 export async function fragmentarComprovante(
   srcDoc: PDFDocument,
   comp: ComprovanteFolha,

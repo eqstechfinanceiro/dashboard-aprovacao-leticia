@@ -348,7 +348,7 @@ interface DestinoSpec {
   base: string;
   tipo: string; // parâmetro 'tipo' de criar_arvore_diretorios
   modeloDocumento: string | null;
-  modeloPasta: 'FINANCEIRO - DP' | 'FINANCEIRO - FROTA' | 'FINANCEIRO - BENEFICIOS';
+  modeloPasta: 'FINANCEIRO - DP' | 'FINANCEIRO - FROTA' | 'FINANCEIRO - BENEFICIOS' | 'DP';
   label: 'Comum' | 'Diferente';
   enviaE2Doc: boolean;
 }
@@ -387,6 +387,8 @@ export function specPorTipo(tipoPagamento: string, mesVigente: string): DestinoS
       return { base: 'Comprovante DP/FERIAS', tipo: 'Simples', modeloDocumento: 'FÉRIAS', modeloPasta: 'FINANCEIRO - DP', label: 'Comum', enviaE2Doc: true };
     case 'FGT':
       return { base: 'Comprovante DP/MULTA FGTS', tipo: 'Simples', modeloDocumento: 'MULTAS DE FGTS RESCISÓRIA', modeloPasta: 'FINANCEIRO - DP', label: 'Comum', enviaE2Doc: true };
+    case 'FGTS':
+      return { base: 'Comprovante DP/FGTS', tipo: 'Simples', modeloDocumento: 'EXTRATO FGTS', modeloPasta: 'DP', label: 'Comum', enviaE2Doc: true };
     // --- Chaves CIFRA<doc> — comprovantes de empresa/departamento (sem CPF, sem E2DOC) ---
     // Tabela oficial PASTA/SUB-PASTA/SIGLA: ADM, BNFUMD, BNTK, BNFS, CMP, CONT, CRA, SMS, DPPNS
     case 'ADM':

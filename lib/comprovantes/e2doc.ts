@@ -83,7 +83,9 @@ export async function existeNoE2Doc(args: {
     const idx = (p: any, label: string) =>
       String((p.indices || []).find((i: any) => i.label === label)?.valor || '').trim();
     for (const pasta of data.pastas || []) {
-      if (idx(pasta, 'COMPETÊNCIA') !== args.competencia) continue;
+      // FIN-* usam 'COMPETÊNCIA'; a pasta-modelo 'DP' usa 'COMPETENCIA' (sem acento).
+      const compIdx = idx(pasta, 'COMPETÊNCIA') || idx(pasta, 'COMPETENCIA');
+      if (compIdx !== args.competencia) continue;
       if (args.banco && idx(pasta, 'BANCO') && idx(pasta, 'BANCO') !== args.banco) continue;
       if (args.pedido && idx(pasta, 'PEDIDO') && idx(pasta, 'PEDIDO') !== args.pedido) continue;
       const docs = pasta.documentos || [];
@@ -135,10 +137,17 @@ export interface EnvioE2Doc {
   competencia: string; // 'MM/YYYY'
   dataFormatada: string; // 'YYYY-MM-DD'
   modeloDocumento: string;
-  modeloPasta: 'FINANCEIRO - DP' | 'FINANCEIRO - FROTA' | 'FINANCEIRO - BENEFICIOS';
+  modeloPasta: 'FINANCEIRO - DP' | 'FINANCEIRO - FROTA' | 'FINANCEIRO - BENEFICIOS' | 'DP';
   label: 'Comum' | 'Diferente';
   pedido?: string | null;
   pdfBuffer: Buffer;
+  // Extras exigidos pelos índices da pasta-modelo 'DP' (FGTS/EXTRATO FGTS).
+  filial?: string;
+  situacao?: string;
+  cargo?: string;
+  funcao?: string;
+  demissao?: string; // formato do cadastro (dd/mm/yyyy)
+  dataDocumento?: string; // 'DD/MM/YYYY'
 }
 
 export interface EnvioResult {
@@ -158,7 +167,23 @@ export async function enviarComprovante(envio: EnvioE2Doc): Promise<EnvioResult>
   try {
     const { token, usuario } = await autenticar();
 
-    const indices = envio.label !== 'Comum'
+    const indices = envio.modeloPasta === 'DP'
+      ? [
+          // Dicionário da pasta-modelo DP — labels medidos em docs reais
+          // (EXTRATO FGTS / GFD). COMPETENCIA é sem acento mesmo.
+          { label: 'CPF (SOMENTE NÚMEROS)', valor: envio.cpf },
+          { label: 'NOME DO FUNCIONARIO', valor: envio.nome },
+          { label: 'CENTRO DE CUSTO', valor: envio.centroCusto },
+          { label: 'DATA DE DEMISSÃO', valor: envio.demissao || '' },
+          { label: 'REGIÃO', valor: envio.regiao },
+          { label: 'FILIAL', valor: envio.filial || '' },
+          { label: 'COMPETENCIA', valor: envio.competencia },
+          { label: 'DATA DO DOCUMENTO', valor: envio.dataDocumento || '' },
+          { label: 'SITUAÇÃO', valor: envio.situacao || '' },
+          { label: 'CARGO', valor: envio.cargo || '' },
+          { label: 'FUNÇÃO', valor: envio.funcao || envio.cargo || '' },
+        ]
+      : envio.label !== 'Comum'
       ? [
           { label: 'COMPETÊNCIA', valor: envio.competencia },
           { label: 'CPF', valor: envio.cpf },

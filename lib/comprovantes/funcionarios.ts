@@ -21,6 +21,8 @@ export interface Funcionario {
   filial: string;
   situacao: string;
   cargo: string;
+  funcao: string;
+  demissao: string;
   banco: string;
   agencia: string;
   conta: string;
@@ -35,16 +37,20 @@ function mapRow(r: any): Funcionario {
     filial: String(r.filial ?? ''),
     situacao: String(r.situacao ?? ''),
     cargo: String(r.cargo ?? ''),
+    funcao: String(r.funcao ?? ''),
+    demissao: r.demissao ? String(r.demissao) : '',
     banco: String(r.banco ?? ''),
     agencia: String(r.agencia ?? ''),
     conta: String(r.conta ?? ''),
   };
 }
 
+const FUNC_COLS = 'cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, funcao, demissao, banco, agencia, conta';
+
 /** Lookup por CPF — equivalente a conexaoDB.consultar_db. Retorna null se não achar. */
 export async function consultarPorCpf(cpf: string): Promise<Funcionario | null> {
   const rows = await getPool().query(
-    'SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios WHERE cpf = $1 LIMIT 1',
+    `SELECT ${FUNC_COLS} FROM funcionarios WHERE cpf = $1 LIMIT 1`,
     [cpf]
   );
   return rows.rows.length > 0 ? mapRow(rows.rows[0]) : null;
@@ -53,7 +59,7 @@ export async function consultarPorCpf(cpf: string): Promise<Funcionario | null> 
 /** Lookup por nome parcial — equivalente a conexaoDB.consultar_db_nome. */
 export async function consultarPorNome(nomeParcial: string): Promise<Funcionario | null> {
   const rows = await getPool().query(
-    'SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios WHERE funcionario ILIKE $1 LIMIT 1',
+    `SELECT ${FUNC_COLS} FROM funcionarios WHERE funcionario ILIKE $1 LIMIT 1`,
     [`%${nomeParcial}%`]
   );
   return rows.rows.length > 0 ? mapRow(rows.rows[0]) : null;
@@ -99,7 +105,7 @@ export async function consultarPorNomeSeguro(nomeComprovante: string): Promise<F
  *  comprovantes — 1 query no início do run em vez de 1 por comprovante). */
 export async function listAllFuncionarios(): Promise<Funcionario[]> {
   const rows = await getPool().query(
-    'SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios'
+    `SELECT ${FUNC_COLS} FROM funcionarios`
   );
   return rows.rows.map(mapRow);
 }
@@ -150,7 +156,7 @@ export async function searchFuncionarios(q: string, limit = 50, offset = 0): Pro
   const count = await p.query(`SELECT count(*)::int AS c FROM funcionarios ${where}`, params);
   params.push(limit, offset);
   const rows = await p.query(
-    `SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios ${where} ORDER BY funcionario LIMIT $${params.length - 1} OFFSET $${params.length}`,
+    `SELECT ${FUNC_COLS} FROM funcionarios ${where} ORDER BY funcionario LIMIT $${params.length - 1} OFFSET $${params.length}`,
     params
   );
   return { rows: rows.rows.map(mapRow), total: count.rows[0]?.c ?? 0 };

@@ -3,11 +3,22 @@
 // Extrai do segmento A: banco/agência/conta do favorecido, nome, data e valor;
 // e do segmento B (quando presente) o CPF. Itaú também grava o CPF no tail do A.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BANCO_NOME = void 0;
+exports.BANCO_E2DOC = exports.BANCO_NOME = void 0;
 exports.cpfValido = cpfValido;
 exports.parseCnab = parseCnab;
+exports.parseRemessaJ = parseRemessaJ;
 exports.BANCO_NOME = {
     '001': 'BB (BANCO DO BRASIL)',
+    '237': 'BRADESCO',
+    '341': 'ITAU',
+    '033': 'SANTANDER',
+    '104': 'CEF',
+};
+/** Valor do índice BANCO no e2doc — o dicionário é estrito e rejeita (400)
+ *  qualquer rótulo fora da lista dele ('BB (BANCO DO BRASIL)' falha; 'BB' passa).
+ *  Verificado em produção: 001→BB, 237→BRADESCO, 341→ITAU. */
+exports.BANCO_E2DOC = {
+    '001': 'BB',
     '237': 'BRADESCO',
     '341': 'ITAU',
     '033': 'SANTANDER',
@@ -126,6 +137,110 @@ function parseCnab(buffer, fileName) {
     const semCpf = entries.filter((e) => !e.cpf).length;
     if (semCpf)
         warnings.push(`${semCpf} registro(s) sem CPF (B ausente ou inscrição inválida)`);
+    return {
+        banco,
+        bancoNome: exports.BANCO_NOME[banco] || `BANCO ${banco}`,
+        fileName,
+        entries,
+        warnings,
+    };
+}
+/** Extrai nome/data/valor do J principal. Offsets medidos no layout Itaú
+ *  "Remessa a Pagar" (out/2026); se a leitura fixa falhar, cai no regex
+ *  DDMMYYYY+valor15d logo após o nome — tolera variação de versão de layout. */
+function parseSegJ(line, warnings) {
+    let nome = line.slice(61, 91).trim();
+    let resto = line.slice(91);
+    let m = /^(\d{8})(\d{15})/.exec(resto);
+    if (!m) {
+        // Fallback: procura o par data+valor em qualquer janela após o nome.
+        m = /(\d{8})(\d{15})/.exec(line.slice(60));
+        if (m) {
+            const nomeEnd = line.indexOf(m[0]);
+            nome = line.slice(61, nomeEnd).trim();
+        }
+    }
+    if (!m) {
+        warnings.push(`seg J sem par data+valor reconhecível: ${line.slice(0, 30)}…`);
+        return null;
+    }
+    const dataPagamento = parseDataPagamento(m[1]);
+    const valor = Number(m[2]) / 100;
+    return { nome, valor, dataPagamento };
+}
+/** J52: 'J' + '052' no campo movimento, traz pagador + recebedor + URL do QR.
+ *  Medido no arquivo real: tipo inscr. recebedor @75, número @76-90 (15d),
+ *  nome recebedor @91-130 (40c), URL @131+. */
+function parseSegJ52(line) {
+    const tipoInsc = line[75];
+    const inscricao = onlyDigits(line.slice(76, 91));
+    let cpf = null;
+    if (tipoInsc === '1' && inscricao.length === 15) {
+        const cand = inscricao.slice(-11);
+        if (cpfValido(cand))
+            cpf = cand;
+    }
+    const nomeRecebedor = line.slice(91, 131).trim() || null;
+    const urlQr = (line.slice(131).match(/\S+/) || [null])[0];
+    return { cpf, nomeRecebedor, urlQr };
+}
+function parseRemessaJ(buffer, fileName) {
+    const text = buffer.toString('latin1');
+    const warnings = [];
+    const entries = [];
+    let banco = '';
+    for (const raw of text.split(/\r?\n/)) {
+        if (raw.length < 30)
+            continue;
+        const bb = raw.slice(0, 3);
+        if (/^\d{3}$/.test(bb)) {
+            banco = bb;
+            break;
+        }
+    }
+    let lastJ = null;
+    let lineNo = 0;
+    for (const raw of text.split(/\r?\n/)) {
+        if (raw.length < 240)
+            continue;
+        lineNo++;
+        if (raw[7] !== '3' || raw[13] !== 'J')
+            continue;
+        if (/pix-qrcode/i.test(raw)) {
+            // J52 — complemento do J principal imediatamente anterior
+            const j52 = parseSegJ52(raw);
+            if (lastJ) {
+                lastJ.cpf = j52.cpf;
+                lastJ.nomeRecebedor = j52.nomeRecebedor;
+                lastJ.urlQr = j52.urlQr;
+                lastJ.isFgtsQr = /pix-qrcode\.caixa\.gov\.br/i.test(j52.urlQr || '');
+            }
+            else {
+                warnings.push(`linha ${lineNo}: J52 sem J principal anterior — ignorado`);
+            }
+            continue;
+        }
+        const parsed = parseSegJ(raw, warnings);
+        if (!parsed)
+            continue;
+        lastJ = {
+            banco: raw.slice(0, 3) || banco,
+            lote: raw.slice(3, 7),
+            seq: Number(raw.slice(8, 13)) || 0,
+            ...parsed,
+            nossoNumero: raw.slice(182, 202).trim(),
+            cpf: null,
+            nomeRecebedor: null,
+            urlQr: null,
+            isFgtsQr: false,
+            line: lineNo,
+        };
+        entries.push(lastJ);
+    }
+    const fgts = entries.filter((e) => e.isFgtsQr).length;
+    if (entries.length && !fgts) {
+        warnings.push('nenhuma entrada PIX QR Caixa (J52 pix-qrcode.caixa.gov.br) — remessa não parece ser de FGTS');
+    }
     return {
         banco,
         bancoNome: exports.BANCO_NOME[banco] || `BANCO ${banco}`,

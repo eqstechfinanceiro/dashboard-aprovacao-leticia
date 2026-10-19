@@ -77,7 +77,9 @@ async function existeNoE2Doc(args) {
         const data = await resp.json().catch(() => ({}));
         const idx = (p, label) => String((p.indices || []).find((i) => i.label === label)?.valor || '').trim();
         for (const pasta of data.pastas || []) {
-            if (idx(pasta, 'COMPETÊNCIA') !== args.competencia)
+            // FIN-* usam 'COMPETÊNCIA'; a pasta-modelo 'DP' usa 'COMPETENCIA' (sem acento).
+            const compIdx = idx(pasta, 'COMPETÊNCIA') || idx(pasta, 'COMPETENCIA');
+            if (compIdx !== args.competencia)
                 continue;
             if (args.banco && idx(pasta, 'BANCO') && idx(pasta, 'BANCO') !== args.banco)
                 continue;
@@ -127,27 +129,43 @@ async function enviarComprovante(envio) {
     }
     try {
         const { token, usuario } = await autenticar();
-        const indices = envio.label !== 'Comum'
+        const indices = envio.modeloPasta === 'DP'
             ? [
-                { label: 'COMPETÊNCIA', valor: envio.competencia },
-                { label: 'CPF', valor: envio.cpf },
+                // Dicionário da pasta-modelo DP — labels medidos em docs reais
+                // (EXTRATO FGTS / GFD). COMPETENCIA é sem acento mesmo.
+                { label: 'CPF (SOMENTE NÚMEROS)', valor: envio.cpf },
                 { label: 'NOME DO FUNCIONARIO', valor: envio.nome },
-                { label: 'PEDIDO', valor: envio.pedido || '' },
-                { label: 'BANCO', valor: envio.banco || '' },
-                { label: 'SINDICATO', valor: '' },
                 { label: 'CENTRO DE CUSTO', valor: envio.centroCusto },
-            ]
-            : [
-                { label: 'COMPETÊNCIA', valor: envio.competencia },
-                { label: 'CPF', valor: envio.cpf },
-                { label: 'NOME DO FUNCIONARIO', valor: envio.nome },
-                { label: 'PEDIDO', valor: envio.pedido || '' },
-                { label: 'BANCO', valor: envio.banco || '' },
-                { label: 'SINDICATO', valor: '' },
-                { label: 'ESTADO', valor: '' },
+                { label: 'DATA DE DEMISSÃO', valor: envio.demissao || '' },
                 { label: 'REGIÃO', valor: envio.regiao },
-                { label: 'CENTRO DE CUSTO', valor: envio.centroCusto },
-            ];
+                { label: 'FILIAL', valor: envio.filial || '' },
+                { label: 'COMPETENCIA', valor: envio.competencia },
+                { label: 'DATA DO DOCUMENTO', valor: envio.dataDocumento || '' },
+                { label: 'SITUAÇÃO', valor: envio.situacao || '' },
+                { label: 'CARGO', valor: envio.cargo || '' },
+                { label: 'FUNÇÃO', valor: envio.funcao || envio.cargo || '' },
+            ]
+            : envio.label !== 'Comum'
+                ? [
+                    { label: 'COMPETÊNCIA', valor: envio.competencia },
+                    { label: 'CPF', valor: envio.cpf },
+                    { label: 'NOME DO FUNCIONARIO', valor: envio.nome },
+                    { label: 'PEDIDO', valor: envio.pedido || '' },
+                    { label: 'BANCO', valor: envio.banco || '' },
+                    { label: 'SINDICATO', valor: '' },
+                    { label: 'CENTRO DE CUSTO', valor: envio.centroCusto },
+                ]
+                : [
+                    { label: 'COMPETÊNCIA', valor: envio.competencia },
+                    { label: 'CPF', valor: envio.cpf },
+                    { label: 'NOME DO FUNCIONARIO', valor: envio.nome },
+                    { label: 'PEDIDO', valor: envio.pedido || '' },
+                    { label: 'BANCO', valor: envio.banco || '' },
+                    { label: 'SINDICATO', valor: '' },
+                    { label: 'ESTADO', valor: '' },
+                    { label: 'REGIÃO', valor: envio.regiao },
+                    { label: 'CENTRO DE CUSTO', valor: envio.centroCusto },
+                ];
         await apiPost('/Sincronismo/Iniciar', {
             token, usuario, protocolo, modeloPasta: envio.modeloPasta, indices,
         });

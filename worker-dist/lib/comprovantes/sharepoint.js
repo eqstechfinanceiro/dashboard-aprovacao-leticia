@@ -8,6 +8,8 @@ exports.listFiles = listFiles;
 exports.downloadFile = downloadFile;
 exports.ensureFolder = ensureFolder;
 exports.uploadFile = uploadFile;
+exports.deleteFile = deleteFile;
+exports.deleteFolder = deleteFolder;
 exports.fileExists = fileExists;
 exports.closeSpBrowser = closeSpBrowser;
 const playwright_1 = require("playwright");
@@ -526,6 +528,30 @@ async function uploadFileInner(site, folderPath, fileName, content) {
     }, { u: url, f: fileName, c: contentB64, d: digest });
     if (res !== 'ok')
         throw new Error(`Upload falhou ${fileName}: ${res}`);
+}
+async function deleteServerRelative(site, kind, p) {
+    return withCrashRetry(site, async () => {
+        const digest = await getFormDigest(site);
+        await ensureConnected(site);
+        const url = `${SITE_URL}${site.sitePath}/_api/web/Get${kind}ByServerRelativeUrl('${esc(p)}')`;
+        const res = await page.evaluate(async ({ u, d }) => {
+            const resp = await fetch(u, {
+                method: 'POST',
+                headers: { Accept: 'application/json;odata=nometadata', 'X-RequestDigest': d, 'X-HTTP-Method': 'DELETE', 'IF-MATCH': '*' },
+            });
+            return resp.ok ? 'ok' : `ERR ${resp.status}: ${(await resp.text()).substring(0, 200)}`;
+        }, { u: url, d: digest });
+        if (res !== 'ok')
+            throw new Error(`Delete falhou ${p}: ${res}`);
+    });
+}
+async function deleteFile(site, filePath) {
+    const p = filePath.startsWith('/') ? filePath : `${site.libraryRoot}/${filePath}`;
+    return deleteServerRelative(site, 'File', p);
+}
+async function deleteFolder(site, folderPath) {
+    const p = folderPath.startsWith('/') ? folderPath : `${site.libraryRoot}/${folderPath}`;
+    return deleteServerRelative(site, 'Folder', p);
 }
 async function fileExists(site, filePath) {
     const p = filePath.startsWith('/') ? filePath : `${site.libraryRoot}/${filePath}`;

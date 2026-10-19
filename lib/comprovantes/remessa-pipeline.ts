@@ -19,8 +19,8 @@ import { listAllFuncionarios, type Funcionario } from './funcionarios';
 import { enviarComprovante, existeNoE2Doc } from './e2doc';
 import { getSetting } from '../db/settings';
 import { updateRunProgress, insertEnvio, finishRun, failRun, type RunRow } from './db';
-import { parseCnab, BANCO_NOME, BANCO_E2DOC, type CnabEntry, type CnabFile } from './cnab';
-import { analisarFolhaPdf, fragmentarComprovante, type ComprovanteFolha, type FolhaAnalise } from './folha-pdf';
+import { parseCnab, parseRemessaJ, BANCO_NOME, BANCO_E2DOC, type CnabEntry, type CnabFile, type RemessaJEntry, type RemessaJFile } from './cnab';
+import { analisarFolhaPdf, analisarFgtsPdf, fragmentarComprovante, type ComprovanteFolha, type FolhaAnalise } from './folha-pdf';
 
 const DESTINO = SP_SITES.destino;
 
@@ -30,9 +30,9 @@ export interface RemessaSelection {
   files: { name: string; kind: 'pdf' | 'txt' }[];
   phase: 'analise' | 'envio';
   /** Tipo de pagamento escolhido pelo usuário na tela ('FOL' proventos,
-   *  'FER' férias). Ausente = 'FOL' (runs antigos). Define o doc e2doc
-   *  (PROVENTOS/FÉRIAS), a pasta SharePoint e a regra de competência. */
-  tipo?: 'FOL' | 'FER';
+   *  'FER' férias, 'FGTS' guias PIX QR Caixa). Ausente = 'FOL' (runs antigos).
+   *  Define o doc e2doc, a pasta SharePoint e a regra de competência. */
+  tipo?: 'FOL' | 'FER' | 'FGTS';
   /** Competência e2doc 'MM/YYYY' escolhida pelo usuário; sem ela, deriva do
    *  pagamento (FOL → competência = mês anterior; FER → mês do pagamento). */
   competencia?: string;
@@ -160,6 +160,7 @@ export async function processRemessaRun(run: RunRow): Promise<void> {
     return;
   }
   if (sel.phase === 'envio') return processRemessaEnvio(run, sel);
+  if (sel.tipo === 'FGTS') return processRemessaAnaliseFgts(run, sel);
   return processRemessaAnalise(run, sel);
 }
 
@@ -347,10 +348,199 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
   }
 }
 
+// ---------- FASE 1 (FGTS): análise PIX QR Caixa ----------
+// Diferente da folha: o comprovante não tem nome/CPF (recebedor é a CEF) — o
+// vínculo sai da remessa seg J/J52 (.rem obrigatório). O elo página↔remessa é
+// valor exato + data de pagamento; página↔funcionário é CPF do J52 → nome do J.
+
+async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Promise<void> {
+  const resumo: AnaliseResumo & { ambiguos: number; paginasIgnoradas: number; remessaNaoFgts: number } = {
+    files: 0, comprovantes: 0, txtEntries: 0,
+    prontos: 0, duplicadosPre: 0, divergentes: 0,
+    semFuncionario: 0, homonimos: 0, semParTxt: 0, txtSemPdf: 0,
+    formatoNaoReconhecido: 0,
+    ambiguos: 0, paginasIgnoradas: 0, remessaNaoFgts: 0,
+    warnings: [],
+  };
+
+  try {
+    await updateRunProgress(run.id, { phase: 'analyzing', startedAt: run.started_at });
+
+    // 1. Remessa CNAB seg J/J52 — OBRIGATÓRIA no FGTS: é dela que sai CPF/nome.
+    const txtFiles = sel.files.filter((x) => x.kind === 'txt');
+    if (txtFiles.length === 0) {
+      await failRun(run.id, 'tipo FGTS exige a remessa (.rem/.txt) junto ao PDF — é dela que sai o vínculo com o funcionário');
+      return;
+    }
+    const remessas: RemessaJFile[] = [];
+    for (const f of txtFiles) {
+      const parsed = parseRemessaJ(readFileSync(join(sel.dir, f.name)), f.name);
+      resumo.warnings.push(...parsed.warnings.map((w) => `${f.name}: ${w}`));
+      remessas.push(parsed);
+    }
+    type JEntry = RemessaJEntry & { _file: string };
+    const poolJ = remessas.flatMap((r) => r.entries.map((e) => ({ ...e, _file: r.fileName }))) as JEntry[];
+    const poolFgts = poolJ.filter((e) => e.isFgtsQr);
+    resumo.remessaNaoFgts = poolJ.length - poolFgts.length;
+    resumo.txtEntries = poolFgts.length;
+    if (poolFgts.length === 0) {
+      await failRun(run.id, 'remessa sem registros seg J/J52 de PIX QR Caixa — o tipo FGTS cobre guias pagas via pix-qrcode.caixa.gov.br');
+      return;
+    }
+    const usados = new Set<JEntry>();
+    const bancoItem = BANCO_E2DOC[remessas[0].banco] || remessas[0].bancoNome || null;
+
+    // 2. Funcionários (1 query — índice em memória)
+    const funcIdx = buildFuncIndex(await listAllFuncionarios());
+
+    // 3. PDFs → filtra páginas QR/CEF; o resto do GERAL misto é ignorado
+    const pdfs = sel.files.filter((x) => x.kind === 'pdf');
+    resumo.files = sel.files.length;
+    if (pdfs.length === 0) {
+      await finishRun(run.id, { ...resumo, warning: 'Nenhum PDF enviado' });
+      await sql`UPDATE comprovantes_runs SET status='aguardando_confirmacao' WHERE id=${run.id}`;
+      return;
+    }
+
+    // Competência e2doc do FGTS mensal = mês anterior ao pagamento (regra FOL).
+    const esperadaDe = (dt: string | null | undefined): string | null =>
+      dt && /^\d{4}-\d{2}-\d{2}$/.test(dt) ? competenciaFolha(dt.slice(5, 7), dt.slice(0, 4)) : null;
+
+    let totalPages = 0;
+    let pagesDone = 0;
+    const compEsperadas = new Set<string>();
+
+    for (const f of pdfs) {
+      const buf = readFileSync(join(sel.dir, f.name));
+      const analise = await analisarFgtsPdf(buf, f.name, (done, total) => {
+        void updateRunProgress(run.id, {
+          phase: 'analyzing', currentFileName: f.name, filePages: total,
+          filePagesDone: done, pagesProcessed: pagesDone + done, totalPages: totalPages + total,
+        });
+      });
+      pagesDone += analise.totalPages;
+      totalPages += analise.totalPages;
+      resumo.comprovantes += analise.fgtsPages.length;
+      resumo.paginasIgnoradas += analise.outrasPages;
+      resumo.warnings.push(...analise.warnings);
+
+      for (const comp of analise.fgtsPages) {
+        const base = { runId: run.id, sourceFile: f.name, pageNum: comp.pageNum };
+        const compEsperada = esperadaDe(comp.dataPagamento);
+        if (compEsperada) compEsperadas.add(compEsperada);
+        const meta = {
+          valor: comp.valor, dataPagamento: comp.dataPagamento, vencimento: comp.vencimento,
+          identificadorQr: comp.identificadorQr, autenticacao: comp.autenticacao, controle: comp.controle,
+          competenciaEsperada: compEsperada, warnings: [] as string[],
+        };
+
+        // Par remessa: valor exato em centavos + mesma data de pagamento
+        // (quando a página traz data). Empate → pareia na ordem do arquivo
+        // e marca 'valor_ambiguo' pra revisão — não auto-envia.
+        let entry: JEntry | null = null;
+        if (comp.valor != null) {
+          const cents = Math.round(comp.valor * 100);
+          let cands = poolFgts.filter((e) => !usados.has(e) && Math.round(e.valor * 100) === cents);
+          if (comp.dataPagamento) {
+            const dated = cands.filter((e) => e.dataPagamento === comp.dataPagamento);
+            if (dated.length) cands = dated;
+          }
+          if (cands.length > 1) {
+            meta.warnings.push(`par_ambiguo_ordem: ${cands.length} entradas .rem com mesmo valor+data — pareado na ordem do arquivo`);
+          }
+          if (cands.length) { entry = cands[0]; usados.add(entry); }
+        }
+
+        // Funcionário: CPF do J52 (primário) → nome do J (fallback, tolera truncamento 30c)
+        let func: Funcionario | null = null;
+        let via = '';
+        if (entry?.cpf && funcIdx.byCpf.get(entry.cpf)) { func = funcIdx.byCpf.get(entry.cpf)!; via = 'j52_cpf'; }
+        const nomeBusca = entry ? (entry.nomeRecebedor || entry.nome) : null;
+        if (!func && nomeBusca) {
+          const porNome = funcsPorNome(funcIdx, nomeBusca);
+          if (porNome.length === 1) { func = porNome[0]; via = 'j_nome'; }
+          else if (porNome.length > 1) {
+            resumo.homonimos++;
+            await insertEnvio({
+              ...base, nome: nomeBusca, cpf: entry?.cpf, tipoPagamento: 'FGTS',
+              status: 'homonimo_ambiguo',
+              meta: { ...meta, candidatos: porNome.map((x) => ({ cpf: x.cpf, nome: x.nome, cc: x.cc })) },
+              error: `${porNome.length} funcionários com nome compatível: ${porNome.map((x) => `${x.nome} (${x.cpf})`).join('; ').substring(0, 240)}`,
+            });
+            continue;
+          }
+        }
+        if (func && (!cpfValido(func.cpf) || normNome(func.nome).length < 3)) {
+          meta.warnings.push(`cadastro inválido no banco de funcionários: nome='${func.nome}' cpf='${func.cpf}'`);
+          func = null;
+        }
+
+        if (!entry) {
+          resumo.semParTxt++;
+          await insertEnvio({
+            ...base, tipoPagamento: 'FGTS', banco: bancoItem,
+            status: 'sem_par_txt', meta,
+            error: `página FGTS (R$${comp.valor ?? '?'}) sem entrada correspondente na remessa`,
+          });
+          continue;
+        }
+        if (!func) {
+          resumo.semFuncionario++;
+          await insertEnvio({
+            ...base, nome: nomeBusca, cpf: entry.cpf, tipoPagamento: 'FGTS', banco: bancoItem,
+            status: 'sem_funcionario',
+            meta: { ...meta, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, file: entry._file } },
+            error: 'funcionário não encontrado no cadastro (CPF J52 e nome sem match)',
+          });
+          continue;
+        }
+
+        const ambiguo = meta.warnings.some((w) => w.startsWith('par_ambiguo_ordem'));
+        if (ambiguo) resumo.ambiguos++;
+        else resumo.prontos++;
+        await insertEnvio({
+          ...base,
+          chave: null, cpf: func.cpf, nome: func.nome, regiao: func.regiao, cc: func.cc,
+          tipoPagamento: 'FGTS', banco: bancoItem,
+          status: ambiguo ? 'valor_ambiguo' : 'pronto',
+          meta: { ...meta, via, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, urlQr: entry.urlQr, file: entry._file } },
+          error: meta.warnings.join('; ') || null,
+        });
+      }
+    }
+
+    // 4. Entradas FGTS da remessa sem página correspondente no PDF
+    for (const e of poolFgts) {
+      if (usados.has(e)) continue;
+      resumo.txtSemPdf++;
+      const compEsp = esperadaDe(e.dataPagamento);
+      if (compEsp) compEsperadas.add(compEsp);
+      await insertEnvio({
+        runId: run.id, sourceFile: e._file, pageNum: 0,
+        nome: e.nomeRecebedor || e.nome, cpf: e.cpf, tipoPagamento: 'FGTS', banco: bancoItem,
+        status: 'txt_sem_pdf',
+        meta: { valor: e.valor, dataPagamento: e.dataPagamento, urlQr: e.urlQr, competenciaEsperada: compEsp },
+        error: 'presente na remessa mas nenhuma página FGTS correspondente no PDF',
+      });
+    }
+
+    if (sel.competencia && compEsperadas.size > 0 && !compEsperadas.has(sel.competencia)) {
+      resumo.warnings.unshift(
+        `competencia_divergente: informada ${sel.competencia}, mas as datas de pagamento indicam ${[...compEsperadas].join(' ou ')}`
+      );
+    }
+
+    resumo.warnings = resumo.warnings.slice(0, 50);
+    await sql`UPDATE comprovantes_runs SET result = ${JSON.stringify({ analise: resumo })}::jsonb, status = 'aguardando_confirmacao', finished_at = NOW() WHERE id = ${run.id}`;
+  } catch (err) {
+    await failRun(run.id, err instanceof Error ? err.message : String(err));
+  }
+}
+
 // ---------- FASE 2: envio ----------
 
 async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<void> {
-  const tipo = sel.tipo === 'FER' ? 'FER' : 'FOL';
+  const tipo = sel.tipo || 'FOL';
   const hoje = new Date();
   const dataFormatada = hoje.toISOString().slice(0, 10);
   const uploadEnabled = (await getSetting<boolean>('comprovantes_upload_enabled')) === true;
@@ -415,6 +605,16 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
   };
 
   let done = 0;
+  // Pasta-modelo 'DP' (FGTS/EXTRATO FGTS) indexa filial/cargo/situação/demissão —
+  // dados que não viajam no envio, buscados do cadastro no envio (lazy, 1 query).
+  let funcByCpf: Map<string, Funcionario> | null = null;
+  const getFunc = async (cpf: string | null | undefined) => {
+    if (!cpf) return null;
+    if (!funcByCpf) {
+      funcByCpf = new Map((await listAllFuncionarios()).map((f) => [f.cpf, f]));
+    }
+    return funcByCpf.get(cpf) || null;
+  };
   const processItem = async (it: any) => {
     const meta = it.meta || {};
 
@@ -486,11 +686,17 @@ async function processRemessaEnvio(run: RunRow, sel: RemessaSelection): Promise<
         }
       }
 
+      const funcExtra = spec.modeloPasta === 'DP' ? await getFunc(it.cpf) : null;
       const envio = await enviarComprovante({
         cpf: it.cpf, nome: it.nome, regiao: it.regiao || '', centroCusto: it.cc || '',
         banco: it.banco || null, competencia, dataFormatada,
         modeloDocumento: spec.modeloDocumento!, modeloPasta: spec.modeloPasta,
         label: spec.label, pdfBuffer: pdfBytes,
+        ...(funcExtra ? {
+          filial: funcExtra.filial, situacao: funcExtra.situacao,
+          cargo: funcExtra.cargo, funcao: funcExtra.funcao, demissao: funcExtra.demissao,
+        } : {}),
+        dataDocumento: comp.dataPagamento ? comp.dataPagamento.split('-').reverse().join('/') : '',
       });
 
       if (!envio.ok) {

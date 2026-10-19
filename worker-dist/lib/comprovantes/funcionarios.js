@@ -29,19 +29,22 @@ function mapRow(r) {
         filial: String(r.filial ?? ''),
         situacao: String(r.situacao ?? ''),
         cargo: String(r.cargo ?? ''),
+        funcao: String(r.funcao ?? ''),
+        demissao: r.demissao ? String(r.demissao) : '',
         banco: String(r.banco ?? ''),
         agencia: String(r.agencia ?? ''),
         conta: String(r.conta ?? ''),
     };
 }
+const FUNC_COLS = 'cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, funcao, demissao, banco, agencia, conta';
 /** Lookup por CPF — equivalente a conexaoDB.consultar_db. Retorna null se não achar. */
 async function consultarPorCpf(cpf) {
-    const rows = await getPool().query('SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios WHERE cpf = $1 LIMIT 1', [cpf]);
+    const rows = await getPool().query(`SELECT ${FUNC_COLS} FROM funcionarios WHERE cpf = $1 LIMIT 1`, [cpf]);
     return rows.rows.length > 0 ? mapRow(rows.rows[0]) : null;
 }
 /** Lookup por nome parcial — equivalente a conexaoDB.consultar_db_nome. */
 async function consultarPorNome(nomeParcial) {
-    const rows = await getPool().query('SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios WHERE funcionario ILIKE $1 LIMIT 1', [`%${nomeParcial}%`]);
+    const rows = await getPool().query(`SELECT ${FUNC_COLS} FROM funcionarios WHERE funcionario ILIKE $1 LIMIT 1`, [`%${nomeParcial}%`]);
     return rows.rows.length > 0 ? mapRow(rows.rows[0]) : null;
 }
 function normalizarNome(s) {
@@ -84,7 +87,7 @@ async function consultarPorNomeSeguro(nomeComprovante) {
 /** Carga completa p/ índices em memória (remessa de folha casa milhares de
  *  comprovantes — 1 query no início do run em vez de 1 por comprovante). */
 async function listAllFuncionarios() {
-    const rows = await getPool().query('SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios');
+    const rows = await getPool().query(`SELECT ${FUNC_COLS} FROM funcionarios`);
     return rows.rows.map(mapRow);
 }
 /**
@@ -126,6 +129,6 @@ async function searchFuncionarios(q, limit = 50, offset = 0) {
     }
     const count = await p.query(`SELECT count(*)::int AS c FROM funcionarios ${where}`, params);
     params.push(limit, offset);
-    const rows = await p.query(`SELECT cpf, funcionario, cc, regiao_pcs, filial, situacao, cargo, banco, agencia, conta FROM funcionarios ${where} ORDER BY funcionario LIMIT $${params.length - 1} OFFSET $${params.length}`, params);
+    const rows = await p.query(`SELECT ${FUNC_COLS} FROM funcionarios ${where} ORDER BY funcionario LIMIT $${params.length - 1} OFFSET $${params.length}`, params);
     return { rows: rows.rows.map(mapRow), total: count.rows[0]?.c ?? 0 };
 }
