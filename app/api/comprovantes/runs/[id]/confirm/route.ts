@@ -19,7 +19,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   const session = token ? await verifyToken(token) : null;
   if (!session) return NextResponse.json({ error: 'não autenticado' }, { status: 401 });
 
-  const { action, envioIds, forcarCompetencia } = await request.json().catch(() => ({}));
+  const { action, envioIds, forcarCompetencia, corrigirCompetencia } = await request.json().catch(() => ({}));
   if (action !== 'confirmar' && action !== 'cancelar') {
     return NextResponse.json({ error: "action deve ser 'confirmar' ou 'cancelar'" }, { status: 400 });
   }
@@ -44,19 +44,29 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
   // de pagamento dos comprovantes (calculadas na análise já com a regra do
   // tipo do run), exige confirmação explícita — erro aqui indexa o documento
   // na competência errada no e2doc.
-  const tipoRun = (run.selection as any)?.tipo === 'FER' ? 'FER' : 'FOL';
+  const tipoRun = (run.selection as any)?.tipo === 'FER' ? 'FER' : (run.selection as any)?.tipo === 'FGTS' ? 'FGTS' : 'FOL';
   const regraCompetencia = tipoRun === 'FER'
     ? 'Para férias, a competência no e2doc é o MÊS DO PAGAMENTO.'
-    : 'Para folha, a competência no e2doc é o MÊS ANTERIOR ao pagamento.';
+    : `Para ${tipoRun === 'FGTS' ? 'FGTS' : 'folha'}, a competência no e2doc é o MÊS ANTERIOR ao pagamento (mês que a guia/folha refere).`;
   const competenciaSel = typeof (run.selection as any)?.competencia === 'string'
     ? (run.selection as any).competencia
     : null;
-  if (competenciaSel && forcarCompetencia !== true) {
-    const esperadas = (await sql`
-      SELECT DISTINCT meta->>'competenciaEsperada' AS ce
-      FROM comprovantes_envios
-      WHERE run_id = ${id} AND meta->>'competenciaEsperada' IS NOT NULL
-    `).map((r: any) => r.ce).filter(Boolean) as string[];
+  const esperadas = (await sql`
+    SELECT DISTINCT meta->>'competenciaEsperada' AS ce
+    FROM comprovantes_envios
+    WHERE run_id = ${id} AND meta->>'competenciaEsperada' IS NOT NULL
+  `).map((r: any) => r.ce).filter(Boolean) as string[];
+  // corrigirCompetencia=true → descarta a informada e deixa cada envio usar a
+  // competência detectada no comprovante (meta.competenciaEsperada).
+  let competenciaFix: string | null | undefined;
+  if (corrigirCompetencia === true) competenciaFix = null;
+  else if (typeof corrigirCompetencia === 'string' && /^\d{2}\/\d{4}$/.test(corrigirCompetencia)) {
+    if (esperadas.length > 0 && !esperadas.includes(corrigirCompetencia)) {
+      return NextResponse.json({ error: `competência ${corrigirCompetencia} não bate com as datas dos comprovantes (${esperadas.join(' ou ')})` }, { status: 400 });
+    }
+    competenciaFix = corrigirCompetencia;
+  }
+  if (competenciaSel && forcarCompetencia !== true && competenciaFix === undefined) {
     if (esperadas.length > 0 && !esperadas.includes(competenciaSel)) {
       return NextResponse.json({
         error: `Competência ${competenciaSel} diverge das datas de pagamento dos comprovantes (esperada: ${esperadas.join(' ou ')}). ${regraCompetencia}`,
@@ -69,7 +79,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
   }
 
-  const sel = { ...(run.selection as any), phase: 'envio', ...(onlyEnvioIds?.length ? { onlyEnvioIds } : {}) };
+  const sel = { ...(run.selection as any), phase: 'envio', ...(onlyEnvioIds?.length ? { onlyEnvioIds } : {}), ...(competenciaFix !== undefined ? { competencia: competenciaFix } : {}) };
+  if (sel.competencia == null) delete sel.competencia;
   await sql`UPDATE comprovantes_runs
     SET status='queued', selection=${JSON.stringify(sel)}::jsonb, started_at=NULL, finished_at=NULL
     WHERE id=${id}`;

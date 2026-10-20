@@ -480,7 +480,7 @@ async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Pr
           await insertEnvio({
             ...base, tipoPagamento: 'FGTS', banco: bancoItem,
             status: 'sem_par_txt', meta,
-            error: `página FGTS (R$${comp.valor ?? '?'}) sem entrada correspondente na remessa`,
+            error: `página FGTS (R$${comp.valor ?? '?'}${comp.vencimento ? `, venc. ${comp.vencimento.split('-').reverse().join('/')}` : ''}${comp.identificadorQr ? `, QR ${comp.identificadorQr.slice(0, 8)}…` : ''}) sem entrada correspondente na remessa`,
           });
           continue;
         }

@@ -239,7 +239,10 @@ export function parseRemessaJ(buffer: Buffer, fileName: string): RemessaJFile {
     lineNo++;
     if (raw[7] !== '3' || raw[13] !== 'J') continue;
 
-    if (/pix-qrcode/i.test(raw)) {
+    // J52 = registro de dados complementares (movimento '052' no campo
+    // 15-19 do layout). A checagem por URL falha quando o recebedor não é
+    // Caixa (ex.: apipix.tesouro.gov.br) — o layout é o discriminador certo.
+    if (raw.slice(14, 19) === '00052' || /pix-qrcode/i.test(raw)) {
       // J52 — complemento do J principal imediatamente anterior
       const j52 = parseSegJ52(raw);
       if (lastJ) {

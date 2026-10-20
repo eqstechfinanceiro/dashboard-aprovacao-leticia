@@ -83,6 +83,8 @@ const STATUS_ENVIO: Record<string, { label: string; cls: string }> = {
   sem_funcionario: { label: 'Funcionário não encontrado', cls: 'bg-orange-100 text-orange-700' },
   homonimo_ambiguo: { label: 'Homônimo ambíguo', cls: 'bg-orange-100 text-orange-700' },
   txt_sem_pdf: { label: 'No TXT, sem comprovante', cls: 'bg-amber-100 text-amber-700' },
+  sem_par_txt: { label: 'No PDF, sem remessa', cls: 'bg-amber-100 text-amber-700' },
+  valor_ambiguo: { label: 'Pareamento ambíguo', cls: 'bg-orange-100 text-orange-700' },
 };
 
 const RUN_STATUS: Record<string, { label: string; cls: string }> = {
@@ -206,8 +208,9 @@ export default function AutomacaoComprovantesPage() {
   const [remUpload, setRemUpload] = useState<{ uploadId: string; files: { name: string; size: number; kind: string; banco?: string | null }[] } | null>(null);
   const [remError, setRemError] = useState<string | null>(null);
   const [remComp, setRemComp] = useState('');
-  const [remTipo, setRemTipo] = useState<'FOL' | 'FER'>('FOL');
+  const [remTipo, setRemTipo] = useState<'FOL' | 'FER' | 'FGTS'>('FOL');
   const [confirming, setConfirming] = useState<number | null>(null);
+  const [compFix, setCompFix] = useState<{ runId: number; informada: string; esperada: string[]; regra: string } | null>(null);
 
   // Funcionários
   const [funcQ, setFuncQ] = useState('');
@@ -392,8 +395,9 @@ export default function AutomacaoComprovantesPage() {
       const data = await resp.json();
       if (!resp.ok) throw new Error(data.error || `HTTP ${resp.status}`);
       setRemUpload(data);
-      // Sugestão pelo nome do arquivo (FERIA* → férias) — o usuário confirma.
+      // Sugestão pelo nome do arquivo (FERIA* → férias, FGTS* → FGTS) — o usuário confirma.
       if ((data.files || []).some((f: any) => /FERIA/i.test(f.name))) setRemTipo('FER');
+      if ((data.files || []).some((f: any) => /FGTS/i.test(f.name))) setRemTipo('FGTS');
     } catch (err) {
       setRemError(String(err));
       setRemUpload(null);
@@ -425,28 +429,30 @@ export default function AutomacaoComprovantesPage() {
     }
   };
 
-  const confirmRemessa = async (id: number, action: 'confirmar' | 'cancelar', forcarCompetencia = false) => {
+  const confirmRemessa = async (
+    id: number,
+    action: 'confirmar' | 'cancelar',
+    opts: { forcar?: boolean; corrigir?: true | string } = {},
+  ) => {
     setConfirming(id);
     try {
       const resp = await fetch(`/api/comprovantes/runs/${id}/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, ...(forcarCompetencia ? { forcarCompetencia: true } : {}) }),
+        body: JSON.stringify({
+          action,
+          ...(opts.forcar ? { forcarCompetencia: true } : {}),
+          ...(opts.corrigir ? { corrigirCompetencia: opts.corrigir } : {}),
+        }),
       });
       if (resp.ok) {
+        setCompFix(null);
         loadRuns();
         loadRunDetail(id);
       } else {
         const d = await resp.json().catch(() => ({}));
         if (resp.status === 409 && d.code === 'competencia_divergente') {
-          const ok = window.confirm(
-            `ATENÇÃO — competência provavelmente errada.\n\n` +
-            `Informada: ${d.informada}\nEsperada pelas datas de pagamento: ${(d.esperada || []).join(' ou ')}\n\n` +
-            `${d.regra || 'Confira a competência esperada para o tipo de pagamento deste run.'} ` +
-            `Enviar com a competência errada indexa os documentos no mês errado.\n\n` +
-            `Confirma mesmo assim enviar com ${d.informada}?`
-          );
-          if (ok) return confirmRemessa(id, action, true);
+          setCompFix({ runId: id, informada: d.informada, esperada: d.esperada || [], regra: d.regra || '' });
           return;
         }
         alert(d.error || 'Falha na confirmação');
@@ -828,22 +834,22 @@ export default function AutomacaoComprovantesPage() {
             </CardTitle>
             <p className="text-xs text-gray-400">
               Suba os PDFs de remessa (Itaú 2/pág., Bradesco 1/pág.) e, opcionalmente, os TXTs CNAB de conferência.
-              Escolha o tipo de pagamento (proventos ou férias) — ele define o documento no e2doc e a pasta no SharePoint.
-              Funcionários são resolvidos pelo cadastro (conta → CPF → nome); o TXT serve de conferência cruzada.
+              Escolha o tipo de pagamento (proventos, férias ou FGTS) — ele define o documento no e2doc e a pasta no SharePoint.
+              Funcionários são resolvidos pelo cadastro (conta → CPF → nome); no FGTS a remessa .rem é obrigatória (o comprovante não tem nome/CPF).
               Nada é enviado sem a sua confirmação após a análise.
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="border-2 border-dashed border-gray-200 rounded-xl p-5">
               <input
-                type="file" multiple accept=".pdf,.txt"
+                type="file" multiple accept=".pdf,.txt,.rem,.ret"
                 onChange={(e) => { setRemFiles([...(e.target.files || [])]); setRemUpload(null); }}
                 className="text-sm text-gray-600 file:mr-3 file:px-3 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-600 file:text-sm file:font-medium hover:file:bg-blue-100"
               />
               {remFiles.length > 0 && !remUpload && (
                 <div className="mt-3 text-xs text-gray-500">
                   {remFiles.length} arquivo{remFiles.length > 1 ? 's' : ''} selecionado{remFiles.length > 1 ? 's' : ''}
-                  <span className="text-gray-400"> — {remFiles.filter((f) => /\.pdf$/i.test(f.name)).length} PDF, {remFiles.filter((f) => /\.txt$/i.test(f.name)).length} TXT</span>
+                  <span className="text-gray-400"> — {remFiles.filter((f) => /\.pdf$/i.test(f.name)).length} PDF, {remFiles.filter((f) => /\.(txt|rem|ret)$/i.test(f.name)).length} TXT/REM</span>
                 </div>
               )}
             </div>
@@ -855,6 +861,7 @@ export default function AutomacaoComprovantesPage() {
                 {([
                   { v: 'FOL' as const, label: 'Proventos (folha)', dest: 'e2doc: doc PROVENTOS · competência = mês anterior ao pagamento · SP: Comprovante DP/PROVENTOS/PAGTOS MANUAIS' },
                   { v: 'FER' as const, label: 'Férias', dest: 'e2doc: doc FÉRIAS · competência = mês do pagamento · SP: Comprovante DP/FERIAS' },
+                  { v: 'FGTS' as const, label: 'FGTS (PIX QR Caixa)', dest: 'e2doc: doc FGTS · competência = mês anterior · SP: Comprovante DP/FGTS · remessa .rem OBRIGATÓRIA' },
                 ]).map((o) => (
                   <button
                     key={o.v}
@@ -874,7 +881,7 @@ export default function AutomacaoComprovantesPage() {
 
             <div className="flex items-center gap-3 flex-wrap">
               <label className="text-xs font-medium text-gray-600">
-                Competência e2doc ({remTipo === 'FER' ? 'mês do pagamento' : 'mês da folha, não do pagamento'})
+                Competência e2doc ({remTipo === 'FER' ? 'mês do pagamento' : 'mês da folha/guia, não do pagamento'})
               </label>
               <input
                 value={remComp}
@@ -888,6 +895,13 @@ export default function AutomacaoComprovantesPage() {
                 <span className="text-[11px] text-red-500">formato MM/AAAA</span>
               )}
             </div>
+
+            {remTipo === 'FGTS' && remUpload && !remUpload.files.some((f: any) => f.kind === 'txt') && (
+              <div className="text-xs text-amber-700 bg-amber-50 rounded-lg p-2.5 flex gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                FGTS exige a remessa (.rem/.txt) junto ao PDF — o comprovante de guia não traz nome nem CPF do funcionário; o vínculo sai do arquivo de remessa.
+              </div>
+            )}
 
             {remError && (
               <div className="text-xs text-red-600 bg-red-50 rounded-lg p-2.5 flex gap-2">
@@ -928,7 +942,7 @@ export default function AutomacaoComprovantesPage() {
               ) : (
                 <button
                   onClick={startRemessa}
-                  disabled={starting}
+                  disabled={starting || (remTipo === 'FGTS' && !remUpload.files.some((f: any) => f.kind === 'txt'))}
                   className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:bg-gray-300"
                 >
                   {starting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
@@ -1015,28 +1029,70 @@ export default function AutomacaoComprovantesPage() {
                           {/* Análise de remessa aguardando confirmação do usuário */}
                           {r.status === 'aguardando_confirmacao' && (() => {
                             const a = (r.result?.analise || {}) as any;
-                            const problemas = (a.semFuncionario ?? 0) + (a.homonimos ?? 0) + (a.divergentes ?? 0) + (a.txtSemPdf ?? 0);
-                            const tipoRun = r.selection?.tipo === 'FER' ? 'FER' : 'FOL';
+                            const problemas = (a.semFuncionario ?? 0) + (a.homonimos ?? 0) + (a.divergentes ?? 0) + (a.txtSemPdf ?? 0) + (a.ambiguos ?? 0);
+                            const tipoRun = r.selection?.tipo === 'FER' ? 'FER' : r.selection?.tipo === 'FGTS' ? 'FGTS' : 'FOL';
+                            const tipoBadge = tipoRun === 'FER'
+                              ? { cls: 'bg-teal-100 text-teal-700', label: 'FÉRIAS → Comprovante DP/FERIAS' }
+                              : tipoRun === 'FGTS'
+                                ? { cls: 'bg-amber-100 text-amber-700', label: 'FGTS → Comprovante DP/FGTS' }
+                                : { cls: 'bg-blue-100 text-blue-700', label: 'PROVENTOS → PAGTOS MANUAIS' };
                             return (
                               <div className="mb-3 rounded-xl border border-violet-200 bg-violet-50/60 p-4">
                                 <div className="text-sm font-semibold text-violet-800 flex items-center gap-2 mb-2">
                                   <AlertTriangle className="w-4 h-4" /> Análise concluída — revise antes de enviar
-                                  <Badge className={`border-0 text-[11px] ${tipoRun === 'FER' ? 'bg-teal-100 text-teal-700' : 'bg-blue-100 text-blue-700'}`}>
-                                    {tipoRun === 'FER' ? 'FÉRIAS → Comprovante DP/FERIAS' : 'PROVENTOS → PAGTOS MANUAIS'}
+                                  <Badge className={`border-0 text-[11px] ${tipoBadge.cls}`}>
+                                    {tipoBadge.label}
                                   </Badge>
                                 </div>
                                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-600 mb-3">
                                   <span><b className="text-emerald-600">{a.prontos ?? 0}</b> prontos p/ envio</span>
                                   {(a.divergentes ?? 0) > 0 && <span><b className="text-red-600">{a.divergentes}</b> divergentes (valor)</span>}
+                                  {(a.ambiguos ?? 0) > 0 && <span><b className="text-orange-600">{a.ambiguos}</b> pareamento ambíguo (mesmo valor+data)</span>}
                                   {(a.semFuncionario ?? 0) > 0 && <span><b className="text-orange-600">{a.semFuncionario}</b> funcionário não encontrado</span>}
                                   {(a.homonimos ?? 0) > 0 && <span><b className="text-orange-600">{a.homonimos}</b> homônimos ambíguos</span>}
-                                  {(a.semParTxt ?? 0) > 0 && <span><b className="text-amber-600">{a.semParTxt}</b> no PDF sem par no TXT</span>}
-                                  {(a.txtSemPdf ?? 0) > 0 && <span><b className="text-amber-600">{a.txtSemPdf}</b> no TXT sem comprovante</span>}
-                                  <span className="text-gray-400">{a.comprovantes ?? 0} comprovantes · {a.txtEntries ?? 0} linhas TXT</span>
+                                  {(a.semParTxt ?? 0) > 0 && <span><b className="text-amber-600">{a.semParTxt}</b> no PDF sem remessa</span>}
+                                  {(a.txtSemPdf ?? 0) > 0 && <span><b className="text-amber-600">{a.txtSemPdf}</b> na remessa sem comprovante</span>}
+                                  <span className="text-gray-400">{a.comprovantes ?? 0} comprovantes · {a.txtEntries ?? 0} linhas TXT{a.paginasIgnoradas ? ` · ${a.paginasIgnoradas} pág. ignoradas` : ''}{a.remessaNaoFgts ? ` · ${a.remessaNaoFgts} entrada(s) .rem não-FGTS` : ''}</span>
                                 </div>
                                 {(a.warnings || []).length > 0 && (
                                   <div className="text-[11px] text-amber-700 bg-amber-50 rounded-lg p-2 mb-3 max-h-24 overflow-y-auto font-mono">
                                     {a.warnings.map((w: string, i: number) => <div key={i}>{w}</div>)}
+                                  </div>
+                                )}
+                                {compFix?.runId === r.id && (
+                                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 mb-3">
+                                    <div className="text-xs font-semibold text-red-700 flex items-center gap-1.5 mb-1">
+                                      <AlertTriangle className="w-3.5 h-3.5" /> Competência divergente
+                                    </div>
+                                    <div className="text-xs text-red-700 mb-2">
+                                      Informada <b>{compFix.informada}</b>, mas as datas de pagamento indicam{' '}
+                                      <b>{compFix.esperada.join(' ou ')}</b>. {compFix.regra}
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <button
+                                        onClick={() => confirmRemessa(r.id, 'confirmar', { corrigir: compFix.esperada.length === 1 ? compFix.esperada[0] : true })}
+                                        disabled={confirming === r.id}
+                                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 disabled:bg-gray-300"
+                                      >
+                                        {confirming === r.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
+                                        {compFix.esperada.length === 1
+                                          ? `Corrigir para ${compFix.esperada[0]} e enviar`
+                                          : 'Enviar com a competência de cada comprovante'}
+                                      </button>
+                                      <button
+                                        onClick={() => confirmRemessa(r.id, 'confirmar', { forcar: true })}
+                                        disabled={confirming === r.id}
+                                        className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 text-xs hover:bg-red-100 disabled:opacity-50"
+                                      >
+                                        Enviar com {compFix.informada} mesmo assim
+                                      </button>
+                                      <button
+                                        onClick={() => setCompFix(null)}
+                                        className="px-2 py-1.5 text-xs text-gray-500 hover:text-gray-700"
+                                      >
+                                        Dispensar
+                                      </button>
+                                    </div>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2">
