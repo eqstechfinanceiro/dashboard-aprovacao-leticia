@@ -172,6 +172,28 @@ export async function eqsGetProcesso(doc: string, fornecCod: string, tenant: str
   return null;
 }
 
+// Lista processos de pagamento com filtros (DDSPVENC_DE/ATE, CDSDOC etc),
+// paginando até esgotar. Cada item é o header SDS + campos do processo.
+export async function eqsListProcpag(
+  params: Record<string, string>,
+  tenant: string = TENANT,
+  maxPages = 20
+): Promise<Record<string, any>[]> {
+  if (!eqsPortalConfigured()) return [];
+  const token = await getToken();
+  const out: Record<string, any>[] = [];
+  for (let page = 1; page <= maxPages; page++) {
+    const q = new URLSearchParams({ ...params, page: String(page), pageSize: '100' });
+    const res = await httpRequest(`/wsrprocpag?${q}`, { headers: authHeaders(token, tenant) });
+    if (res.status < 200 || res.status >= 300) break;
+    const data = JSON.parse(res.body.toString('utf-8'));
+    const items: Record<string, any>[] = data.items || [];
+    out.push(...items);
+    if (!data.hasNext || items.length < 100) break;
+  }
+  return out;
+}
+
 // Mesma busca, retornando só o NDSRECNO (deep link do portal Angular).
 export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promise<string | null> {
   const proc = await eqsGetProcesso(doc, fornecCod);

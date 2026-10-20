@@ -27,6 +27,16 @@ interface EnvioRow {
   tipo_pagamento: string | null; pedido: string | null; modelo_documento: string | null;
   competencia: string | null; destino_path: string | null; destino_filename: string | null;
   status: string; error: string | null; generated_pdf_path: string | null;
+  meta?: {
+    valor?: number; dataPagamento?: string; vencimento?: string;
+    portal?: {
+      status?: string; processo?: number; doc?: string; guia?: string | null;
+      guiaVenc?: string | null; totalGuia?: number | null; cobv?: string | null;
+      composicao?: string[]; guiaPath?: string;
+      trabalhador?: { nome: string; cpf: string | null; matricula: string | null };
+      trabalhadores?: { nome: string; cpf: string | null; matricula: string | null }[];
+    };
+  } | null;
 }
 interface Funcionario {
   cpf: string; nome: string; cc: string; regiao: string; filial: string;
@@ -210,6 +220,7 @@ export default function AutomacaoComprovantesPage() {
   const [remComp, setRemComp] = useState('');
   const [remTipo, setRemTipo] = useState<'FOL' | 'FER' | 'FGTS'>('FOL');
   const [confirming, setConfirming] = useState<number | null>(null);
+  const [resolvingPortal, setResolvingPortal] = useState<number | null>(null);
   const [compFix, setCompFix] = useState<{ runId: number; informada: string; esperada: string[]; regra: string } | null>(null);
 
   // Funcionários
@@ -459,6 +470,28 @@ export default function AutomacaoComprovantesPage() {
       }
     } finally {
       setConfirming(null);
+    }
+  };
+
+  const resolverPortal = async (id: number) => {
+    setResolvingPortal(id);
+    try {
+      const resp = await fetch(`/api/comprovantes/runs/${id}/resolver-portal`, { method: 'POST' });
+      const d = await resp.json().catch(() => ({}));
+      if (!resp.ok) { alert(d.error || `Falha (${resp.status})`); return; }
+      const r = d.resumo || {};
+      const partes = [
+        r.resolvidos ? `${r.resolvidos} identificado(s)` : null,
+        r.ambiguos_confirmados ? `${r.ambiguos_confirmados} ambíguo(s) confirmado(s)` : null,
+        r.identificados_sem_cadastro ? `${r.identificados_sem_cadastro} fora do cadastro` : null,
+        r.sem_processo ? `${r.sem_processo} sem processo no portal` : null,
+        r.erros?.length ? `${r.erros.length} erro(s)` : null,
+      ].filter(Boolean);
+      alert(partes.length ? `Portal EQS: ${partes.join(' · ')}` : 'Portal EQS: nada para identificar');
+      loadRuns();
+      loadRunDetail(id);
+    } finally {
+      setResolvingPortal(null);
     }
   };
 
@@ -1052,6 +1085,7 @@ export default function AutomacaoComprovantesPage() {
                                   {(a.homonimos ?? 0) > 0 && <span><b className="text-orange-600">{a.homonimos}</b> homônimos ambíguos</span>}
                                   {(a.semParTxt ?? 0) > 0 && <span><b className="text-amber-600">{a.semParTxt}</b> no PDF sem remessa</span>}
                                   {(a.txtSemPdf ?? 0) > 0 && <span><b className="text-amber-600">{a.txtSemPdf}</b> na remessa sem comprovante</span>}
+                                  {(a.portalResolvidos ?? 0) > 0 && <span><b className="text-blue-600">{a.portalResolvidos}</b> identificado(s) via portal EQS</span>}
                                   <span className="text-gray-400">{a.comprovantes ?? 0} comprovantes · {a.txtEntries ?? 0} linhas TXT{a.paginasIgnoradas ? ` · ${a.paginasIgnoradas} pág. ignoradas` : ''}{a.remessaNaoFgts ? ` · ${a.remessaNaoFgts} entrada(s) .rem não-FGTS` : ''}</span>
                                 </div>
                                 {(a.warnings || []).length > 0 && (
@@ -1114,6 +1148,17 @@ export default function AutomacaoComprovantesPage() {
                                   {problemas > 0 && (
                                     <span className="text-[11px] text-gray-500 ml-2">somente os prontos são enviados; problemas ficam registrados</span>
                                   )}
+                                  {((a.semParTxt ?? 0) + (a.ambiguos ?? 0)) > 0 && (
+                                    <button
+                                      onClick={() => resolverPortal(r.id)}
+                                      disabled={resolvingPortal === r.id}
+                                      title="Consulta os processos de pagamento no portal EQS e identifica comprovantes pela guia FGTS anexada"
+                                      className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-blue-300 text-blue-700 text-xs font-semibold hover:bg-blue-50 disabled:opacity-50"
+                                    >
+                                      {resolvingPortal === r.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+                                      Identificar via portal EQS
+                                    </button>
+                                  )}
                                 </div>
                               </div>
                             );
@@ -1153,17 +1198,37 @@ export default function AutomacaoComprovantesPage() {
                                         <td className="py-2 pr-3">
                                           <EnvioStatusBadge status={e.status} />
                                           {e.error && <div className="text-red-500 mt-0.5 max-w-[200px] truncate" title={e.error}>{e.error}</div>}
+                                          {e.meta?.portal && e.meta.portal.status !== 'sem_processo' && (
+                                            <div
+                                              className="text-[10px] text-blue-600 mt-0.5 max-w-[200px] truncate"
+                                              title={`Portal EQS · proc. ${e.meta.portal.doc}/${e.meta.portal.processo}${e.meta.portal.composicao?.length ? '\n' + e.meta.portal.composicao.join('\n') : ''}`}
+                                            >
+                                              portal · guia {e.meta.portal.guia || e.meta.portal.doc}
+                                              {e.meta.portal.trabalhador ? ` · ${e.meta.portal.trabalhador.nome}` : ''}
+                                            </div>
+                                          )}
                                         </td>
                                         <td className="py-2">
-                                          {e.generated_pdf_path && (
-                                            <button
-                                              onClick={() => setPdfView({ url: `/api/comprovantes/generated/${e.id}`, title: e.destino_filename || e.source_file })}
-                                              className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg"
-                                              title="Ver PDF gerado"
-                                            >
-                                              <Eye className="w-4 h-4" />
-                                            </button>
-                                          )}
+                                          <div className="flex items-center gap-0.5">
+                                            {e.generated_pdf_path && (
+                                              <button
+                                                onClick={() => setPdfView({ url: `/api/comprovantes/generated/${e.id}`, title: e.destino_filename || e.source_file })}
+                                                className="text-blue-600 hover:bg-blue-50 p-1.5 rounded-lg"
+                                                title="Ver PDF gerado"
+                                              >
+                                                <Eye className="w-4 h-4" />
+                                              </button>
+                                            )}
+                                            {e.meta?.portal?.guiaPath && (
+                                              <button
+                                                onClick={() => setPdfView({ url: `/api/comprovantes/generated/${e.id}?doc=guia`, title: `Guia ${e.meta?.portal?.guia || e.meta?.portal?.doc || 'FGTS'}` })}
+                                                className="text-teal-600 hover:bg-teal-50 p-1.5 rounded-lg"
+                                                title="Ver guia FGTS do portal"
+                                              >
+                                                <FileText className="w-4 h-4" />
+                                              </button>
+                                            )}
+                                          </div>
                                         </td>
                                       </tr>
                                     ))}

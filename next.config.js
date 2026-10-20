@@ -9,14 +9,15 @@ const nextConfig = {
       {
         // Documentos fiscais (PDF/XML) precisam abrir em <iframe> na própria
         // página /fiscal — SAMEORIGIN libera só frames internos do app.
-        source: '/api/fiscal/doc',
+        // Idem comprovantes gerados / guias do portal em /automacao-comprovantes.
+        source: '/:path(api/fiscal/doc|api/comprovantes/generated/[0-9]+)',
         headers: [
           { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
         ],
       },
       {
-        source: '/:path((?!api/fiscal/doc).*)*',
+        source: '/:path((?!api/fiscal/doc|api/comprovantes/generated).*)*',
         headers: [
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },

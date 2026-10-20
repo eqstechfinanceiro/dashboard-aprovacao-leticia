@@ -83,7 +83,7 @@ function collectCookies(jar: Map<string, string>, headers: Record<string, any>) 
   }
 }
 
-async function oldPortalSession(force = false): Promise<string | null> {
+export async function oldPortalSession(force = false): Promise<string | null> {
   if (!force && sessionCookies && Date.now() - sessionAt < 50 * 60 * 1000) return sessionCookies;
   if (!USER || !PASS) return null;
   const jar = new Map<string, string>();
@@ -111,14 +111,14 @@ async function oldPortalSession(force = false): Promise<string | null> {
   return sessionCookies;
 }
 
-interface PortalDocItem {
+export interface PortalDocItem {
   arquivo_id: number;
   tipo: string;
   nome: string;
   data: string;
 }
 
-async function oldPortalListDocs(cookies: string, grupo: string, filial: string, chave: string): Promise<PortalDocItem[]> {
+export async function oldPortalListDocs(cookies: string, grupo: string, filial: string, chave: string): Promise<PortalDocItem[]> {
   const r = await httpReq(
     `${OLD_BASE}/old/api/arquivo/lista/${grupo}/${filial}/SDS?chave=${encodeURIComponent(chave)}`,
     { headers: { Cookie: cookies, Accept: 'application/json' } }
@@ -132,7 +132,7 @@ async function oldPortalListDocs(cookies: string, grupo: string, filial: string,
   }
 }
 
-async function oldPortalDownload(cookies: string, arquivoId: number): Promise<Buffer | null> {
+export async function oldPortalDownload(cookies: string, arquivoId: number): Promise<Buffer | null> {
   const r = await httpReq(`${OLD_BASE}/old/arquivo/${arquivoId}`, { headers: { Cookie: cookies } });
   if (r.status !== 200 || !r.body.length || r.body.length > MAX_DOC_BYTES) return null;
   return r.body;

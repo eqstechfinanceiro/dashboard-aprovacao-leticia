@@ -21,6 +21,7 @@ import { getSetting } from '../db/settings';
 import { updateRunProgress, insertEnvio, finishRun, failRun, type RunRow } from './db';
 import { parseCnab, parseRemessaJ, BANCO_NOME, BANCO_E2DOC, type CnabEntry, type CnabFile, type RemessaJEntry, type RemessaJFile } from './cnab';
 import { analisarFolhaPdf, analisarFgtsPdf, fragmentarComprovante, type ComprovanteFolha, type FolhaAnalise } from './folha-pdf';
+import { resolverComprovantesPortal } from './portal-fgts';
 
 const DESTINO = SP_SITES.destino;
 
@@ -354,7 +355,7 @@ async function processRemessaAnalise(run: RunRow, sel: RemessaSelection): Promis
 // valor exato + data de pagamento; página↔funcionário é CPF do J52 → nome do J.
 
 async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Promise<void> {
-  const resumo: AnaliseResumo & { ambiguos: number; paginasIgnoradas: number; remessaNaoFgts: number } = {
+  const resumo: AnaliseResumo & { ambiguos: number; paginasIgnoradas: number; remessaNaoFgts: number; portalResolvidos?: number } = {
     files: 0, comprovantes: 0, txtEntries: 0,
     prontos: 0, duplicadosPre: 0, divergentes: 0,
     semFuncionario: 0, homonimos: 0, semParTxt: 0, txtSemPdf: 0,
@@ -447,6 +448,7 @@ async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Pr
           }
           if (cands.length > 1) {
             meta.warnings.push(`par_ambiguo_ordem: ${cands.length} entradas .rem com mesmo valor+data — pareado na ordem do arquivo`);
+            (meta as any).candidatos = cands.map((c) => ({ seq: c.seq, nome: c.nome, cpf: c.cpf, urlQr: c.urlQr }));
           }
           if (cands.length) { entry = cands[0]; usados.add(entry); }
         }
@@ -503,7 +505,7 @@ async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Pr
           chave: null, cpf: func.cpf, nome: func.nome, regiao: func.regiao, cc: func.cc,
           tipoPagamento: 'FGTS', banco: bancoItem,
           status: ambiguo ? 'valor_ambiguo' : 'pronto',
-          meta: { ...meta, via, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, urlQr: entry.urlQr, file: entry._file } },
+          meta: { ...meta, via, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, urlQr: entry.urlQr, file: entry._file, candidatos: (meta as any).candidatos } },
           error: meta.warnings.join('; ') || null,
         });
       }
@@ -528,6 +530,24 @@ async function processRemessaAnaliseFgts(run: RunRow, sel: RemessaSelection): Pr
       resumo.warnings.unshift(
         `competencia_divergente: informada ${sel.competencia}, mas as datas de pagamento indicam ${[...compEsperadas].join(' ou ')}`
       );
+    }
+
+    // 5. Fallback portal EQS: comprovantes sem par na remessa (pagos por fora)
+    // e pares ambíguos são identificados pela guia anexada ao processo CBME**.
+    if (resumo.semParTxt > 0 || resumo.ambiguos > 0) {
+      try {
+        await updateRunProgress(run.id, { phase: 'analyzing', currentFileName: 'portal EQS — identificando guias' });
+        const r = await resolverComprovantesPortal(run.id);
+        resumo.portalResolvidos = r.resolvidos;
+        resumo.semParTxt -= r.resolvidos - r.ambiguos_confirmados;
+        resumo.ambiguos -= r.ambiguos_confirmados;
+        resumo.prontos += r.resolvidos;
+        if (r.erros.length) {
+          resumo.warnings.push(`portal: ${r.erros.length} falha(s) na identificação (${r.erros[0].erro})`);
+        }
+      } catch (e: any) {
+        resumo.warnings.push(`portal EQS: identificação automática falhou (${String(e?.message || e).slice(0, 120)})`);
+      }
     }
 
     resumo.warnings = resumo.warnings.slice(0, 50);
