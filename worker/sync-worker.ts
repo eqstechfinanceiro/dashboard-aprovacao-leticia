@@ -30,6 +30,8 @@ import {
 } from '../lib/sync/notifications';
 import { syncImpacto } from '../lib/impacto/totvs';
 import { syncBoletos } from '../lib/boletos/totvs';
+import { syncConferencia } from '../lib/conferencia/sync';
+import { syncServicoDocs } from '../lib/fiscal/servico-docs';
 import { getSetting, setSetting } from '../lib/db/settings';
 
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
@@ -214,6 +216,25 @@ async function warmCycle() {
     } catch (e: any) {
       failed = true;
       await logError(runId, 'warm', 'boletos-se2', e?.message || String(e), true);
+    }
+    // Conferência de mercadoria — SF1×XML (Z01/SDS/SIEG) por ledger, janela 14d
+    try {
+      const conf = await syncConferencia();
+      meta.conferencia = `notas:${conf.total} conf:${conf.conferidas} ok:${conf.match} div:${conf.divergentes} falha:${conf.falhas} skip:${conf.puladas} fontes:${JSON.stringify(conf.fontes)}${conf.error ? ' !err' : ''}`;
+      if (conf.error) failed = true;
+    } catch (e: any) {
+      failed = true;
+      await logError(runId, 'warm', 'conferencia', e?.message || String(e), true);
+    }
+    // Anexos do portal EQS — notas de serviço pendentes/falhas recebem TODOS
+    // os docs do processo (o runner local baixa só o primeiro tipo 'G').
+    try {
+      const sd = await syncServicoDocs({ limit: 15 });
+      if (sd.processadas || sd.erros.length) {
+        meta.servico_docs = `proc:${sd.processadas} docs:+${sd.anexados} sem:${sd.sem_docs} n/a:${sd.proc_nao_encontrado} err:${sd.erros.length}`;
+      }
+    } catch (e: any) {
+      await logError(runId, 'warm', 'servico-docs', e?.message || String(e), true);
     }
     await finishRun(runId, failed ? 'error' : 'done', meta);
     console.log('[WARM] ciclo', failed ? 'com erros' : 'ok');

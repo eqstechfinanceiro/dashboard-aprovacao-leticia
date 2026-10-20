@@ -24,6 +24,35 @@ const MIME: Record<string, string> = {
 export async function GET(request: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'Banco indisponível' }, { status: 503 });
 
+  // doc_id → anexo extra do portal (fiscal_notas_docs): boleto, nota real, etc.
+  const docRowId = parseInt(request.nextUrl.searchParams.get('doc_id') || '', 10);
+  if (docRowId) {
+    const rows = await sql`SELECT nome, path FROM fiscal_notas_docs WHERE id = ${docRowId}`;
+    const rel = String(rows[0]?.path || '');
+    if (!rel.startsWith('fiscal/')) return NextResponse.json({ error: 'Documento não encontrado' }, { status: 404 });
+    const file = path.join(DIR, rel);
+    if (!existsSync(file)) return NextResponse.json({ error: 'Arquivo indisponível' }, { status: 404 });
+    const nome = String(rows[0].nome || 'documento');
+    const ext = path.extname(file).toLowerCase();
+    if (ext === '.xml' && request.nextUrl.searchParams.get('raw') !== '1') {
+      return new NextResponse(danfeHtml(readFileSync(file, 'utf-8')), {
+        headers: {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Content-Disposition': `inline; filename="${nome.replace(/\.xml$/i, '')}.html"`,
+        },
+      });
+    }
+    const type = MIME[ext] || 'application/octet-stream';
+    const webStream = Readable.toWeb(createReadStream(file));
+    return new NextResponse(webStream as ReadableStream, {
+      headers: {
+        'Content-Type': type,
+        'Content-Length': String(statSync(file).size),
+        'Content-Disposition': `inline; filename="${nome}"`,
+      },
+    });
+  }
+
   const id = parseInt(request.nextUrl.searchParams.get('id') || '', 10);
   if (!id) return NextResponse.json({ error: 'id obrigatório' }, { status: 400 });
 

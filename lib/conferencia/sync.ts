@@ -480,7 +480,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
         await upsertNota(runId, {
           ...base, tipo: vex ? 'vexpenses' : 'mercadoria',
           autoStatus: 'erro',
-          autoResumo: 'XML não obtido em nenhuma fonte (cache/Z01/SIEG)',
+          autoResumo: 'XML não obtido em nenhuma fonte (cache/Z01/SDS/SIEG)',
           checks: [{ field: 'XML', expected: 'NF-e', actual: chave ? 'não obtido' : 'sem chave na SF1', match: false }],
           extra: { ...extraBase, tentativa: tent },
           tentativas: tent, nextRetry,

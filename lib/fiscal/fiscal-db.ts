@@ -114,6 +114,22 @@ export async function ensureFiscalTables(): Promise<void> {
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_by TEXT`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancel_motivo TEXT`;
+  // Anexos extras do portal EQS (serviço): todos os documentos do processo,
+  // não só o primeiro tipo 'G' que o runner baixa.
+  await sql`
+    CREATE TABLE IF NOT EXISTS fiscal_notas_docs (
+      id BIGSERIAL PRIMARY KEY,
+      nota_id BIGINT NOT NULL REFERENCES fiscal_notas(id) ON DELETE CASCADE,
+      arquivo_id BIGINT NOT NULL,
+      nome TEXT NOT NULL,
+      tipo TEXT,
+      path TEXT NOT NULL,
+      size INT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (nota_id, arquivo_id)
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_fiscal_notas_docs_nota ON fiscal_notas_docs(nota_id)`;
 }
 
 // cstOnly: todas as divergências são "Origem CST" — campo informativo que o
@@ -162,6 +178,16 @@ export async function deleteFiscalDoc(notaId: number): Promise<void> {
       }
     }
     await sql`UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${notaId}`;
+    const docs = await sql`SELECT id, path FROM fiscal_notas_docs WHERE nota_id = ${notaId}`;
+    for (const d of docs) {
+      const rel2 = String(d.path || '');
+      if (rel2.startsWith('fiscal/')) {
+        try {
+          unlinkSync(path.join(process.cwd(), 'private-downloads', rel2));
+        } catch {}
+      }
+    }
+    await sql`DELETE FROM fiscal_notas_docs WHERE nota_id = ${notaId}`;
   } catch {
     /* noop */
   }
@@ -192,5 +218,24 @@ export async function sweepOldFiscalDocs(): Promise<number> {
     }
     await sql`UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${r.id}`;
   }
+  // Mesma retenção pros anexos extras do portal (fiscal_notas_docs).
+  try {
+    const oldDocs = await sql`
+      SELECT d.id, d.path FROM fiscal_notas_docs d
+      JOIN fiscal_notas n ON n.id = d.nota_id
+      WHERE n.review_status <> 'confirmado_erro'
+        AND n.created_at < NOW() - INTERVAL '90 days'
+    `;
+    for (const d of oldDocs) {
+      const rel = String(d.path || '');
+      if (rel.startsWith('fiscal/')) {
+        try {
+          unlinkSync(path.join(process.cwd(), 'private-downloads', rel));
+          removed++;
+        } catch {}
+      }
+      await sql`DELETE FROM fiscal_notas_docs WHERE id = ${d.id}`;
+    }
+  } catch {}
   return removed;
 }

@@ -76,10 +76,10 @@ async function getToken(): Promise<string> {
   return token;
 }
 
-function authHeaders(token: string): Record<string, string> {
+function authHeaders(token: string, tenant: string = TENANT): Record<string, string> {
   return {
     Authorization: `Bearer ${token}`,
-    tenantid: TENANT,
+    tenantid: tenant,
     CUSRID: '001859',
     TIPOUSUARIO: 'protheus',
     'X-PO-Screen-Lock': 'true',
@@ -132,10 +132,10 @@ export async function eqsGetDanfePdf(chave: string): Promise<Buffer | null> {
 }
 
 // Fornecedor pelo CNPJ (14 dígitos). Retorna {cod, loja} do SA2 ou null.
-export async function eqsGetFornecedorByCnpj(cnpj: string): Promise<{ cod: string; loja: string } | null> {
+export async function eqsGetFornecedorByCnpj(cnpj: string, tenant: string = TENANT): Promise<{ cod: string; loja: string } | null> {
   if (!eqsPortalConfigured() || !/^\d{14}$/.test(cnpj)) return null;
   const token = await getToken();
-  const res = await httpRequest(`/wsrfornecedor?CA2CGC=${cnpj}&page=1&pageSize=3`, { headers: authHeaders(token) });
+  const res = await httpRequest(`/wsrfornecedor?CA2CGC=${cnpj}&page=1&pageSize=3`, { headers: authHeaders(token, tenant) });
   if (res.status < 200 || res.status >= 300) return null;
   const items = JSON.parse(res.body.toString('utf-8')).items || [];
   const f = items.find((x: any) => String(x.CA2CGC || '').trim() === cnpj) || items[0];
@@ -143,11 +143,12 @@ export async function eqsGetFornecedorByCnpj(cnpj: string): Promise<{ cod: strin
   return { cod: String(f.CA2COD || '').trim(), loja: String(f.CA2LOJA || '01').trim() };
 }
 
-// Processo de pagamento pela nota (doc + fornecedor). Retorna o NDSRECNO —
-// usado no deep link do portal Angular. Primeiro tenta modelo 'S' (serviço);
-// se não achar, repete sem filtro de modelo — notas de mercadoria usam
-// modelo '1'/'55' e morreriam no filtro de serviço.
-export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promise<string | null> {
+// Processo de pagamento pela nota (doc + fornecedor). Retorna o item completo
+// (CDSDOC/CDSSERIE/CDSFORNEC/CDSLOJA/NDSRECNO/CENTNREDUZ/DDSEMISSA...) — usado
+// no deep link e na chave de documentos do portal antigo. Primeiro tenta
+// modelo 'S' (serviço); se não achar, repete sem filtro de modelo — notas de
+// mercadoria usam modelo '1'/'55' e morreriam no filtro de serviço.
+export async function eqsGetProcesso(doc: string, fornecCod: string, tenant: string = TENANT): Promise<Record<string, any> | null> {
   if (!eqsPortalConfigured() || !doc || !fornecCod) return null;
   const token = await getToken();
   const base = {
@@ -163,11 +164,17 @@ export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promi
     base,
   ];
   for (const params of tentativas) {
-    const res = await httpRequest(`/wsrprocpag?${new URLSearchParams(params)}`, { headers: authHeaders(token) });
+    const res = await httpRequest(`/wsrprocpag?${new URLSearchParams(params)}`, { headers: authHeaders(token, tenant) });
     if (res.status < 200 || res.status >= 300) continue;
     const items = JSON.parse(res.body.toString('utf-8')).items || [];
-    const recno = items[0]?.NDSRECNO;
-    if (recno) return String(recno).trim();
+    if (items[0]) return items[0];
   }
   return null;
+}
+
+// Mesma busca, retornando só o NDSRECNO (deep link do portal Angular).
+export async function eqsGetProcessoRecno(doc: string, fornecCod: string): Promise<string | null> {
+  const proc = await eqsGetProcesso(doc, fornecCod);
+  const recno = proc?.NDSRECNO;
+  return recno ? String(recno).trim() : null;
 }

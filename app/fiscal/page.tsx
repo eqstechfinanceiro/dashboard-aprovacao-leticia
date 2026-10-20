@@ -61,6 +61,7 @@ interface FiscalNota {
   resultados_id: number | null;
   doc_path: string | null;
   doc_nome: string | null;
+  docs?: { id: number; nome: string; tipo: string }[];
 }
 
 interface FiscalRun {
@@ -133,13 +134,25 @@ function flatChecks(checks: FiscalNota['checks']): Check[] {
   return checks as Check[];
 }
 
+// Normaliza erros "específicos da nota" numa categoria única — sem isso o
+// filtro de divergência lista "valor 1118.81 NÃO ENCONTRADO", "valor 72.13
+// NÃO ENCONTRADO"... como tipos distintos (um por nota).
+function normDivTipo(t: string): string {
+  if (/^doc .+ não encontrado$/i.test(t)) return 'Doc não encontrado';
+  if (/^valor .+ não encontrado$/i.test(t)) return 'Valor não encontrado';
+  const m = t.match(/^(iss|irrf|inss) .+ não encontrado$/i);
+  if (m) return `${m[1].toUpperCase()} não encontrado`;
+  if (/^erro ao ler pdf/i.test(t)) return 'Erro ao ler PDF';
+  return t;
+}
+
 // Tipos de divergência de uma nota: sufixo do field sem o prefixo "Item X · ",
 // agrupado com contagem — [['TES', 2], ['Valor Total', 1]]
 function divTipos(checks: Check[]): [string, number][] {
   const m = new Map<string, number>();
   for (const c of checks) {
     if (c.match) continue;
-    const t = (c.field.split('·').pop() || c.field).trim() || c.field;
+    const t = normDivTipo((c.field.split('·').pop() || c.field).trim() || c.field);
     m.set(t, (m.get(t) || 0) + 1);
   }
   return [...m.entries()].sort((a, b) => b[1] - a[1]);
@@ -165,7 +178,9 @@ export default function FiscalPage() {
   const [acting, setActing] = useState<number | null>(null);
   const [erroForm, setErroForm] = useState<{ notaId: number; erro_tipo: string; descricao: string } | null>(null);
   const [cancelForm, setCancelForm] = useState<{ notaId: number; motivo: string } | null>(null);
-  const [docModal, setDocModal] = useState<{ id: number; nome: string } | null>(null);
+  const [docModal, setDocModal] = useState<{ id?: number; docId?: number; nome: string } | null>(null);
+  // Anexo selecionado por nota (nota_id → fiscal_notas_docs.id) — muda o iframe.
+  const [docSel, setDocSel] = useState<Record<number, number>>({});
   const [onlyErr, setOnlyErr] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -241,6 +256,29 @@ export default function FiscalPage() {
       await load();
     } catch (e: any) {
       alert(`Erro ao revisar: ${e.message}`);
+    } finally {
+      setActing(null);
+    }
+  };
+
+  // Baixa TODOS os documentos do processo no portal EQS (não só o primeiro
+  // 'G' que o runner pega — boletos e a nota real vêm junto).
+  const buscarDocs = async (notaId: number) => {
+    setActing(notaId);
+    try {
+      const res = await fetch('/api/fiscal/servico-docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nota_id: notaId }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
+      if (body.erros?.length) alert(`Portal: ${body.erros[0].erro}`);
+      else if (!body.anexados && body.proc_nao_encontrado) alert('Processo não encontrado no portal EQS.');
+      else if (!body.anexados && body.sem_docs) alert('O processo não tem documentos anexados no portal.');
+      await load();
+    } catch (e: any) {
+      alert(`Erro ao buscar documentos: ${e.message}`);
     } finally {
       setActing(null);
     }
@@ -851,7 +889,7 @@ export default function FiscalPage() {
                     </button>
 
                     {isOpen && (
-                      <div className={cn('border-t px-4 py-3', n.doc_path && 'grid gap-4 lg:grid-cols-2')}>
+                      <div className={cn('border-t px-4 py-3', (n.doc_path || (n.docs && n.docs.length > 0)) && 'grid gap-4 lg:grid-cols-2')}>
                         <div className="space-y-3 min-w-0">
                         {n.auto_resumo && <p className="text-sm">{n.auto_resumo}</p>}
 
@@ -936,6 +974,51 @@ export default function FiscalPage() {
                               Abrir em nova aba
                             </a>
                           </div>
+                        )}
+
+                        {/* Anexos do portal EQS — todos os documentos do processo
+                            (nota real + boletos + outros), servidos por doc_id. */}
+                        {n.docs && n.docs.length > 0 && (
+                          <div className="flex items-start gap-1.5 flex-wrap">
+                            <span className="text-xs text-muted-foreground mt-0.5">Docs do portal:</span>
+                            {n.docs.map((d) => {
+                              const selId = docSel[n.id] ?? (n.doc_path ? null : n.docs![0]?.id ?? null);
+                              const active = selId === d.id;
+                              const tipoLabel = d.tipo === 'G' ? 'Nota' : d.tipo === 'B' ? 'Boleto' : d.tipo || 'Doc';
+                              return (
+                                <button
+                                  key={d.id}
+                                  onClick={() => setDocSel({ ...docSel, [n.id]: d.id })}
+                                  className={cn(
+                                    'rounded-full border px-2 py-0.5 text-[10px] font-medium max-w-[240px] truncate',
+                                    active
+                                      ? 'border-blue-400 bg-blue-50 text-blue-700'
+                                      : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
+                                  )}
+                                  title={d.nome}
+                                >
+                                  <span className={cn('font-semibold', d.tipo === 'G' ? 'text-green-700' : d.tipo === 'B' ? 'text-amber-700' : '')}>
+                                    {tipoLabel}
+                                  </span>
+                                  {' · '}{d.nome}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                        {n.tipo === 'servico' && (
+                          <button
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline disabled:opacity-50"
+                            disabled={acting === n.id}
+                            onClick={() => buscarDocs(n.id)}
+                          >
+                            {acting === n.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Download className="h-3 w-3" />
+                            )}
+                            {n.docs && n.docs.length > 0 ? 'Atualizar documentos do portal' : 'Buscar documentos no portal'}
+                          </button>
                         )}
                         {n.reviewed_by && (
                           <p className="text-xs text-muted-foreground">
@@ -1082,25 +1165,31 @@ export default function FiscalPage() {
                         )}
                         </div>
 
-                        {(n.doc_path || /^\d{44}$/.test(n.chave_acesso || '')) && (
+                        {(n.doc_path || /^\d{44}$/.test(n.chave_acesso || '') || (n.docs && n.docs.length > 0)) && (() => {
+                          const sel = docSel[n.id]
+                            ? n.docs?.find((d) => d.id === docSel[n.id])
+                            : (n.doc_path ? undefined : n.docs?.[0]);
+                          const nomeSel = sel?.nome || n.doc_nome || 'documento';
+                          return (
                           <div className="min-w-0 border rounded-md overflow-hidden bg-muted/30 flex flex-col">
                             <div className="flex items-center gap-2 px-3 py-1.5 border-b bg-muted/50 text-xs text-muted-foreground">
                               <FileText className="h-3.5 w-3.5 shrink-0" />
-                              <span className="truncate">{n.doc_nome || 'documento'}</span>
+                              <span className="truncate">{nomeSel}</span>
                               <button
                                 className="ml-auto text-blue-600 hover:underline inline-flex items-center gap-1"
-                                onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
+                                onClick={() => setDocModal({ id: n.id, docId: sel?.id, nome: nomeSel })}
                               >
                                 <Maximize2 className="h-3 w-3" /> Ampliar
                               </button>
                             </div>
                             <iframe
-                              src={`/api/fiscal/doc?id=${n.id}`}
+                              src={sel ? `/api/fiscal/doc?doc_id=${sel.id}` : `/api/fiscal/doc?id=${n.id}`}
                               title={`Documento NF ${n.doc}`}
                               className="w-full flex-1 min-h-[480px] bg-white"
                             />
                           </div>
-                        )}
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
@@ -1273,7 +1362,7 @@ export default function FiscalPage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm font-medium truncate">{docModal.nome}</span>
             <a
-              href={`/api/fiscal/doc?id=${docModal.id}`}
+              href={docModal.docId ? `/api/fiscal/doc?doc_id=${docModal.docId}` : `/api/fiscal/doc?id=${docModal.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="ml-auto text-xs text-blue-600 hover:underline"
@@ -1285,7 +1374,7 @@ export default function FiscalPage() {
             </Button>
           </div>
           <iframe
-            src={`/api/fiscal/doc?id=${docModal.id}`}
+            src={docModal.docId ? `/api/fiscal/doc?doc_id=${docModal.docId}` : `/api/fiscal/doc?id=${docModal.id}`}
             title={docModal.nome}
             className="flex-1 rounded-b-lg bg-white"
             onClick={(e) => e.stopPropagation()}

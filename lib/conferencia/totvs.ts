@@ -170,3 +170,31 @@ export async function fetchZ01XmlByChave(chave: string): Promise<string | null> 
   }
   return null;
 }
+
+/**
+ * Fonte zero-custo alternativa: a fila "XMLs Disponíveis" do MATA143 (SDS)
+ * guarda o XML completo da NF-e em DS_XML — inclusive de notas já lançadas
+ * (DS_STATUS='G'), cobrindo casos que a Z01 não tem. Mesma genericQuery.
+ */
+export async function fetchSdsXmlByChave(chave: string): Promise<string | null> {
+  if (!/^\d{44}$/.test(chave)) return null;
+  for (const emp of Object.keys(EMPRESAS)) {
+    const tenantId = EMPRESAS[emp];
+    if (!tenantId) continue;
+    try {
+      const d = await genericQuery(tenantId, {
+        tables: 'SDS',
+        // DS_XML é memo — precisa de coluna companheira no fields (igual Z01).
+        fields: 'DS_DOC,DS_CHAVENF,DS_XML',
+        where: `SDS.DS_CHAVENF='${chave}' AND SDS.D_E_L_E_T_=' '`,
+        page: '1',
+        pageSize: '5',
+      });
+      for (const it of d.items || []) {
+        const xml = String(it.ds_xml || '').trim();
+        if (xml.includes('infNFe')) return xml;
+      }
+    } catch {}
+  }
+  return null;
+}
