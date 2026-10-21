@@ -198,3 +198,76 @@ export async function fetchSdsXmlByChave(chave: string): Promise<string | null> 
   }
   return null;
 }
+
+export interface BorderoInfo {
+  empresa: string;
+  numbor: string;
+  databor: string | null;
+  banco: string;
+  agencia: string;
+  conta: string;
+  situacao: string;
+  ocorrencia: string;
+  baixa: string | null;
+}
+
+/**
+ * Verifica se o título da NF está em borderô de pagamento (SEA — "Títulos
+ * Enviados ao Banco") e complementa com a baixa no SE2. A linha SEA persiste
+ * após o pagamento, então serve tanto pra "está em borderô" quanto "foi paga
+ * via borderô N em data D". Filtro só por doc+série no where (campos char
+ * têm padding variável) — fornecedor/loja filtrados no cliente.
+ */
+export async function checkTituloBordero(
+  doc: string, serie: string, fornec: string, loja: string
+): Promise<BorderoInfo[]> {
+  const out: BorderoInfo[] = [];
+  const doc9 = String(doc || '').trim().padStart(9, '0');
+  const serieT = String(serie || '').trim();
+  for (const emp of Object.keys(EMPRESAS)) {
+    const tenantId = EMPRESAS[emp];
+    if (!tenantId) continue;
+    try {
+      const d = await genericQuery(tenantId, {
+        tables: 'SEA',
+        fields: 'EA_NUMBOR,EA_DATABOR,EA_PORTADO,EA_AGEDEP,EA_NUMCON,EA_SITUACA,EA_OCORR,EA_FORNECE,EA_LOJA,EA_TIPO,EA_NUM,EA_PARCELA',
+        where: `SEA.D_E_L_E_T_=' ' AND (EA_NUM='${doc9}' OR EA_NUM='${doc}') AND EA_PREFIXO='${serieT}'`,
+        page: '1',
+        pageSize: '50',
+      });
+      const rows = (d.items || []).filter(
+        (it: any) =>
+          (!fornec || trim(it.ea_fornece) === fornec) &&
+          (!loja || trim(it.ea_loja) === loja)
+      );
+      if (!rows.length) continue;
+      // Baixa no SE2 do(s) título(s) encontrados — borderô pode já ter pago.
+      const b = await genericQuery(tenantId, {
+        tables: 'SE2',
+        fields: 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ',
+        where: `SE2.D_E_L_E_T_=' ' AND (E2_NUM='${doc9}' OR E2_NUM='${doc}') AND E2_PREFIXO='${serieT}'`,
+        page: '1',
+        pageSize: '50',
+      });
+      const baixas = new Map<string, string>();
+      for (const it of b.items || []) {
+        const bx = trim(it.e2_baixa);
+        if (bx) baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
+      }
+      for (const it of rows) {
+        out.push({
+          empresa: emp,
+          numbor: trim(it.ea_numbor),
+          databor: (() => { const s = trim(it.ea_databor); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null; })(),
+          banco: trim(it.ea_portado),
+          agencia: trim(it.ea_agedep),
+          conta: trim(it.ea_numcon),
+          situacao: trim(it.ea_situaca),
+          ocorrencia: trim(it.ea_ocorr),
+          baixa: baixas.get(`${trim(it.ea_num)}|${trim(it.ea_parcela)}`) || null,
+        });
+      }
+    } catch {}
+  }
+  return out;
+}

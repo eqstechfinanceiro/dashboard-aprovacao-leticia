@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
              n.auto_resumo, n.checks, n.extra, n.review_status, n.reviewed_by,
              n.reviewed_at, n.review_nota, n.erro_tipo, n.erro_descricao,
              n.cancelled_by, n.cancelled_at, n.cancel_motivo,
-             n.corrigida_by, n.corrigida_at, n.corrigida_nota,
+             n.corrigida_by, n.corrigida_at, n.corrigida_nota, n.corrigida_de,
              n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at,
              COALESCE(dd.docs, '[]'::jsonb) AS docs
       FROM fiscal_notas n

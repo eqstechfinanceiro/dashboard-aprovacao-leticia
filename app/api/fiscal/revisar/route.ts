@@ -35,9 +35,9 @@ export async function POST(request: NextRequest) {
 
   const notaId = parseInt(body.nota_id, 10);
   const decisao = String(body.decisao || '');
-  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado', 'pendente', 'corrigida'].includes(decisao)) {
+  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado', 'pendente', 'corrigida', 'desfazer_correcao'].includes(decisao)) {
     return NextResponse.json(
-      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado|pendente|corrigida) obrigatórios' },
+      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado|pendente|corrigida|desfazer_correcao) obrigatórios' },
       { status: 400 }
     );
   }
@@ -67,11 +67,22 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Correção idem: a nota precisa estar em erro confirmado pra ser marcada
-  // como corrigida pelo setor de entrada.
-  if (decisao === 'corrigida' && nota.review_status !== 'confirmado_erro') {
+  // Correção: erro confirmado OU cancelada podem ser marcadas corrigidas
+  // (nota cancelada no ERP também pode voltar corrigida depois). O status de
+  // origem fica em corrigida_de pro "desfazer" restaurar certo.
+  if (decisao === 'corrigida' && !['confirmado_erro', 'cancelado'].includes(nota.review_status)) {
     return NextResponse.json(
-      { error: 'Só é possível marcar como corrigida uma nota com erro confirmado' },
+      { error: 'Só é possível marcar como corrigida uma nota com erro confirmado ou cancelada' },
+      { status: 409 }
+    );
+  }
+
+  // Desfazer correção devolve a nota ao status de origem (corrigida_de):
+  // erro confirmado ou cancelada. O erro continua real — recria a linha na
+  // aba de erros.
+  if (decisao === 'desfazer_correcao' && nota.review_status !== 'corrigida') {
+    return NextResponse.json(
+      { error: 'Só é possível desfazer a correção de uma nota corrigida' },
       { status: 409 }
     );
   }
@@ -84,15 +95,21 @@ export async function POST(request: NextRequest) {
 
   let resultadosId: number | null = nota.resultados_id;
 
-  if (decisao === 'confirmado_erro' && !resultadosId) {
+  const isDesfazer = decisao === 'desfazer_correcao';
+  const statusFinal = isDesfazer
+    ? (nota.corrigida_de === 'cancelado' ? 'cancelado' : 'confirmado_erro')
+    : decisao;
+
+  if ((decisao === 'confirmado_erro' || isDesfazer) && !resultadosId) {
     const descricao =
-      (body.erro_descricao && String(body.erro_descricao).slice(0, 500)) ||
+      (decisao === 'confirmado_erro' && body.erro_descricao && String(body.erro_descricao).slice(0, 500)) ||
+      nota.erro_descricao ||
       nota.auto_resumo ||
       'Erro confirmado na conferência fiscal';
     const titulo = `NF ${nota.doc} - ${nota.fornecedor || 'fornecedor'} - ${descricao}`.slice(0, 400);
     const ins = await sql`
       INSERT INTO resultados_conferencias (titulo, tipo, erro, valor, data, fonte)
-      VALUES (${titulo}, ${nota.tipo}, ${erroTipo},
+      VALUES (${titulo}, ${nota.tipo}, ${decisao === 'confirmado_erro' ? erroTipo : (nota.erro_tipo || 'outro')},
               ${nota.valor ?? 0}, ${nota.emissao ?? new Date().toISOString().slice(0, 10)},
               ${RESULTADOS_FONTE})
       RETURNING id
@@ -116,18 +133,19 @@ export async function POST(request: NextRequest) {
   const isCorrigida = decisao === 'corrigida';
   const upd = await sql`
     UPDATE fiscal_notas SET
-      review_status = ${decisao},
-      reviewed_by = ${isCancel || isCorrigida ? nota.reviewed_by : (isReopen ? null : reviewer)},
-      reviewed_at = ${isCancel || isCorrigida ? nota.reviewed_at : (isReopen ? null : new Date().toISOString())},
-      review_nota = ${isCancel || isCorrigida ? nota.review_nota : (body.review_nota ? String(body.review_nota).slice(0, 500) : null)},
-      erro_tipo = ${decisao === 'confirmado_erro' ? erroTipo : (isCancel || isCorrigida ? nota.erro_tipo : null)},
-      erro_descricao = ${decisao === 'confirmado_erro' ? (body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo) : (isCancel || isCorrigida ? nota.erro_descricao : null)},
-      cancelled_by = ${isCancel ? reviewer : null},
-      cancelled_at = ${isCancel ? new Date().toISOString() : null},
-      cancel_motivo = ${isCancel && body.cancel_motivo ? String(body.cancel_motivo).slice(0, 500) : null},
-      corrigida_by = ${isCorrigida ? reviewer : (decisao === 'confirmado_erro' ? null : nota.corrigida_by)},
-      corrigida_at = ${isCorrigida ? new Date().toISOString() : (decisao === 'confirmado_erro' ? null : nota.corrigida_at)},
-      corrigida_nota = ${isCorrigida ? (body.corrigida_nota ? String(body.corrigida_nota).slice(0, 500) : null) : (decisao === 'confirmado_erro' ? null : nota.corrigida_nota)},
+      review_status = ${statusFinal},
+      reviewed_by = ${isCancel || isCorrigida || isDesfazer ? nota.reviewed_by : (isReopen ? null : reviewer)},
+      reviewed_at = ${isCancel || isCorrigida || isDesfazer ? nota.reviewed_at : (isReopen ? null : new Date().toISOString())},
+      review_nota = ${isCancel || isCorrigida || isDesfazer ? nota.review_nota : (body.review_nota ? String(body.review_nota).slice(0, 500) : null)},
+      erro_tipo = ${decisao === 'confirmado_erro' ? erroTipo : (isCancel || isCorrigida || isDesfazer ? nota.erro_tipo : null)},
+      erro_descricao = ${decisao === 'confirmado_erro' ? (body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo) : (isCancel || isCorrigida || isDesfazer ? nota.erro_descricao : null)},
+      cancelled_by = ${isCancel ? reviewer : (isCorrigida || isDesfazer ? nota.cancelled_by : null)},
+      cancelled_at = ${isCancel ? new Date().toISOString() : (isCorrigida || isDesfazer ? nota.cancelled_at : null)},
+      cancel_motivo = ${isCancel && body.cancel_motivo ? String(body.cancel_motivo).slice(0, 500) : (isCorrigida || isDesfazer ? nota.cancel_motivo : null)},
+      corrigida_by = ${isCorrigida ? reviewer : (isDesfazer || decisao === 'confirmado_erro' ? null : nota.corrigida_by)},
+      corrigida_at = ${isCorrigida ? new Date().toISOString() : (isDesfazer || decisao === 'confirmado_erro' ? null : nota.corrigida_at)},
+      corrigida_nota = ${isCorrigida ? (body.corrigida_nota ? String(body.corrigida_nota).slice(0, 500) : null) : (isDesfazer || decisao === 'confirmado_erro' ? null : nota.corrigida_nota)},
+      corrigida_de = ${isCorrigida ? nota.review_status : null},
       resultados_id = ${resultadosId},
       updated_at = NOW()
     WHERE id = ${notaId}

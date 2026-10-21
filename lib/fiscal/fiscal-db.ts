@@ -121,6 +121,10 @@ export async function ensureFiscalTables(): Promise<void> {
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_by TEXT`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_at TIMESTAMPTZ`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_nota TEXT`;
+  // Status em que a nota estava quando marcada corrigida ('confirmado_erro'
+  // ou 'cancelado') — usado pelo "desfazer correção" pra restaurar o estado
+  // certo (uma nota cancelada+corrigida volta a ser cancelada, não erro).
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_de TEXT`;
   // Anexos extras do portal EQS (serviço): todos os documentos do processo,
   // não só o primeiro tipo 'G' que o runner baixa.
   await sql`

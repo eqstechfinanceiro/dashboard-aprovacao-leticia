@@ -61,6 +61,7 @@ interface FiscalNota {
   corrigida_by: string | null;
   corrigida_at: string | null;
   corrigida_nota: string | null;
+  corrigida_de: string | null;
   review_nota: string | null;
   erro_tipo: string | null;
   erro_descricao: string | null;
@@ -263,6 +264,8 @@ export default function FiscalPage() {
   const [docModal, setDocModal] = useState<{ id?: number; docId?: number; nome: string } | null>(null);
   // Anexo selecionado por nota (nota_id → fiscal_notas_docs.id) — muda o iframe.
   const [docSel, setDocSel] = useState<Record<number, number>>({});
+  // Borderô da nota (SEA/SE2 do TOTVS) — lazy fetch ao expandir.
+  const [bordero, setBordero] = useState<Record<number, { em_bordero: boolean; pago: boolean; borderos: any[] } | 'loading'>>({});
   const [onlyErr, setOnlyErr] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -960,7 +963,17 @@ export default function FiscalPage() {
                       className="flex w-full items-center gap-3 p-3 text-left hover:bg-muted/50"
                       onClick={() => {
                         const next = new Set(expanded);
-                        if (next.has(n.id)) next.delete(n.id); else next.add(n.id);
+                        if (next.has(n.id)) next.delete(n.id); else {
+                          next.add(n.id);
+                          // Lazy: consulta borderô (SEA/SE2) só ao abrir a nota.
+                          if (n.tipo !== 'vexpenses' && bordero[n.id] === undefined) {
+                            setBordero((prev) => ({ ...prev, [n.id]: 'loading' }));
+                            fetch(`/api/fiscal/bordero?nota_id=${n.id}`)
+                              .then((r) => (r.ok ? r.json() : { em_bordero: false, pago: false, borderos: [] }))
+                              .then((b) => setBordero((prev) => ({ ...prev, [n.id]: b })))
+                              .catch(() => setBordero((prev) => ({ ...prev, [n.id]: { em_bordero: false, pago: false, borderos: [] } })));
+                          }
+                        }
                         setExpanded(next);
                       }}
                     >
@@ -1017,7 +1030,13 @@ export default function FiscalPage() {
                         {n.review_status === 'corrigida' && n.corrigida_by && (
                           <p className="text-xs text-emerald-700 truncate">
                             Corrigida por {n.corrigida_by} em {n.corrigida_at ? new Date(n.corrigida_at).toLocaleString('pt-BR') : '—'}
+                            {n.corrigida_de === 'cancelado' ? ' (estava cancelada)' : ''}
                             {n.corrigida_nota ? ` — ${n.corrigida_nota}` : ''}
+                          </p>
+                        )}
+                        {n.review_status === 'corrigida' && n.corrigida_de === 'cancelado' && n.cancelled_by && (
+                          <p className="text-xs text-slate-500 truncate">
+                            Cancelada por {n.cancelled_by} em {n.cancelled_at ? new Date(n.cancelled_at).toLocaleString('pt-BR') : '—'}
                           </p>
                         )}
                       </div>
@@ -1068,6 +1087,49 @@ export default function FiscalPage() {
                                   </div>
                                 ))}
                               </dl>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Borderô de pagamento (SEA/SE2 do TOTVS) — destaca
+                            quando a nota já entrou em pagamento, o que muda o
+                            fluxo de correção/cancelamento. */}
+                        {(() => {
+                          const b = bordero[n.id];
+                          if (!b || b === 'loading') return null;
+                          if (!b.em_bordero) {
+                            return (
+                              <p className="text-[11px] text-muted-foreground">
+                                Pagamento: fora de borderô
+                              </p>
+                            );
+                          }
+                          const pago = b.pago;
+                          return (
+                            <div className={cn(
+                              'rounded-md border px-3 py-2 text-xs space-y-1',
+                              pago ? 'border-slate-300 bg-slate-50 text-slate-700' : 'border-amber-300 bg-amber-50 text-amber-900'
+                            )}>
+                              <p className="font-semibold flex items-center gap-1.5">
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                {pago ? 'Nota paga via borderô' : 'Nota já está em borderô de pagamento'}
+                              </p>
+                              {b.borderos.map((x: any, i: number) => (
+                                <p key={i}>
+                                  Borderô <span className="font-semibold">Nº {x.numbor || '—'}</span>
+                                  {x.databor ? ` · ${new Date(x.databor + 'T12:00:00').toLocaleDateString('pt-BR')}` : ''}
+                                  {x.banco ? ` · ${x.banco_nome || x.banco}` : ''}
+                                  {x.agencia ? ` ag ${x.agencia}` : ''}
+                                  {x.conta ? ` cc ${x.conta}` : ''}
+                                  {x.baixa ? ` — baixada em ${new Date(x.baixa + 'T12:00:00').toLocaleDateString('pt-BR')}` : ''}
+                                  {x.ocorrencia ? ` · ocorr. ${x.ocorrencia}` : ''}
+                                </p>
+                              ))}
+                              {!pago && (
+                                <p className="text-[11px]">
+                                  Correção/cancelamento depois do borderô exige providência no financeiro — não é só ajuste no TOTVS.
+                                </p>
+                              )}
                             </div>
                           );
                         })()}
@@ -1222,6 +1284,7 @@ export default function FiscalPage() {
                         {n.corrigida_by && (
                           <p className="text-xs text-emerald-700">
                             Corrigida por {n.corrigida_by} em {n.corrigida_at ? new Date(n.corrigida_at).toLocaleString('pt-BR') : '—'}
+                            {n.corrigida_de === 'cancelado' ? ' (estava cancelada)' : ''}
                             {n.corrigida_nota ? ` — ${n.corrigida_nota}` : ''}
                           </p>
                         )}
@@ -1309,14 +1372,25 @@ export default function FiscalPage() {
                               <Button
                                 key="desc" size="sm" variant="ghost"
                                 disabled={acting === n.id}
-                                onClick={() => revisar(n.id, 'confirmado_erro', n.erro_tipo || 'outro', n.erro_descricao || undefined)}
+                                onClick={() => revisar(n.id, 'desfazer_correcao')}
                               >
                                 Desfazer correção
                               </Button>
                             );
                           }
-                          if (view === 'historico' && n.review_status === 'cancelado') {
+                          if (view === 'historico' && n.review_status === 'cancelado' && !corrigirForm) {
                             actions.push(
+                              // Nota cancelada pode voltar corrigida — fecha o
+                              // ciclo "cancelada → corrigida" sem perder o
+                              // rastreio (corrigida_de='cancelado').
+                              <Button
+                                key="corr" size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                disabled={acting === n.id}
+                                onClick={() => setCorrigirForm({ notaId: n.id, nota: '' })}
+                              >
+                                <CheckCheck className="h-4 w-4 mr-1.5" /> Marcar como corrigida
+                              </Button>,
                               <Button
                                 key="desc" size="sm" variant="ghost"
                                 disabled={acting === n.id}
