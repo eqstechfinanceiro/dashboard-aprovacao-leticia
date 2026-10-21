@@ -19,6 +19,7 @@ const STATUS_LABEL: Record<string, string> = {
   confirmado_ok: 'Confirmada OK',
   confirmado_erro: 'Erro confirmado',
   cancelado: 'Cancelada',
+  corrigida: 'Corrigida',
 };
 
 const ERRO_LABEL: Record<string, string> = {
@@ -54,13 +55,14 @@ export async function GET(request: NextRequest) {
            n.valor, n.emissao::text, n.chave_acesso, n.auto_status,
            n.auto_resumo, n.review_status, n.reviewed_by, n.reviewed_at,
            n.erro_tipo, n.erro_descricao, n.cancelled_by, n.cancelled_at,
-           n.cancel_motivo, n.created_at
+           n.cancel_motivo, n.corrigida_by, n.corrigida_at, n.corrigida_nota,
+           n.created_at
     FROM fiscal_notas n
     WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
       AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
-      AND (${scope} <> 'fila' OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
+      AND (${scope} <> 'fila' OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
       AND (${empresa} = '' OR upper(COALESCE(n.extra->>'empresa', '')) = ${empresa})
-      AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
+      AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado', 'corrigida'))
       AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
       AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
       AND (${q} = '' OR
@@ -137,6 +139,7 @@ export async function GET(request: NextRequest) {
     'Valor', 'Chave de Acesso', 'Status', 'Conferência auto', 'Resumo auto',
     'Tipo de erro', 'Descrição do erro', 'Revisado por', 'Revisado em',
     'Cancelada por', 'Cancelada em', 'Motivo cancelamento',
+    'Corrigida por', 'Corrigida em', 'Nota da correção',
   ];
 
   const wb = XLSX.utils.book_new();
@@ -182,6 +185,7 @@ export async function GET(request: NextRequest) {
       n.erro_descricao || '',
       n.reviewed_by || '', fmtDtHora(n.reviewed_at),
       n.cancelled_by || '', fmtDtHora(n.cancelled_at), n.cancel_motivo || '',
+      n.corrigida_by || '', fmtDtHora(n.corrigida_at), n.corrigida_nota || '',
     ];
     values.forEach((v, c) => {
       const ref = XLSX.utils.encode_cell({ r, c });
@@ -206,6 +210,7 @@ export async function GET(request: NextRequest) {
     { wch: 12 }, { wch: 6 }, { wch: 11 }, { wch: 7 }, { wch: 38 }, { wch: 20 },
     { wch: 11 }, { wch: 13 }, { wch: 48 }, { wch: 16 }, { wch: 14 }, { wch: 34 },
     { wch: 16 }, { wch: 34 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 18 }, { wch: 30 },
+    { wch: 18 }, { wch: 18 }, { wch: 34 },
   ];
   ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: 3 + notas.length, c: COLS.length - 1 } });
   ws['!autofilter'] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3 + notas.length, c: COLS.length - 1 } }) };

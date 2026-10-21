@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
              n.auto_resumo, n.checks, n.extra, n.review_status, n.reviewed_by,
              n.reviewed_at, n.review_nota, n.erro_tipo, n.erro_descricao,
              n.cancelled_by, n.cancelled_at, n.cancel_motivo,
+             n.corrigida_by, n.corrigida_at, n.corrigida_nota,
              n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at,
              COALESCE(dd.docs, '[]'::jsonb) AS docs
       FROM fiscal_notas n
@@ -68,10 +69,10 @@ export async function GET(request: NextRequest) {
       ) dd ON true
       WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
-        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
-             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
-        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
-        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
+             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
+        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado', 'corrigida'))
+        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
         AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
         AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
         AND (${runId}::int IS NULL OR n.run_id = ${runId})
@@ -98,8 +99,8 @@ export async function GET(request: NextRequest) {
                 END = ${div}
         ))
       ORDER BY
-        CASE WHEN ${scope} = 'historico' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
-             THEN n.reviewed_at END DESC NULLS LAST,
+        CASE WHEN ${scope} = 'historico' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
+             THEN COALESCE(n.corrigida_at, n.cancelled_at, n.reviewed_at) END DESC NULLS LAST,
         CASE n.review_status WHEN 'pendente' THEN 0 ELSE 1 END,
         n.emissao DESC NULLS LAST, n.doc DESC
       LIMIT ${limit}
@@ -127,10 +128,10 @@ export async function GET(request: NextRequest) {
         AND lbl.f IS NOT NULL AND lbl.f <> ''
         AND (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
-        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado')
-             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado'))
-        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado'))
-        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'))
+        AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
+             OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
+        AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado', 'corrigida'))
+        AND (${scope} <> 'kanban' OR n.review_status IN ('pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
         AND (${from}::date IS NULL OR n.emissao >= ${from}::date)
         AND (${to}::date IS NULL OR n.emissao <= ${to}::date)
         AND (${runId}::int IS NULL OR n.run_id = ${runId})

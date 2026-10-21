@@ -7,10 +7,13 @@ import { logAudit } from '@/lib/db/audit';
 export const dynamic = 'force-dynamic';
 
 // POST /api/fiscal/revisar
-// { nota_id, decisao: 'confirmado_ok' | 'confirmado_erro' | 'cancelado' | 'pendente',
-//   erro_tipo?, erro_descricao?, review_nota?, cancel_motivo? }
+// { nota_id, decisao: 'confirmado_ok' | 'confirmado_erro' | 'cancelado' | 'pendente' | 'corrigida',
+//   erro_tipo?, erro_descricao?, review_nota?, cancel_motivo?, corrigida_nota? }
 // 'pendente' = reabrir a nota (volta pra fila) — usado pelo kanban ao arrastar
 // um card de volta e pela ação "desfazer".
+// 'corrigida' = o setor de entrada de notas corrigiu a nota no TOTVS — só a
+// partir de confirmado_erro; registra quem corrigiu/quando/como e tira a nota
+// da aba de erros (resultados_conferencias).
 //
 // confirmado_erro → cria registro em resultados_conferencias (aba de erros
 // existente) e linka via resultados_id. Idempotente: revisar de novo a mesma
@@ -32,9 +35,9 @@ export async function POST(request: NextRequest) {
 
   const notaId = parseInt(body.nota_id, 10);
   const decisao = String(body.decisao || '');
-  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado', 'pendente'].includes(decisao)) {
+  if (!notaId || !['confirmado_ok', 'confirmado_erro', 'cancelado', 'pendente', 'corrigida'].includes(decisao)) {
     return NextResponse.json(
-      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado|pendente) obrigatórios' },
+      { error: 'nota_id e decisao (confirmado_ok|confirmado_erro|cancelado|pendente|corrigida) obrigatórios' },
       { status: 400 }
     );
   }
@@ -64,6 +67,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Correção idem: a nota precisa estar em erro confirmado pra ser marcada
+  // como corrigida pelo setor de entrada.
+  if (decisao === 'corrigida' && nota.review_status !== 'confirmado_erro') {
+    return NextResponse.json(
+      { error: 'Só é possível marcar como corrigida uma nota com erro confirmado' },
+      { status: 409 }
+    );
+  }
+
   // Quem revisou — identidade vem dos headers do middleware.
   const reviewer =
     request.headers.get('x-user-name') ||
@@ -86,10 +98,10 @@ export async function POST(request: NextRequest) {
       RETURNING id
     `;
     resultadosId = ins[0].id;
-  } else if (decisao === 'confirmado_ok' || decisao === 'pendente') {
+  } else if (decisao === 'confirmado_ok' || decisao === 'pendente' || decisao === 'corrigida') {
     if (resultadosId) {
-      // Revisão mudou de erro→ok: remove o registro da aba de erros para não
-      // deixar um falso positivo permanentemente listado.
+      // Revisão mudou de erro→ok/corrigida: remove o registro da aba de erros
+      // para não deixar um falso positivo permanentemente listado.
       await sql`DELETE FROM resultados_conferencias WHERE id = ${resultadosId} AND fonte = ${RESULTADOS_FONTE}`;
       resultadosId = null;
     }
@@ -101,17 +113,21 @@ export async function POST(request: NextRequest) {
 
   const isCancel = decisao === 'cancelado';
   const isReopen = decisao === 'pendente';
+  const isCorrigida = decisao === 'corrigida';
   const upd = await sql`
     UPDATE fiscal_notas SET
       review_status = ${decisao},
-      reviewed_by = ${isCancel ? nota.reviewed_by : (isReopen ? null : reviewer)},
-      reviewed_at = ${isCancel ? nota.reviewed_at : (isReopen ? null : new Date().toISOString())},
-      review_nota = ${isCancel ? nota.review_nota : (body.review_nota ? String(body.review_nota).slice(0, 500) : null)},
-      erro_tipo = ${decisao === 'confirmado_erro' ? erroTipo : (isCancel ? nota.erro_tipo : null)},
-      erro_descricao = ${decisao === 'confirmado_erro' ? (body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo) : (isCancel ? nota.erro_descricao : null)},
+      reviewed_by = ${isCancel || isCorrigida ? nota.reviewed_by : (isReopen ? null : reviewer)},
+      reviewed_at = ${isCancel || isCorrigida ? nota.reviewed_at : (isReopen ? null : new Date().toISOString())},
+      review_nota = ${isCancel || isCorrigida ? nota.review_nota : (body.review_nota ? String(body.review_nota).slice(0, 500) : null)},
+      erro_tipo = ${decisao === 'confirmado_erro' ? erroTipo : (isCancel || isCorrigida ? nota.erro_tipo : null)},
+      erro_descricao = ${decisao === 'confirmado_erro' ? (body.erro_descricao ? String(body.erro_descricao).slice(0, 500) : nota.auto_resumo) : (isCancel || isCorrigida ? nota.erro_descricao : null)},
       cancelled_by = ${isCancel ? reviewer : null},
       cancelled_at = ${isCancel ? new Date().toISOString() : null},
       cancel_motivo = ${isCancel && body.cancel_motivo ? String(body.cancel_motivo).slice(0, 500) : null},
+      corrigida_by = ${isCorrigida ? reviewer : (decisao === 'confirmado_erro' ? null : nota.corrigida_by)},
+      corrigida_at = ${isCorrigida ? new Date().toISOString() : (decisao === 'confirmado_erro' ? null : nota.corrigida_at)},
+      corrigida_nota = ${isCorrigida ? (body.corrigida_nota ? String(body.corrigida_nota).slice(0, 500) : null) : (decisao === 'confirmado_erro' ? null : nota.corrigida_nota)},
       resultados_id = ${resultadosId},
       updated_at = NOW()
     WHERE id = ${notaId}
@@ -129,6 +145,7 @@ export async function POST(request: NextRequest) {
       fornecedor: nota.fornecedor,
       erro_tipo: decisao === 'confirmado_erro' ? erroTipo : nota.erro_tipo,
       cancel_motivo: decisao === 'cancelado' ? (body.cancel_motivo || null) : null,
+      corrigida_nota: decisao === 'corrigida' ? (body.corrigida_nota || null) : null,
       resultados_id: resultadosId,
       decisao_anterior: nota.review_status,
     },

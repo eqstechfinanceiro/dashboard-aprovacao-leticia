@@ -22,6 +22,9 @@ import {
   Upload,
   Download,
   ExternalLink,
+  Copy,
+  Check,
+  CheckCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -49,12 +52,15 @@ interface FiscalNota {
   auto_resumo: string | null;
   checks: Check[] | Check[][] | null;
   extra: Record<string, any> | null;
-  review_status: 'auto_ok' | 'auto_ok_aviso' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro' | 'cancelado';
+  review_status: 'auto_ok' | 'auto_ok_aviso' | 'pendente' | 'falha_tecnica' | 'confirmado_ok' | 'confirmado_erro' | 'corrigida' | 'cancelado';
   reviewed_by: string | null;
   reviewed_at: string | null;
   cancelled_by: string | null;
   cancelled_at: string | null;
   cancel_motivo: string | null;
+  corrigida_by: string | null;
+  corrigida_at: string | null;
+  corrigida_nota: string | null;
   review_nota: string | null;
   erro_tipo: string | null;
   erro_descricao: string | null;
@@ -62,6 +68,7 @@ interface FiscalNota {
   doc_path: string | null;
   doc_nome: string | null;
   docs?: { id: number; nome: string; tipo: string }[];
+  created_at: string;
 }
 
 interface FiscalRun {
@@ -96,6 +103,7 @@ const STATUS_LABEL: Record<string, string> = {
   falha_tecnica: 'Falha técnica',
   confirmado_ok: 'Confirmada OK',
   confirmado_erro: 'Erro confirmado',
+  corrigida: 'Corrigida',
   cancelado: 'Cancelada',
 };
 
@@ -106,6 +114,7 @@ const STATUS_STYLE: Record<string, string> = {
   falha_tecnica: 'bg-gray-200 text-gray-600',
   confirmado_ok: 'bg-blue-100 text-blue-700',
   confirmado_erro: 'bg-red-100 text-red-700',
+  corrigida: 'bg-emerald-100 text-emerald-700',
   cancelado: 'bg-slate-200 text-slate-600',
 };
 
@@ -114,6 +123,7 @@ const KANBAN_COLS: { status: string; label: string; drop: boolean; cls: string }
   { status: 'falha_tecnica', label: 'Falha técnica', drop: false, cls: 'border-gray-300 bg-gray-50/40' },
   { status: 'confirmado_ok', label: 'Confirmadas OK', drop: true, cls: 'border-blue-300 bg-blue-50/40' },
   { status: 'confirmado_erro', label: 'Erros confirmados', drop: true, cls: 'border-red-300 bg-red-50/40' },
+  { status: 'corrigida', label: 'Corrigidas', drop: true, cls: 'border-emerald-300 bg-emerald-50/40' },
   { status: 'cancelado', label: 'Canceladas', drop: true, cls: 'border-slate-300 bg-slate-50/40' },
 ];
 
@@ -124,6 +134,52 @@ const ERRO_LABEL: Record<string, string> = Object.fromEntries(
 function fmtBRL(v: number | null): string {
   if (v === null || v === undefined) return '—';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function fmtCnpj(v: string | null | undefined): string {
+  const d = String(v || '').replace(/\D/g, '');
+  if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  return v || '—';
+}
+
+function fmtData(v: string | null | undefined): string {
+  if (!v) return '—';
+  const d = v.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d.split('-').reverse().join('/') : v;
+}
+
+// Nome legível do fornecedor: em notas de mercadoria a coluna `fornecedor`
+// guarda o CÓDIGO (WA5439); o nome fica no check 'Nome Fornecedor' (lado
+// TOTVS = expected). Serviço guarda o nome direto na coluna.
+function fornecedorNome(n: FiscalNota): string | null {
+  const chk = flatChecks(n.checks).find((c) => /nome fornecedor/i.test(c.field));
+  const nome = chk?.expected || chk?.actual || null;
+  if (nome && nome !== '—') return nome;
+  return n.tipo === 'servico' ? (n.fornecedor || null) : null;
+}
+
+// Código do fornecedor no TOTVS (mercadoria = coluna fornecedor; serviço =
+// recno do processo guardado em extra pelo sync de docs do portal).
+function fornecedorCodigo(n: FiscalNota): string | null {
+  if (n.tipo === 'mercadoria' || n.tipo === 'vexpenses') return n.fornecedor || null;
+  return n.extra?.fornecedor_cod || n.extra?.recno || null;
+}
+
+// Texto copiável pra localizar a nota no TOTVS/portal.
+function resumoCopiavel(n: FiscalNota): string {
+  const nome = fornecedorNome(n);
+  const cod = fornecedorCodigo(n);
+  const lancamento = n.extra?.f1_dtdigit || n.created_at || null;
+  const linhas = [
+    `NF ${n.doc}${n.serie ? ` · série ${n.serie}` : ''}${n.filial ? ` · filial ${n.filial}` : ''}`,
+    `Fornecedor: ${cod ? `${cod} — ` : ''}${nome || n.fornecedor || '—'}`,
+    `CNPJ: ${fmtCnpj(n.cnpj)}`,
+    `Emissão: ${fmtData(n.emissao)} · Lançamento: ${fmtData(lancamento)}`,
+    `Valor: ${fmtBRL(n.valor)}`,
+  ];
+  if (n.chave_acesso) linhas.push(`Chave: ${n.chave_acesso}`);
+  return linhas.join('\n');
 }
 
 function flatChecks(checks: FiscalNota['checks']): Check[] {
@@ -144,6 +200,30 @@ function normDivTipo(t: string): string {
   if (m) return `${m[1].toUpperCase()} não encontrado`;
   if (/^erro ao ler pdf/i.test(t)) return 'Erro ao ler PDF';
   return t;
+}
+
+// Botão de segmented control — usado na navegação principal e nos filtros
+// de status (substitui a fileira de Buttons soltos).
+function SegBtn({ active, onClick, title, children }: {
+  active: boolean; onClick: () => void; title?: string; children: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={cn(
+        'inline-flex items-center gap-1.5 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+        active ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SegCount({ n }: { n: number | undefined }) {
+  if (!n) return null;
+  return <span className="rounded-full bg-slate-200/80 px-1.5 text-[10px] font-semibold text-slate-600">{n}</span>;
 }
 
 // Tipos de divergência de uma nota: sufixo do field sem o prefixo "Item X · ",
@@ -178,6 +258,8 @@ export default function FiscalPage() {
   const [acting, setActing] = useState<number | null>(null);
   const [erroForm, setErroForm] = useState<{ notaId: number; erro_tipo: string; descricao: string } | null>(null);
   const [cancelForm, setCancelForm] = useState<{ notaId: number; motivo: string } | null>(null);
+  const [corrigirForm, setCorrigirForm] = useState<{ notaId: number; nota: string } | null>(null);
+  const [copied, setCopied] = useState<number | null>(null);
   const [docModal, setDocModal] = useState<{ id?: number; docId?: number; nome: string } | null>(null);
   // Anexo selecionado por nota (nota_id → fiscal_notas_docs.id) — muda o iframe.
   const [docSel, setDocSel] = useState<Record<number, number>>({});
@@ -241,23 +323,34 @@ export default function FiscalPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const revisar = async (notaId: number, decisao: string, erroTipo?: string, descricao?: string, motivo?: string) => {
+  const revisar = async (notaId: number, decisao: string, erroTipo?: string, descricao?: string, motivo?: string, corrigidaNota?: string) => {
     setActing(notaId);
     try {
       const res = await fetch('/api/fiscal/revisar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nota_id: notaId, decisao, erro_tipo: erroTipo, erro_descricao: descricao, cancel_motivo: motivo }),
+        body: JSON.stringify({ nota_id: notaId, decisao, erro_tipo: erroTipo, erro_descricao: descricao, cancel_motivo: motivo, corrigida_nota: corrigidaNota }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || `HTTP ${res.status}`);
       setErroForm(null);
       setCancelForm(null);
+      setCorrigirForm(null);
       await load();
     } catch (e: any) {
       alert(`Erro ao revisar: ${e.message}`);
     } finally {
       setActing(null);
+    }
+  };
+
+  const copiarResumo = async (notaId: number, texto: string) => {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopied(notaId);
+      setTimeout(() => setCopied((c) => (c === notaId ? null : c)), 1600);
+    } catch {
+      alert('Não foi possível copiar — selecione e copie manualmente.');
     }
   };
 
@@ -290,6 +383,13 @@ export default function FiscalPage() {
     if (to === 'confirmado_ok') revisar(notaId, 'confirmado_ok');
     else if (to === 'pendente') revisar(notaId, 'pendente');
     else if (to === 'confirmado_erro') setErroForm({ notaId, erro_tipo: 'outro', descricao: '' });
+    else if (to === 'corrigida') {
+      if (from !== 'confirmado_erro') {
+        alert('Só é possível corrigir uma nota com erro confirmado — arraste primeiro para "Erros confirmados".');
+        return;
+      }
+      setCorrigirForm({ notaId, nota: '' });
+    }
     else if (to === 'cancelado') {
       if (from !== 'confirmado_erro') {
         alert('Só é possível cancelar uma nota com erro confirmado — arraste primeiro para "Erros confirmados".');
@@ -340,6 +440,10 @@ export default function FiscalPage() {
     : `/api/fiscal/exportar-xlsx?scope=fila&tipo=${tipo}&status=${status}${exportExtra}`;
 
   const resumoTipo = data?.resumo?.[tipo] || {};
+  const resumoTotal: Record<string, number> = {};
+  for (const counts of Object.values(data?.resumo || {})) {
+    for (const [s, n] of Object.entries(counts)) resumoTotal[s] = (resumoTotal[s] || 0) + (n as number);
+  }
   const latestRun = data?.runs?.find((r) => r.tipo === tipo);
 
   return (
@@ -357,44 +461,44 @@ export default function FiscalPage() {
         </Button>
       </div>
 
-      {/* Seletor de aba: fila de trabalho × histórico de erros */}
-      <div className="flex gap-2">
-        <Button
-          variant={view === 'fila' && tipo === 'mercadoria' ? 'default' : 'outline'}
-          onClick={() => { setView('fila'); setTipo('mercadoria'); }}
-        >
-          <Package className="h-4 w-4 mr-2" /> Mercadoria
-        </Button>
-        <Button
-          variant={view === 'fila' && tipo === 'servico' ? 'default' : 'outline'}
-          onClick={() => { setView('fila'); setTipo('servico'); }}
-        >
-          <Wrench className="h-4 w-4 mr-2" /> Serviço
-        </Button>
-        <Button
-          variant={view === 'fila' && tipo === 'vexpenses' ? 'default' : 'outline'}
-          onClick={() => { setView('fila'); setTipo('vexpenses'); }}
-        >
-          <FileText className="h-4 w-4 mr-2" /> VExpenses
-        </Button>
-        <Button
-          variant={view === 'historico' ? 'default' : 'outline'}
-          onClick={() => setView('historico')}
-        >
-          <History className="h-4 w-4 mr-2" /> Histórico
-        </Button>
-        <div className="ml-auto flex gap-2">
+      {/* Navegação: segmented control de visões + ações secundárias à direita */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="inline-flex items-center gap-0.5 rounded-lg border bg-muted/40 p-1">
+          <SegBtn
+            active={view === 'fila' && tipo === 'mercadoria'}
+            onClick={() => { setView('fila'); setTipo('mercadoria'); }}
+          >
+            <Package className="h-4 w-4" /> Mercadoria
+          </SegBtn>
+          <SegBtn
+            active={view === 'fila' && tipo === 'servico'}
+            onClick={() => { setView('fila'); setTipo('servico'); }}
+          >
+            <Wrench className="h-4 w-4" /> Serviço
+          </SegBtn>
+          <SegBtn
+            active={view === 'fila' && tipo === 'vexpenses'}
+            onClick={() => { setView('fila'); setTipo('vexpenses'); }}
+          >
+            <FileText className="h-4 w-4" /> VExpenses
+          </SegBtn>
+          <div className="mx-1 w-px self-stretch bg-border" />
+          <SegBtn active={view === 'historico'} onClick={() => setView('historico')}>
+            <History className="h-4 w-4" /> Histórico
+          </SegBtn>
+        </div>
+        <div className="flex gap-2">
           <a href="/fiscal/tes-regras">
-            <Button variant="outline" type="button">
-              <ExternalLink className="h-4 w-4 mr-2" /> Regras TES
+            <Button variant="ghost" size="sm" type="button">
+              <ExternalLink className="h-4 w-4 mr-1.5" /> Regras TES
             </Button>
           </a>
-          <Button variant="outline" onClick={() => { setImportTipo(view === 'fila' ? tipo : 'mercadoria'); setImportOpen(true); }}>
-            <Upload className="h-4 w-4 mr-2" /> Importar nota
+          <Button variant="outline" size="sm" onClick={() => { setImportTipo(view === 'fila' ? tipo : 'mercadoria'); setImportOpen(true); }}>
+            <Upload className="h-4 w-4 mr-1.5" /> Importar nota
           </Button>
           <a href={exportUrl} download>
-            <Button variant="outline" type="button">
-              <Download className="h-4 w-4 mr-2" /> Exportar Excel
+            <Button variant="outline" size="sm" type="button">
+              <Download className="h-4 w-4 mr-1.5" /> Exportar Excel
             </Button>
           </a>
         </div>
@@ -519,41 +623,38 @@ export default function FiscalPage() {
         </p>
       )}
 
-      {/* Filtro de status — fila: estados de trabalho; histórico: erros/canceladas */}
+      {/* Filtro de status — segmented control com contadores */}
       {view === 'fila' ? (
-        <div className="flex gap-2 flex-wrap">
-          {['pendente', 'auto_ok', 'auto_ok_aviso', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado', 'all'].map((s) => (
-            <Button key={s} size="sm" variant={status === s ? 'default' : 'outline'} onClick={() => setStatus(s)}>
+        <div className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border bg-muted/40 p-1">
+          {['pendente', 'auto_ok', 'auto_ok_aviso', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'corrigida', 'cancelado', 'all'].map((s) => (
+            <SegBtn key={s} active={status === s} onClick={() => setStatus(s)}>
               {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
-            </Button>
+              <SegCount n={s === 'all' ? undefined : resumoTipo[s]} />
+            </SegBtn>
           ))}
         </div>
       ) : (
-        <div className="flex gap-2 flex-wrap items-center">
-          <div className="flex rounded-md border overflow-hidden">
-            <button
-              className={cn('px-3 py-1.5 text-sm', histMode === 'lista' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted')}
-              onClick={() => setHistMode('lista')}
-            >
-              Lista
-            </button>
-            <button
-              className={cn('px-3 py-1.5 text-sm border-l', histMode === 'kanban' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted')}
-              onClick={() => setHistMode('kanban')}
-            >
-              Kanban
-            </button>
+        <div className="flex gap-3 flex-wrap items-center">
+          <div className="inline-flex items-center gap-0.5 rounded-lg border bg-muted/40 p-1">
+            <SegBtn active={histMode === 'lista'} onClick={() => setHistMode('lista')}>Lista</SegBtn>
+            <SegBtn active={histMode === 'kanban'} onClick={() => setHistMode('kanban')}>Kanban</SegBtn>
           </div>
-          {histMode === 'lista' && [
-            { v: 'confirmado_erro', l: 'Erros confirmados' },
-            { v: 'confirmado_ok', l: 'Confirmadas OK' },
-            { v: 'cancelado', l: 'Canceladas' },
-            { v: 'all', l: 'Todas' },
-          ].map((o) => (
-            <Button key={o.v} size="sm" variant={histStatus === o.v ? 'default' : 'outline'} onClick={() => setHistStatus(o.v)}>
-              {o.l}
-            </Button>
-          ))}
+          {histMode === 'lista' && (
+            <div className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border bg-muted/40 p-1">
+              {[
+                { v: 'confirmado_erro', l: 'Erros confirmados' },
+                { v: 'corrigida', l: 'Corrigidas' },
+                { v: 'confirmado_ok', l: 'Confirmadas OK' },
+                { v: 'cancelado', l: 'Canceladas' },
+                { v: 'all', l: 'Todas' },
+              ].map((o) => (
+                <SegBtn key={o.v} active={histStatus === o.v} onClick={() => setHistStatus(o.v)}>
+                  {o.l}
+                  <SegCount n={o.v === 'all' ? undefined : resumoTotal[o.v]} />
+                </SegBtn>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -742,6 +843,11 @@ export default function FiscalPage() {
                               cancelada por {n.cancelled_by}
                             </p>
                           )}
+                          {n.review_status === 'corrigida' && n.corrigida_by && (
+                            <p className="text-[10px] text-emerald-700 truncate mt-0.5">
+                              corrigida por {n.corrigida_by}
+                            </p>
+                          )}
                           {erroForm?.notaId === n.id && (
                             <div className="rounded border border-red-200 bg-red-50 p-2 mt-1.5 space-y-1.5">
                               <p className="text-[11px] font-medium text-red-800">Confirmar erro</p>
@@ -796,6 +902,30 @@ export default function FiscalPage() {
                                   {acting === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Confirmar'}
                                 </Button>
                                 <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => setCancelForm(null)}>
+                                  Voltar
+                                </Button>
+                              </div>
+                            </div>
+                          )}
+                          {corrigirForm?.notaId === n.id && (
+                            <div className="rounded border border-emerald-300 bg-emerald-50 p-2 mt-1.5 space-y-1.5">
+                              <p className="text-[11px] font-medium text-emerald-800">Marcar como corrigida</p>
+                              <input
+                                className="w-full rounded border bg-white px-1.5 py-1 text-[11px]"
+                                placeholder="Como foi corrigida (opcional)"
+                                value={corrigirForm.nota}
+                                onChange={(e) => setCorrigirForm({ ...corrigirForm, nota: e.target.value })}
+                              />
+                              <div className="flex gap-1.5">
+                                <Button
+                                  size="sm"
+                                  className="h-7 text-[11px] px-2 bg-emerald-600 hover:bg-emerald-700"
+                                  disabled={acting === n.id}
+                                  onClick={() => revisar(n.id, 'corrigida', undefined, undefined, undefined, corrigirForm.nota)}
+                                >
+                                  {acting === n.id ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Registrar'}
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-7 text-[11px] px-2" onClick={() => setCorrigirForm(null)}>
                                   Voltar
                                 </Button>
                               </div>
@@ -884,6 +1014,12 @@ export default function FiscalPage() {
                             {n.cancel_motivo ? ` — ${n.cancel_motivo}` : ''}
                           </p>
                         )}
+                        {n.review_status === 'corrigida' && n.corrigida_by && (
+                          <p className="text-xs text-emerald-700 truncate">
+                            Corrigida por {n.corrigida_by} em {n.corrigida_at ? new Date(n.corrigida_at).toLocaleString('pt-BR') : '—'}
+                            {n.corrigida_nota ? ` — ${n.corrigida_nota}` : ''}
+                          </p>
+                        )}
                       </div>
                       <span className="text-sm font-semibold shrink-0">{fmtBRL(n.valor)}</span>
                     </button>
@@ -891,6 +1027,51 @@ export default function FiscalPage() {
                     {isOpen && (
                       <div className={cn('border-t px-4 py-3', (n.doc_path || (n.docs && n.docs.length > 0)) && 'grid gap-4 lg:grid-cols-2')}>
                         <div className="space-y-3 min-w-0">
+                        {/* Identificação copiável — dados pra localizar a nota
+                            no TOTVS/portal (fornecedor nome+código, doc, série,
+                            emissão, lançamento). */}
+                        {(() => {
+                          const nome = fornecedorNome(n);
+                          const cod = fornecedorCodigo(n);
+                          const lancamento = n.extra?.f1_dtdigit || n.created_at || null;
+                          const campos: [string, string][] = [
+                            ['Número', n.doc],
+                            ['Série', n.serie || '—'],
+                            ['Fornecedor', nome || n.fornecedor || '—'],
+                            ['Cód. fornecedor', cod || '—'],
+                            ['CNPJ', fmtCnpj(n.cnpj)],
+                            ['Emissão', fmtData(n.emissao)],
+                            ['Lançamento', fmtData(lancamento)],
+                            ['Filial', n.filial || '—'],
+                            ['Valor', fmtBRL(n.valor)],
+                          ];
+                          return (
+                            <div className="rounded-lg border bg-muted/30 px-3 py-2.5">
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                  Identificação da nota
+                                </span>
+                                <button
+                                  className="inline-flex items-center gap-1 rounded border bg-white px-2 py-0.5 text-[11px] font-medium text-slate-600 hover:bg-slate-50"
+                                  onClick={() => copiarResumo(n.id, resumoCopiavel(n))}
+                                  title="Copiar resumo para localizar a nota"
+                                >
+                                  {copied === n.id ? <Check className="h-3 w-3 text-green-600" /> : <Copy className="h-3 w-3" />}
+                                  {copied === n.id ? 'Copiado' : 'Copiar'}
+                                </button>
+                              </div>
+                              <dl className="mt-1.5 grid grid-cols-2 gap-x-4 gap-y-1 sm:grid-cols-3">
+                                {campos.map(([label, value]) => (
+                                  <div key={label} className={cn('min-w-0', label === 'Fornecedor' && 'col-span-2 sm:col-span-3')}>
+                                    <dt className="text-[10px] text-muted-foreground">{label}</dt>
+                                    <dd className="truncate text-xs font-medium" title={value}>{value}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            </div>
+                          );
+                        })()}
+
                         {n.auto_resumo && <p className="text-sm">{n.auto_resumo}</p>}
 
                         {checks.length > 0 && (
@@ -942,168 +1123,239 @@ export default function FiscalPage() {
                         )}
 
                         {n.chave_acesso && (
-                          <p className="text-xs text-muted-foreground">Chave: {n.chave_acesso}</p>
+                          <p className="text-xs text-muted-foreground select-all">Chave: {n.chave_acesso}</p>
                         )}
                         {n.extra?.vexpenses && (
                           <p className="text-xs text-violet-700">
                             VExpenses — relatório <span className="font-medium">{n.extra.vexpenses.report_name || `#${n.extra.vexpenses.report_id}`}</span> (despesa #{n.extra.vexpenses.expense_id})
                           </p>
                         )}
-                        <a
-                          href={`/api/fiscal/portal-link?id=${n.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" /> Abrir no portal EQS
-                        </a>
-                        {n.doc_path && (
-                          <div className="flex items-center gap-3">
-                            <button
-                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                              onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
-                            >
-                              <Maximize2 className="h-3 w-3" /> Ampliar documento
-                            </button>
-                            <a
-                              href={`/api/fiscal/doc?id=${n.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
-                            >
-                              Abrir em nova aba
-                            </a>
+
+                        {/* Documentos — anexos e links externos agrupados */}
+                        {(n.doc_path || (n.docs && n.docs.length > 0) || n.tipo === 'servico' || true) && (
+                          <div className="space-y-2">
+                            <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Documentos</span>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <a
+                                href={`/api/fiscal/portal-link?id=${n.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 rounded-md border bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5 text-blue-600" /> Portal EQS
+                              </a>
+                              {n.doc_path && (
+                                <>
+                                  <button
+                                    className="inline-flex items-center gap-1.5 rounded-md border bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                                    onClick={() => setDocModal({ id: n.id, nome: n.doc_nome || 'documento' })}
+                                  >
+                                    <Maximize2 className="h-3.5 w-3.5 text-blue-600" /> Ampliar
+                                  </button>
+                                  <a
+                                    href={`/api/fiscal/doc?id=${n.id}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 rounded-md border bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                                  >
+                                    <FileText className="h-3.5 w-3.5 text-blue-600" /> Nova aba
+                                  </a>
+                                </>
+                              )}
+                              {n.tipo === 'servico' && (
+                                <button
+                                  className="inline-flex items-center gap-1.5 rounded-md border bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                                  disabled={acting === n.id}
+                                  onClick={() => buscarDocs(n.id)}
+                                >
+                                  {acting === n.id ? (
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  ) : (
+                                    <Download className="h-3.5 w-3.5 text-blue-600" />
+                                  )}
+                                  {n.docs && n.docs.length > 0 ? 'Atualizar docs do portal' : 'Buscar docs no portal'}
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Anexos do portal EQS — todos os documentos do
+                                processo (nota real + boletos), por doc_id. */}
+                            {n.docs && n.docs.length > 0 && (
+                              <div className="flex items-start gap-1.5 flex-wrap">
+                                {n.docs.map((d) => {
+                                  const selId = docSel[n.id] ?? (n.doc_path ? null : n.docs![0]?.id ?? null);
+                                  const active = selId === d.id;
+                                  const tipoLabel = d.tipo === 'G' ? 'Nota' : d.tipo === 'B' ? 'Boleto' : d.tipo || 'Doc';
+                                  return (
+                                    <button
+                                      key={d.id}
+                                      onClick={() => setDocSel({ ...docSel, [n.id]: d.id })}
+                                      className={cn(
+                                        'rounded-full border px-2 py-0.5 text-[10px] font-medium max-w-[240px] truncate',
+                                        active
+                                          ? 'border-blue-400 bg-blue-50 text-blue-700'
+                                          : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
+                                      )}
+                                      title={d.nome}
+                                    >
+                                      <span className={cn('font-semibold', d.tipo === 'G' ? 'text-green-700' : d.tipo === 'B' ? 'text-amber-700' : '')}>
+                                        {tipoLabel}
+                                      </span>
+                                      {' · '}{d.nome}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         )}
 
-                        {/* Anexos do portal EQS — todos os documentos do processo
-                            (nota real + boletos + outros), servidos por doc_id. */}
-                        {n.docs && n.docs.length > 0 && (
-                          <div className="flex items-start gap-1.5 flex-wrap">
-                            <span className="text-xs text-muted-foreground mt-0.5">Docs do portal:</span>
-                            {n.docs.map((d) => {
-                              const selId = docSel[n.id] ?? (n.doc_path ? null : n.docs![0]?.id ?? null);
-                              const active = selId === d.id;
-                              const tipoLabel = d.tipo === 'G' ? 'Nota' : d.tipo === 'B' ? 'Boleto' : d.tipo || 'Doc';
-                              return (
-                                <button
-                                  key={d.id}
-                                  onClick={() => setDocSel({ ...docSel, [n.id]: d.id })}
-                                  className={cn(
-                                    'rounded-full border px-2 py-0.5 text-[10px] font-medium max-w-[240px] truncate',
-                                    active
-                                      ? 'border-blue-400 bg-blue-50 text-blue-700'
-                                      : 'border-slate-300 bg-white text-slate-600 hover:border-slate-400'
-                                  )}
-                                  title={d.nome}
-                                >
-                                  <span className={cn('font-semibold', d.tipo === 'G' ? 'text-green-700' : d.tipo === 'B' ? 'text-amber-700' : '')}>
-                                    {tipoLabel}
-                                  </span>
-                                  {' · '}{d.nome}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {n.tipo === 'servico' && (
-                          <button
-                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline disabled:opacity-50"
-                            disabled={acting === n.id}
-                            onClick={() => buscarDocs(n.id)}
-                          >
-                            {acting === n.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Download className="h-3 w-3" />
-                            )}
-                            {n.docs && n.docs.length > 0 ? 'Atualizar documentos do portal' : 'Buscar documentos no portal'}
-                          </button>
-                        )}
+                        {/* Trilha de quem mexeu: erro confirmado / correção /
+                            cancelamento — o "quem corrigiu o quê". */}
                         {n.reviewed_by && (
                           <p className="text-xs text-muted-foreground">
-                            Revisado por {n.reviewed_by} em {n.reviewed_at ? new Date(n.reviewed_at).toLocaleString('pt-BR') : '—'}
-                            {n.review_nota ? ` — ${n.review_nota}` : ''}
-                            {n.erro_tipo ? ` · erro: ${n.erro_tipo}` : ''}
+                            {n.review_status === 'confirmado_erro' || n.erro_tipo ? 'Erro confirmado' : 'Revisado'} por {n.reviewed_by} em {n.reviewed_at ? new Date(n.reviewed_at).toLocaleString('pt-BR') : '—'}
+                            {n.erro_tipo ? ` · ${ERRO_LABEL[n.erro_tipo] || n.erro_tipo}` : ''}
+                            {n.erro_descricao ? ` — ${n.erro_descricao}` : (n.review_nota ? ` — ${n.review_nota}` : '')}
+                          </p>
+                        )}
+                        {n.corrigida_by && (
+                          <p className="text-xs text-emerald-700">
+                            Corrigida por {n.corrigida_by} em {n.corrigida_at ? new Date(n.corrigida_at).toLocaleString('pt-BR') : '—'}
+                            {n.corrigida_nota ? ` — ${n.corrigida_nota}` : ''}
+                          </p>
+                        )}
+                        {n.cancelled_by && (
+                          <p className="text-xs text-slate-600">
+                            Cancelada por {n.cancelled_by} em {n.cancelled_at ? new Date(n.cancelled_at).toLocaleString('pt-BR') : '—'}
+                            {n.cancel_motivo ? ` — ${n.cancel_motivo}` : ''}
                           </p>
                         )}
 
-                        {view === 'fila' && n.review_status === 'pendente' && (
-                          <div className="flex gap-2 pt-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={acting === n.id}
-                              onClick={() => revisar(n.id, 'confirmado_ok')}
-                            >
-                              {acting === n.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1 text-green-600" />}
-                              Confirmar OK
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              disabled={acting === n.id}
-                              onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'tes_errado', descricao: n.auto_resumo || '' })}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" /> Confirmar erro
-                            </Button>
-                          </div>
-                        )}
+                        {/* Barra de ações — decisões da nota, centralizadas e
+                            destacadas num painel único. */}
+                        {(() => {
+                          const actions: React.ReactNode[] = [];
+                          if (view === 'fila' && n.review_status === 'pendente') {
+                            actions.push(
+                              <Button
+                                key="ok" size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'confirmado_ok')}
+                              >
+                                {acting === n.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1.5" />}
+                                Confirmar OK
+                              </Button>,
+                              <Button
+                                key="erro" size="sm" variant="destructive"
+                                disabled={acting === n.id}
+                                onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'tes_errado', descricao: n.auto_resumo || '' })}
+                              >
+                                <XCircle className="h-4 w-4 mr-1.5" /> Confirmar erro
+                              </Button>
+                            );
+                          }
+                          if (view === 'fila' && n.review_status === 'auto_ok_aviso') {
+                            actions.push(
+                              <span key="aviso" className="text-xs text-yellow-700 self-center">
+                                Aprovada automaticamente — divergência apenas de Origem CST
+                              </span>,
+                              <Button
+                                key="erro" size="sm" variant="outline"
+                                className="border-red-300 text-red-600 hover:bg-red-50"
+                                disabled={acting === n.id}
+                                onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'outro', descricao: n.auto_resumo || '' })}
+                              >
+                                <XCircle className="h-4 w-4 mr-1.5" /> Confirmar erro
+                              </Button>
+                            );
+                          }
+                          if (view === 'fila' && (n.review_status === 'confirmado_ok' || n.review_status === 'confirmado_erro')) {
+                            actions.push(
+                              <Button
+                                key="rev" size="sm" variant="ghost"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, n.review_status === 'confirmado_ok' ? 'confirmado_erro' : 'confirmado_ok', n.review_status === 'confirmado_ok' ? 'outro' : (n.erro_tipo || 'outro'))}
+                              >
+                                Reverter para {n.review_status === 'confirmado_ok' ? 'erro' : 'OK'}
+                              </Button>
+                            );
+                          }
+                          // Histórico: quem trata os erros (entrada de notas)
+                          // marca a correção — fica registrado quem/quando/como.
+                          if (view === 'historico' && n.review_status === 'confirmado_erro' && !cancelForm && !corrigirForm) {
+                            actions.push(
+                              <Button
+                                key="corr" size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                disabled={acting === n.id}
+                                onClick={() => setCorrigirForm({ notaId: n.id, nota: '' })}
+                              >
+                                <CheckCheck className="h-4 w-4 mr-1.5" /> Marcar como corrigida
+                              </Button>,
+                              <Button
+                                key="canc" size="sm" variant="outline"
+                                className="border-slate-300 text-slate-600 hover:bg-slate-50"
+                                disabled={acting === n.id}
+                                onClick={() => setCancelForm({ notaId: n.id, motivo: '' })}
+                              >
+                                <Ban className="h-4 w-4 mr-1.5" /> Cancelar nota
+                              </Button>
+                            );
+                          }
+                          if (view === 'historico' && n.review_status === 'corrigida') {
+                            actions.push(
+                              <Button
+                                key="desc" size="sm" variant="ghost"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'confirmado_erro', n.erro_tipo || 'outro', n.erro_descricao || undefined)}
+                              >
+                                Desfazer correção
+                              </Button>
+                            );
+                          }
+                          if (view === 'historico' && n.review_status === 'cancelado') {
+                            actions.push(
+                              <Button
+                                key="desc" size="sm" variant="ghost"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'confirmado_erro', n.erro_tipo || 'outro', n.erro_descricao || undefined)}
+                              >
+                                Desfazer cancelamento
+                              </Button>
+                            );
+                          }
+                          if (actions.length === 0) return null;
+                          return (
+                            <div className="flex flex-wrap items-center justify-center gap-2.5 rounded-lg border bg-muted/40 px-4 py-3">
+                              {actions}
+                            </div>
+                          );
+                        })()}
 
-                        {/* Aviso CST: já auto-aprovada, mas o revisor pode escalar
-                            pra erro se o aviso esconder problema real. */}
-                        {view === 'fila' && n.review_status === 'auto_ok_aviso' && (
-                          <div className="flex items-center gap-2 pt-1">
-                            <span className="text-xs text-yellow-700">
-                              Aprovada automaticamente — divergência apenas de Origem CST
-                            </span>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-red-600 hover:text-red-700"
-                              disabled={acting === n.id}
-                              onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'outro', descricao: n.auto_resumo || '' })}
-                            >
-                              <XCircle className="h-4 w-4 mr-1" /> Confirmar erro
-                            </Button>
-                          </div>
-                        )}
-
-                        {view === 'fila' && (n.review_status === 'confirmado_ok' || n.review_status === 'confirmado_erro') && (
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={acting === n.id}
-                            onClick={() => revisar(n.id, n.review_status === 'confirmado_ok' ? 'confirmado_erro' : 'confirmado_ok', n.review_status === 'confirmado_ok' ? 'outro' : (n.erro_tipo || 'outro'))}
-                          >
-                            Reverter para {n.review_status === 'confirmado_ok' ? 'erro' : 'OK'}
-                          </Button>
-                        )}
-
-                        {/* Histórico: ações do setor que trata os erros */}
-                        {view === 'historico' && n.review_status === 'confirmado_erro' && !cancelForm && (
-                          <div className="pt-1">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={acting === n.id}
-                              onClick={() => setCancelForm({ notaId: n.id, motivo: '' })}
-                            >
-                              <Ban className="h-4 w-4 mr-1" /> Marcar como cancelada
-                            </Button>
-                          </div>
-                        )}
-
-                        {view === 'historico' && n.review_status === 'cancelado' && (
-                          <div className="pt-1">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              disabled={acting === n.id}
-                              onClick={() => revisar(n.id, 'confirmado_erro', n.erro_tipo || 'outro', n.erro_descricao || undefined)}
-                            >
-                              Desfazer cancelamento
-                            </Button>
+                        {corrigirForm?.notaId === n.id && (
+                          <div className="rounded-md border border-emerald-300 bg-emerald-50 p-3 space-y-2">
+                            <p className="text-sm font-medium text-emerald-800">
+                              Marcar como corrigida — a nota sai da fila de erros e registra quem corrigiu
+                            </p>
+                            <input
+                              className="w-full rounded border bg-white px-2 py-1 text-sm"
+                              placeholder="Como foi corrigida? (opcional — ex.: TES ajustada pra 401 no TOTVS)"
+                              value={corrigirForm.nota}
+                              onChange={(e) => setCorrigirForm({ ...corrigirForm, nota: e.target.value })}
+                            />
+                            <div className="flex justify-center gap-2">
+                              <Button
+                                size="sm"
+                                className="bg-emerald-600 hover:bg-emerald-700"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'corrigida', undefined, undefined, undefined, corrigirForm.nota)}
+                              >
+                                {acting === n.id ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Registrar correção'}
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={() => setCorrigirForm(null)}>Voltar</Button>
+                            </div>
                           </div>
                         )}
 
@@ -1118,7 +1370,7 @@ export default function FiscalPage() {
                               value={cancelForm.motivo}
                               onChange={(e) => setCancelForm({ ...cancelForm, motivo: e.target.value })}
                             />
-                            <div className="flex gap-2">
+                            <div className="flex justify-center gap-2">
                               <Button
                                 size="sm"
                                 disabled={acting === n.id}
@@ -1150,7 +1402,7 @@ export default function FiscalPage() {
                               value={erroForm.descricao}
                               onChange={(e) => setErroForm({ ...erroForm, descricao: e.target.value })}
                             />
-                            <div className="flex gap-2">
+                            <div className="flex justify-center gap-2">
                               <Button
                                 size="sm"
                                 variant="destructive"

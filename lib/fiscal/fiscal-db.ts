@@ -8,6 +8,8 @@
 //   confirmado_ok   → fiscal revisou e aceitou (ex.: divergência esperada de TES)
 //   confirmado_erro → fiscal confirmou erro real; gera registro em
 //                     resultados_conferencias (aba de erros existente)
+//   corrigida       → entrada de notas corrigiu no TOTVS; registra
+//                     corrigida_by/at/nota e sai da aba de erros
 //
 // Importação é idempotente por (tipo, doc, serie, filial, emissao, fornecedor):
 // re-rodar o mesmo dia atualiza a linha em vez de duplicar — mas NUNCA
@@ -26,7 +28,7 @@ export type FiscalTipo = (typeof FISCAL_TIPOS)[number];
 export const AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'] as const;
 export type AutoStatus = (typeof AUTO_STATUS)[number];
 
-export const REVIEW_STATUS = ['auto_ok', 'auto_ok_aviso', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'] as const;
+export const REVIEW_STATUS = ['auto_ok', 'auto_ok_aviso', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'corrigida', 'cancelado'] as const;
 export type ReviewStatus = (typeof REVIEW_STATUS)[number];
 
 // Categorias de erro confirmado → coluna `erro` de resultados_conferencias.
@@ -114,6 +116,11 @@ export async function ensureFiscalTables(): Promise<void> {
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_by TEXT`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ`;
   await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancel_motivo TEXT`;
+  // Correção pelo setor de entrada de notas (erro confirmado → corrigida no
+  // TOTVS). Guarda quem corrigiu, quando e como (nota livre da correção).
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_by TEXT`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_nota TEXT`;
   // Anexos extras do portal EQS (serviço): todos os documentos do processo,
   // não só o primeiro tipo 'G' que o runner baixa.
   await sql`
