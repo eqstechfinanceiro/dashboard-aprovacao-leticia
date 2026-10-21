@@ -55,6 +55,7 @@ const settings_1 = require("../db/settings");
 const db_1 = require("./db");
 const cnab_1 = require("./cnab");
 const folha_pdf_1 = require("./folha-pdf");
+const portal_fgts_1 = require("./portal-fgts");
 const DESTINO = sharepoint_1.SP_SITES.destino;
 // ---------- Índice de funcionários ----------
 function normDigits(s) {
@@ -448,6 +449,7 @@ async function processRemessaAnaliseFgts(run, sel) {
                     }
                     if (cands.length > 1) {
                         meta.warnings.push(`par_ambiguo_ordem: ${cands.length} entradas .rem com mesmo valor+data — pareado na ordem do arquivo`);
+                        meta.candidatos = cands.map((c) => ({ seq: c.seq, nome: c.nome, cpf: c.cpf, urlQr: c.urlQr }));
                     }
                     if (cands.length) {
                         entry = cands[0];
@@ -488,7 +490,7 @@ async function processRemessaAnaliseFgts(run, sel) {
                     await (0, db_1.insertEnvio)({
                         ...base, tipoPagamento: 'FGTS', banco: bancoItem,
                         status: 'sem_par_txt', meta,
-                        error: `página FGTS (R$${comp.valor ?? '?'}) sem entrada correspondente na remessa`,
+                        error: `página FGTS (R$${comp.valor ?? '?'}${comp.vencimento ? `, venc. ${comp.vencimento.split('-').reverse().join('/')}` : ''}${comp.identificadorQr ? `, QR ${comp.identificadorQr.slice(0, 8)}…` : ''}) sem entrada correspondente na remessa`,
                     });
                     continue;
                 }
@@ -512,7 +514,7 @@ async function processRemessaAnaliseFgts(run, sel) {
                     chave: null, cpf: func.cpf, nome: func.nome, regiao: func.regiao, cc: func.cc,
                     tipoPagamento: 'FGTS', banco: bancoItem,
                     status: ambiguo ? 'valor_ambiguo' : 'pronto',
-                    meta: { ...meta, via, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, urlQr: entry.urlQr, file: entry._file } },
+                    meta: { ...meta, via, txt: { nome: entry.nome, valor: entry.valor, cpf: entry.cpf, seq: entry.seq, urlQr: entry.urlQr, file: entry._file, candidatos: meta.candidatos } },
                     error: meta.warnings.join('; ') || null,
                 });
             }
@@ -535,6 +537,24 @@ async function processRemessaAnaliseFgts(run, sel) {
         }
         if (sel.competencia && compEsperadas.size > 0 && !compEsperadas.has(sel.competencia)) {
             resumo.warnings.unshift(`competencia_divergente: informada ${sel.competencia}, mas as datas de pagamento indicam ${[...compEsperadas].join(' ou ')}`);
+        }
+        // 5. Fallback portal EQS: comprovantes sem par na remessa (pagos por fora)
+        // e pares ambíguos são identificados pela guia anexada ao processo CBME**.
+        if (resumo.semParTxt > 0 || resumo.ambiguos > 0) {
+            try {
+                await (0, db_1.updateRunProgress)(run.id, { phase: 'analyzing', currentFileName: 'portal EQS — identificando guias' });
+                const r = await (0, portal_fgts_1.resolverComprovantesPortal)(run.id);
+                resumo.portalResolvidos = r.resolvidos;
+                resumo.semParTxt -= r.resolvidos - r.ambiguos_confirmados;
+                resumo.ambiguos -= r.ambiguos_confirmados;
+                resumo.prontos += r.resolvidos;
+                if (r.erros.length) {
+                    resumo.warnings.push(`portal: ${r.erros.length} falha(s) na identificação (${r.erros[0].erro})`);
+                }
+            }
+            catch (e) {
+                resumo.warnings.push(`portal EQS: identificação automática falhou (${String(e?.message || e).slice(0, 120)})`);
+            }
         }
         resumo.warnings = resumo.warnings.slice(0, 50);
         await (0, neon_1.sql) `UPDATE comprovantes_runs SET result = ${JSON.stringify({ analise: resumo })}::jsonb, status = 'aguardando_confirmacao', finished_at = NOW() WHERE id = ${run.id}`;

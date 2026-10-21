@@ -200,17 +200,30 @@ export async function syncServicoDocs(opts: { notaId?: number; limit?: number; f
     out.processadas++;
     try {
       // Resolve o processo (doc+fornecedor) no tenant onde ele existir.
+      // O fornecedor resolvido por CNPJ é o código SA2 — gravamos no extra
+      // (fornecedor_cod/loja/empresa) porque a coluna `fornecedor` de notas
+      // de serviço guarda o NOME, e borderô/monitor precisam do código.
+      const TENANT_EMPRESA: Record<string, string> = { '02,02': 'EQS', '11,01': 'BRATEC' };
       let proc: Record<string, any> | null = null;
       let tenant = TENANTS[0];
+      let fornecedorCod: { cod: string; loja: string } | null = null;
       for (const t of TENANTS) {
         const fornec = await eqsGetFornecedorByCnpj(String(n.cnpj).trim(), t).catch(() => null);
         if (!fornec) continue;
+        if (!fornecedorCod) { fornecedorCod = fornec; tenant = t; }
         proc = await eqsGetProcesso(String(n.doc).trim(), fornec.cod, t).catch(() => null);
-        if (proc) { tenant = t; break; }
+        if (proc) { tenant = t; fornecedorCod = fornec; break; }
       }
+      const fornecExtra = fornecedorCod ? {
+        fornecedor_cod: fornecedorCod.cod,
+        fornecedor_loja: fornecedorCod.loja,
+        loja: fornecedorCod.loja,
+        empresa: TENANT_EMPRESA[tenant] || '',
+      } : {};
+      const mergeExtra = (o: Record<string, any>) => JSON.stringify({ ...fornecExtra, ...o });
       if (!proc) {
         out.proc_nao_encontrado++;
-        await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'proc_nao_encontrado' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+        await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'proc_nao_encontrado' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
         continue;
       }
 
@@ -219,7 +232,7 @@ export async function syncServicoDocs(opts: { notaId?: number; limit?: number; f
       const docs = await oldPortalListDocs(cookies, grupo, filial, chave);
       if (!docs.length) {
         out.sem_docs++;
-        await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'sem_docs' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+        await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'sem_docs' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
         continue;
       }
 
@@ -253,7 +266,7 @@ export async function syncServicoDocs(opts: { notaId?: number; limit?: number; f
         await sql`UPDATE fiscal_notas SET doc_path = ${pathPrimeiroG.path}, doc_nome = ${pathPrimeiroG.nome}, updated_at = NOW() WHERE id = ${n.id} AND (doc_path IS NULL OR doc_path = '')`;
       }
       const totalDocs = existentes.size + novos;
-      await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify({ portal_docs_at: new Date().toISOString(), portal_docs_count: totalDocs, portal_docs_status: 'ok' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+      await sql`UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: totalDocs, portal_docs_status: 'ok' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
     } catch (e: any) {
       out.erros.push({ nota_id: n.id, erro: String(e?.message || e).slice(0, 200) });
     }

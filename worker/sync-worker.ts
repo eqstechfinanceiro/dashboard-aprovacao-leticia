@@ -32,6 +32,8 @@ import { syncImpacto } from '../lib/impacto/totvs';
 import { syncBoletos } from '../lib/boletos/totvs';
 import { syncConferencia } from '../lib/conferencia/sync';
 import { syncServicoDocs } from '../lib/fiscal/servico-docs';
+import { syncBorderoStatus } from '../lib/fiscal/bordero-monitor';
+import { syncCanceladaMonitor } from '../lib/fiscal/cancelada-monitor';
 import { getSetting, setSetting } from '../lib/db/settings';
 
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
@@ -235,6 +237,25 @@ async function warmCycle() {
       }
     } catch (e: any) {
       await logError(runId, 'warm', 'servico-docs', e?.message || String(e), true);
+    }
+    // Monitor fiscal — cache batch de borderô (SEA×SE2 por tenant, erros
+    // pendentes p/ contas a pagar) + monitor de re-lançamento de canceladas
+    // (fingerprint SF1/SD1 → notificações). Falha TOTVS não zera estado.
+    try {
+      const b = await syncBorderoStatus();
+      meta.bordero_status = `check:${b.checked} em:${b.em_bordero} pagas:${b.pagas} rem:${b.removidas} err:${b.errors.length}`;
+      if (b.errors.length) failed = true;
+    } catch (e: any) {
+      failed = true;
+      await logError(runId, 'warm', 'bordero-status', e?.message || String(e), true);
+    }
+    try {
+      const m = await syncCanceladaMonitor();
+      meta.cancelada_monitor = `check:${m.checked} aguard:${m.aguardando} excl:${m.excluidas} rel:${m.relancadas} err:${m.erros}`;
+      if (m.erros) failed = true;
+    } catch (e: any) {
+      failed = true;
+      await logError(runId, 'warm', 'cancelada-monitor', e?.message || String(e), true);
     }
     await finishRun(runId, failed ? 'error' : 'done', meta);
     console.log('[WARM] ciclo', failed ? 'com erros' : 'ok');

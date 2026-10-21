@@ -4,6 +4,11 @@ exports.SD1_SB1_FIELDS = exports.SF1_SA2_FIELDS = void 0;
 exports.decodeUserlgi = decodeUserlgi;
 exports.fetchMercadoriaNfs = fetchMercadoriaNfs;
 exports.fetchZ01XmlByChave = fetchZ01XmlByChave;
+exports.fetchSdsXmlByChave = fetchSdsXmlByChave;
+exports.checkTituloBordero = checkTituloBordero;
+exports.fetchBorderoStatusBatch = fetchBorderoStatusBatch;
+exports.nfFingerprint = nfFingerprint;
+exports.fetchNfByIdentidade = fetchNfByIdentidade;
 /**
  * Conferência de mercadoria — consulta TOTVS REST (SF1+SA2 cabeçalho,
  * SD1+SB1 itens) para NFs lançadas (bot OU humano), EQS + BRATEC.
@@ -11,6 +16,7 @@ exports.fetchZ01XmlByChave = fetchZ01XmlByChave;
  * Port de conferencia-notas-mercadoria/totvs_mercadoria_api.py sobre o client
  * compartilhado lib/impacto/totvs.ts (cookie + OAuth2 + genericQuery paginada).
  */
+const crypto_1 = require("crypto");
 const totvs_1 = require("../impacto/totvs");
 exports.SF1_SA2_FIELDS = [
     'F1_FILIAL', 'F1_DOC', 'F1_SERIE', 'F1_FORNECE', 'F1_LOJA', 'F1_EMISSAO', 'F1_VALBRUT',
@@ -167,4 +173,286 @@ async function fetchZ01XmlByChave(chave) {
         catch { }
     }
     return null;
+}
+/**
+ * Fonte zero-custo alternativa: a fila "XMLs Disponíveis" do MATA143 (SDS)
+ * guarda o XML completo da NF-e em DS_XML — inclusive de notas já lançadas
+ * (DS_STATUS='G'), cobrindo casos que a Z01 não tem. Mesma genericQuery.
+ */
+async function fetchSdsXmlByChave(chave) {
+    if (!/^\d{44}$/.test(chave))
+        return null;
+    for (const emp of Object.keys(totvs_1.EMPRESAS)) {
+        const tenantId = totvs_1.EMPRESAS[emp];
+        if (!tenantId)
+            continue;
+        try {
+            const d = await (0, totvs_1.genericQuery)(tenantId, {
+                tables: 'SDS',
+                // DS_XML é memo — precisa de coluna companheira no fields (igual Z01).
+                fields: 'DS_DOC,DS_CHAVENF,DS_XML',
+                where: `SDS.DS_CHAVENF='${chave}' AND SDS.D_E_L_E_T_=' '`,
+                page: '1',
+                pageSize: '5',
+            });
+            for (const it of d.items || []) {
+                const xml = String(it.ds_xml || '').trim();
+                if (xml.includes('infNFe'))
+                    return xml;
+            }
+        }
+        catch { }
+    }
+    return null;
+}
+/**
+ * Verifica se o título da NF está em borderô de pagamento (SEA — "Títulos
+ * Enviados ao Banco") e complementa com a baixa no SE2. A linha SEA persiste
+ * após o pagamento, então serve tanto pra "está em borderô" quanto "foi paga
+ * via borderô N em data D". Filtro só por doc+série no where (campos char
+ * têm padding variável) — fornecedor/loja filtrados no cliente.
+ */
+async function checkTituloBordero(doc, serie, fornec, loja, empresa) {
+    const out = [];
+    const doc9 = String(doc || '').trim().padStart(9, '0');
+    const serieT = String(serie || '').trim();
+    const emps = empresa && totvs_1.EMPRESAS[empresa] ? [empresa] : Object.keys(totvs_1.EMPRESAS);
+    for (const emp of emps) {
+        const tenantId = totvs_1.EMPRESAS[emp];
+        if (!tenantId)
+            continue;
+        try {
+            const d = await (0, totvs_1.genericQuery)(tenantId, {
+                tables: 'SEA',
+                fields: 'EA_NUMBOR,EA_DATABOR,EA_PORTADO,EA_AGEDEP,EA_NUMCON,EA_SITUACA,EA_OCORR,EA_FORNECE,EA_LOJA,EA_TIPO,EA_NUM,EA_PARCELA',
+                where: `SEA.D_E_L_E_T_=' ' AND (EA_NUM='${doc9}' OR EA_NUM='${doc}') AND EA_PREFIXO='${serieT}'`,
+                page: '1',
+                pageSize: '50',
+            });
+            const rows = (d.items || []).filter((it) => (!fornec || trim(it.ea_fornece) === fornec) &&
+                (!loja || trim(it.ea_loja) === loja));
+            if (!rows.length)
+                continue;
+            // Baixa no SE2 do(s) título(s) encontrados — borderô pode já ter pago.
+            const b = await (0, totvs_1.genericQuery)(tenantId, {
+                tables: 'SE2',
+                fields: 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ',
+                where: `SE2.D_E_L_E_T_=' ' AND (E2_NUM='${doc9}' OR E2_NUM='${doc}') AND E2_PREFIXO='${serieT}'`,
+                page: '1',
+                pageSize: '50',
+            });
+            const baixas = new Map();
+            for (const it of b.items || []) {
+                const bx = trim(it.e2_baixa);
+                if (bx)
+                    baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
+            }
+            for (const it of rows) {
+                out.push({
+                    empresa: emp,
+                    numbor: trim(it.ea_numbor),
+                    databor: (() => { const s = trim(it.ea_databor); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null; })(),
+                    banco: trim(it.ea_portado),
+                    agencia: trim(it.ea_agedep),
+                    conta: trim(it.ea_numcon),
+                    situacao: trim(it.ea_situaca),
+                    ocorrencia: trim(it.ea_ocorr),
+                    baixa: baixas.get(`${trim(it.ea_num)}|${trim(it.ea_parcela)}`) || null,
+                });
+            }
+        }
+        catch { }
+    }
+    return out;
+}
+const SEA_FIELDS = 'EA_NUMBOR,EA_DATABOR,EA_PORTADO,EA_AGEDEP,EA_NUMCON,EA_SITUACA,EA_OCORR,EA_FORNECE,EA_LOJA,EA_TIPO,EA_NUM,EA_PARCELA,EA_PREFIXO';
+const SE2_FIELDS = 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ,E2_FORNECE,E2_LOJA,E2_PREFIXO';
+const BATCH_CHUNK = 120; // tamanho do IN(...) — URL da genericQuery tem limite
+function docVariants(doc) {
+    const d = trim(doc);
+    const d9 = d.padStart(9, '0');
+    return d9 === d ? [d9] : [d9, d];
+}
+function rowMatchesNota(it, n, numField) {
+    const num = trim(it[numField]);
+    if (!docVariants(n.doc).includes(num))
+        return false;
+    if (n.serie && trim(it.ea_prefixo ?? it.e2_prefixo ?? '') !== n.serie)
+        return false;
+    const forn = trim(it.ea_fornece ?? it.e2_fornece ?? '');
+    const loja = trim(it.ea_loja ?? it.e2_loja ?? '');
+    if (n.fornec && forn !== n.fornec)
+        return false;
+    if (n.loja && loja !== n.loja)
+        return false;
+    return true;
+}
+async function fetchBorderoStatusBatch(notas) {
+    const porNota = new Map();
+    const errors = [];
+    if (!notas.length)
+        return { porNota, errors };
+    // Agrupa por tenant alvo — nota sem empresa definida consulta todos.
+    const allEmps = Object.keys(totvs_1.EMPRESAS);
+    const porEmpresa = new Map();
+    for (const n of notas) {
+        const emps = n.empresa && totvs_1.EMPRESAS[n.empresa] ? [n.empresa] : allEmps;
+        for (const emp of emps) {
+            const g = porEmpresa.get(emp);
+            if (g)
+                g.push(n);
+            else
+                porEmpresa.set(emp, [n]);
+        }
+    }
+    for (const [emp, grupo] of porEmpresa) {
+        const tenantId = totvs_1.EMPRESAS[emp];
+        const docNums = [...new Set(grupo.flatMap((n) => docVariants(n.doc)))];
+        const serieSet = new Set(grupo.map((n) => n.serie).filter(Boolean));
+        for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
+            const chunk = docNums.slice(i, i + BATCH_CHUNK);
+            const inList = chunk.map((d) => `'${d}'`).join(',');
+            const serieFilter = serieSet.size
+                ? ` AND EA_PREFIXO IN (${[...serieSet].map((s) => `'${s}'`).join(',')})`
+                : '';
+            try {
+                const d = await (0, totvs_1.genericQuery)(tenantId, {
+                    tables: 'SEA', fields: SEA_FIELDS,
+                    where: `SEA.D_E_L_E_T_=' ' AND EA_NUM IN (${inList})${serieFilter}`,
+                    page: '1', pageSize: '1000',
+                });
+                if (d.error) {
+                    errors.push(`${emp} SEA: ${d.error}`);
+                    continue;
+                }
+                for (const it of d.items || []) {
+                    for (const n of grupo) {
+                        if (!rowMatchesNota(it, n, 'ea_num'))
+                            continue;
+                        const arr = porNota.get(n.id) || [];
+                        arr.push({
+                            empresa: emp,
+                            numbor: trim(it.ea_numbor),
+                            databor: (() => { const s = trim(it.ea_databor); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null; })(),
+                            banco: trim(it.ea_portado),
+                            agencia: trim(it.ea_agedep),
+                            conta: trim(it.ea_numcon),
+                            situacao: trim(it.ea_situaca),
+                            ocorrencia: trim(it.ea_ocorr),
+                            baixa: null, // preenchido pelo SE2 abaixo
+                            _num: trim(it.ea_num), _parcela: trim(it.ea_parcela),
+                        });
+                        porNota.set(n.id, arr);
+                    }
+                }
+            }
+            catch (e) {
+                errors.push(`${emp} SEA: ${e?.message || e}`);
+            }
+        }
+        // Baixas SE2 do mesmo conjunto de docs — uma passada por chunk.
+        if (porNota.size) {
+            for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
+                const chunk = docNums.slice(i, i + BATCH_CHUNK);
+                const inList = chunk.map((d) => `'${d}'`).join(',');
+                try {
+                    const b = await (0, totvs_1.genericQuery)(tenantId, {
+                        tables: 'SE2', fields: SE2_FIELDS,
+                        where: `SE2.D_E_L_E_T_=' ' AND E2_NUM IN (${inList})`,
+                        page: '1', pageSize: '1000',
+                    });
+                    if (b.error) {
+                        errors.push(`${emp} SE2: ${b.error}`);
+                        continue;
+                    }
+                    const baixas = new Map();
+                    for (const it of b.items || []) {
+                        const bx = trim(it.e2_baixa);
+                        if (bx)
+                            baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
+                    }
+                    for (const arr of porNota.values()) {
+                        for (const info of arr) {
+                            if (info.empresa !== emp)
+                                continue;
+                            info.baixa = baixas.get(`${info._num}|${info._parcela}`) || info.baixa;
+                            delete info._num;
+                            delete info._parcela;
+                        }
+                    }
+                }
+                catch (e) {
+                    errors.push(`${emp} SE2: ${e?.message || e}`);
+                }
+            }
+        }
+    }
+    return { porNota, errors };
+}
+/**
+ * Fingerprint estável do estado TOTVS da NF — qualquer edição/re-digitação
+ * muda o hash. Campos de valor/imposto/TES do header + itens ordenados.
+ */
+function nfFingerprint(header, items) {
+    const H = ['f1_valbrut', 'f1_valicms', 'f1_valipi', 'f1_icmsret', 'f1_icmst', 'f1_tipo',
+        'f1_especie', 'f1_dtdigit', 'f1_status', 'f1_irrf', 'f1_inss', 'f1_iss',
+        'f1_valpis', 'f1_valcsll', 'f1_cond', 'f1_descont', 'f1_naturez', 'f1_chvnfe'];
+    const I = ['d1_cod', 'd1_quant', 'd1_vunit', 'd1_total', 'd1_tes', 'd1_cf',
+        'd1_icmsret', 'd1_clasfis', 'd1_valicms', 'd1_valipi', 'd1_valdesc'];
+    const h = H.map((k) => trim(header?.[k])).join('|');
+    const its = (items || [])
+        .map((i) => I.map((k) => trim(i[k])).join(':'))
+        .sort()
+        .join(';');
+    return (0, crypto_1.createHash)('sha256').update(`${h}#${its}`).digest('hex').slice(0, 32);
+}
+/**
+ * Busca UMA nota na SF1/SD1 pela identidade (doc+série+fornecedor+loja) em
+ * qualquer estado — inclui linhas deletadas (D_E_L_E_T_='*') pra distinguir
+ * "excluída aguardando re-lançamento" de "ainda lançada". Sem janela de data.
+ */
+async function fetchNfByIdentidade(ref) {
+    const emps = ref.empresa && totvs_1.EMPRESAS[ref.empresa] ? [ref.empresa] : Object.keys(totvs_1.EMPRESAS);
+    const docIn = docVariants(ref.doc).map((d) => `'${d}'`).join(',');
+    for (const emp of emps) {
+        const tenantId = totvs_1.EMPRESAS[emp];
+        try {
+            const hd = await (0, totvs_1.genericQuery)(tenantId, {
+                tables: 'SF1,SA2',
+                fields: exports.SF1_SA2_FIELDS + ',SF1.D_E_L_E_T_',
+                where: `SF1.F1_DOC IN (${docIn})` +
+                    (ref.serie ? ` AND SF1.F1_SERIE='${ref.serie}'` : '') +
+                    (ref.fornec ? ` AND SF1.F1_FORNECE='${ref.fornec}'` : '') +
+                    ` AND SA2.D_E_L_E_T_=' ' AND SF1.F1_FORNECE=SA2.A2_COD AND SF1.F1_LOJA=SA2.A2_LOJA`,
+                page: '1', pageSize: '50',
+            });
+            if (hd.error)
+                continue;
+            const rows = (hd.items || []).filter((it) => !ref.loja || trim(it.f1_loja) === ref.loja);
+            // Prefere a linha ativa; se só houver deletada, reporta como excluída.
+            const ativa = rows.find((r) => trim(r['d_e_l_e_t_'] ?? r['D_E_L_E_T_'] ?? '') !== '*');
+            if (!ativa) {
+                if (rows.length)
+                    return { encontrada: false, empresa: emp, header: null, items: [], fingerprint: null };
+                continue;
+            }
+            const it = await (0, totvs_1.genericQuery)(tenantId, {
+                tables: 'SD1,SB1',
+                fields: exports.SD1_SB1_FIELDS + ',SD1.D_E_L_E_T_',
+                where: `SD1.D1_DOC IN (${docIn})` +
+                    (ref.serie ? ` AND SD1.D1_SERIE='${ref.serie}'` : '') +
+                    ` AND SD1.D1_FORNECE='${trim(ativa.f1_fornece)}' AND SD1.D1_LOJA='${trim(ativa.f1_loja)}'` +
+                    ` AND SD1.D1_COD=SB1.B1_COD`,
+                page: '1', pageSize: '500',
+            });
+            const items = (it.items || []).filter((r) => trim(r['d_e_l_e_t_'] ?? r['D_E_L_E_T_'] ?? '') !== '*');
+            const header = { ...ativa, _empresa: emp };
+            return {
+                encontrada: true, empresa: emp, header, items,
+                fingerprint: nfFingerprint(ativa, items),
+            };
+        }
+        catch { }
+    }
+    return { encontrada: false, empresa: null, header: null, items: [], fingerprint: null };
 }

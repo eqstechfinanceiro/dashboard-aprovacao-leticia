@@ -16,7 +16,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import { sql } from '../db/neon';
 import { ensureFiscalTables, computeReviewStatus } from '../fiscal/fiscal-db';
-import { fetchMercadoriaNfs } from './totvs';
+import { fetchMercadoriaNfs, nfFingerprint } from './totvs';
 import { ensureDocCacheTable, cacheHasChaves, prepararSieg, obterXmlNfe } from './fontes';
 import { compareNf } from './comparator';
 import { carregarTesOverride } from './tes-override';
@@ -105,6 +105,7 @@ async function upsertNota(runId: number, nota: {
   valor: number | null; emissao: string | null; chave: string;
   autoStatus: string; autoResumo: string; checks: unknown; extra: unknown;
   tentativas: number; nextRetry: Date | null; cstOnly?: boolean; tipo?: string;
+  fingerprint?: string | null;
 }): Promise<number> {
   const reviewStatus = computeReviewStatus(nota.autoStatus as any, nota.cstOnly === true);
   const tipo = nota.tipo || 'mercadoria';
@@ -165,6 +166,7 @@ async function upsertNota(runId: number, nota: {
           END,
           conferencia_tentativas = ${nota.tentativas},
           conferencia_next_retry = ${nota.nextRetry ? nota.nextRetry.toISOString() : null},
+          monitor_fingerprint = COALESCE(${nota.fingerprint ?? null}, monitor_fingerprint),
           updated_at = NOW()
         WHERE id = ${id}`;
       return id;
@@ -174,7 +176,7 @@ async function upsertNota(runId: number, nota: {
     INSERT INTO fiscal_notas
       (run_id, tipo, doc, serie, filial, fornecedor, cnpj, valor, emissao,
        chave_acesso, auto_status, auto_resumo, checks, extra, review_status,
-       conferencia_tentativas, conferencia_next_retry)
+       conferencia_tentativas, conferencia_next_retry, monitor_fingerprint)
     VALUES
       (${runId}, ${tipo}, ${trim(nota.doc).slice(0, 60)}, ${nul(nota.serie)},
        ${nul(nota.filial)}, ${nul(nota.fornecedor)}, ${nul(nota.cnpj)},
@@ -182,7 +184,8 @@ async function upsertNota(runId: number, nota: {
        ${nota.autoStatus}, ${nul(nota.autoResumo)},
        ${nota.checks ? JSON.stringify(nota.checks) : null},
        ${nota.extra ? JSON.stringify(nota.extra) : null},
-       ${reviewStatus}, ${nota.tentativas}, ${nota.nextRetry ? nota.nextRetry.toISOString() : null})
+       ${reviewStatus}, ${nota.tentativas}, ${nota.nextRetry ? nota.nextRetry.toISOString() : null},
+       ${nota.fingerprint ?? null})
     ON CONFLICT (tipo, doc, COALESCE(serie, ''), COALESCE(filial, ''), COALESCE(emissao, '1900-01-01'::date), COALESCE(fornecedor, '')) DO UPDATE SET
       run_id = EXCLUDED.run_id,
       cnpj = COALESCE(EXCLUDED.cnpj, fiscal_notas.cnpj),
@@ -199,6 +202,7 @@ async function upsertNota(runId: number, nota: {
       END,
       conferencia_tentativas = EXCLUDED.conferencia_tentativas,
       conferencia_next_retry = EXCLUDED.conferencia_next_retry,
+      monitor_fingerprint = COALESCE(EXCLUDED.monitor_fingerprint, fiscal_notas.monitor_fingerprint),
       updated_at = NOW()
     RETURNING id`;
   return res[0].id as number;
@@ -461,9 +465,12 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       };
       const extraBase = {
         empresa: h._empresa, usuario: h.f1_userlgi || null,
-        f1_dtdigit: trim(h.f1_dtdigit), itens_totvs: nf.items.length,
+        f1_dtdigit: trim(h.f1_dtdigit), f1_loja: trim(h.f1_loja), itens_totvs: nf.items.length,
         ...(vex ? { vexpenses: { expense_id: vex.expense_id, report_id: vex.report_id, report_name: vex.report_name } } : {}),
       };
+      // Fingerprint do estado TOTVS na conferência — baseline pro monitor de
+      // canceladas detectar edição/re-digitação depois.
+      const fingerprint = nfFingerprint(h, nf.items);
 
       let xmlRes = null;
       try {
@@ -483,7 +490,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
           autoResumo: 'XML não obtido em nenhuma fonte (cache/Z01/SDS/SIEG)',
           checks: [{ field: 'XML', expected: 'NF-e', actual: chave ? 'não obtido' : 'sem chave na SF1', match: false }],
           extra: { ...extraBase, tentativa: tent },
-          tentativas: tent, nextRetry,
+          tentativas: tent, nextRetry, fingerprint,
         });
         out.falhas++;
         out.conferidas++;
@@ -501,7 +508,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
           ...base, tipo: vex ? 'vexpenses' : 'mercadoria',
           autoStatus: 'erro', autoResumo: `comparação falhou: ${e?.message}`,
           checks: null, extra: { ...extraBase, fonte_xml: xmlRes.fonte, tentativa: tent },
-          tentativas: tent, nextRetry,
+          tentativas: tent, nextRetry, fingerprint,
         });
         out.falhas++;
         out.conferidas++;
@@ -516,7 +523,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
           ...extraBase, fonte_xml: xmlRes.fonte, mismatch_count: cmp.mismatch_count,
           chave_xml: xmlRes.parsed.chave || null, tentativa: tent,
         },
-        tentativas: 0, nextRetry: null, cstOnly: cmp.cst_only === true,
+        tentativas: 0, nextRetry: null, cstOnly: cmp.cst_only === true, fingerprint,
       });
       if (autoStatus !== 'match') {
         await anexarXml(notaId, xmlRes.xml, chave || 'sem-chave');

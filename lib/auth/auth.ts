@@ -78,6 +78,7 @@ export const MODULES = [
   { id: 'sync-health', label: 'Saúde dos Syncs' },
   { id: 'audit-log', label: 'Log de Auditoria' },
   { id: 'fiscal', label: 'Fiscal' },
+  { id: 'borderos', label: 'Borderôs — Contas a Pagar' },
   { id: 'configuracoes', label: 'Configurações' },
 ] as const;
 
@@ -101,6 +102,7 @@ export const MODULE_HREF_MAP: Record<string, string> = {
   'sync-health': '/sync-health',
   'audit-log': '/audit-log',
   fiscal: '/fiscal',
+  borderos: '/borderos',
   configuracoes: '/configuracoes',
 };
 
@@ -114,6 +116,9 @@ export const HREF_TO_MODULES: Record<string, string[]> = Object.entries(MODULE_H
   },
   {} as Record<string, string[]>
 );
+
+// Página amigável de histórico de atividades — mesmo grant do log técnico.
+HREF_TO_MODULES['/historico'] = ['audit-log', 'configuracoes'];
 
 // Módulos que NUNCA são liberados por bypass de admin — exigem grant explícito
 // em allowed_modules para qualquer role (inclusive admin).

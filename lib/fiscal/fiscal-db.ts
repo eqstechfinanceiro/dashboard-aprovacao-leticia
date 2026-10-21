@@ -141,6 +141,29 @@ export async function ensureFiscalTables(): Promise<void> {
     )
   `;
   await sql`CREATE INDEX IF NOT EXISTS idx_fiscal_notas_docs_nota ON fiscal_notas_docs(nota_id)`;
+  // Cache do status de borderô (SEA/SE2) — preenchido em batch pelo worker
+  // (syncBorderoStatus) e lido pela fila do contas a pagar + página fiscal.
+  await sql`
+    CREATE TABLE IF NOT EXISTS fiscal_bordero_status (
+      nota_id        BIGINT PRIMARY KEY REFERENCES fiscal_notas(id) ON DELETE CASCADE,
+      em_bordero     BOOLEAN NOT NULL DEFAULT FALSE,
+      pago           BOOLEAN NOT NULL DEFAULT FALSE,
+      borderos       JSONB NOT NULL DEFAULT '[]',
+      checked_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      check_error    TEXT,
+      remocao_confirmada_at TIMESTAMPTZ,
+      remocao_confirmada_by TEXT,
+      removida_detectada_at TIMESTAMPTZ
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS idx_fbs_fila ON fiscal_bordero_status(em_bordero, remocao_confirmada_at)`;
+  // Monitor de re-lançamento de notas canceladas — fingerprint do estado
+  // TOTVS (SF1+SD1) gravado na conferência e re-verificado em batch; mudança
+  // com SF1 ativa = a nota foi re-digitada.
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_fingerprint TEXT`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_status TEXT`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_checked_at TIMESTAMPTZ`;
+  await sql`ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_detail JSONB`;
 }
 
 // cstOnly: todas as divergências são "Origem CST" — campo informativo que o

@@ -9,6 +9,8 @@
 //   confirmado_ok   → fiscal revisou e aceitou (ex.: divergência esperada de TES)
 //   confirmado_erro → fiscal confirmou erro real; gera registro em
 //                     resultados_conferencias (aba de erros existente)
+//   corrigida       → entrada de notas corrigiu no TOTVS; registra
+//                     corrigida_by/at/nota e sai da aba de erros
 //
 // Importação é idempotente por (tipo, doc, serie, filial, emissao, fornecedor):
 // re-rodar o mesmo dia atualiza a linha em vez de duplicar — mas NUNCA
@@ -21,6 +23,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FISCAL_DOCS_DIR = exports.ERRO_TIPOS = exports.REVIEW_STATUS = exports.AUTO_STATUS = exports.FISCAL_TIPOS = void 0;
 exports.ensureFiscalTables = ensureFiscalTables;
 exports.computeReviewStatus = computeReviewStatus;
+exports.isCstOnlyDivergence = isCstOnlyDivergence;
 exports.deleteFiscalDoc = deleteFiscalDoc;
 exports.sweepOldFiscalDocs = sweepOldFiscalDocs;
 const fs_1 = require("fs");
@@ -29,7 +32,7 @@ const neon_1 = require("../db/neon");
 let tableEnsured = false;
 exports.FISCAL_TIPOS = ['mercadoria', 'servico', 'vexpenses'];
 exports.AUTO_STATUS = ['match', 'divergente', 'erro', 'pendente'];
-exports.REVIEW_STATUS = ['auto_ok', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'cancelado'];
+exports.REVIEW_STATUS = ['auto_ok', 'auto_ok_aviso', 'pendente', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'corrigida', 'cancelado'];
 // Categorias de erro confirmado → coluna `erro` de resultados_conferencias.
 // Mantém compatibilidade com os 3 tipos históricos.
 exports.ERRO_TIPOS = [
@@ -114,13 +117,87 @@ async function ensureFiscalTables() {
     await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_by TEXT`;
     await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ`;
     await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS cancel_motivo TEXT`;
+    // Correção pelo setor de entrada de notas (erro confirmado → corrigida no
+    // TOTVS). Guarda quem corrigiu, quando e como (nota livre da correção).
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_by TEXT`;
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_at TIMESTAMPTZ`;
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_nota TEXT`;
+    // Status em que a nota estava quando marcada corrigida ('confirmado_erro'
+    // ou 'cancelado') — usado pelo "desfazer correção" pra restaurar o estado
+    // certo (uma nota cancelada+corrigida volta a ser cancelada, não erro).
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS corrigida_de TEXT`;
+    // Anexos extras do portal EQS (serviço): todos os documentos do processo,
+    // não só o primeiro tipo 'G' que o runner baixa.
+    await (0, neon_1.sql) `
+    CREATE TABLE IF NOT EXISTS fiscal_notas_docs (
+      id BIGSERIAL PRIMARY KEY,
+      nota_id BIGINT NOT NULL REFERENCES fiscal_notas(id) ON DELETE CASCADE,
+      arquivo_id BIGINT NOT NULL,
+      nome TEXT NOT NULL,
+      tipo TEXT,
+      path TEXT NOT NULL,
+      size INT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (nota_id, arquivo_id)
+    )
+  `;
+    await (0, neon_1.sql) `CREATE INDEX IF NOT EXISTS idx_fiscal_notas_docs_nota ON fiscal_notas_docs(nota_id)`;
+    // Cache do status de borderô (SEA/SE2) — preenchido em batch pelo worker
+    // (syncBorderoStatus) e lido pela fila do contas a pagar + página fiscal.
+    await (0, neon_1.sql) `
+    CREATE TABLE IF NOT EXISTS fiscal_bordero_status (
+      nota_id        BIGINT PRIMARY KEY REFERENCES fiscal_notas(id) ON DELETE CASCADE,
+      em_bordero     BOOLEAN NOT NULL DEFAULT FALSE,
+      pago           BOOLEAN NOT NULL DEFAULT FALSE,
+      borderos       JSONB NOT NULL DEFAULT '[]',
+      checked_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      check_error    TEXT,
+      remocao_confirmada_at TIMESTAMPTZ,
+      remocao_confirmada_by TEXT,
+      removida_detectada_at TIMESTAMPTZ
+    )
+  `;
+    await (0, neon_1.sql) `CREATE INDEX IF NOT EXISTS idx_fbs_fila ON fiscal_bordero_status(em_bordero, remocao_confirmada_at)`;
+    // Monitor de re-lançamento de notas canceladas — fingerprint do estado
+    // TOTVS (SF1+SD1) gravado na conferência e re-verificado em batch; mudança
+    // com SF1 ativa = a nota foi re-digitada.
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_fingerprint TEXT`;
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_status TEXT`;
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_checked_at TIMESTAMPTZ`;
+    await (0, neon_1.sql) `ALTER TABLE fiscal_notas ADD COLUMN IF NOT EXISTS monitor_detail JSONB`;
 }
-function computeReviewStatus(autoStatus) {
+// cstOnly: todas as divergências são "Origem CST" — campo informativo que o
+// fiscal já validou como ruído. Auto-aprova com aviso em vez de pendente.
+function computeReviewStatus(autoStatus, cstOnly = false) {
     if (autoStatus === 'match')
         return 'auto_ok';
     if (autoStatus === 'erro')
         return 'falha_tecnica'; // download/parse — não é erro fiscal
+    if (autoStatus === 'divergente' && cstOnly)
+        return 'auto_ok_aviso';
     return 'pendente';
+}
+// Detecta nos checks persistidos (flat ou por item) se todas as divergências
+// são só "Origem CST" — usado pelo import legado e pelo backfill.
+function isCstOnlyDivergence(checks) {
+    if (!checks)
+        return false;
+    const flat = [];
+    // Aceita os dois shapes persistidos: array flat / array-por-item / CompareResult.
+    const arr = Array.isArray(checks)
+        ? checks
+        : checks.header_checks || checks.item_checks
+            ? [...(checks.header_checks || []), ...(checks.item_checks || [])]
+            : [];
+    for (const c of arr) {
+        if (Array.isArray(c))
+            flat.push(...c);
+        else
+            flat.push(c);
+    }
+    const falhas = flat.filter((c) => c && c.match === false);
+    return falhas.length > 0 &&
+        falhas.every((c) => (String(c.field || '').split('·').pop() || '').trim() === 'Origem CST');
 }
 const FISCAL_DOCS_DIR = () => path_1.default.join(process.cwd(), 'private-downloads', 'fiscal');
 exports.FISCAL_DOCS_DIR = FISCAL_DOCS_DIR;
@@ -141,6 +218,17 @@ async function deleteFiscalDoc(notaId) {
             }
         }
         await (0, neon_1.sql) `UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${notaId}`;
+        const docs = await (0, neon_1.sql) `SELECT id, path FROM fiscal_notas_docs WHERE nota_id = ${notaId}`;
+        for (const d of docs) {
+            const rel2 = String(d.path || '');
+            if (rel2.startsWith('fiscal/')) {
+                try {
+                    (0, fs_1.unlinkSync)(path_1.default.join(process.cwd(), 'private-downloads', rel2));
+                }
+                catch { }
+            }
+        }
+        await (0, neon_1.sql) `DELETE FROM fiscal_notas_docs WHERE nota_id = ${notaId}`;
     }
     catch {
         /* noop */
@@ -174,5 +262,26 @@ async function sweepOldFiscalDocs() {
         }
         await (0, neon_1.sql) `UPDATE fiscal_notas SET doc_path = NULL, doc_nome = NULL WHERE id = ${r.id}`;
     }
+    // Mesma retenção pros anexos extras do portal (fiscal_notas_docs).
+    try {
+        const oldDocs = await (0, neon_1.sql) `
+      SELECT d.id, d.path FROM fiscal_notas_docs d
+      JOIN fiscal_notas n ON n.id = d.nota_id
+      WHERE n.review_status <> 'confirmado_erro'
+        AND n.created_at < NOW() - INTERVAL '90 days'
+    `;
+        for (const d of oldDocs) {
+            const rel = String(d.path || '');
+            if (rel.startsWith('fiscal/')) {
+                try {
+                    (0, fs_1.unlinkSync)(path_1.default.join(process.cwd(), 'private-downloads', rel));
+                    removed++;
+                }
+                catch { }
+            }
+            await (0, neon_1.sql) `DELETE FROM fiscal_notas_docs WHERE id = ${d.id}`;
+        }
+    }
+    catch { }
     return removed;
 }

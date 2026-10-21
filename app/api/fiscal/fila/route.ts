@@ -60,8 +60,13 @@ export async function GET(request: NextRequest) {
              n.cancelled_by, n.cancelled_at, n.cancel_motivo,
              n.corrigida_by, n.corrigida_at, n.corrigida_nota, n.corrigida_de,
              n.resultados_id, n.doc_path, n.doc_nome, n.created_at, n.updated_at,
+             n.monitor_status, n.monitor_checked_at,
+             COALESCE(bs.em_bordero, FALSE) AS em_bordero,
+             COALESCE(bs.pago, FALSE) AS bordero_pago,
+             bs.checked_at AS bordero_checked_at,
              COALESCE(dd.docs, '[]'::jsonb) AS docs
       FROM fiscal_notas n
+      LEFT JOIN fiscal_bordero_status bs ON bs.nota_id = n.id
       LEFT JOIN LATERAL (
         SELECT jsonb_agg(jsonb_build_object('id', d.id, 'nome', d.nome, 'tipo', d.tipo)
                          ORDER BY (d.tipo = 'G') DESC, d.id) AS docs

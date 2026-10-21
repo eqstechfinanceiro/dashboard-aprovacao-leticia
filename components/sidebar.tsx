@@ -23,6 +23,9 @@ import {
   Activity,
   ScrollText,
   ScanBarcode,
+  Landmark,
+  Sparkles,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -54,6 +57,7 @@ const ALL_CATEGORIES: NavCategory[] = [
       { id: 'impacto-financeiro', name: 'Impacto Financeiro', href: '/impacto-financeiro', icon: DollarSign },
       { id: 'boletos', name: 'Boletos', href: '/boletos', icon: ScanBarcode },
       { id: 'fiscal', name: 'Fiscal', href: '/fiscal', icon: ScrollText },
+      { id: 'borderos', name: 'Borderôs', href: '/borderos', icon: Landmark },
     ],
   },
   {
@@ -78,8 +82,10 @@ const ALL_CATEGORIES: NavCategory[] = [
   {
     label: 'Sistema',
     items: [
+      { id: 'novidades', name: 'Novidades', href: '/novidades', icon: Sparkles, always: true },
       { id: 'suporte', name: 'Suporte', href: '/suporte', icon: LifeBuoy, always: true },
       { id: 'sync-health', name: 'Saúde dos Syncs', href: '/sync-health', icon: Activity },
+      { id: 'audit-log', name: 'Histórico', href: '/historico', icon: History },
       { id: 'audit-log', name: 'Log de Auditoria', href: '/audit-log', icon: ScrollText },
       { id: 'configuracoes', name: 'Configurações', href: '/configuracoes', icon: Settings },
     ],
@@ -95,6 +101,7 @@ export function Sidebar() {
     () => new Set(ALL_CATEGORIES.map((c) => c.label))
   );
   const [view, setView] = useState<SectorView>('all');
+  const [changelogUnread, setChangelogUnread] = useState(false);
 
   // "Ver como setor" — escolha feita no header, persiste em localStorage.
   useEffect(() => {
@@ -103,6 +110,25 @@ export function Sidebar() {
     window.addEventListener(VIEW_EVENT, on);
     return () => window.removeEventListener(VIEW_EVENT, on);
   }, []);
+
+  // Dot de não-lido nas Novidades — compara a versão mais nova com o
+  // localStorage (a página /novidades grava ao abrir e dispara o evento).
+  useEffect(() => {
+    let cancelled = false;
+    const check = async () => {
+      try {
+        const r = await fetch('/api/changelog');
+        const b = await r.json();
+        const latest = (b.entries || [])[0]?.version;
+        const seen = window.localStorage.getItem('aery:changelog-seen');
+        if (!cancelled) setChangelogUnread(!!latest && latest !== seen);
+      } catch {}
+    };
+    check();
+    const onSeen = () => setChangelogUnread(false);
+    window.addEventListener('aery:changelog-seen', onSeen);
+    return () => { cancelled = true; window.removeEventListener('aery:changelog-seen', onSeen); };
+  }, [pathname]);
 
   if (loading) {
     return (
@@ -190,6 +216,9 @@ export function Sidebar() {
                       >
                         <item.icon className="h-4.5 w-4.5 flex-shrink-0" />
                         {item.name}
+                        {item.id === 'novidades' && changelogUnread && (
+                          <span className="ml-auto h-2 w-2 rounded-full bg-red-500" title="Há novidades" />
+                        )}
                       </Link>
                     );
                   })}

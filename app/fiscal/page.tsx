@@ -69,6 +69,11 @@ interface FiscalNota {
   doc_path: string | null;
   doc_nome: string | null;
   docs?: { id: number; nome: string; tipo: string }[];
+  em_bordero?: boolean;
+  bordero_pago?: boolean;
+  bordero_checked_at?: string | null;
+  monitor_status?: string | null;
+  monitor_checked_at?: string | null;
   created_at: string;
 }
 
@@ -131,6 +136,16 @@ const KANBAN_COLS: { status: string; label: string; drop: boolean; cls: string }
 const ERRO_LABEL: Record<string, string> = Object.fromEntries(
   ERRO_OPCOES.map((o) => [o.value, o.label])
 );
+
+// Monitor de re-lançamento de notas canceladas (worker syncCanceladaMonitor).
+const MONITOR_LABEL: Record<string, { label: string; cls: string }> = {
+  aguardando_exclusao: { label: 'Aguardando exclusão no ERP', cls: 'bg-amber-100 text-amber-700' },
+  excluida: { label: 'Excluída — aguardando re-lançamento', cls: 'bg-sky-100 text-sky-700' },
+  relancada_pendente: { label: 'Re-lançada — sem XML p/ re-conferir', cls: 'bg-violet-100 text-violet-700' },
+  relancada_ok: { label: 'Re-lançada — confere com o XML', cls: 'bg-emerald-100 text-emerald-700' },
+  relancada_divergente: { label: 'Re-lançada — ainda divergente', cls: 'bg-red-100 text-red-700' },
+  erro_monitor: { label: 'Erro ao monitorar', cls: 'bg-gray-200 text-gray-600' },
+};
 
 function fmtBRL(v: number | null): string {
   if (v === null || v === undefined) return '—';
@@ -991,6 +1006,22 @@ export default function FiscalPage() {
                           <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_STYLE[n.review_status])}>
                             {STATUS_LABEL[n.review_status]}
                           </span>
+                          {n.em_bordero && (
+                            <span
+                              className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800"
+                              title={n.bordero_pago ? 'Título já baixado (pago) em borderô' : 'Título em borderô de pagamento'}
+                            >
+                              {n.bordero_pago ? 'Paga em borderô' : 'Em borderô'}
+                            </span>
+                          )}
+                          {n.review_status === 'cancelado' && n.monitor_status && MONITOR_LABEL[n.monitor_status] && (
+                            <span
+                              className={cn('rounded-full px-2 py-0.5 text-xs font-medium', MONITOR_LABEL[n.monitor_status].cls)}
+                              title={n.monitor_checked_at ? `Monitorado em ${new Date(n.monitor_checked_at).toLocaleString('pt-BR')}` : ''}
+                            >
+                              {MONITOR_LABEL[n.monitor_status].label}
+                            </span>
+                          )}
                           {view === 'historico' && n.erro_tipo && (
                             <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-700 border border-red-200">
                               {ERRO_LABEL[n.erro_tipo] || n.erro_tipo}
@@ -1097,10 +1128,27 @@ export default function FiscalPage() {
                         {(() => {
                           const b = bordero[n.id];
                           if (!b || b === 'loading') return null;
+                          const recheck = (
+                            <button
+                              className="text-[10px] text-blue-600 hover:underline"
+                              title="Reverificar agora no TOTVS"
+                              onClick={() => {
+                                setBordero((prev) => ({ ...prev, [n.id]: 'loading' }));
+                                fetch(`/api/fiscal/bordero?nota_id=${n.id}&fresh=1`)
+                                  .then((r) => (r.ok ? r.json() : { em_bordero: false, pago: false, borderos: [] }))
+                                  .then((bb) => setBordero((prev) => ({ ...prev, [n.id]: bb })))
+                                  .catch(() => setBordero((prev) => ({ ...prev, [n.id]: { em_bordero: false, pago: false, borderos: [] } })));
+                              }}
+                            >
+                              reverificar
+                            </button>
+                          );
                           if (!b.em_bordero) {
                             return (
                               <p className="text-[11px] text-muted-foreground">
                                 Pagamento: fora de borderô
+                                {(b as any).checked_at ? ` (verificado ${new Date((b as any).checked_at).toLocaleString('pt-BR')})` : ''}
+                                {' · '}{recheck}
                               </p>
                             );
                           }
@@ -1113,6 +1161,7 @@ export default function FiscalPage() {
                               <p className="font-semibold flex items-center gap-1.5">
                                 <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                                 {pago ? 'Nota paga via borderô' : 'Nota já está em borderô de pagamento'}
+                                <span className="ml-auto font-normal">{recheck}</span>
                               </p>
                               {b.borderos.map((x: any, i: number) => (
                                 <p key={i}>
@@ -1294,12 +1343,30 @@ export default function FiscalPage() {
                             {n.cancel_motivo ? ` — ${n.cancel_motivo}` : ''}
                           </p>
                         )}
+                        {n.review_status === 'cancelado' && n.monitor_status && MONITOR_LABEL[n.monitor_status] && (
+                          <div className={cn('rounded-md border px-3 py-2 text-xs',
+                            n.monitor_status === 'relancada_ok' ? 'border-emerald-300 bg-emerald-50 text-emerald-800' :
+                            n.monitor_status === 'relancada_divergente' ? 'border-red-300 bg-red-50 text-red-800' :
+                            n.monitor_status === 'excluida' ? 'border-sky-300 bg-sky-50 text-sky-800' :
+                            'border-amber-300 bg-amber-50 text-amber-900')}>
+                            <p className="font-semibold flex items-center gap-1.5">
+                              <Clock className="h-3.5 w-3.5 shrink-0" />
+                              Monitor de re-lançamento: {MONITOR_LABEL[n.monitor_status].label}
+                            </p>
+                            {n.monitor_checked_at && (
+                              <p className="mt-0.5 text-[11px] opacity-80">
+                                Última verificação {new Date(n.monitor_checked_at).toLocaleString('pt-BR')}
+                              </p>
+                            )}
+                          </div>
+                        )}
 
-                        {/* Barra de ações — decisões da nota, centralizadas e
-                            destacadas num painel único. */}
+                        {/* Barra de ações — decisões da nota por STATUS (a
+                            mesma máquina de estados em qualquer view: fila,
+                            kanban e histórico têm paridade total). */}
                         {(() => {
                           const actions: React.ReactNode[] = [];
-                          if (view === 'fila' && n.review_status === 'pendente') {
+                          if (n.review_status === 'pendente' || n.review_status === 'falha_tecnica') {
                             actions.push(
                               <Button
                                 key="ok" size="sm"
@@ -1319,7 +1386,7 @@ export default function FiscalPage() {
                               </Button>
                             );
                           }
-                          if (view === 'fila' && n.review_status === 'auto_ok_aviso') {
+                          if (n.review_status === 'auto_ok_aviso') {
                             actions.push(
                               <span key="aviso" className="text-xs text-yellow-700 self-center">
                                 Aprovada automaticamente — divergência apenas de Origem CST
@@ -1334,20 +1401,10 @@ export default function FiscalPage() {
                               </Button>
                             );
                           }
-                          if (view === 'fila' && (n.review_status === 'confirmado_ok' || n.review_status === 'confirmado_erro')) {
-                            actions.push(
-                              <Button
-                                key="rev" size="sm" variant="ghost"
-                                disabled={acting === n.id}
-                                onClick={() => revisar(n.id, n.review_status === 'confirmado_ok' ? 'confirmado_erro' : 'confirmado_ok', n.review_status === 'confirmado_ok' ? 'outro' : (n.erro_tipo || 'outro'))}
-                              >
-                                Reverter para {n.review_status === 'confirmado_ok' ? 'erro' : 'OK'}
-                              </Button>
-                            );
-                          }
-                          // Histórico: quem trata os erros (entrada de notas)
-                          // marca a correção — fica registrado quem/quando/como.
-                          if (view === 'historico' && n.review_status === 'confirmado_erro' && !cancelForm && !corrigirForm) {
+                          // Erro confirmado: quem trata os erros (entrada de
+                          // notas) marca a correção — fica registrado
+                          // quem/quando/como. E pode cancelar a nota no ERP.
+                          if (n.review_status === 'confirmado_erro' && !cancelForm && !corrigirForm) {
                             actions.push(
                               <Button
                                 key="corr" size="sm"
@@ -1364,10 +1421,28 @@ export default function FiscalPage() {
                                 onClick={() => setCancelForm({ notaId: n.id, motivo: '' })}
                               >
                                 <Ban className="h-4 w-4 mr-1.5" /> Cancelar nota
+                              </Button>,
+                              <Button
+                                key="rev" size="sm" variant="ghost"
+                                disabled={acting === n.id}
+                                onClick={() => revisar(n.id, 'confirmado_ok', undefined, undefined)}
+                              >
+                                Reverter para OK
                               </Button>
                             );
                           }
-                          if (view === 'historico' && n.review_status === 'corrigida') {
+                          if (n.review_status === 'confirmado_ok') {
+                            actions.push(
+                              <Button
+                                key="rev" size="sm" variant="ghost"
+                                disabled={acting === n.id}
+                                onClick={() => setErroForm({ notaId: n.id, erro_tipo: 'outro', descricao: '' })}
+                              >
+                                Reverter para erro
+                              </Button>
+                            );
+                          }
+                          if (n.review_status === 'corrigida') {
                             actions.push(
                               <Button
                                 key="desc" size="sm" variant="ghost"
@@ -1378,7 +1453,7 @@ export default function FiscalPage() {
                               </Button>
                             );
                           }
-                          if (view === 'historico' && n.review_status === 'cancelado' && !corrigirForm) {
+                          if (n.review_status === 'cancelado' && !corrigirForm) {
                             actions.push(
                               // Nota cancelada pode voltar corrigida — fecha o
                               // ciclo "cancelada → corrigida" sem perder o

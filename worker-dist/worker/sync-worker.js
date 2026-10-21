@@ -30,6 +30,9 @@ const notifications_1 = require("../lib/sync/notifications");
 const totvs_1 = require("../lib/impacto/totvs");
 const totvs_2 = require("../lib/boletos/totvs");
 const sync_2 = require("../lib/conferencia/sync");
+const servico_docs_1 = require("../lib/fiscal/servico-docs");
+const bordero_monitor_1 = require("../lib/fiscal/bordero-monitor");
+const cancelada_monitor_1 = require("../lib/fiscal/cancelada-monitor");
 const settings_1 = require("../lib/db/settings");
 const HOT_INTERVAL_MS = 5 * 60 * 1000;
 const WARM_INTERVAL_MS = 45 * 60 * 1000;
@@ -227,7 +230,7 @@ async function warmCycle() {
             failed = true;
             await logError(runId, 'warm', 'boletos-se2', e?.message || String(e), true);
         }
-        // Conferência de mercadoria — SF1×XML (Z01/SIEG) por ledger, janela 14d
+        // Conferência de mercadoria — SF1×XML (Z01/SDS/SIEG) por ledger, janela 14d
         try {
             const conf = await (0, sync_2.syncConferencia)();
             meta.conferencia = `notas:${conf.total} conf:${conf.conferidas} ok:${conf.match} div:${conf.divergentes} falha:${conf.falhas} skip:${conf.puladas} fontes:${JSON.stringify(conf.fontes)}${conf.error ? ' !err' : ''}`;
@@ -237,6 +240,40 @@ async function warmCycle() {
         catch (e) {
             failed = true;
             await logError(runId, 'warm', 'conferencia', e?.message || String(e), true);
+        }
+        // Anexos do portal EQS — notas de serviço pendentes/falhas recebem TODOS
+        // os docs do processo (o runner local baixa só o primeiro tipo 'G').
+        try {
+            const sd = await (0, servico_docs_1.syncServicoDocs)({ limit: 15 });
+            if (sd.processadas || sd.erros.length) {
+                meta.servico_docs = `proc:${sd.processadas} docs:+${sd.anexados} sem:${sd.sem_docs} n/a:${sd.proc_nao_encontrado} err:${sd.erros.length}`;
+            }
+        }
+        catch (e) {
+            await logError(runId, 'warm', 'servico-docs', e?.message || String(e), true);
+        }
+        // Monitor fiscal — cache batch de borderô (SEA×SE2 por tenant, erros
+        // pendentes p/ contas a pagar) + monitor de re-lançamento de canceladas
+        // (fingerprint SF1/SD1 → notificações). Falha TOTVS não zera estado.
+        try {
+            const b = await (0, bordero_monitor_1.syncBorderoStatus)();
+            meta.bordero_status = `check:${b.checked} em:${b.em_bordero} pagas:${b.pagas} rem:${b.removidas} err:${b.errors.length}`;
+            if (b.errors.length)
+                failed = true;
+        }
+        catch (e) {
+            failed = true;
+            await logError(runId, 'warm', 'bordero-status', e?.message || String(e), true);
+        }
+        try {
+            const m = await (0, cancelada_monitor_1.syncCanceladaMonitor)();
+            meta.cancelada_monitor = `check:${m.checked} aguard:${m.aguardando} excl:${m.excluidas} rel:${m.relancadas} err:${m.erros}`;
+            if (m.erros)
+                failed = true;
+        }
+        catch (e) {
+            failed = true;
+            await logError(runId, 'warm', 'cancelada-monitor', e?.message || String(e), true);
         }
         await finishRun(runId, failed ? 'error' : 'done', meta);
         console.log('[WARM] ciclo', failed ? 'com erros' : 'ok');

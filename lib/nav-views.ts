@@ -39,6 +39,7 @@ const SECTOR_MODULES: Record<Exclude<SectorView, 'all'>, string[]> = {
     'ferramentas-itau',
     'cartorios',
     'boletos',
+    'borderos',
   ],
   // Gerencial menos Fiscal e Impacto Financeiro.
   'entrada-notas': [
@@ -47,7 +48,7 @@ const SECTOR_MODULES: Record<Exclude<SectorView, 'all'>, string[]> = {
     'gestao-caixa',
     'pendencias',
   ],
-  fiscal: ['fiscal'],
+  fiscal: ['fiscal', 'borderos'],
 };
 
 export const VIEW_STORAGE_KEY = 'aery:view';

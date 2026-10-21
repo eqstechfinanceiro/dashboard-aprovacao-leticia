@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { sql } from '@/lib/db/neon';
+import { sql } from './neon';
 
 // Audit log — quem fez o quê, quando. Requisito de operação financeira:
 // disputas de "quem aprovou/congelou/editou" precisam de registro imutável.

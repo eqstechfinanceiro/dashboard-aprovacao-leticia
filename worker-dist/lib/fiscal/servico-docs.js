@@ -1,0 +1,263 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ensureServicoDocsTable = ensureServicoDocsTable;
+exports.oldPortalSession = oldPortalSession;
+exports.oldPortalListDocs = oldPortalListDocs;
+exports.oldPortalDownload = oldPortalDownload;
+exports.syncServicoDocs = syncServicoDocs;
+/**
+ * Anexos de notas de serviço — portal EQS antigo (Django, /old).
+ *
+ * O runner local baixa só o primeiro doc tipo 'G' por processo — quando a nota
+ * falha na validação (doc/valor não encontrado) o fiscal precisa dos OUTROS
+ * anexos do processo (a NFS real costuma estar lá junto com boletos). Este
+ * módulo lista TODOS os documentos do processo e os anexa à nota.
+ *
+ * Fluxo (descoberto no runner legado download-notas-de-servico/automation.py):
+ *   1. Login Django: GET /old/auth/ (csrftoken) → POST /old/auth/ → sessionid
+ *   2. Processo: wsrfornecedor (CNPJ→SA2) + wsrprocpag (doc+fornec→NDSRECNO)
+ *   3. Chave: CDSDOC+CDSSERIE+CDSFORNEC+CDSLOJA+NDSRECNO
+ *   4. GET /old/api/arquivo/lista/{grupo}/{filial}/SDS?chave=... → docs
+ *      [{arquivo_id, tipo('G'=nota,'B'=boleto,...), nome, data}]
+ *   5. GET /old/arquivo/{arquivo_id} → binário
+ *
+ * Persistência: fiscal_notas_docs (um row por arquivo) + fiscal_notas.doc_path
+ * aponta pro primeiro doc 'G' quando a nota ainda não tem evidência.
+ */
+const https_1 = __importDefault(require("https"));
+const fs_1 = require("fs");
+const path_1 = __importDefault(require("path"));
+const neon_1 = require("../db/neon");
+const fiscal_db_1 = require("./fiscal-db");
+const eqs_portal_1 = require("./eqs-portal");
+const OLD_BASE = 'https://portal.eqsengenharia.com.br';
+const USER = process.env.PORTAL_EQS_USER || '';
+const PASS = process.env.PORTAL_EQS_PASS || '';
+// Tenants (grupo,filial) tentados em ordem — serviço não carrega empresa.
+const TENANTS = ['02,02', '11,01'];
+const MAX_DOC_BYTES = 8 * 1024 * 1024;
+const RESYNC_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
+const TIMEOUT_MS = 45000;
+let tableEnsured = false;
+async function ensureServicoDocsTable() {
+    if (tableEnsured || !neon_1.sql)
+        return;
+    tableEnsured = true;
+    await (0, neon_1.sql) `
+    CREATE TABLE IF NOT EXISTS fiscal_notas_docs (
+      id BIGSERIAL PRIMARY KEY,
+      nota_id BIGINT NOT NULL REFERENCES fiscal_notas(id) ON DELETE CASCADE,
+      arquivo_id BIGINT NOT NULL,
+      nome TEXT NOT NULL,
+      tipo TEXT,
+      path TEXT NOT NULL,
+      size INT,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      UNIQUE (nota_id, arquivo_id)
+    )`;
+    await (0, neon_1.sql) `CREATE INDEX IF NOT EXISTS idx_fiscal_notas_docs_nota ON fiscal_notas_docs(nota_id)`;
+}
+// ---- HTTP raw (portal antigo usa session cookie Django; cert ok mas cookie jar manual)
+function httpReq(url, opts = {}) {
+    return new Promise((resolve, reject) => {
+        const req = https_1.default.request(url, { method: opts.method || 'GET', headers: opts.headers || {}, rejectUnauthorized: false, timeout: TIMEOUT_MS }, (res) => {
+            const chunks = [];
+            res.on('data', (c) => chunks.push(c));
+            res.on('end', () => resolve({ status: res.statusCode || 0, headers: res.headers, body: Buffer.concat(chunks) }));
+        });
+        req.on('timeout', () => req.destroy(new Error('timeout')));
+        req.on('error', reject);
+        if (opts.body)
+            req.write(opts.body);
+        req.end();
+    });
+}
+// ---- Sessão Django (reutilizada até expirar)
+let sessionCookies = '';
+let sessionAt = 0;
+function collectCookies(jar, headers) {
+    for (const c of headers['set-cookie'] || []) {
+        const kv = c.split(';')[0];
+        const i = kv.indexOf('=');
+        if (i > 0)
+            jar.set(kv.slice(0, i).trim(), kv.slice(i + 1).trim());
+    }
+}
+async function oldPortalSession(force = false) {
+    if (!force && sessionCookies && Date.now() - sessionAt < 50 * 60 * 1000)
+        return sessionCookies;
+    if (!USER || !PASS)
+        return null;
+    const jar = new Map();
+    let r = await httpReq(`${OLD_BASE}/old/auth/`);
+    collectCookies(jar, r.headers);
+    let csrf = jar.get('csrftoken') || '';
+    if (!csrf) {
+        const m = r.body.toString('utf-8').match(/csrfmiddlewaretoken["\s]+value="([^"]+)"/);
+        if (m)
+            csrf = m[1];
+    }
+    const cookieStr = () => [...jar.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
+    r = await httpReq(`${OLD_BASE}/old/auth/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            Referer: `${OLD_BASE}/old/auth/`,
+            Cookie: cookieStr(),
+        },
+        body: `username=${encodeURIComponent(USER)}&password=${encodeURIComponent(PASS)}&csrfmiddlewaretoken=${encodeURIComponent(csrf)}`,
+    });
+    collectCookies(jar, r.headers);
+    if (!jar.get('sessionid'))
+        return null;
+    sessionCookies = cookieStr();
+    sessionAt = Date.now();
+    return sessionCookies;
+}
+async function oldPortalListDocs(cookies, grupo, filial, chave) {
+    const r = await httpReq(`${OLD_BASE}/old/api/arquivo/lista/${grupo}/${filial}/SDS?chave=${encodeURIComponent(chave)}`, { headers: { Cookie: cookies, Accept: 'application/json' } });
+    if (r.status !== 200)
+        return [];
+    try {
+        const data = JSON.parse(r.body.toString('utf-8'));
+        return Array.isArray(data) ? data : [];
+    }
+    catch {
+        return [];
+    }
+}
+async function oldPortalDownload(cookies, arquivoId) {
+    const r = await httpReq(`${OLD_BASE}/old/arquivo/${arquivoId}`, { headers: { Cookie: cookies } });
+    if (r.status !== 200 || !r.body.length || r.body.length > MAX_DOC_BYTES)
+        return null;
+    return r.body;
+}
+function buildChave(proc) {
+    return (String(proc.CDSDOC || '').trim() +
+        String(proc.CDSSERIE || '').trim() +
+        String(proc.CDSFORNEC || '').trim() +
+        String(proc.CDSLOJA || '').trim() +
+        String(proc.NDSRECNO || '').trim());
+}
+function safeName(nome) {
+    return (nome || 'documento.pdf').replace(/[<>:"/\\|?*]/g, '_').slice(0, 120);
+}
+/**
+ * Anexa todos os documentos do processo do portal EQS às notas de serviço
+ * pendentes/em falha. Idempotente por (nota_id, arquivo_id). `force` reprocessa
+ * notas sincronizadas recentemente.
+ */
+async function syncServicoDocs(opts = {}) {
+    const out = { processadas: 0, com_docs: 0, anexados: 0, sem_docs: 0, proc_nao_encontrado: 0, erros: [] };
+    if (!neon_1.sql || !(0, eqs_portal_1.eqsPortalConfigured)())
+        return out;
+    await ensureServicoDocsTable();
+    const notaId = opts.notaId || null;
+    const limit = Math.min(opts.limit ?? 15, 200);
+    const force = !!opts.force;
+    const notas = await (0, neon_1.sql) `
+    SELECT id, doc, cnpj, fornecedor, doc_path, doc_nome, extra
+    FROM fiscal_notas
+    WHERE tipo = 'servico'
+      AND review_status IN ('pendente', 'falha_tecnica')
+      AND cnpj ~ '^[0-9]{14}$'
+      AND (${notaId}::bigint IS NULL OR id = ${notaId})
+      AND (${force}
+           OR extra->>'portal_docs_at' IS NULL
+           OR (extra->>'portal_docs_at')::timestamptz < NOW() - (${RESYNC_AFTER_MS} || ' milliseconds')::interval)
+    ORDER BY id
+    LIMIT ${limit}`;
+    if (!notas.length)
+        return out;
+    const cookies = await oldPortalSession();
+    if (!cookies) {
+        out.erros.push({ nota_id: 0, erro: 'login no portal antigo falhou' });
+        return out;
+    }
+    (0, fs_1.mkdirSync)((0, fiscal_db_1.FISCAL_DOCS_DIR)(), { recursive: true });
+    for (const n of notas) {
+        out.processadas++;
+        try {
+            // Resolve o processo (doc+fornecedor) no tenant onde ele existir.
+            // O fornecedor resolvido por CNPJ é o código SA2 — gravamos no extra
+            // (fornecedor_cod/loja/empresa) porque a coluna `fornecedor` de notas
+            // de serviço guarda o NOME, e borderô/monitor precisam do código.
+            const TENANT_EMPRESA = { '02,02': 'EQS', '11,01': 'BRATEC' };
+            let proc = null;
+            let tenant = TENANTS[0];
+            let fornecedorCod = null;
+            for (const t of TENANTS) {
+                const fornec = await (0, eqs_portal_1.eqsGetFornecedorByCnpj)(String(n.cnpj).trim(), t).catch(() => null);
+                if (!fornec)
+                    continue;
+                if (!fornecedorCod) {
+                    fornecedorCod = fornec;
+                    tenant = t;
+                }
+                proc = await (0, eqs_portal_1.eqsGetProcesso)(String(n.doc).trim(), fornec.cod, t).catch(() => null);
+                if (proc) {
+                    tenant = t;
+                    fornecedorCod = fornec;
+                    break;
+                }
+            }
+            const fornecExtra = fornecedorCod ? {
+                fornecedor_cod: fornecedorCod.cod,
+                fornecedor_loja: fornecedorCod.loja,
+                loja: fornecedorCod.loja,
+                empresa: TENANT_EMPRESA[tenant] || '',
+            } : {};
+            const mergeExtra = (o) => JSON.stringify({ ...fornecExtra, ...o });
+            if (!proc) {
+                out.proc_nao_encontrado++;
+                await (0, neon_1.sql) `UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'proc_nao_encontrado' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+                continue;
+            }
+            const chave = buildChave(proc);
+            const [grupo, filial] = tenant.split(',');
+            const docs = await oldPortalListDocs(cookies, grupo, filial, chave);
+            if (!docs.length) {
+                out.sem_docs++;
+                await (0, neon_1.sql) `UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: 0, portal_docs_status: 'sem_docs' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+                continue;
+            }
+            // Já anexados — baixa só o que falta.
+            const existentes = new Set((await (0, neon_1.sql) `SELECT arquivo_id::text AS a FROM fiscal_notas_docs WHERE nota_id = ${n.id}`).map((r) => r.a));
+            let novos = 0;
+            let pathPrimeiroG = null;
+            for (const d of docs) {
+                const aid = String(d.arquivo_id);
+                const nome = safeName(d.nome);
+                const rel = `fiscal/sd${n.id}_${aid}_${nome}`;
+                if (!existentes.has(aid)) {
+                    const buf = await oldPortalDownload(cookies, Number(aid));
+                    if (!buf)
+                        continue;
+                    (0, fs_1.writeFileSync)(path_1.default.join(process.cwd(), 'private-downloads', rel), buf);
+                    await (0, neon_1.sql) `
+            INSERT INTO fiscal_notas_docs (nota_id, arquivo_id, nome, tipo, path, size)
+            VALUES (${n.id}, ${Number(aid)}, ${nome}, ${d.tipo || ''}, ${rel}, ${buf.length})
+            ON CONFLICT (nota_id, arquivo_id) DO NOTHING`;
+                    novos++;
+                }
+                if (d.tipo === 'G' && !pathPrimeiroG)
+                    pathPrimeiroG = { path: rel, nome };
+            }
+            out.anexados += novos;
+            out.com_docs++;
+            // Evidência principal: primeiro doc 'G' (a nota) quando a nota não tem doc.
+            if (!n.doc_path && pathPrimeiroG) {
+                await (0, neon_1.sql) `UPDATE fiscal_notas SET doc_path = ${pathPrimeiroG.path}, doc_nome = ${pathPrimeiroG.nome}, updated_at = NOW() WHERE id = ${n.id} AND (doc_path IS NULL OR doc_path = '')`;
+            }
+            const totalDocs = existentes.size + novos;
+            await (0, neon_1.sql) `UPDATE fiscal_notas SET extra = COALESCE(extra,'{}'::jsonb) || ${mergeExtra({ portal_docs_at: new Date().toISOString(), portal_docs_count: totalDocs, portal_docs_status: 'ok' })}::jsonb, updated_at = NOW() WHERE id = ${n.id}`;
+        }
+        catch (e) {
+            out.erros.push({ nota_id: n.id, erro: String(e?.message || e).slice(0, 200) });
+        }
+    }
+    return out;
+}
