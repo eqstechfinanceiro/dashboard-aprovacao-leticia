@@ -3,21 +3,24 @@
  *   1. fiscal_doc_cache (Postgres — XML já obtido antes, inclui uploads do bot)
  *   2. Z01_XMLNFE (XML embutido na tabela Z01 do TOTVS — zero custo, mesmo genericQuery)
  *   3. SDS.DS_XML (XML da fila MATA143 — cobre nota já lançada, zero custo)
- *   4. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
- *   5. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
- * Todo XML obtido de 2-5 é persistido no cache pra não baixar de novo.
+ *   4. Protheus capturarXML (cria processo de pagamento que puxa o XML da SEFAZ
+ *      pro SDS — mesma ação do botão "Criar Processo" do portal EQS)
+ *   5. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
+ *   6. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
+ * Todo XML obtido de 2-6 é persistido no cache pra não baixar de novo.
  */
 import { sql } from '../db/neon';
 import { fetchZ01XmlByChave, fetchSdsXmlByChave } from './totvs';
 import { garantirAutenticacao, baixarXmlSieg, preAdicionarChaves } from './sieg';
 import { baixarXmlMeudanfe, meudanfeEnabled } from './meudanfe';
+import { eqsCapturarXml, eqsGetNotaByChave, eqsPortalConfigured } from '../fiscal/eqs-portal';
 import { parseNfeXml } from './xml-parser';
 import type { NfeXml } from './xml-parser';
 
 export interface XmlResult {
   xml: string;
   parsed: NfeXml;
-  fonte: 'cache' | 'z01_xmlnfe' | 'sds' | 'sieg' | 'meudanfe';
+  fonte: 'cache' | 'z01_xmlnfe' | 'sds' | 'protheus_capture' | 'sieg' | 'meudanfe';
 }
 
 let cacheEnsured = false;
@@ -80,7 +83,37 @@ export async function salvarXmlCache(chaveAcesso: string, xml: string, fonte: st
   return true;
 }
 
-export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean; meudanfe?: boolean } = {}): Promise<XmlResult | null> {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Captura o XML via Protheus (POST /wsrprocpag/capturarXML) e aguarda ele cair
+ * no SDS — a captura SEFAZ é assíncrona dentro do Protheus. Quando a nota já
+ * está em processo de pagamento o Protheus recusa com "ja em processo"; nesse
+ * caso re-olhamos o SDS uma última vez (o XML pode ter chegado depois da nossa
+ * primeira consulta). Retorna o XML ou null.
+ */
+async function capturarXmlProtheus(chave: string): Promise<string | null> {
+  try {
+    const nota = await eqsGetNotaByChave(chave);
+    const cap = await eqsCapturarXml(chave, { cnpjDestino: nota?.cnpjDestino || undefined });
+    if (!cap.ok && !cap.jaEmProcesso) {
+      console.warn(`[fontes] capturarXML ${chave.slice(0, 10)}… → ${cap.error || 'falhou'}`);
+      return null;
+    }
+    const tentativas = cap.ok ? 6 : 1; // criou processo → captura assíncrona; já-em-processo → re-check único
+    for (let i = 0; i < tentativas; i++) {
+      if (i > 0) await sleep(4000);
+      const xml = (await fetchSdsXmlByChave(chave)) || (await fetchZ01XmlByChave(chave));
+      if (xml) return xml;
+    }
+    return null;
+  } catch (e: any) {
+    console.warn(`[fontes] capturarXML ${chave.slice(0, 10)}… erro:`, e?.message);
+    return null;
+  }
+}
+
+export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean; meudanfe?: boolean; protheusCapture?: boolean } = {}): Promise<XmlResult | null> {
   const chave = (chaveAcesso || '').trim();
   if (chave.length !== 44) return null;
 
@@ -105,6 +138,17 @@ export async function obterXmlNfe(chaveAcesso: string, opts: { sieg?: boolean; m
     if (parsed) {
       await cachePut(chave, sdsXml, 'sds');
       return { xml: sdsXml, parsed, fonte: 'sds' };
+    }
+  }
+
+  if (opts.protheusCapture !== false && eqsPortalConfigured()) {
+    const capXml = await capturarXmlProtheus(chave);
+    if (capXml) {
+      const parsed = parseNfeXml(capXml);
+      if (parsed) {
+        await cachePut(chave, capXml, 'protheus_capture');
+        return { xml: capXml, parsed, fonte: 'protheus_capture' };
+      }
     }
   }
 

@@ -4,9 +4,10 @@
 // recebida só com a chave de acesso — sem certificado local.
 //
 // Endpoints usados (descobertos no bundle Angular do portal):
-//   POST {base}/api/oauth2/v1/token      → JWT (grant_type=password)
-//   GET  {base}/wsrnfesefaz/{chave44}    → metadados da nota recebida
-//   GET  {base}/wsrdanfe/entrada/{chave} → DANFE em PDF
+//   POST {base}/api/oauth2/v1/token       → JWT (grant_type=password)
+//   GET  {base}/wsrnfesefaz/{chave44}     → metadados da nota recebida
+//   GET  {base}/wsrdanfe/entrada/{chave}  → DANFE em PDF
+//   POST {base}/wsrprocpag/capturarXML    → cria processo + captura XML da SEFAZ pro SDS
 //
 // Credenciais via env: PORTAL_EQS_USER / PORTAL_EQS_PASS (mesma conta da
 // automação). Se ausentes, as funções retornam null — a feature degrada
@@ -97,6 +98,7 @@ export interface EqsNotaSefaz {
   situacaoDoc: string;
   dataRecebimento: string;
   valor: number;
+  cnpjDestino: string;
   raw: Record<string, unknown>;
 }
 
@@ -118,6 +120,7 @@ export async function eqsGetNotaByChave(chave: string): Promise<EqsNotaSefaz | n
     situacaoDoc: String(d.CC00SITDOC || ''),
     dataRecebimento: String(d.DC00DTREC || ''),
     valor: Number(d.NC00VLDOC) || 0,
+    cnpjDestino: String(d.CCNPJDESTINO || d.CCNPJ_DESTINO || ''),
     raw: d,
   };
 }
@@ -129,6 +132,54 @@ export async function eqsGetDanfePdf(chave: string): Promise<Buffer | null> {
   const res = await httpRequest(`/wsrdanfe/entrada/${chave}`, { headers: authHeaders(token) });
   if (res.status < 200 || res.status >= 300 || !res.body.subarray(0, 5).equals(Buffer.from('%PDF-'))) return null;
   return res.body;
+}
+
+export interface EqsCapturaResult {
+  ok: boolean;
+  /** NDSRECNO do processo criado — XML cai no SDS (DS_XML) em seguida. */
+  ndsRecno?: string;
+  /** 400 "ja em processo de pagamento" — SDS provavelmente já tem o XML. */
+  jaEmProcesso?: boolean;
+  /** Mensagem de erro do Protheus (manifesto quebrado, nota não localizada…). */
+  error?: string;
+}
+
+// CNPJ destino padrão por empresa (matriz) — usado quando a nota não está no
+// inbox CC00 e não dá pra ler o destino real da filial.
+const CNPJ_DESTINO_PADRAO: Record<string, string> = {
+  EQS: '80464753000197',
+  BRATEC: '27462720000125',
+};
+
+// POST /wsrprocpag/capturarXML — mesmo fluxo do botão "Criar Processo" do
+// portal: cria o processo de pagamento e puxa o XML da NF-e da SEFAZ pro SDS.
+// Payload extraído do bundle Angular (criarProcessoCapturarXML):
+//   {CDESTINO_XML:"1", CCNPJDESTINO, CENTIDADE:"", CCHAVEDANFE, CUSUARIO:"001859"}
+// CUSUARIO é a string do CUSRID — objeto quebra o TLPP com type mismatch.
+export async function eqsCapturarXml(chave: string, opts: { cnpjDestino?: string; empresa?: string } = {}): Promise<EqsCapturaResult> {
+  if (!eqsPortalConfigured() || !/^\d{44}$/.test(chave)) return { ok: false, error: 'chave inválida ou portal não configurado' };
+  const cnpjDestino = opts.cnpjDestino || (opts.empresa ? CNPJ_DESTINO_PADRAO[opts.empresa] : '') || CNPJ_DESTINO_PADRAO.EQS;
+  const token = await getToken();
+  const body = JSON.stringify({
+    CDESTINO_XML: '1',
+    CCNPJDESTINO: cnpjDestino,
+    CENTIDADE: '',
+    CCHAVEDANFE: chave,
+    CUSUARIO: '001859',
+  });
+  const res = await httpRequest('/wsrprocpag/capturarXML', {
+    method: 'POST',
+    headers: { ...authHeaders(token), 'Content-Type': 'application/json' },
+    body,
+  });
+  const text = res.body.toString('utf-8');
+  let data: Record<string, any> = {};
+  try { data = JSON.parse(text); } catch { /* corpo não-json */ }
+  if (res.status >= 200 && res.status < 300) {
+    return { ok: true, ndsRecno: data.NDSRECNO ? String(data.NDSRECNO) : undefined };
+  }
+  const msg = String(data.message || text.slice(0, 300));
+  return { ok: false, jaEmProcesso: /ja em processo/i.test(msg), error: msg };
 }
 
 // Fornecedor pelo CNPJ (14 dígitos). Retorna {cod, loja} do SA2 ou null.

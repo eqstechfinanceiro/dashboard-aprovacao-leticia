@@ -9,14 +9,18 @@ exports.obterXmlNfe = obterXmlNfe;
  * Fontes de documento da conferência — cadeia:
  *   1. fiscal_doc_cache (Postgres — XML já obtido antes, inclui uploads do bot)
  *   2. Z01_XMLNFE (XML embutido na tabela Z01 do TOTVS — zero custo, mesmo genericQuery)
- *   3. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
- *   4. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
- * Todo XML obtido de 2-4 é persistido no cache pra não baixar de novo.
+ *   3. SDS.DS_XML (XML da fila MATA143 — cobre nota já lançada, zero custo)
+ *   4. Protheus capturarXML (cria processo de pagamento que puxa o XML da SEFAZ
+ *      pro SDS — mesma ação do botão "Criar Processo" do portal EQS)
+ *   5. SIEG (download por chave — cookies COFRE.AUTH / login Playwright)
+ *   6. MeuDanfe get/xml (GRÁTIS — só XMLs já no repositório da conta; nunca paga)
+ * Todo XML obtido de 2-6 é persistido no cache pra não baixar de novo.
  */
 const neon_1 = require("../db/neon");
 const totvs_1 = require("./totvs");
 const sieg_1 = require("./sieg");
 const meudanfe_1 = require("./meudanfe");
+const eqs_portal_1 = require("../fiscal/eqs-portal");
 const xml_parser_1 = require("./xml-parser");
 let cacheEnsured = false;
 async function ensureDocCacheTable() {
@@ -82,6 +86,37 @@ async function salvarXmlCache(chaveAcesso, xml, fonte) {
     await cachePut(chave, xml, fonte);
     return true;
 }
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/**
+ * Captura o XML via Protheus (POST /wsrprocpag/capturarXML) e aguarda ele cair
+ * no SDS — a captura SEFAZ é assíncrona dentro do Protheus. Quando a nota já
+ * está em processo de pagamento o Protheus recusa com "ja em processo"; nesse
+ * caso re-olhamos o SDS uma última vez (o XML pode ter chegado depois da nossa
+ * primeira consulta). Retorna o XML ou null.
+ */
+async function capturarXmlProtheus(chave) {
+    try {
+        const nota = await (0, eqs_portal_1.eqsGetNotaByChave)(chave);
+        const cap = await (0, eqs_portal_1.eqsCapturarXml)(chave, { cnpjDestino: nota?.cnpjDestino || undefined });
+        if (!cap.ok && !cap.jaEmProcesso) {
+            console.warn(`[fontes] capturarXML ${chave.slice(0, 10)}… → ${cap.error || 'falhou'}`);
+            return null;
+        }
+        const tentativas = cap.ok ? 6 : 1; // criou processo → captura assíncrona; já-em-processo → re-check único
+        for (let i = 0; i < tentativas; i++) {
+            if (i > 0)
+                await sleep(4000);
+            const xml = (await (0, totvs_1.fetchSdsXmlByChave)(chave)) || (await (0, totvs_1.fetchZ01XmlByChave)(chave));
+            if (xml)
+                return xml;
+        }
+        return null;
+    }
+    catch (e) {
+        console.warn(`[fontes] capturarXML ${chave.slice(0, 10)}… erro:`, e?.message);
+        return null;
+    }
+}
 async function obterXmlNfe(chaveAcesso, opts = {}) {
     const chave = (chaveAcesso || '').trim();
     if (chave.length !== 44)
@@ -98,6 +133,24 @@ async function obterXmlNfe(chaveAcesso, opts = {}) {
         if (parsed) {
             await cachePut(chave, z01xml, 'z01_xmlnfe');
             return { xml: z01xml, parsed, fonte: 'z01_xmlnfe' };
+        }
+    }
+    const sdsXml = await (0, totvs_1.fetchSdsXmlByChave)(chave);
+    if (sdsXml) {
+        const parsed = (0, xml_parser_1.parseNfeXml)(sdsXml);
+        if (parsed) {
+            await cachePut(chave, sdsXml, 'sds');
+            return { xml: sdsXml, parsed, fonte: 'sds' };
+        }
+    }
+    if (opts.protheusCapture !== false && (0, eqs_portal_1.eqsPortalConfigured)()) {
+        const capXml = await capturarXmlProtheus(chave);
+        if (capXml) {
+            const parsed = (0, xml_parser_1.parseNfeXml)(capXml);
+            if (parsed) {
+                await cachePut(chave, capXml, 'protheus_capture');
+                return { xml: capXml, parsed, fonte: 'protheus_capture' };
+            }
         }
     }
     if (opts.sieg !== false) {
