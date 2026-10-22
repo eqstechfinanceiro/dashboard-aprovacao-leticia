@@ -11,13 +11,12 @@ const BANCOS: Record<string, string> = {
 };
 
 // GET /api/borderos/notas[?todas=1]
-// Fila do contas a pagar: notas com erro/cancelamento cujo título está em
-// borderô aguardando remoção. Sem o batch do worker nada entra aqui — a
-// listagem é 100% leitura do cache fiscal_bordero_status.
-//   fila     → (em_bordero OR pago-sem-borderô) AND sem confirmação manual
-//              AND sem remoção detectada — paga direto também é acionável
-//              (correção exige estorno + devolução pro entrada)
-//   ?todas=1 → inclui removidas/confirmadas (histórico da fila)
+// Fila do contas a pagar: notas com PROBLEMA (erro confirmado, falha técnica
+// ou cancelamento) cujo título está em borderô — ou já foi pago — aguardando
+// remoção/estorno. Nota pendente/em dia em borderô é fluxo normal e fica fora.
+//   fila     → (em_bordero OR pago) AND status-problema AND sem confirmação
+//              manual AND sem remoção detectada
+//   ?todas=1 → todas as linhas do cache (contexto completo, incl. saudáveis)
 export async function GET(request: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'Banco indisponível' }, { status: 503 });
   await ensureFiscalTables();
@@ -33,22 +32,36 @@ export async function GET(request: NextRequest) {
            bs.remocao_confirmada_at, bs.remocao_confirmada_by, bs.removida_detectada_at
     FROM fiscal_bordero_status bs
     JOIN fiscal_notas n ON n.id = bs.nota_id
-    WHERE (${todas} OR ((bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL))
+    WHERE (bs.em_bordero OR bs.pago OR
+           (${todas} AND (bs.remocao_confirmada_at IS NOT NULL OR bs.removida_detectada_at IS NOT NULL)))
+      AND (${todas} OR (bs.remocao_confirmada_at IS NULL
+                        AND bs.removida_detectada_at IS NULL
+                        AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado')))
       AND (${q} = '' OR lower(n.doc) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
     ORDER BY
-      CASE WHEN (bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL THEN 0 ELSE 1 END,
+      CASE WHEN (bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
+           AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado') THEN 0 ELSE 1 END,
       bs.pago ASC, bs.checked_at DESC
     LIMIT 500
   `;
 
   const resumo = await sql`
     SELECT
-      COUNT(*) FILTER (WHERE (em_bordero OR pago) AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS na_fila,
-      COUNT(*) FILTER (WHERE pago AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS pagas_na_fila,
-      MAX(checked_at) AS ultima_verificacao
-    FROM fiscal_bordero_status
+      COUNT(*) FILTER (WHERE (bs.em_bordero OR bs.pago)
+                       AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
+                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS na_fila,
+      COUNT(*) FILTER (WHERE bs.pago AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
+                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS pagas_na_fila,
+      COUNT(*) FILTER (WHERE bs.em_bordero)::int AS total_em_bordero,
+      COUNT(*) FILTER (WHERE bs.em_bordero AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
+                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS em_bordero_na_fila,
+      COUNT(*) FILTER (WHERE bs.pago)::int AS total_pagas,
+      COUNT(*) FILTER (WHERE bs.remocao_confirmada_at IS NOT NULL OR bs.removida_detectada_at IS NOT NULL)::int AS resolvidas,
+      MAX(bs.checked_at) AS ultima_verificacao
+    FROM fiscal_bordero_status bs
+    JOIN fiscal_notas n ON n.id = bs.nota_id
   `;
 
   return NextResponse.json({
@@ -56,6 +69,6 @@ export async function GET(request: NextRequest) {
       ...r,
       borderos: (r.borderos || []).map((b: any) => ({ ...b, banco_nome: BANCOS[b.banco] || b.banco })),
     })),
-    resumo: resumo[0] || { na_fila: 0, pagas_na_fila: 0, ultima_verificacao: null },
+    resumo: resumo[0] || null,
   });
 }

@@ -91,8 +91,18 @@ function fornecedorLabel(n: BorderoNota): string {
   return n.extra?.fornecedor_nome || n.extra?.nome_fornecedor || n.fornecedor || '—';
 }
 
+interface BorderoResumo {
+  na_fila: number;
+  pagas_na_fila: number;
+  em_bordero_na_fila: number;
+  total_em_bordero: number;
+  total_pagas: number;
+  resolvidas: number;
+  ultima_verificacao: string | null;
+}
+
 export default function BorderosPage() {
-  const [data, setData] = useState<{ notas: BorderoNota[]; resumo: { na_fila: number; pagas_na_fila: number; ultima_verificacao: string | null } } | null>(null);
+  const [data, setData] = useState<{ notas: BorderoNota[]; resumo: BorderoResumo | null } | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -177,7 +187,7 @@ export default function BorderosPage() {
             Borderôs — Contas a Pagar
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Notas com erro confirmado ou canceladas cujo título está em borderô — remover no Protheus pra liberar a correção.
+            Notas com problema (erro confirmado, falha técnica ou canceladas) cujo título está em borderô ou já foi pago — remover/estornar no Protheus pra liberar a correção.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -190,6 +200,35 @@ export default function BorderosPage() {
           </Button>
         </div>
       </div>
+
+      {data?.resumo && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <p className="text-2xl font-bold text-amber-700">{data.resumo.em_bordero_na_fila}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">em borderô aguardando remoção</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <p className="text-2xl font-bold text-slate-700">{data.resumo.pagas_na_fila}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">já pagas (exigem estorno)</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <p className="text-2xl font-bold">{data.resumo.total_em_bordero}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">total em borderô (todas as notas)</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-4 pb-3">
+              <p className="text-2xl font-bold text-emerald-700">{data.resumo.resolvidas}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">removidas / confirmadas</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 flex-wrap">
         <input
@@ -208,7 +247,7 @@ export default function BorderosPage() {
           />
           Mostrar resolvidas
         </label>
-        {data && (
+        {data?.resumo && (
           <span className="text-xs text-muted-foreground ml-auto">
             {data.resumo.na_fila} na fila{data.resumo.pagas_na_fila ? ` · ${data.resumo.pagas_na_fila} já paga(s)` : ''}
           </span>
@@ -235,7 +274,7 @@ export default function BorderosPage() {
               <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto mb-2" />
               <p className="text-sm font-medium text-emerald-700">Fila vazia</p>
               <p className="text-xs text-muted-foreground mt-1">
-                Nenhuma nota com erro/cancelada está em borderô agora.
+                Nenhuma nota com problema está em borderô/paga agora.
               </p>
             </div>
           ) : (

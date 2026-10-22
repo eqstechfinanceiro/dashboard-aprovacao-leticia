@@ -242,13 +242,15 @@ async function syncBorderoStatus(opts = {}) {
             });
         }
         const label = `NF ${n.doc}${n.serie ? '/' + n.serie : ''}`;
-        if (!baseline && entrouAgora && ['confirmado_erro', 'cancelado'].includes(n.review_status)) {
+        if (!baseline && entrouAgora && ['confirmado_erro', 'cancelado', 'falha_tecnica'].includes(n.review_status)) {
             // Nota com problema entrou em pagamento — fila de remoção do AP.
+            const motivo = n.review_status === 'cancelado' ? 'cancelamento'
+                : n.review_status === 'falha_tecnica' ? 'falha técnica' : 'erro confirmado';
             for (const uid of borderoUsers) {
                 await (0, notifications_1.upsertNotification)(uid, {
                     type: 'fiscal_bordero',
                     title: `${label} em borderô — remover`,
-                    body: `Nota com ${n.review_status === 'cancelado' ? 'cancelamento' : 'erro confirmado'} entrou em borderô de pagamento. Remover o título pra liberar a correção.`,
+                    body: `Nota com ${motivo} entrou em borderô de pagamento. Remover o título pra liberar a correção.`,
                     link: '/borderos',
                     dedupKey: `bordero:remover:${n.id}`,
                 });
