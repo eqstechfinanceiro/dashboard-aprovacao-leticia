@@ -33,7 +33,10 @@ export async function GET(request: NextRequest) {
   const limit = Math.min(parseInt(sp.get('limit') || '300', 10) || 300, 1000);
   // 'auto_ok' é a visão "aprovadas" — inclui as aprovadas com aviso de CST.
   // 'auto_ok_aviso' filtra só as avisadas.
-  const statusList = status === 'auto_ok' ? ['auto_ok', 'auto_ok_aviso'] : [status];
+  // 'reconf' = pendente aguardando reconferência automática (extra.reconf) —
+  // não é acionável; sai da fila 'pendente' e vira visão própria.
+  const statusList = status === 'auto_ok' ? ['auto_ok', 'auto_ok_aviso']
+    : status === 'reconf' ? ['pendente'] : [status];
 
   try {
     const runs = await sql`
@@ -44,8 +47,11 @@ export async function GET(request: NextRequest) {
     `;
 
     const resumo = await sql`
-      SELECT tipo, review_status, COUNT(*)::int AS n
-      FROM fiscal_notas GROUP BY tipo, review_status
+      SELECT tipo,
+             CASE WHEN review_status = 'pendente' AND extra->>'reconf' = 'true'
+                  THEN 'reconf' ELSE review_status END AS review_status,
+             COUNT(*)::int AS n
+      FROM fiscal_notas GROUP BY 1, 2
     `;
 
     const ultimaEmissao = await sql`
@@ -74,6 +80,8 @@ export async function GET(request: NextRequest) {
       ) dd ON true
       WHERE (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
+        AND (${status} <> 'reconf' OR n.extra->>'reconf' = 'true')
+        AND (${status} = 'reconf' OR ${q} <> '' OR n.extra->>'reconf' IS DISTINCT FROM 'true')
         AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
              OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
         AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado', 'corrigida'))
@@ -133,6 +141,8 @@ export async function GET(request: NextRequest) {
         AND lbl.f IS NOT NULL AND lbl.f <> ''
         AND (${tipo} = 'all' OR n.tipo = ${tipo})
         AND (${status} = 'all' OR n.review_status = ANY(${statusList}))
+        AND (${status} = 'reconf' OR ${q} <> '' OR n.extra->>'reconf' IS DISTINCT FROM 'true')
+        AND (${status} <> 'reconf' OR n.extra->>'reconf' = 'true')
         AND (${scope} <> 'fila' OR ${status} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
              OR n.review_status NOT IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'))
         AND (${scope} <> 'historico' OR n.review_status IN ('confirmado_erro', 'cancelado', 'corrigida'))

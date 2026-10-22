@@ -156,14 +156,17 @@ export function compareNf(
   info('Descontos', _toFloat(totvsHeader.f1_descont).toFixed(2), (xmlData.total?.vDesc ?? 0).toFixed(2));
   info('Vlr. Produtos', 'N/A', (xmlData.total?.vProd ?? 0).toFixed(2));
 
+  // valbrut só mascara qtd quando HÁ itens no TOTVS (fracionamento). Nota de
+  // mercadoria com ZERO linhas SD1 é lançamento quebrado/incompleto — diverge
+  // mesmo com o total batendo.
   const itemCountMatch = totvsItems.length === xmlData.items.length;
   chk('Qtd. Itens', String(totvsItems.length), String(xmlData.items.length),
-    valbrutMatch ? true : itemCountMatch);
+    valbrutMatch && totvsItems.length > 0 ? true : itemCountMatch);
 
   // Quando a NF fraciona itens (1 XML → N SD1) o total da NF bate mas nenhum
   // item casa 1:1 — aí o valbrut "amortece" checks de item. Quando a qtd de
   // itens bate, divergência de item é real e NÃO pode ser mascarada.
-  const valbrutMask = valbrutMatch && !itemCountMatch;
+  const valbrutMask = valbrutMatch && !itemCountMatch && totvsItems.length > 0;
 
   // ── Itens — fase 1: par 1:1 greedy por total (desempate qtd+vunit) ────
   const xmlItems = xmlData.items || [];
@@ -375,7 +378,7 @@ export function compareNf(
   for (let xi = 0; xi < xmlItems.length; xi++) {
     if (xmlMatched[xi]) continue;
     const xi2 = xmlItems[xi];
-    const m2 = valbrutMatch;
+    const m2 = valbrutMask;
     const pfx = `Item ${_normStr(xi2.c_prod) || xi + 1} · `;
     const list: Check[] = [
       { field: pfx + 'Produto', expected: '—', actual: _normStr(xi2.c_prod), match: m2 },

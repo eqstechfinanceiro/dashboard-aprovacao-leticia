@@ -159,7 +159,7 @@ async function upsertNota(runId: number, nota: {
           auto_status = ${nota.autoStatus},
           auto_resumo = COALESCE(${nul(nota.autoResumo)}, auto_resumo),
           checks = COALESCE(${nota.checks ? JSON.stringify(nota.checks) : null}::jsonb, checks),
-          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra),
+          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra) - 'reconf',
           review_status = CASE
             WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
             ELSE ${reviewStatus}
@@ -194,7 +194,7 @@ async function upsertNota(runId: number, nota: {
       auto_status = EXCLUDED.auto_status,
       auto_resumo = EXCLUDED.auto_resumo,
       checks = COALESCE(EXCLUDED.checks, fiscal_notas.checks),
-      extra = COALESCE(EXCLUDED.extra, fiscal_notas.extra),
+      extra = COALESCE(EXCLUDED.extra, fiscal_notas.extra) - 'reconf',
       review_status = CASE
         WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro')
           THEN fiscal_notas.review_status

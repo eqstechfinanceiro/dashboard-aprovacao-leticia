@@ -111,6 +111,7 @@ const STATUS_LABEL: Record<string, string> = {
   confirmado_erro: 'Erro confirmado',
   corrigida: 'Corrigida',
   cancelado: 'Cancelada',
+  reconf: 'Reconferindo',
 };
 
 const STATUS_STYLE: Record<string, string> = {
@@ -122,6 +123,7 @@ const STATUS_STYLE: Record<string, string> = {
   confirmado_erro: 'bg-red-100 text-red-700',
   corrigida: 'bg-emerald-100 text-emerald-700',
   cancelado: 'bg-slate-200 text-slate-600',
+  reconf: 'bg-indigo-100 text-indigo-700',
 };
 
 const KANBAN_COLS: { status: string; label: string; drop: boolean; cls: string }[] = [
@@ -611,7 +613,14 @@ export default function FiscalPage() {
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Clock className="h-4 w-4 text-amber-500" />Pendentes</CardTitle></CardHeader>
-          <CardContent><div className="text-2xl font-bold text-amber-600">{resumoTipo.pendente || 0}</div></CardContent>
+          <CardContent>
+            <div className="text-2xl font-bold text-amber-600">{resumoTipo.pendente || 0}</div>
+            {!!resumoTipo.reconf && (
+              <div className="mt-1 text-xs text-indigo-600">
+                {resumoTipo.reconf} aguardando reconferência automática
+              </div>
+            )}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" />Conferidas (auto)</CardTitle></CardHeader>
@@ -644,7 +653,7 @@ export default function FiscalPage() {
       {/* Filtro de status — segmented control com contadores */}
       {view === 'fila' ? (
         <div className="inline-flex max-w-full items-center gap-0.5 overflow-x-auto rounded-lg border bg-muted/40 p-1">
-          {['pendente', 'auto_ok', 'auto_ok_aviso', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'corrigida', 'cancelado', 'all'].map((s) => (
+          {['pendente', 'reconf', 'auto_ok', 'auto_ok_aviso', 'falha_tecnica', 'confirmado_ok', 'confirmado_erro', 'corrigida', 'cancelado', 'all'].map((s) => (
             <SegBtn key={s} active={status === s} onClick={() => setStatus(s)}>
               {s === 'all' ? 'Todas' : STATUS_LABEL[s]}
               <SegCount n={s === 'all' ? undefined : resumoTipo[s]} />
@@ -1006,6 +1015,14 @@ export default function FiscalPage() {
                           <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', STATUS_STYLE[n.review_status])}>
                             {STATUS_LABEL[n.review_status]}
                           </span>
+                          {n.extra?.reconf === 'true' && (
+                            <span
+                              className="rounded-full px-2 py-0.5 text-xs font-medium bg-indigo-100 text-indigo-700"
+                              title="Aguardando reconferência automática com as novas regras — o resultado anterior é só referência"
+                            >
+                              Reconferindo
+                            </span>
+                          )}
                           {n.em_bordero && (
                             <span
                               className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-800"

@@ -327,7 +327,7 @@ async function validarNotaServico(notaId: number): Promise<'match' | 'aviso' | '
       await sql`
         UPDATE fiscal_notas SET
           auto_resumo = ${m.resumo.slice(0, 500)},
-          extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify(extraPatch)}::jsonb,
+          extra = (COALESCE(extra,'{}'::jsonb) || ${JSON.stringify(extraPatch)}::jsonb) - 'reconf',
           updated_at = NOW()
         WHERE id = ${notaId}`;
       return 'falha';
@@ -344,7 +344,7 @@ async function validarNotaServico(notaId: number): Promise<'match' | 'aviso' | '
         WHEN review_status IN ('confirmado_ok','confirmado_erro','cancelado','corrigida') THEN review_status
         ELSE ${reviewStatus}
       END,
-      extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify(extraPatch)}::jsonb,
+      extra = (COALESCE(extra,'{}'::jsonb) || ${JSON.stringify(extraPatch)}::jsonb) - 'reconf',
       conferencia_next_retry = NULL,
       updated_at = NOW()
     WHERE id = ${notaId}`;

@@ -147,6 +147,7 @@ export async function POST(request: NextRequest) {
       corrigida_nota = ${isCorrigida ? (body.corrigida_nota ? String(body.corrigida_nota).slice(0, 500) : null) : (isDesfazer || decisao === 'confirmado_erro' ? null : nota.corrigida_nota)},
       corrigida_de = ${isCorrigida ? nota.review_status : null},
       resultados_id = ${resultadosId},
+      extra = COALESCE(extra, '{}'::jsonb) - 'reconf',
       updated_at = NOW()
     WHERE id = ${notaId}
     RETURNING id, review_status, resultados_id
