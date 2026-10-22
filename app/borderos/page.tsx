@@ -297,7 +297,7 @@ export default function BorderosPage() {
                         {n.pago && (
                           <div className="rounded-md border border-slate-300 bg-slate-50 px-3 py-2 text-xs text-slate-700 flex items-center gap-2">
                             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
-                            Título já baixado — correção exige estorno, não remoção de borderô.
+                            Título já baixado — correção exige estorno. Ao confirmar, a nota volta pro entrada de notas.
                           </div>
                         )}
                         {n.borderos.map((b, i) => (
@@ -340,12 +340,12 @@ export default function BorderosPage() {
                             <Button
                               size="sm"
                               className="bg-emerald-600 hover:bg-emerald-700"
-                              disabled={acting === n.nota_id || n.pago}
-                              title={n.pago ? 'Título já pago — requer estorno' : 'Confirmar que o título foi removido do borderô'}
+                              disabled={acting === n.nota_id}
+                              title={n.pago ? 'Título já pago — confirmar que a baixa foi tratada (estorno) e devolver a nota pro entrada' : 'Confirmar que o título foi removido do borderô e devolver a nota pro entrada'}
                               onClick={() => { setConfirmModal(n); setConfirmNota(''); }}
                             >
                               {acting === n.nota_id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-1.5" />}
-                              Confirmar remoção
+                              {n.pago ? 'Devolver p/ entrada' : 'Confirmar remoção'}
                             </Button>
                           )}
                         </div>
@@ -369,10 +369,16 @@ export default function BorderosPage() {
             className="w-full max-w-md rounded-lg bg-background p-5 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-lg font-semibold">Confirmar remoção do borderô</h2>
+            <h2 className="text-lg font-semibold">
+              {confirmModal.pago ? 'Devolver nota pro entrada' : 'Confirmar remoção do borderô'}
+            </h2>
             <p className="text-sm text-muted-foreground">
-              Confirma que o título da NF {confirmModal.doc} ({fmtBRL(confirmModal.valor)}) foi removido
-              do borderô de pagamento no Protheus?
+              {confirmModal.pago
+                ? `O título da NF ${confirmModal.doc} (${fmtBRL(confirmModal.valor)}) já foi pago — confirma que a baixa foi tratada/estornada no Protheus?`
+                : `Confirma que o título da NF ${confirmModal.doc} (${fmtBRL(confirmModal.valor)}) foi removido do borderô de pagamento no Protheus?`}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              A nota sai desta fila e volta pra coluna <strong>Pendente</strong> do setor de entrada de notas.
             </p>
             <input
               className="w-full rounded border bg-white px-2 py-1.5 text-sm"
