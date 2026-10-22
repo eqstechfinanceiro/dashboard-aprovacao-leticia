@@ -242,10 +242,11 @@ async function syncBorderoStatus(opts = {}) {
             });
         }
         const label = `NF ${n.doc}${n.serie ? '/' + n.serie : ''}`;
-        if (!baseline && entrouAgora && ['confirmado_erro', 'cancelado', 'falha_tecnica'].includes(n.review_status)) {
+        if (!baseline && entrouAgora && ['confirmado_erro', 'cancelado'].includes(n.review_status)) {
             // Nota com problema entrou em pagamento — fila de remoção do AP.
-            const motivo = n.review_status === 'cancelado' ? 'cancelamento'
-                : n.review_status === 'falha_tecnica' ? 'falha técnica' : 'erro confirmado';
+            // falha_tecnica não notifica: o robô não leu o PDF mas o pagamento
+            // seguiu o fluxo normal — não é trabalho de remoção do AP.
+            const motivo = n.review_status === 'cancelado' ? 'cancelamento' : 'erro confirmado';
             for (const uid of borderoUsers) {
                 await (0, notifications_1.upsertNotification)(uid, {
                     type: 'fiscal_bordero',

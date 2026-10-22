@@ -11,9 +11,10 @@ const BANCOS: Record<string, string> = {
 };
 
 // GET /api/borderos/notas[?todas=1]
-// Fila do contas a pagar: notas com PROBLEMA (erro confirmado, falha técnica
-// ou cancelamento) cujo título está em borderô — ou já foi pago — aguardando
-// remoção/estorno. Nota pendente/em dia em borderô é fluxo normal e fica fora.
+// Fila do contas a pagar: notas com PROBLEMA (erro confirmado ou cancelamento)
+// cujo título está em borderô — ou já foi pago — aguardando remoção/estorno.
+// falha_tecnica não entra: robô não leu o PDF, o pagamento seguiu normal e
+// não há nada a remover/estornar. Pendente/em dia também é fluxo normal.
 //   fila     → (em_bordero OR pago) AND status-problema AND sem confirmação
 //              manual AND sem remoção detectada
 //   ?todas=1 → todas as linhas do cache (contexto completo, incl. saudáveis)
@@ -36,13 +37,13 @@ export async function GET(request: NextRequest) {
            (${todas} AND (bs.remocao_confirmada_at IS NOT NULL OR bs.removida_detectada_at IS NOT NULL)))
       AND (${todas} OR (bs.remocao_confirmada_at IS NULL
                         AND bs.removida_detectada_at IS NULL
-                        AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado')))
+                        AND n.review_status IN ('confirmado_erro','cancelado')))
       AND (${q} = '' OR lower(n.doc) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
     ORDER BY
       CASE WHEN (bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
-           AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado') THEN 0 ELSE 1 END,
+           AND n.review_status IN ('confirmado_erro','cancelado') THEN 0 ELSE 1 END,
       bs.pago ASC, bs.checked_at DESC
     LIMIT 500
   `;
@@ -51,12 +52,12 @@ export async function GET(request: NextRequest) {
     SELECT
       COUNT(*) FILTER (WHERE (bs.em_bordero OR bs.pago)
                        AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
-                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS na_fila,
+                       AND n.review_status IN ('confirmado_erro','cancelado'))::int AS na_fila,
       COUNT(*) FILTER (WHERE bs.pago AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
-                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS pagas_na_fila,
+                       AND n.review_status IN ('confirmado_erro','cancelado'))::int AS pagas_na_fila,
       COUNT(*) FILTER (WHERE bs.em_bordero)::int AS total_em_bordero,
       COUNT(*) FILTER (WHERE bs.em_bordero AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL
-                       AND n.review_status IN ('falha_tecnica','confirmado_erro','cancelado'))::int AS em_bordero_na_fila,
+                       AND n.review_status IN ('confirmado_erro','cancelado'))::int AS em_bordero_na_fila,
       COUNT(*) FILTER (WHERE bs.pago)::int AS total_pagas,
       COUNT(*) FILTER (WHERE bs.remocao_confirmada_at IS NOT NULL OR bs.removida_detectada_at IS NOT NULL)::int AS resolvidas,
       MAX(bs.checked_at) AS ultima_verificacao

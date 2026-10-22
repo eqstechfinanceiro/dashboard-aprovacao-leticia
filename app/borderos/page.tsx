@@ -187,7 +187,7 @@ export default function BorderosPage() {
             Borderôs — Contas a Pagar
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Notas com problema (erro confirmado, falha técnica ou canceladas) cujo título está em borderô ou já foi pago — remover/estornar no Protheus pra liberar a correção.
+            Notas com erro confirmado ou canceladas cujo título está em borderô ou já foi pago — remover/estornar no Protheus pra liberar a correção.
           </p>
         </div>
         <div className="flex items-center gap-2">
