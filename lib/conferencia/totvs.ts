@@ -415,6 +415,27 @@ export interface NfIdentidade {
   fornec: string; // código SA2
   loja: string;
   empresa: string; // '' = tenta todos os tenants
+  cnpj?: string;  // resolve fornec/loja via SA2 quando `fornec` é nome
+}
+
+// Códigos SA2 são alfanum curtos sem espaço ('W93259','001234'). Nomes de
+// fornecedor não passam — usado pra decidir se vale filtrar F1_FORNECE.
+export function isFornecCodigo(v: string): boolean {
+  return /^[A-Z0-9]{1,8}$/.test(trim(v));
+}
+
+// SA2 por CNPJ — resolve o código/loja do fornecedor quando a nota guarda o
+// nome (mercadoria importada por nome ou serviço sem backfill).
+export async function sa2ByCnpj(tenantId: string, cnpj: string): Promise<{ cod: string; loja: string } | null> {
+  try {
+    const d = await genericQuery(tenantId, {
+      tables: 'SA2', fields: 'A2_COD,A2_LOJA',
+      where: `SA2.A2_CGC='${cnpj}' AND SA2.D_E_L_E_T_=' '`,
+      page: '1', pageSize: '5',
+    });
+    const f = (d.items || [])[0];
+    return f ? { cod: trim(f.a2_cod), loja: trim(f.a2_loja) } : null;
+  } catch { return null; }
 }
 
 export interface NfSnapshot {
@@ -454,18 +475,28 @@ export async function fetchNfByIdentidade(ref: NfIdentidade): Promise<NfSnapshot
   for (const emp of emps) {
     const tenantId = EMPRESAS[emp];
     try {
+      // `fornec` pode vir como nome (nota importada fora do syncConferencia)
+      // — resolve o código SA2 por CNPJ nesse tenant antes de filtrar.
+      let fornec = ref.fornec;
+      let loja = ref.loja;
+      if (!isFornecCodigo(fornec)) {
+        const cnpj = trim(ref.cnpj || '');
+        const f = /^\d{14}$/.test(cnpj) ? await sa2ByCnpj(tenantId, cnpj) : null;
+        fornec = f?.cod || '';
+        if (!loja && f?.loja) loja = f.loja;
+      }
       const hd = await genericQuery(tenantId, {
         tables: 'SF1,SA2',
         fields: SF1_SA2_FIELDS + ',SF1.D_E_L_E_T_',
         where: `SF1.F1_DOC IN (${docIn})` +
           (ref.serie ? ` AND SF1.F1_SERIE='${ref.serie}'` : '') +
-          (ref.fornec ? ` AND SF1.F1_FORNECE='${ref.fornec}'` : '') +
+          (fornec ? ` AND SF1.F1_FORNECE='${fornec}'` : '') +
           ` AND SA2.D_E_L_E_T_=' ' AND SF1.F1_FORNECE=SA2.A2_COD AND SF1.F1_LOJA=SA2.A2_LOJA`,
         page: '1', pageSize: '50',
       });
       if (hd.error) continue;
       const rows = (hd.items || []).filter(
-        (it: any) => !ref.loja || trim(it.f1_loja) === ref.loja
+        (it: any) => !loja || trim(it.f1_loja) === loja
       );
       // Prefere a linha ativa; se só houver deletada, reporta como excluída.
       const ativa = rows.find((r: any) => trim(r['d_e_l_e_t_'] ?? r['D_E_L_E_T_'] ?? '') !== '*');

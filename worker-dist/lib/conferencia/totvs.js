@@ -7,6 +7,8 @@ exports.fetchZ01XmlByChave = fetchZ01XmlByChave;
 exports.fetchSdsXmlByChave = fetchSdsXmlByChave;
 exports.checkTituloBordero = checkTituloBordero;
 exports.fetchBorderoStatusBatch = fetchBorderoStatusBatch;
+exports.isFornecCodigo = isFornecCodigo;
+exports.sa2ByCnpj = sa2ByCnpj;
 exports.nfFingerprint = nfFingerprint;
 exports.fetchNfByIdentidade = fetchNfByIdentidade;
 /**
@@ -389,6 +391,27 @@ async function fetchBorderoStatusBatch(notas) {
     }
     return { porNota, errors };
 }
+// Códigos SA2 são alfanum curtos sem espaço ('W93259','001234'). Nomes de
+// fornecedor não passam — usado pra decidir se vale filtrar F1_FORNECE.
+function isFornecCodigo(v) {
+    return /^[A-Z0-9]{1,8}$/.test(trim(v));
+}
+// SA2 por CNPJ — resolve o código/loja do fornecedor quando a nota guarda o
+// nome (mercadoria importada por nome ou serviço sem backfill).
+async function sa2ByCnpj(tenantId, cnpj) {
+    try {
+        const d = await (0, totvs_1.genericQuery)(tenantId, {
+            tables: 'SA2', fields: 'A2_COD,A2_LOJA',
+            where: `SA2.A2_CGC='${cnpj}' AND SA2.D_E_L_E_T_=' '`,
+            page: '1', pageSize: '5',
+        });
+        const f = (d.items || [])[0];
+        return f ? { cod: trim(f.a2_cod), loja: trim(f.a2_loja) } : null;
+    }
+    catch {
+        return null;
+    }
+}
 /**
  * Fingerprint estável do estado TOTVS da NF — qualquer edição/re-digitação
  * muda o hash. Campos de valor/imposto/TES do header + itens ordenados.
@@ -417,18 +440,29 @@ async function fetchNfByIdentidade(ref) {
     for (const emp of emps) {
         const tenantId = totvs_1.EMPRESAS[emp];
         try {
+            // `fornec` pode vir como nome (nota importada fora do syncConferencia)
+            // — resolve o código SA2 por CNPJ nesse tenant antes de filtrar.
+            let fornec = ref.fornec;
+            let loja = ref.loja;
+            if (!isFornecCodigo(fornec)) {
+                const cnpj = trim(ref.cnpj || '');
+                const f = /^\d{14}$/.test(cnpj) ? await sa2ByCnpj(tenantId, cnpj) : null;
+                fornec = f?.cod || '';
+                if (!loja && f?.loja)
+                    loja = f.loja;
+            }
             const hd = await (0, totvs_1.genericQuery)(tenantId, {
                 tables: 'SF1,SA2',
                 fields: exports.SF1_SA2_FIELDS + ',SF1.D_E_L_E_T_',
                 where: `SF1.F1_DOC IN (${docIn})` +
                     (ref.serie ? ` AND SF1.F1_SERIE='${ref.serie}'` : '') +
-                    (ref.fornec ? ` AND SF1.F1_FORNECE='${ref.fornec}'` : '') +
+                    (fornec ? ` AND SF1.F1_FORNECE='${fornec}'` : '') +
                     ` AND SA2.D_E_L_E_T_=' ' AND SF1.F1_FORNECE=SA2.A2_COD AND SF1.F1_LOJA=SA2.A2_LOJA`,
                 page: '1', pageSize: '50',
             });
             if (hd.error)
                 continue;
-            const rows = (hd.items || []).filter((it) => !ref.loja || trim(it.f1_loja) === ref.loja);
+            const rows = (hd.items || []).filter((it) => !loja || trim(it.f1_loja) === loja);
             // Prefere a linha ativa; se só houver deletada, reporta como excluída.
             const ativa = rows.find((r) => trim(r['d_e_l_e_t_'] ?? r['D_E_L_E_T_'] ?? '') !== '*');
             if (!ativa) {

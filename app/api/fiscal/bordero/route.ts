@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db/neon';
-import { checkTituloBordero } from '@/lib/conferencia/totvs';
+import { checkTituloBordero, sa2ByCnpj } from '@/lib/conferencia/totvs';
+import { EMPRESAS as EMPRESAS_TOTVS } from '@/lib/impacto/totvs';
 import { ensureFiscalTables } from '@/lib/fiscal/fiscal-db';
 import { fornecedorCodigoNota, lojaNota } from '@/lib/fiscal/bordero-monitor';
 
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
   if (!id) return NextResponse.json({ error: 'nota_id obrigatório' }, { status: 400 });
   const fresh = request.nextUrl.searchParams.get('fresh') === '1';
 
-  const rows = await sql`SELECT doc, serie, fornecedor, tipo, extra FROM fiscal_notas WHERE id = ${id}`;
+  const rows = await sql`SELECT doc, serie, fornecedor, cnpj, tipo, extra FROM fiscal_notas WHERE id = ${id}`;
   if (!rows[0]) return NextResponse.json({ error: 'Nota não encontrada' }, { status: 404 });
   const n = rows[0];
 
@@ -45,9 +46,18 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const loja = lojaNota(n);
-  const fornec = fornecedorCodigoNota(n);
+  let loja = lojaNota(n);
+  let fornec = fornecedorCodigoNota(n);
   const empresa = String((n.extra as any)?.empresa || '').trim().toUpperCase();
+  // Fornecedor gravado como nome — resolve o código SA2 por CNPJ (o batch
+  // faz o mesmo e já faz backfill do extra; aqui é o caminho ad-hoc).
+  if (!fornec && /^\d{14}$/.test(String(n.cnpj || '').trim())) {
+    const emps = empresa && EMPRESAS_TOTVS[empresa] ? [empresa] : Object.keys(EMPRESAS_TOTVS);
+    for (const emp of emps) {
+      const f = await sa2ByCnpj(EMPRESAS_TOTVS[emp], String(n.cnpj).trim());
+      if (f) { fornec = f.cod; loja = loja || f.loja; break; }
+    }
+  }
   const borderos = await checkTituloBordero(String(n.doc), String(n.serie || ''), fornec, loja, empresa || undefined);
 
   const emBordero = borderos.length > 0;

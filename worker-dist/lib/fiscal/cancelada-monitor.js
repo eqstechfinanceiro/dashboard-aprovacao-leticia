@@ -76,6 +76,7 @@ async function syncCanceladaMonitor(opts = {}) {
                 fornec: (0, bordero_monitor_1.fornecedorCodigoNota)(n),
                 loja: (0, bordero_monitor_1.lojaNota)(n),
                 empresa: trim(n.extra?.empresa).toUpperCase(),
+                cnpj: trim(n.cnpj),
             });
             let status;
             let detail = { ultima_verificacao: new Date().toISOString() };

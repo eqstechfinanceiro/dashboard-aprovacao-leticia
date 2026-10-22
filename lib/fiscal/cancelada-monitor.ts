@@ -90,6 +90,7 @@ export async function syncCanceladaMonitor(opts: { janelaDias?: number; limit?: 
         fornec: fornecedorCodigoNota(n),
         loja: lojaNota(n),
         empresa: trim(n.extra?.empresa).toUpperCase(),
+        cnpj: trim(n.cnpj),
       });
 
       let status: MonitorStatus;
