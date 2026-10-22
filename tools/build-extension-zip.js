@@ -16,6 +16,7 @@ const FILES = [
   'popup.html',
   'popup.js',
   'bradesco-bot.js',
+  'inncash-bot.js',
   'icon16.png',
   'icon48.png',
   'icon128.png',

@@ -34,6 +34,17 @@ O popup da extensão tem um botão **"Bot Bradesco — marcar de 50 em 50"**:
 5. **MODO TESTE** (ligado por padrão) só destaca as caixas em laranja sem clicar — desmarque para clicar de verdade
 6. Se a grade estiver num iframe inacessível, o painel aparece dentro do próprio frame da grade
 
+## Ferramentas — Bot InnCash Empresas
+
+O popup também tem o botão **"Bot InnCash — selecionar empresas"**:
+
+1. Abra `app.inn.cash/remessas-de-pagamento` nesta aba
+2. Clique no ícone da Aery → botão **Bot InnCash**
+3. O painel flutuante aparece na página (arrastável, com botão fechar)
+4. **Marcar EQS** / **Marcar BRATEC**: abre o dropdown do campo *Empresa* e clica em todas as boxes cujo nome começa com o prefixo, uma a uma
+5. Campo **"Outro prefixo…"** marca qualquer outro grupo (ex.: `ARENANET`)
+6. Itens já marcados são pulados — rodar de novo é seguro (idempotente)
+
 ## Como funciona
 
 1. Ao visitar `app.vexpenses.com`, lê os cookies `laravel_token`/`laravel_session`

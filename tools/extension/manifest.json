@@ -1,12 +1,14 @@
 {
   "manifest_version": 3,
   "name": "Aery",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Aery — sincroniza automaticamente o token do VExpenses com o portal financeiro",
   "permissions": ["cookies", "storage", "alarms", "scripting", "activeTab"],
   "host_permissions": [
     "https://vexpenses.com/*",
     "https://*.vexpenses.com/*",
+    "https://app.inn.cash/*",
+    "https://*.inn.cash/*",
     "http://localhost:3000/*",
     "http://179.199.149.43/*",
     "https://*.sslip.io/*",

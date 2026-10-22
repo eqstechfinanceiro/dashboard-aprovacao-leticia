@@ -116,4 +116,30 @@ document.getElementById('bradescoBotBtn').addEventListener('click', async () => 
   }
 });
 
+document.getElementById('inncashBotBtn').addEventListener('click', async () => {
+  const btn = document.getElementById('inncashBotBtn');
+  const msg = document.getElementById('toolMsg');
+  btn.disabled = true;
+  msg.style.display = 'none';
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab?.id) throw new Error('Aba ativa não encontrada');
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id, allFrames: true },
+      files: ['inncash-bot.js'],
+    });
+    msg.className = 'success-msg';
+    msg.textContent = 'Bot injetado — o painel apareceu na página.';
+    msg.style.display = 'block';
+  } catch (e) {
+    msg.className = 'error-msg';
+    msg.textContent = String(e?.message || e).includes('Cannot access')
+      ? 'Não dá pra injetar nesta página (chrome:// ou loja). Abra o app.inn.cash primeiro.'
+      : 'Falha ao injetar: ' + (e?.message || e);
+    msg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 document.addEventListener('DOMContentLoaded', loadStatus);
