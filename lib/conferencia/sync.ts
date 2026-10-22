@@ -16,7 +16,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import { sql } from '../db/neon';
 import { ensureFiscalTables, computeReviewStatus } from '../fiscal/fiscal-db';
-import { fetchMercadoriaNfs, nfFingerprint } from './totvs';
+import { fetchMercadoriaNfs, fetchSe2Parcelas, nfFingerprint, se2ParcelaKey } from './totvs';
 import { ensureDocCacheTable, cacheHasChaves, prepararSieg, obterXmlNfe } from './fontes';
 import { compareNf } from './comparator';
 import { carregarTesOverride } from './tes-override';
@@ -447,6 +447,20 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
     }
     await setState({ fase: 'conferindo', elegiveis: elegiveis.length }, `conferindo ${elegiveis.length} notas (${out.puladas} puladas por dedup/backoff)`);
 
+    // Parcelas SE2 das elegíveis (batch) — checks de duplicata no compareNf.
+    let parcelasMap = new Map<string, any[]>();
+    try {
+      parcelasMap = await fetchSe2Parcelas(
+        elegiveis.map((nf) => ({
+          doc: trim(nf.header.f1_doc), serie: trim(nf.header.f1_serie),
+          fornec: trim(nf.header.f1_fornece), loja: trim(nf.header.f1_loja),
+          empresa: nf.header._empresa,
+        }))
+      );
+    } catch (e: any) {
+      console.warn('[conferencia] SE2 parcelas falhou (checks de duplicata pulados):', e?.message);
+    }
+
     let i = 0;
     for (const nf of elegiveis) {
       i++;
@@ -501,7 +515,10 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       let cmp;
       try {
         const tesOvr = await carregarTesOverride(h._empresa || 'EQS');
-        cmp = compareNf(h, nf.items, xmlRes.parsed, tesOvr);
+        const parc = parcelasMap.get(
+          se2ParcelaKey(h.f1_doc, h.f1_serie, h.f1_fornece, h.f1_loja)
+        );
+        cmp = compareNf(h, nf.items, xmlRes.parsed, tesOvr, { se2Parcelas: parc });
       } catch (e: any) {
         const nextRetry = new Date(now + RETRY_BASE_MIN * 60_000);
         await upsertNota(runId, {

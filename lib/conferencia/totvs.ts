@@ -21,6 +21,8 @@ export const SD1_SB1_FIELDS = [
   'D1_FILIAL', 'D1_DOC', 'D1_SERIE', 'D1_FORNECE', 'D1_LOJA', 'D1_COD', 'D1_ITEM',
   'D1_QUANT', 'D1_VUNIT', 'D1_TOTAL', 'D1_VALICMS', 'D1_VALIPI', 'D1_TES', 'D1_CF', 'D1_ICMSRET',
   'D1_BASEICM', 'D1_BASEIPI', 'D1_VALDESC', 'D1_CLASFIS',
+  // Conferência Lince-parity: alíquotas, frete/seguro/despesa por item.
+  'D1_PICM', 'D1_IPI', 'D1_VALFRE', 'D1_SEGURO', 'D1_DESPESA', 'D1_BRICMS',
   'B1_DESC', 'B1_UM',
 ].join(',');
 
@@ -198,6 +200,77 @@ export async function fetchSdsXmlByChave(chave: string): Promise<string | null> 
     } catch {}
   }
   return null;
+}
+
+// ── Duplicatas SE2 ──────────────────────────────────────────────────────────
+// Parcelas da NF no contas a pagar — conferidas contra <cobr><dup> do XML.
+
+export interface Se2Parcela {
+  parcela: string;
+  tipo: string;
+  natureza: string;
+  valor: number;
+  vencto: string | null;
+}
+
+const SE2_PARC_FIELDS = 'E2_NUM,E2_PREFIXO,E2_PARCELA,E2_TIPO,E2_NATUREZ,E2_VALOR,E2_VENCTO,E2_VENCREA,E2_FORNECE,E2_LOJA,E2_BAIXA';
+
+/** Chave canônica doc|serie|fornec|loja (doc pad-9) — mesma do mapa de retorno. */
+export function se2ParcelaKey(doc: string, serie: string, fornec: string, loja: string): string {
+  return `${trim(doc).padStart(9, '0')}|${trim(serie)}|${trim(fornec)}|${trim(loja)}`;
+}
+
+/** Parcelas SE2 por nota (doc+serie+fornec+loja), batch com IN(...) paginado.
+ * Chave de retorno: `se2ParcelaKey(doc, serie, fornec, loja)`. */
+export async function fetchSe2Parcelas(
+  refs: { doc: string; serie: string; fornec: string; loja: string; empresa: string }[]
+): Promise<Map<string, Se2Parcela[]>> {
+  const out = new Map<string, Se2Parcela[]>();
+  if (!refs.length) return out;
+  const allEmps = Object.keys(EMPRESAS);
+  const porEmpresa = new Map<string, typeof refs>();
+  for (const n of refs) {
+    const emps = n.empresa && EMPRESAS[n.empresa] ? [n.empresa] : allEmps;
+    for (const emp of emps) {
+      const g = porEmpresa.get(emp);
+      if (g) g.push(n); else porEmpresa.set(emp, [n]);
+    }
+  }
+  const keyOf = se2ParcelaKey;
+  for (const [emp, grupo] of porEmpresa) {
+    const tenantId = EMPRESAS[emp];
+    const docNums = [...new Set(grupo.flatMap((n) => docVariants(n.doc)))];
+    for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
+      const inList = docNums.slice(i, i + BATCH_CHUNK).map((d) => `'${d}'`).join(',');
+      try {
+        const d = await queryAllPages(tenantId, {
+          tables: 'SE2', fields: SE2_PARC_FIELDS,
+          where: `SE2.D_E_L_E_T_=' ' AND E2_NUM IN (${inList})`,
+          pageSize: '1000',
+        });
+        for (const it of d.items || []) {
+          for (const n of grupo) {
+            if (!docVariants(n.doc).includes(trim(it.e2_num))) continue;
+            if (n.serie && trim(it.e2_prefixo) !== n.serie) continue;
+            if (n.fornec && trim(it.e2_fornece) !== n.fornec) continue;
+            if (n.loja && trim(it.e2_loja) !== n.loja) continue;
+            const k = keyOf(n.doc, n.serie, n.fornec, n.loja);
+            const arr = out.get(k) || [];
+            const ven = trim(it.e2_vencrea || it.e2_vencto);
+            arr.push({
+              parcela: trim(it.e2_parcela),
+              tipo: trim(it.e2_tipo),
+              natureza: trim(it.e2_naturez),
+              valor: Number(it.e2_valor) || 0,
+              vencto: /^\d{4}-\d{2}-\d{2}/.test(ven) ? ven.slice(0, 10) : null,
+            });
+            out.set(k, arr);
+          }
+        }
+      } catch {}
+    }
+  }
+  return out;
 }
 
 export interface BorderoInfo {

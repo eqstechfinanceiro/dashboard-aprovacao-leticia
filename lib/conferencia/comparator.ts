@@ -11,6 +11,7 @@ import {
 } from './tes-rules';
 import { resolverTesOverride, type TesOverrideCfg } from './tes-override';
 import type { NfeXml, NfeXmlItem } from './xml-parser';
+import type { Se2Parcela } from './totvs';
 
 export const TOLERANCE = 0.02;
 
@@ -61,11 +62,14 @@ const _cmpStr = (a: string, b: string) => _normStr(a) === _normStr(b);
 const _cmpCnpj = (a: string, b: string) => { const x = _normCnpj(a), y = _normCnpj(b); return !!x && !!y && x === y; };
 const _cmpDate = (a: string, b: string) => _normDate(a) === _normDate(b);
 
-/** Deriva ctrl_imposto dos impostos do item XML (mesma tabela do Python). */
+/** Deriva ctrl_imposto dos impostos do item XML (mesma tabela do Python).
+ * Paridade com documento_entrada_handler._determinar_tipo do Lince: imposto
+ * conta quando o VALOR **ou a BASE** é > 0 — CST 051/70 e afins têm base sem
+ * valor destacado e antes caíam em 'Nenhum imposto' (TES esperada errada). */
 function deriveCtrlImposto(xmlItem: Partial<NfeXmlItem>): string {
-  const hasIcms = _toFloat(xmlItem.v_icms) > 0;
-  const hasSt = _toFloat(xmlItem.v_icms_st) > 0;
-  const hasIpi = _toFloat(xmlItem.v_ipi) > 0;
+  const hasIcms = _toFloat(xmlItem.v_icms) > 0 || _toFloat(xmlItem.v_bc_icms) > 0;
+  const hasSt = _toFloat(xmlItem.v_icms_st) > 0 || _toFloat(xmlItem.v_bc_icms_st) > 0;
+  const hasIpi = _toFloat(xmlItem.v_ipi) > 0 || _toFloat(xmlItem.v_bc_ipi) > 0;
   if (hasIcms && hasSt && hasIpi) return 'Todos os impostos';
   if (hasIcms && hasSt && !hasIpi) return 'Apenas ICMS e ICMSST';
   if (hasIcms && !hasSt && hasIpi) return 'Apenas ICMS e IPI';
@@ -81,6 +85,7 @@ export function compareNf(
   totvsItems: Record<string, any>[],
   xmlData: NfeXml,
   tesOverride?: TesOverrideCfg,
+  extras?: { se2Parcelas?: Se2Parcela[] },
 ): CompareResult {
   const empresa = _normStr(totvsHeader._empresa) || 'EQS';
   const headerChecks: Check[] = [];
@@ -155,34 +160,68 @@ export function compareNf(
   chk('Qtd. Itens', String(totvsItems.length), String(xmlData.items.length),
     valbrutMatch ? true : itemCountMatch);
 
-  // ── Itens (greedy match por total, pontuado por qtd+vunit) ───────────
+  // Quando a NF fraciona itens (1 XML → N SD1) o total da NF bate mas nenhum
+  // item casa 1:1 — aí o valbrut "amortece" checks de item. Quando a qtd de
+  // itens bate, divergência de item é real e NÃO pode ser mascarada.
+  const valbrutMask = valbrutMatch && !itemCountMatch;
+
+  // ── Itens — fase 1: par 1:1 greedy por total (desempate qtd+vunit) ────
   const xmlItems = xmlData.items || [];
   const xmlMatched = new Array(xmlItems.length).fill(false);
-
+  const matchXi: (number | null)[] = new Array(totvsItems.length).fill(null);
   for (let ti = 0; ti < totvsItems.length; ti++) {
     const totvsItem = totvsItems[ti];
-    const list: Check[] = [];
-
     let bestXi: number | null = null;
     let bestScore = -1;
     for (let xi = 0; xi < xmlItems.length; xi++) {
       if (xmlMatched[xi]) continue;
-      const xt = xmlItems[xi].v_prod;
-      if (!_cmpFloat(_toFloat(totvsItem.d1_total), xt)) continue;
+      if (!_cmpFloat(_toFloat(totvsItem.d1_total), xmlItems[xi].v_prod)) continue;
       let score = 0;
       if (_cmpFloat(_toFloat(totvsItem.d1_quant), xmlItems[xi].q_com)) score++;
       if (_cmpFloat(_toFloat(totvsItem.d1_vunit), xmlItems[xi].v_un_com)) score++;
       if (score > bestScore) { bestScore = score; bestXi = xi; }
     }
+    if (bestXi !== null) { xmlMatched[bestXi] = true; matchXi[ti] = bestXi; }
+  }
 
-    let xmlItem: NfeXmlItem | Record<string, never>;
-    if (bestXi !== null) {
-      xmlMatched[bestXi] = true;
-      xmlItem = xmlItems[bestXi];
-    } else {
-      xmlItem = {};
+  // ── Fase 2: fracionamento — N linhas SD1 do mesmo produto cuja Σ fecha
+  // no v_prod de UM item XML sem par. Todas as linhas do grupo casam com
+  // esse item (checks somados); sem o grupo cada linha divergia sozinha.
+  const fracionado = new Map<number, { xi: number; idxs: number[] }>();
+  {
+    const porProd = new Map<string, number[]>();
+    for (let i = 0; i < totvsItems.length; i++) {
+      if (matchXi[i] !== null) continue;
+      const k = _normStr(totvsItems[i].d1_cod);
+      const g = porProd.get(k) || [];
+      g.push(i);
+      porProd.set(k, g);
     }
+    for (const idxs of porProd.values()) {
+      if (idxs.length < 2) continue;
+      const soma = idxs.reduce((s, i) => s + _toFloat(totvsItems[i].d1_total), 0);
+      for (let xi = 0; xi < xmlItems.length; xi++) {
+        if (xmlMatched[xi]) continue;
+        if (!_cmpFloat(soma, xmlItems[xi].v_prod)) continue;
+        xmlMatched[xi] = true;
+        for (const i of idxs) fracionado.set(i, { xi, idxs });
+        break;
+      }
+    }
+  }
+
+  for (let ti = 0; ti < totvsItems.length; ti++) {
+    const totvsItem = totvsItems[ti];
+    const list: Check[] = [];
+
+    const frac = fracionado.get(ti) || null;
+    const bestXi = matchXi[ti] !== null ? matchXi[ti] : (frac ? frac.xi : null);
+    const xmlItem: NfeXmlItem | Record<string, never> = bestXi !== null ? xmlItems[bestXi as number] : {};
     const noXml = bestXi === null;
+
+    // Agregados do grupo fracionado (ou do item sozinho quando não é).
+    const grp = frac ? frac.idxs.map((i) => totvsItems[i]) : [totvsItem];
+    const sum = (k: string) => grp.reduce((s, t) => s + _toFloat(t[k]), 0);
 
     const pfx = `Item ${_normStr(totvsItem.d1_cod) || _normStr((xmlItem as NfeXmlItem).c_prod) || ti + 1} · `;
     const itemChk = (field: string, expected: any, actual: any, match: boolean) => {
@@ -194,24 +233,27 @@ export function compareNf(
     };
 
     itemInfo('Produto', _normStr(totvsItem.d1_cod), _normStr((xmlItem as NfeXmlItem).c_prod));
+    if (frac) {
+      itemInfo('Fracionado', `${frac.idxs.length} linhas SD1`, `itens ${frac.idxs.map((i) => _normStr(totvsItems[i].d1_item) || i + 1).join('+')}`);
+    }
 
-    const totvsTotal = _toFloat(totvsItem.d1_total);
+    const totvsTotal = sum('d1_total');
     const totalMatch = bestXi !== null ? _cmpFloat(totvsTotal, (xmlItem as NfeXmlItem).v_prod) : false;
     itemChk('Vlr. Total Item', totvsTotal.toFixed(2),
       bestXi !== null ? (xmlItem as NfeXmlItem).v_prod.toFixed(2) : '—',
-      valbrutMatch ? true : totalMatch);
+      valbrutMask ? true : totalMatch);
 
-    const totvsQtd = _toFloat(totvsItem.d1_quant);
+    const totvsQtd = sum('d1_quant');
     const qtdMatch = bestXi !== null ? _cmpFloat(totvsQtd, (xmlItem as NfeXmlItem).q_com) : false;
     itemChk('Quantidade', totvsQtd.toFixed(4),
       bestXi !== null ? (xmlItem as NfeXmlItem).q_com.toFixed(4) : '—',
-      (totalMatch || valbrutMatch) ? true : qtdMatch);
+      (totalMatch || valbrutMask) ? true : qtdMatch);
 
-    const totvsVunit = _toFloat(totvsItem.d1_vunit);
+    const totvsVunit = totvsQtd ? totvsTotal / totvsQtd : sum('d1_vunit');
     const vunitMatch = bestXi !== null ? _cmpFloat(totvsVunit, (xmlItem as NfeXmlItem).v_un_com) : false;
     itemChk('Vlr. Unitário', totvsVunit.toFixed(4),
       bestXi !== null ? (xmlItem as NfeXmlItem).v_un_com.toFixed(4) : '—',
-      (totalMatch || valbrutMatch) ? true : vunitMatch);
+      (totalMatch || valbrutMask) ? true : vunitMatch);
 
     // TES via regras Lince — empresa vem do header (corrige bug EQS-fixo do legado)
     const totvsTes = String(totvsItem.d1_tes || '').trim();
@@ -219,6 +261,7 @@ export function compareNf(
     const ctrlImposto = bestXi !== null ? deriveCtrlImposto(xmlItem as NfeXmlItem) : '';
     let expectedTes = '';
     let tesMatch = true;
+    let tesRegra: string | null = null;
     if (bestXi !== null && natureza) {
       const xi = xmlItem as NfeXmlItem;
       const r = definirTes({
@@ -233,6 +276,7 @@ export function compareNf(
         icms_aliq_xml: xi.p_icms || null,
       });
       expectedTes = r.tes;
+      tesRegra = r.meta?.regra_aplicada || null;
       // Parametrização lince_tes_regras — o bot aplica esse override depois de
       // definir_tes (cred ICMS: fornecedor+produto+TES nas listas do banco).
       // Sem isso a conferência esperava a TES padrão e falhava nos dois
@@ -249,26 +293,60 @@ export function compareNf(
       tesMatch = expectedTes ? expectedTes === totvsTes : true;
     }
     itemChk('TES', expectedTes || totvsTes, totvsTes, tesMatch);
+    // "Não verificável" ≠ match: a regra não consegue decidir a TES esperada
+    // (natureza cód.8, CC especial sem TES, tes_vazio_no_siga). Informativo —
+    // sai do silêncio sem criar fila sem dono.
+    if (bestXi !== null && natureza && !expectedTes) {
+      itemInfo('Não verificável', tesRegra || '—', totvsTes || '—');
+    }
 
-    // ICMS item — valida regra zerar
-    const totvsIcmsItem = _toFloat(totvsItem.d1_valicms);
+    const zerarIcms = !!totvsTes && precisaZerarIcms(totvsTes, ctrlImposto);
+    const zerarIpi = !!totvsTes && precisaZerarIpi(totvsTes, ctrlImposto);
+    const zerarSt = !!totvsTes && precisaZerarIcmsSt(totvsTes, ctrlImposto);
+
+    // ICMS item — D1_VALICMS nunca é gravada neste ambiente: a SF4 das TES
+    // zera o campo na gravação (0 linhas >0 em set–out/2026; a prova real do
+    // imposto são Base ICMS + Aliq ICMS abaixo). Aceita 0 ou o valor do XML
+    // (se alguma TES contabilizar); um terceiro valor é divergência real.
+    const totvsIcmsItem = sum('d1_valicms');
     const xmlIcmsItem = bestXi !== null ? (xmlItem as NfeXmlItem).v_icms : 0;
-    const icmsItemMatch = bestXi !== null && totvsTes && precisaZerarIcms(totvsTes, ctrlImposto)
-      ? totvsIcmsItem === 0
-      : bestXi !== null ? _cmpFloat(totvsIcmsItem, xmlIcmsItem) : false;
-    itemChk('ICMS Item', totvsIcmsItem.toFixed(2),
-      bestXi !== null ? xmlIcmsItem.toFixed(2) : '—',
-      valbrutMatch ? true : icmsItemMatch);
+    const icmsItemMatch = bestXi !== null &&
+      (totvsIcmsItem === 0 || _cmpFloat(totvsIcmsItem, xmlIcmsItem));
+    itemChk('ICMS Item', '0.00', totvsIcmsItem.toFixed(2),
+      valbrutMask ? true : icmsItemMatch);
 
     // IPI item — valida regra zerar
-    const totvsIpiItem = _toFloat(totvsItem.d1_valipi);
+    const totvsIpiItem = sum('d1_valipi');
     const xmlIpiItem = bestXi !== null ? (xmlItem as NfeXmlItem).v_ipi : 0;
-    const ipiItemMatch = bestXi !== null && totvsTes && precisaZerarIpi(totvsTes, ctrlImposto)
-      ? totvsIpiItem === 0
+    const ipiItemMatch = bestXi !== null && zerarIpi
+      ? totvsIpiItem === 0 || _cmpFloat(totvsIpiItem, xmlIpiItem)
       : bestXi !== null ? _cmpFloat(totvsIpiItem, xmlIpiItem) : false;
-    itemChk('IPI Item', totvsIpiItem.toFixed(2),
-      bestXi !== null ? xmlIpiItem.toFixed(2) : '—',
-      valbrutMatch ? true : ipiItemMatch);
+    itemChk('IPI Item', (zerarIpi ? 0 : xmlIpiItem).toFixed(2),
+      totvsIpiItem.toFixed(2),
+      valbrutMask ? true : ipiItemMatch);
+
+    // ── Campos que o Lince escreve e ninguém conferia ────────────────────
+    // Alíquotas/bases/impostos-a-mais por item. Contexto "zerar": a SF4 às
+    // vezes conserva base/aliq residuais (TES 421 grava picm em ~12% das
+    // notas) — aceita 0 OU o valor do XML; um terceiro valor diverge.
+    if (bestXi !== null) {
+      const xi = xmlItem as NfeXmlItem;
+      const campo = (field: string, xmlV: number, d1V: number, zerar: boolean) => {
+        const ok = zerar ? (d1V === 0 || _cmpFloat(d1V, xmlV)) : _cmpFloat(d1V, xmlV);
+        itemChk(field, (zerar ? 0 : xmlV).toFixed(2), d1V.toFixed(2),
+          valbrutMask ? true : ok);
+      };
+      campo('Aliq ICMS', xi.p_icms, _toFloat(totvsItem.d1_picm), zerarIcms);
+      campo('Base ICMS', xi.v_bc_icms, sum('d1_baseicm'), zerarIcms);
+      campo('Aliq IPI', xi.p_ipi, _toFloat(totvsItem.d1_ipi), zerarIpi);
+      campo('Base IPI', xi.v_bc_ipi, sum('d1_baseipi'), zerarIpi);
+      campo('ST Item', xi.v_icms_st, sum('d1_icmsret'), zerarSt);
+      campo('Base ST', xi.v_bc_icms_st, sum('d1_bricms'), zerarSt);
+      campo('Desconto', xi.v_desc, sum('d1_valdesc'), false);
+      campo('Frete', xi.v_frete, sum('d1_valfre'), false);
+      campo('Seguro', xi.v_seg, sum('d1_seguro'), false);
+      campo('Despesa', xi.v_outro, sum('d1_despesa'), false);
+    }
 
     // CFOP — informativo
     itemInfo('CFOP', _normStr(totvsItem.d1_cf),
@@ -311,6 +389,51 @@ export function compareNf(
     ];
     if (!m2) hasMismatch = true;
     itemChecks.push(list);
+  }
+
+  // ── Duplicatas (SE2 parcelas × XML cobr.dup) ─────────────────────────
+  // O Lince gera as parcelas no SE2 a partir do XML — qtd e valor têm que
+  // bater (hard); vencimento é informativo (cond. pagto pode mudar
+  // legitimamente) e natureza é conferida só em nível informativo.
+  const se2Parcelas = extras?.se2Parcelas || [];
+  const xmlDups = xmlData.dups || [];
+  if (se2Parcelas.length || xmlDups.length) {
+    const uniq = new Map<string, Se2Parcela>();
+    for (const p of se2Parcelas) {
+      const k = `${p.parcela}|${p.valor.toFixed(2)}|${p.vencto || ''}`;
+      if (!uniq.has(k)) uniq.set(k, p);
+    }
+    const parcelas = [...uniq.values()].sort(
+      (a, b) => a.parcela.localeCompare(b.parcela, 'pt-BR', { numeric: true }) || String(a.vencto).localeCompare(String(b.vencto))
+    );
+    const dups = [...xmlDups].sort((a, b) => String(a.d_venc).localeCompare(String(b.d_venc)));
+
+    if (dups.length) {
+      chk('Qtd. parcelas', String(dups.length), String(parcelas.length), dups.length === parcelas.length);
+      const n = Math.max(dups.length, parcelas.length);
+      for (let i = 0; i < n; i++) {
+        const xd = dups[i];
+        const sp = parcelas[i];
+        const label = `Parcela ${i + 1}`;
+        if (!sp) {
+          chk(`${label} Vlr.`, xd.v_dup.toFixed(2), '—', false);
+          continue;
+        }
+        if (!xd) {
+          chk(`${label} Vlr.`, '—', sp.valor.toFixed(2), false);
+          continue;
+        }
+        chk(`${label} Vlr.`, xd.v_dup.toFixed(2), sp.valor.toFixed(2), _cmpFloat(xd.v_dup, sp.valor, 0.02));
+        // Vencimento: warning-only — informativo mesmo quando diverge.
+        const dv = _normDate(xd.d_venc);
+        const sv = _normDate(sp.vencto || '');
+        headerChecks.push({ field: `${label} Vencimento`, expected: dv, actual: sv || '—', match: true });
+      }
+    } else {
+      info('Qtd. parcelas', '— (XML sem cobr)', String(parcelas.length));
+    }
+    const natDom = parcelas.length ? parcelas[0].natureza : '';
+    if (natDom) info('Natureza título', _normStr(totvsHeader.f1_naturez), _normStr(natDom));
   }
 
   const allChecks = [...headerChecks, ...itemChecks.flat()];

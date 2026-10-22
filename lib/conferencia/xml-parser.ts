@@ -34,6 +34,12 @@ export interface NfeXmlItem {
   p_ipi: number;
 }
 
+export interface NfeXmlDup {
+  n_dup: string;
+  d_venc: string;
+  v_dup: number;
+}
+
 export interface NfeXml {
   chave: string;
   numero: string;
@@ -47,6 +53,7 @@ export interface NfeXml {
   filial: string;
   total: Record<string, number>;
   items: NfeXmlItem[];
+  dups: NfeXmlDup[];
 }
 
 const CNPJ_FILIAL_EQS: Record<string, string> = {
@@ -186,6 +193,21 @@ export function parseNfeXml(xmlText: string): NfeXml | null {
     });
   }
 
+  // Duplicatas <cobr><dup> — conferidas contra as parcelas SE2.
+  const dups: NfeXmlDup[] = [];
+  const cobrBlk = tag(infNfe, 'cobr');
+  if (cobrBlk) {
+    const dupRe = /<dup>([\s\S]*?)<\/dup>/g;
+    let dm: RegExpExecArray | null;
+    while ((dm = dupRe.exec(cobrBlk)) !== null) {
+      dups.push({
+        n_dup: tag(dm[1], 'nDup'),
+        d_venc: tag(dm[1], 'dVenc'),
+        v_dup: numTag(dm[1], 'vDup'),
+      });
+    }
+  }
+
   return {
     chave,
     numero: tag(ide, 'nNF'),
@@ -199,5 +221,6 @@ export function parseNfeXml(xmlText: string): NfeXml | null {
     filial: CNPJ_FILIAL_EQS[destCnpj] || '',
     total,
     items,
+    dups,
   };
 }
