@@ -18,6 +18,24 @@ export interface ChangelogSeedEntry {
 // seq menor = mais novo primeiro na listagem.
 export const CHANGELOG_SEED: ChangelogSeedEntry[] = [
   {
+    version: '26.5.0',
+    seq: 90,
+    date: '2026-10-22',
+    title: 'Cobertura fiscal completa + borderôs inteligentes',
+    items: [
+      { tag: 'feat', text: 'Conferência de mercadoria cobre alíquotas e bases de ICMS/IPI/ST, desconto, frete, seguro e despesas por item — paridade com o que o Lince grava no Protheus' },
+      { tag: 'feat', text: 'Duplicatas conferidas: quantidade, valor e vencimento das parcelas (SE2 × XML)' },
+      { tag: 'feat', text: 'Serviço: revalidação lê todos os anexos do processo; nota sem texto extraível no PDF é validada pelos metadados do processo, com evidência registrada' },
+      { tag: 'feat', text: 'Borderô detecta título via fatura/boletão e a consulta pagina completa — notas em borderô que passavam batido agora aparecem' },
+      { tag: 'feat', text: 'Página Borderôs ganha cards de resumo (aguardando remoção, já pagas, total, resolvidas) e a fila mostra só notas-problema' },
+      { tag: 'feat', text: 'Notas em reconferência automática saíram da fila de pendentes — novo chip "Reconferindo"' },
+      { tag: 'feat', text: 'Extensão Aery 1.6.0 — bot "InnCash: selecionar empresas" marca empresas por prefixo no multi-select' },
+      { tag: 'fix', text: 'ICMS do item não acusa mais divergência falsa — as TES da EQS nunca gravam o valor, só base e alíquota' },
+      { tag: 'fix', text: 'Nota lida no meio do lançamento (0 itens no TOTVS) deixa de passar como "conferida"' },
+      { tag: 'fix', text: 'Fornecedor gravado como nome sem CNPJ agora resolve o cadastro (SA2) e entra na verificação de borderô' },
+    ],
+  },
+  {
     version: '26.4.0',
     seq: 100,
     date: '2026-08-19',
