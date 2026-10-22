@@ -137,8 +137,8 @@ async function upsertNota(runId: number, nota: {
         await sql`
           UPDATE fiscal_notas SET
             review_status = CASE
-              WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
-              WHEN ${stale.review_status ?? null} IN ('confirmado_ok', 'confirmado_erro') THEN ${stale.review_status ?? null}
+              WHEN review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN review_status
+              WHEN ${stale.review_status ?? null} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN ${stale.review_status ?? null}
               ELSE review_status END,
             review_nota = COALESCE(review_nota, ${stale.review_nota ?? null}),
             reviewed_by = COALESCE(reviewed_by, ${stale.reviewed_by ?? null}),
@@ -161,7 +161,7 @@ async function upsertNota(runId: number, nota: {
           checks = COALESCE(${nota.checks ? JSON.stringify(nota.checks) : null}::jsonb, checks),
           extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra) - 'reconf',
           review_status = CASE
-            WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN review_status
             ELSE ${reviewStatus}
           END,
           conferencia_tentativas = ${nota.tentativas},
@@ -196,7 +196,7 @@ async function upsertNota(runId: number, nota: {
       checks = COALESCE(EXCLUDED.checks, fiscal_notas.checks),
       extra = COALESCE(EXCLUDED.extra, fiscal_notas.extra) - 'reconf',
       review_status = CASE
-        WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro')
+        WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
           THEN fiscal_notas.review_status
         ELSE EXCLUDED.review_status
       END,
@@ -386,8 +386,8 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
       ), upd AS (
         UPDATE fiscal_notas k SET
           review_status = CASE
-            WHEN k.review_status IN ('confirmado_ok','confirmado_erro') THEN k.review_status
-            WHEN d.review_status IN ('confirmado_ok','confirmado_erro') THEN d.review_status
+            WHEN k.review_status IN ('confirmado_ok','confirmado_erro','cancelado','corrigida') THEN k.review_status
+            WHEN d.review_status IN ('confirmado_ok','confirmado_erro','cancelado','corrigida') THEN d.review_status
             WHEN k.review_status IN ('pendente','falha_tecnica') THEN d.review_status
             ELSE k.review_status END,
           review_nota = COALESCE(k.review_nota, d.review_nota),

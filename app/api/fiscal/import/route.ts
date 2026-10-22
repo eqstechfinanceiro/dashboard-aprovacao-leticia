@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
           checks = COALESCE(${n.checks ? JSON.stringify(n.checks) : null}::jsonb, checks),
           extra = COALESCE(${n.extra ? JSON.stringify(n.extra) : null}::jsonb, extra),
           review_status = CASE
-            WHEN review_status IN ('confirmado_ok', 'confirmado_erro')
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
               THEN review_status
             ELSE ${reviewStatus}
           END,
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         -- Decisão humana nunca é sobrescrita; auto_ok só desce pra pendente se
         -- o novo resultado automático deixou de ser match.
         review_status = CASE
-          WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro')
+          WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
             THEN fiscal_notas.review_status
           ELSE ${reviewStatus}
         END,
@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
     const row = res[0];
     if (row.was_inserted) inserted++;
     else updated++;
-    if (row.review_status === 'confirmado_ok' || row.review_status === 'confirmado_erro') preserved++;
+    if (['confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida'].includes(row.review_status)) preserved++;
 
     // Documento (XML/PDF) anexado pelo runner — grava no disco e linka na nota.
     if (n.doc_base64 && n.doc_nome) {
