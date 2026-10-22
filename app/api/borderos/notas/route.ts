@@ -14,7 +14,9 @@ const BANCOS: Record<string, string> = {
 // Fila do contas a pagar: notas com erro/cancelamento cujo título está em
 // borderô aguardando remoção. Sem o batch do worker nada entra aqui — a
 // listagem é 100% leitura do cache fiscal_bordero_status.
-//   fila     → em_bordero AND sem confirmação manual AND sem remoção detectada
+//   fila     → (em_bordero OR pago-sem-borderô) AND sem confirmação manual
+//              AND sem remoção detectada — paga direto também é acionável
+//              (correção exige estorno + devolução pro entrada)
 //   ?todas=1 → inclui removidas/confirmadas (histórico da fila)
 export async function GET(request: NextRequest) {
   if (!sql) return NextResponse.json({ error: 'Banco indisponível' }, { status: 503 });
@@ -31,20 +33,20 @@ export async function GET(request: NextRequest) {
            bs.remocao_confirmada_at, bs.remocao_confirmada_by, bs.removida_detectada_at
     FROM fiscal_bordero_status bs
     JOIN fiscal_notas n ON n.id = bs.nota_id
-    WHERE (${todas} OR (bs.em_bordero AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL))
+    WHERE (${todas} OR ((bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL))
       AND (${q} = '' OR lower(n.doc) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.fornecedor, '')) LIKE ${'%' + q + '%'}
            OR lower(COALESCE(n.chave_acesso, '')) LIKE ${'%' + q + '%'})
     ORDER BY
-      CASE WHEN bs.em_bordero AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL THEN 0 ELSE 1 END,
+      CASE WHEN (bs.em_bordero OR bs.pago) AND bs.remocao_confirmada_at IS NULL AND bs.removida_detectada_at IS NULL THEN 0 ELSE 1 END,
       bs.pago ASC, bs.checked_at DESC
     LIMIT 500
   `;
 
   const resumo = await sql`
     SELECT
-      COUNT(*) FILTER (WHERE em_bordero AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS na_fila,
-      COUNT(*) FILTER (WHERE em_bordero AND pago AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS pagas_na_fila,
+      COUNT(*) FILTER (WHERE (em_bordero OR pago) AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS na_fila,
+      COUNT(*) FILTER (WHERE pago AND remocao_confirmada_at IS NULL AND removida_detectada_at IS NULL)::int AS pagas_na_fila,
       MAX(checked_at) AS ultima_verificacao
     FROM fiscal_bordero_status
   `;

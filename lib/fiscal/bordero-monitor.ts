@@ -18,7 +18,7 @@
  */
 import { sql } from '../db/neon';
 import { ensureFiscalTables } from './fiscal-db';
-import { fetchBorderoStatusBatch, isFornecCodigo, type BorderoNotaRef, type BorderoInfo } from '../conferencia/totvs';
+import { fetchBorderoStatusBatch, isFornecCodigo, sa2ByNome, type BorderoNotaRef, type BorderoInfo } from '../conferencia/totvs';
 import { genericQuery, EMPRESAS } from '../impacto/totvs';
 import { ensureAuditTable } from '../db/audit';
 import { upsertNotification, resolveByDedup } from '../sync/notifications';
@@ -81,6 +81,55 @@ async function resolveFornecedoresPorCnpj(
   return out;
 }
 
+// SA2 por NOME — pra nota sem CNPJ cujo `fornecedor` guarda o nome (importação
+// avulsa). Dedup por nome (várias notas do mesmo fornecedor = 1 query/tenant);
+// só resolve quando o match é inequívoco no tenant alvo da nota. Backfill do
+// código no extra e do CNPJ real (A2_CGC) na coluna — corridas futuras
+// resolvem por CNPJ direto.
+async function resolveFornecedoresPorNome(
+  notas: { id: number; fornecedor: any; extra: any }[]
+): Promise<Map<number, { cod: string; loja: string; empresa: string }>> {
+  const out = new Map<number, { cod: string; loja: string; empresa: string }>();
+  if (!sql || !notas.length) return out;
+  const nomes = [...new Set(notas.map((n) => trim(n.fornecedor)).filter((v) => v && !isFornecCodigo(v)))];
+  const hitsCache = new Map<string, { cod: string; loja: string; empresa: string; cgc: string }[]>();
+  for (const nome of nomes) {
+    const hits: { cod: string; loja: string; empresa: string; cgc: string }[] = [];
+    for (const [emp, tenantId] of Object.entries(EMPRESAS)) {
+      for (const h of await sa2ByNome(tenantId, nome)) {
+        hits.push({ cod: h.cod, loja: h.loja, empresa: emp, cgc: h.cgc });
+      }
+    }
+    hitsCache.set(nome, hits);
+  }
+  for (const n of notas) {
+    const empHint = trim(n.extra?.empresa).toUpperCase();
+    const hits = (hitsCache.get(trim(n.fornecedor)) || [])
+      .filter((h) => !empHint || h.empresa === empHint);
+    const distintos = [...new Map(hits.map((h) => [`${h.cod}|${h.loja}`, h])).values()];
+    if (distintos.length !== 1) continue; // sem match ou ambíguo — não arrisca
+    const f = distintos[0];
+    // Empresa: só fixa no extra quando o fornecedor existe num único tenant
+    // (fixar tenant errado estreitaria as queries seguintes).
+    const empUnivoca = new Set(hits.map((h) => h.empresa)).size === 1;
+    const empresa = empHint || (empUnivoca ? f.empresa : '');
+    out.set(n.id, { cod: f.cod, loja: f.loja, empresa });
+    try {
+      const extraMerge: Record<string, string> = {
+        fornecedor_cod: f.cod,
+        fornecedor_loja: f.loja,
+        loja: lojaNota(n) || f.loja,
+      };
+      if (empresa) extraMerge.empresa = empresa;
+      await sql`UPDATE fiscal_notas SET
+        extra = COALESCE(extra,'{}'::jsonb) || ${JSON.stringify(extraMerge)}::jsonb,
+        cnpj = CASE WHEN COALESCE(cnpj,'') = '' AND ${f.cgc} <> '' THEN ${f.cgc} ELSE cnpj END
+      WHERE id = ${n.id}`;
+    } catch {}
+  }
+  return out;
+}
+
 /** Usuários ativos com um módulo — destino das notificações in-app. */
 export async function userIdsWithModule(module: string): Promise<number[]> {
   if (!sql) return [];
@@ -111,7 +160,7 @@ export async function syncBorderoStatus(opts: { limit?: number } = {}): Promise<
   const notas = await sql`
     SELECT n.id, n.doc, n.serie, n.fornecedor, n.cnpj, n.tipo, n.chave_acesso, n.extra, n.review_status,
            bs.em_bordero AS prev_em_bordero, bs.pago AS prev_pago,
-           bs.remocao_confirmada_at, bs.removida_detectada_at
+           bs.remocao_confirmada_at, bs.remocao_confirmada_by, bs.removida_detectada_at
     FROM fiscal_notas n
     LEFT JOIN fiscal_bordero_status bs ON bs.nota_id = n.id
     WHERE n.review_status IN ('pendente','falha_tecnica','confirmado_erro','cancelado')
@@ -122,9 +171,16 @@ export async function syncBorderoStatus(opts: { limit?: number } = {}): Promise<
   if (!alvo.length) return out;
 
   // Fornecedor gravado como nome (serviço ou importação avulsa) — resolve o
-  // código SA2 por CNPJ antes do batch, senão o match fino descarta a linha.
-  const semCodigo = alvo.filter((n: any) => !fornecedorCodigoNota(n) && /^\d{14}$/.test(trim(n.cnpj)));
-  const resolvidos = await resolveFornecedoresPorCnpj(semCodigo);
+  // código SA2 antes do batch, senão o match fino descarta a linha. Por CNPJ
+  // quando há; por nome (SA2.A2_NOME) nas notas sem CNPJ.
+  const semCodigo = alvo.filter((n: any) => !fornecedorCodigoNota(n));
+  const resolvidos = await resolveFornecedoresPorCnpj(
+    semCodigo.filter((n: any) => /^\d{14}$/.test(trim(n.cnpj)))
+  );
+  const resolvidosNome = await resolveFornecedoresPorNome(
+    semCodigo.filter((n: any) => !resolvidos.has(n.id))
+  );
+  for (const [id, r] of resolvidosNome) resolvidos.set(id, r);
 
   // Primeiro run = baseline: popula o cache sem disparar notificações
   // (tudo que já está em borderô "entra" de uma vez e inundaria o sino).
@@ -143,7 +199,7 @@ export async function syncBorderoStatus(opts: { limit?: number } = {}): Promise<
     };
   });
 
-  const { porNota, errors } = await fetchBorderoStatusBatch(refs);
+  const { porNota, baixaDireta, errors } = await fetchBorderoStatusBatch(refs);
   out.errors.push(...errors);
   out.checked = alvo.length;
 
@@ -154,7 +210,9 @@ export async function syncBorderoStatus(opts: { limit?: number } = {}): Promise<
   for (const n of alvo as any[]) {
     const borderos: BorderoInfo[] = porNota.get(n.id) || [];
     const emBordero = borderos.length > 0;
-    const pago = borderos.some((b) => !!b.baixa);
+    // Pago = baixa numa linha de borderô OU baixa direta SE2 (pagou sem
+    // borderô — segue exigindo estorno pra corrigir).
+    const pago = borderos.some((b) => !!b.baixa) || baixaDireta.has(n.id);
     const prevEm = !!n.prev_em_bordero;
     const prevPago = !!n.prev_pago;
     if (emBordero) out.em_bordero++;
@@ -162,20 +220,37 @@ export async function syncBorderoStatus(opts: { limit?: number } = {}): Promise<
     const removidaAgora = prevEm && !emBordero && !n.removida_detectada_at;
     const pagaAgora = pago && !prevPago;
     const entrouAgora = emBordero && !prevEm;
+    // Re-entrou em borderô → limpa o marcador de removida pra ela voltar pra
+    // fila do AP (alguém re-incluiu o título depois da remoção).
+    const removidaAt = removidaAgora ? new Date().toISOString()
+      : emBordero ? null : n.removida_detectada_at;
 
     await sql`
       INSERT INTO fiscal_bordero_status
         (nota_id, em_bordero, pago, borderos, checked_at, check_error, removida_detectada_at)
       VALUES (${n.id}, ${emBordero}, ${pago}, ${JSON.stringify(borderos)}::jsonb, NOW(), NULL,
-              ${removidaAgora ? new Date().toISOString() : n.removida_detectada_at})
+              ${removidaAt})
       ON CONFLICT (nota_id) DO UPDATE SET
         em_bordero = EXCLUDED.em_bordero,
         pago = EXCLUDED.pago,
         borderos = EXCLUDED.borderos,
         checked_at = NOW(),
         check_error = NULL,
-        removida_detectada_at = EXCLUDED.removida_detectada_at
+        removida_detectada_at = EXCLUDED.removida_detectada_at,
+        -- re-entrou em borderô: a confirmação de remoção ficou obsoleta —
+        -- limpa pra a nota voltar pra fila do AP
+        remocao_confirmada_at = CASE WHEN EXCLUDED.em_bordero THEN NULL
+                                     ELSE fiscal_bordero_status.remocao_confirmada_at END,
+        remocao_confirmada_by = CASE WHEN EXCLUDED.em_bordero THEN NULL
+                                     ELSE fiscal_bordero_status.remocao_confirmada_by END
     `;
+
+    if (emBordero && n.remocao_confirmada_at) {
+      await auditSys('fiscal.bordero_reentrou', n.id, {
+        doc: n.doc, serie: n.serie,
+        confirmada_por: n.remocao_confirmada_by, confirmada_em: n.remocao_confirmada_at,
+      });
+    }
 
     const label = `NF ${n.doc}${n.serie ? '/' + n.serie : ''}`;
 

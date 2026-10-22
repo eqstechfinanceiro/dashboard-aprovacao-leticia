@@ -1014,6 +1014,14 @@ export default function FiscalPage() {
                               {n.bordero_pago ? 'Paga em borderô' : 'Em borderô'}
                             </span>
                           )}
+                          {!n.em_bordero && n.bordero_pago && (
+                            <span
+                              className="rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700"
+                              title="Título baixado sem passar por borderô — correção exige estorno"
+                            >
+                              Paga
+                            </span>
+                          )}
                           {n.review_status === 'cancelado' && n.monitor_status && MONITOR_LABEL[n.monitor_status] && (
                             <span
                               className={cn('rounded-full px-2 py-0.5 text-xs font-medium', MONITOR_LABEL[n.monitor_status].cls)}
@@ -1146,7 +1154,9 @@ export default function FiscalPage() {
                           if (!b.em_bordero) {
                             return (
                               <p className="text-[11px] text-muted-foreground">
-                                Pagamento: fora de borderô
+                                {b.pago
+                                  ? 'Pagamento: título baixado sem borderô — correção exige estorno'
+                                  : 'Pagamento: fora de borderô'}
                                 {(b as any).checked_at ? ` (verificado ${new Date((b as any).checked_at).toLocaleString('pt-BR')})` : ''}
                                 {' · '}{recheck}
                               </p>
@@ -1172,6 +1182,7 @@ export default function FiscalPage() {
                                   {x.conta ? ` cc ${x.conta}` : ''}
                                   {x.baixa ? ` — baixada em ${new Date(x.baixa + 'T12:00:00').toLocaleDateString('pt-BR')}` : ''}
                                   {x.ocorrencia ? ` · ocorr. ${x.ocorrencia}` : ''}
+                                  {x.via_fatura ? ` · via fatura ${x.via_fatura}` : ''}
                                 </p>
                               ))}
                               {!pago && (

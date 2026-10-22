@@ -9,6 +9,8 @@ exports.checkTituloBordero = checkTituloBordero;
 exports.fetchBorderoStatusBatch = fetchBorderoStatusBatch;
 exports.isFornecCodigo = isFornecCodigo;
 exports.sa2ByCnpj = sa2ByCnpj;
+exports.normFornecNome = normFornecNome;
+exports.sa2ByNome = sa2ByNome;
 exports.nfFingerprint = nfFingerprint;
 exports.fetchNfByIdentidade = fetchNfByIdentidade;
 /**
@@ -213,9 +215,13 @@ async function fetchSdsXmlByChave(chave) {
  * após o pagamento, então serve tanto pra "está em borderô" quanto "foi paga
  * via borderô N em data D". Filtro só por doc+série no where (campos char
  * têm padding variável) — fornecedor/loja filtrados no cliente.
+ *
+ * Também segue o hop de boletão: SE2.E2_FATURA aponta pra FT que agrupou a
+ * NF — o borderô está no título FT, não na NF.
  */
 async function checkTituloBordero(doc, serie, fornec, loja, empresa) {
     const out = [];
+    let baixaDireta = null;
     const doc9 = String(doc || '').trim().padStart(9, '0');
     const serieT = String(serie || '').trim();
     const emps = empresa && totvs_1.EMPRESAS[empresa] ? [empresa] : Object.keys(totvs_1.EMPRESAS);
@@ -224,30 +230,43 @@ async function checkTituloBordero(doc, serie, fornec, loja, empresa) {
         if (!tenantId)
             continue;
         try {
-            const d = await (0, totvs_1.genericQuery)(tenantId, {
+            const d = await queryAllPages(tenantId, {
                 tables: 'SEA',
                 fields: 'EA_NUMBOR,EA_DATABOR,EA_PORTADO,EA_AGEDEP,EA_NUMCON,EA_SITUACA,EA_OCORR,EA_FORNECE,EA_LOJA,EA_TIPO,EA_NUM,EA_PARCELA',
                 where: `SEA.D_E_L_E_T_=' ' AND (EA_NUM='${doc9}' OR EA_NUM='${doc}') AND EA_PREFIXO='${serieT}'`,
-                page: '1',
-                pageSize: '50',
-            });
+                pageSize: '200',
+            }, 5);
             const rows = (d.items || []).filter((it) => (!fornec || trim(it.ea_fornece) === fornec) &&
                 (!loja || trim(it.ea_loja) === loja));
-            if (!rows.length)
-                continue;
-            // Baixa no SE2 do(s) título(s) encontrados — borderô pode já ter pago.
-            const b = await (0, totvs_1.genericQuery)(tenantId, {
+            // Baixa no SE2 — mesmo sem linha SEA a NF pode ter sido paga via
+            // fatura agrupada (E2_FATURA) ou direto com E2_NUMBOR.
+            const b = await queryAllPages(tenantId, {
                 tables: 'SE2',
-                fields: 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ',
+                fields: 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ,E2_FATURA,E2_NUMBOR,E2_FORNECE,E2_LOJA,E2_PORTADO',
                 where: `SE2.D_E_L_E_T_=' ' AND (E2_NUM='${doc9}' OR E2_NUM='${doc}') AND E2_PREFIXO='${serieT}'`,
-                page: '1',
-                pageSize: '50',
-            });
+                pageSize: '200',
+            }, 5);
+            const se2Rows = (b.items || []).filter((it) => (!fornec || trim(it.e2_fornece) === fornec) &&
+                (!loja || trim(it.e2_loja) === loja));
             const baixas = new Map();
-            for (const it of b.items || []) {
+            const faturas = new Set();
+            for (const it of se2Rows) {
                 const bx = trim(it.e2_baixa);
                 if (bx)
                     baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
+                const nb = trim(it.e2_numbor);
+                if (nb) {
+                    // Título pago via borderô próprio mesmo sem linha SEA ativa.
+                    out.push({
+                        empresa: emp, numbor: nb,
+                        databor: bx ? bx.slice(0, 10) : null,
+                        banco: trim(it.e2_portado), agencia: '', conta: '',
+                        situacao: '', ocorrencia: '', baixa: bx || null,
+                    });
+                }
+                const fat = trim(it.e2_fatura);
+                if (fat && fat !== 'NOTFAT')
+                    faturas.add(fat);
             }
             for (const it of rows) {
                 out.push({
@@ -262,18 +281,73 @@ async function checkTituloBordero(doc, serie, fornec, loja, empresa) {
                     baixa: baixas.get(`${trim(it.ea_num)}|${trim(it.ea_parcela)}`) || null,
                 });
             }
+            // Hop de boletão: o borderô está no título FT, não na NF.
+            if (faturas.size) {
+                const fList = [...faturas].map((f) => `'${f}'`).join(',');
+                const fd = await queryAllPages(tenantId, {
+                    tables: 'SEA', fields: SEA_FIELDS,
+                    where: `SEA.D_E_L_E_T_=' ' AND EA_NUM IN (${fList})`,
+                    pageSize: '200',
+                }, 5).catch(() => null);
+                for (const it of fd?.items || []) {
+                    if (fornec && trim(it.ea_fornece) !== fornec)
+                        continue;
+                    if (loja && trim(it.ea_loja) !== loja)
+                        continue;
+                    if (!faturas.has(trim(it.ea_num)))
+                        continue;
+                    out.push({
+                        empresa: emp,
+                        numbor: trim(it.ea_numbor),
+                        databor: (() => { const s = trim(it.ea_databor); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null; })(),
+                        banco: trim(it.ea_portado),
+                        agencia: trim(it.ea_agedep),
+                        conta: trim(it.ea_numcon),
+                        situacao: trim(it.ea_situaca),
+                        ocorrencia: trim(it.ea_ocorr),
+                        baixa: se2Rows.map((x) => trim(x.e2_baixa)).find(Boolean) || null,
+                        via_fatura: trim(it.ea_num),
+                    });
+                }
+            }
+            // Baixa direta SE2 sem borderô nenhum (pagou fora de borderô).
+            if (!out.length && !baixaDireta) {
+                const bx = se2Rows.map((x) => trim(x.e2_baixa)).find(Boolean);
+                if (bx)
+                    baixaDireta = bx.slice(0, 10);
+            }
         }
         catch { }
     }
-    return out;
+    return { borderos: out, baixaDireta };
 }
 const SEA_FIELDS = 'EA_NUMBOR,EA_DATABOR,EA_PORTADO,EA_AGEDEP,EA_NUMCON,EA_SITUACA,EA_OCORR,EA_FORNECE,EA_LOJA,EA_TIPO,EA_NUM,EA_PARCELA,EA_PREFIXO';
-const SE2_FIELDS = 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ,E2_FORNECE,E2_LOJA,E2_PREFIXO';
-const BATCH_CHUNK = 120; // tamanho do IN(...) — URL da genericQuery tem limite
+const SE2_FIELDS = 'E2_NUM,E2_PARCELA,E2_BAIXA,E2_VALLIQ,E2_FORNECE,E2_LOJA,E2_PREFIXO,E2_NUMBOR,E2_FATURA,E2_PORTADO';
+// SE2 guarda dezenas de linhas por doc (juros, renegociações, faturas) —
+// 40 docs/chunk mantém o volume sob controle pro maxPages do queryAllPages.
+const BATCH_CHUNK = 40; // tamanho do IN(...) — URL da genericQuery tem limite
 function docVariants(doc) {
     const d = trim(doc);
     const d9 = d.padStart(9, '0');
     return d9 === d ? [d9] : [d9, d];
+}
+// genericQuery paginada — um chunk de IN(...) pode estourar o pageSize (SE2
+// tem várias linhas por doc: juros, renegociações, faturas). Sem isso o batch
+// perdia silenciosamente docs que caíam na página 2+ (bug da NF 31231).
+// Estourar o maxPages sem esgotar vira erro — truncamento nunca é silencioso.
+async function queryAllPages(tenantId, params, maxPages = 30) {
+    const items = [];
+    for (let page = 1; page <= maxPages; page++) {
+        const d = await (0, totvs_1.genericQuery)(tenantId, { ...params, page: String(page) });
+        if (d.error)
+            return { items, error: d.error };
+        items.push(...(d.items || []));
+        if (!d.hasNext)
+            return { items };
+        if (page === maxPages)
+            return { items, error: 'paginação truncada (maxPages)' };
+    }
+    return { items };
 }
 function rowMatchesNota(it, n, numField) {
     const num = trim(it[numField]);
@@ -291,9 +365,10 @@ function rowMatchesNota(it, n, numField) {
 }
 async function fetchBorderoStatusBatch(notas) {
     const porNota = new Map();
+    const baixaDireta = new Map();
     const errors = [];
     if (!notas.length)
-        return { porNota, errors };
+        return { porNota, baixaDireta, errors };
     // Agrupa por tenant alvo — nota sem empresa definida consulta todos.
     const allEmps = Object.keys(totvs_1.EMPRESAS);
     const porEmpresa = new Map();
@@ -318,10 +393,10 @@ async function fetchBorderoStatusBatch(notas) {
                 ? ` AND EA_PREFIXO IN (${[...serieSet].map((s) => `'${s}'`).join(',')})`
                 : '';
             try {
-                const d = await (0, totvs_1.genericQuery)(tenantId, {
+                const d = await queryAllPages(tenantId, {
                     tables: 'SEA', fields: SEA_FIELDS,
                     where: `SEA.D_E_L_E_T_=' ' AND EA_NUM IN (${inList})${serieFilter}`,
-                    page: '1', pageSize: '1000',
+                    pageSize: '1000',
                 });
                 if (d.error) {
                     errors.push(`${emp} SEA: ${d.error}`);
@@ -352,44 +427,138 @@ async function fetchBorderoStatusBatch(notas) {
                 errors.push(`${emp} SEA: ${e?.message || e}`);
             }
         }
-        // Baixas SE2 do mesmo conjunto de docs — uma passada por chunk.
-        if (porNota.size) {
-            for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
-                const chunk = docNums.slice(i, i + BATCH_CHUNK);
-                const inList = chunk.map((d) => `'${d}'`).join(',');
-                try {
-                    const b = await (0, totvs_1.genericQuery)(tenantId, {
-                        tables: 'SE2', fields: SE2_FIELDS,
-                        where: `SE2.D_E_L_E_T_=' ' AND E2_NUM IN (${inList})`,
-                        page: '1', pageSize: '1000',
+        // Baixas SE2 do mesmo conjunto de docs — sempre roda: é onde moram a
+        // baixa própria da NF, o E2_NUMBOR direto e o E2_FATURA (boletão).
+        const se2PorNota = new Map();
+        for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
+            const chunk = docNums.slice(i, i + BATCH_CHUNK);
+            const inList = chunk.map((d) => `'${d}'`).join(',');
+            try {
+                const b = await queryAllPages(tenantId, {
+                    tables: 'SE2', fields: SE2_FIELDS,
+                    where: `SE2.D_E_L_E_T_=' ' AND E2_NUM IN (${inList})`,
+                    pageSize: '1000',
+                });
+                if (b.error) {
+                    errors.push(`${emp} SE2: ${b.error}`);
+                    continue;
+                }
+                for (const it of b.items || []) {
+                    for (const n of grupo) {
+                        if (!rowMatchesNota(it, n, 'e2_num'))
+                            continue;
+                        const arr2 = se2PorNota.get(n.id) || [];
+                        arr2.push(it);
+                        se2PorNota.set(n.id, arr2);
+                    }
+                }
+            }
+            catch (e) {
+                errors.push(`${emp} SE2: ${e?.message || e}`);
+            }
+        }
+        // Aplica baixa nas linhas SEA diretas + colhe numbor/fatura da própria NF.
+        const faturasPorNota = new Map();
+        const faturaSet = new Set();
+        for (const [notaId, se2Rows] of se2PorNota) {
+            const arr = porNota.get(notaId) || [];
+            const baixas = new Map();
+            let baixaPropria = null;
+            for (const it of se2Rows) {
+                const bx = trim(it.e2_baixa);
+                if (bx) {
+                    baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
+                    if (!baixaPropria)
+                        baixaPropria = bx;
+                }
+            }
+            for (const info of arr) {
+                if (info.empresa !== emp)
+                    continue;
+                info.baixa = baixas.get(`${info._num}|${info._parcela}`) || info.baixa;
+            }
+            for (const it of se2Rows) {
+                const bx = trim(it.e2_baixa);
+                const nb = trim(it.e2_numbor);
+                if (nb) {
+                    // Baixada por borderô próprio mesmo sem linha SEA.
+                    arr.push({
+                        empresa: emp, numbor: nb,
+                        databor: bx ? bx.slice(0, 10) : null,
+                        banco: trim(it.e2_portado), agencia: '', conta: '',
+                        situacao: '', ocorrencia: '', baixa: bx || null,
                     });
-                    if (b.error) {
-                        errors.push(`${emp} SE2: ${b.error}`);
-                        continue;
-                    }
-                    const baixas = new Map();
-                    for (const it of b.items || []) {
-                        const bx = trim(it.e2_baixa);
-                        if (bx)
-                            baixas.set(`${trim(it.e2_num)}|${trim(it.e2_parcela)}`, bx);
-                    }
-                    for (const arr of porNota.values()) {
-                        for (const info of arr) {
-                            if (info.empresa !== emp)
-                                continue;
-                            info.baixa = baixas.get(`${info._num}|${info._parcela}`) || info.baixa;
-                            delete info._num;
-                            delete info._parcela;
-                        }
+                }
+                const fat = trim(it.e2_fatura);
+                if (fat && fat !== 'NOTFAT') {
+                    const s = faturasPorNota.get(notaId) || new Set();
+                    s.add(fat);
+                    faturasPorNota.set(notaId, s);
+                    faturaSet.add(fat);
+                }
+            }
+            if (arr.length)
+                porNota.set(notaId, arr);
+            // Paga direto (sem borderô e sem fatura) — informa o chamador pra marcar
+            // `pago` sem fingir linha de borderô.
+            if (baixaPropria && !arr.length)
+                baixaDireta.set(notaId, baixaPropria.slice(0, 10));
+        }
+        // Hop do boletão: a NF saiu num borderô via fatura FT — a linha SEA tem
+        // EA_NUM = número da FT.
+        if (faturaSet.size) {
+            const fList = [...faturaSet].map((f) => `'${f}'`).join(',');
+            try {
+                const fd = await queryAllPages(tenantId, {
+                    tables: 'SEA', fields: SEA_FIELDS,
+                    where: `SEA.D_E_L_E_T_=' ' AND EA_NUM IN (${fList})`,
+                    pageSize: '500',
+                });
+                if (fd.error) {
+                    errors.push(`${emp} SEA-FT: ${fd.error}`);
+                }
+                for (const it of fd.items || []) {
+                    const fnum = trim(it.ea_num);
+                    for (const [notaId, fats] of faturasPorNota) {
+                        if (!fats.has(fnum))
+                            continue;
+                        const n = grupo.find((g) => g.id === notaId);
+                        if (n.fornec && trim(it.ea_fornece) !== n.fornec)
+                            continue;
+                        if (n.loja && trim(it.ea_loja) !== n.loja)
+                            continue;
+                        const bx = (se2PorNota.get(notaId) || []).map((x) => trim(x.e2_baixa)).find(Boolean) || null;
+                        const arr = porNota.get(notaId) || [];
+                        arr.push({
+                            empresa: emp,
+                            numbor: trim(it.ea_numbor),
+                            databor: (() => { const s = trim(it.ea_databor); return /^\d{4}-\d{2}-\d{2}/.test(s) ? s.slice(0, 10) : null; })(),
+                            banco: trim(it.ea_portado),
+                            agencia: trim(it.ea_agedep),
+                            conta: trim(it.ea_numcon),
+                            situacao: trim(it.ea_situaca),
+                            ocorrencia: trim(it.ea_ocorr),
+                            baixa: bx,
+                            via_fatura: fnum,
+                        });
+                        porNota.set(notaId, arr);
+                        baixaDireta.delete(notaId);
                     }
                 }
-                catch (e) {
-                    errors.push(`${emp} SE2: ${e?.message || e}`);
-                }
+            }
+            catch (e) {
+                errors.push(`${emp} SEA-FT: ${e?.message || e}`);
             }
         }
     }
-    return { porNota, errors };
+    // limpa os campos internos de match
+    for (const arr of porNota.values()) {
+        for (const info of arr) {
+            delete info._num;
+            delete info._parcela;
+        }
+    }
+    return { porNota, baixaDireta, errors };
 }
 // Códigos SA2 são alfanum curtos sem espaço ('W93259','001234'). Nomes de
 // fornecedor não passam — usado pra decidir se vale filtrar F1_FORNECE.
@@ -410,6 +579,44 @@ async function sa2ByCnpj(tenantId, cnpj) {
     }
     catch {
         return null;
+    }
+}
+// Nome normalizado pra comparar `fiscal_notas.fornecedor` (vem do XML/PDF,
+// com acento e sufixo LTDA) com SA2.A2_NOME (truncado ~35 chars, sem acento).
+function normFornecNome(v) {
+    return trim(v).toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^A-Z0-9]/g, '');
+}
+// SA2 por nome — pra nota cujo `fornecedor` guarda o nome em vez do código e
+// não tem CNPJ (importação avulsa). LIKE com as 2 primeiras palavras
+// desacentuadas limita a query; o match exato-normalizado é client-side.
+async function sa2ByNome(tenantId, nome) {
+    const alvo = normFornecNome(nome);
+    if (alvo.length < 6)
+        return [];
+    const like = trim(nome)
+        .toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .split(/\s+/).filter(Boolean).slice(0, 2).join(' ')
+        .replace(/'/g, '');
+    if (like.length < 4)
+        return [];
+    try {
+        const d = await (0, totvs_1.genericQuery)(tenantId, {
+            tables: 'SA2', fields: 'A2_COD,A2_LOJA,A2_NOME,A2_CGC',
+            where: `UPPER(SA2.A2_NOME) LIKE '${like}%' AND SA2.D_E_L_E_T_=' '`,
+            page: '1', pageSize: '50',
+        });
+        return (d.items || [])
+            .filter((it) => {
+            const n = normFornecNome(it.a2_nome);
+            return n.length >= 6 && (alvo.startsWith(n) || n.startsWith(alvo));
+        })
+            .map((it) => ({
+            cod: trim(it.a2_cod), loja: trim(it.a2_loja),
+            nome: trim(it.a2_nome), cgc: trim(it.a2_cgc),
+        }));
+    }
+    catch {
+        return [];
     }
 }
 /**
@@ -447,9 +654,22 @@ async function fetchNfByIdentidade(ref) {
             if (!isFornecCodigo(fornec)) {
                 const cnpj = trim(ref.cnpj || '');
                 const f = /^\d{14}$/.test(cnpj) ? await sa2ByCnpj(tenantId, cnpj) : null;
-                fornec = f?.cod || '';
-                if (!loja && f?.loja)
-                    loja = f.loja;
+                if (f) {
+                    fornec = f.cod;
+                    if (!loja && f.loja)
+                        loja = f.loja;
+                }
+                else {
+                    // Sem CNPJ (importação avulsa) — resolve pelo nome via SA2.A2_NOME.
+                    // Só assume quando o match é inequívoco (um único cod+loja).
+                    const cand = await sa2ByNome(tenantId, fornec);
+                    const distintos = [...new Map(cand.map((c) => [`${c.cod}|${c.loja}`, c])).values()];
+                    if (distintos.length === 1) {
+                        fornec = distintos[0].cod;
+                        if (!loja)
+                            loja = distintos[0].loja;
+                    }
+                }
             }
             const hd = await (0, totvs_1.genericQuery)(tenantId, {
                 tables: 'SF1,SA2',

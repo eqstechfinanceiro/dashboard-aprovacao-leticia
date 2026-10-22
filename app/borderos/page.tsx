@@ -28,6 +28,7 @@ interface BorderoLinha {
   situacao: string;
   ocorrencia: string;
   baixa: string | null;
+  via_fatura?: string | null;
 }
 
 interface BorderoNota {
@@ -241,7 +242,9 @@ export default function BorderosPage() {
             <div className="space-y-2">
               {data.notas.map((n) => {
                 const isOpen = expanded.has(n.nota_id);
-                const resolvida = !n.em_bordero || !!n.remocao_confirmada_at || !!n.removida_detectada_at;
+                // Resolvida = remoção confirmada ou detectada. Paga sem
+                // borderô continua acionável (devolução pro entrada).
+                const resolvida = !!n.remocao_confirmada_at || !!n.removida_detectada_at || (!n.em_bordero && !n.pago);
                 return (
                   <div key={n.nota_id} className={cn('rounded-lg border', resolvida && 'opacity-70')}>
                     <button
@@ -309,6 +312,7 @@ export default function BorderosPage() {
                             {b.conta ? ` cc ${b.conta}` : ''}
                             {b.baixa ? ` — baixada em ${fmtData(b.baixa)}` : ''}
                             {b.ocorrencia ? ` · ocorr. ${b.ocorrencia}` : ''}
+                            {b.via_fatura ? ` · via fatura ${b.via_fatura}` : ''}
                           </div>
                         ))}
                         {!n.borderos.length && (
