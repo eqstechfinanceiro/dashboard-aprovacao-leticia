@@ -1,12 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/db/neon';
+import { PassThrough, Readable } from 'stream';
+import ExcelJS from 'exceljs';
+import { sql, getPool } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
 import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
-import * as XLSX from 'xlsx';
+import { exportLimiter, heavyBusy } from '@/lib/util/heavy';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
+
+// Página de leitura do extrato/despesas — o export inteiro é streamado
+// (ExcelJS WorkbookWriter) para a heap ficar limitada ao chunk, não ao
+// dataset completo (antes: dump integral + SheetJS = ~3× os dados na heap,
+// picos de ~2GB e OOM do processo — ver ecosystem.config.js).
+const CHUNK = 20000;
 
 function toNum(v: string | null | undefined): number {
   if (v === null || v === undefined) return 0;
@@ -67,6 +75,10 @@ export async function GET(request: NextRequest) {
   const scope = await getScopeForRequest(request);
   const inScope = (cpf: unknown) => scope!.cpfs.has(normalizeCpf(cpf) ?? '__none__');
 
+  // Limite de concorrência — segurado até o stream terminar (produtor libera).
+  const release = await exportLimiter.acquire();
+  if (!release) return heavyBusy();
+
   try {
     // 1. Load cadastro
     let cadastroRows = await sql`
@@ -106,6 +118,7 @@ export async function GET(request: NextRequest) {
     const STATUS_LABEL: Record<string, string> = {
       ok: 'CARREGADO', forced_ok: 'CARREGADO (FORÇADO)', failed: 'FALHOU',
       forced_failed: 'FALHOU (FORÇADO)', blocked: 'BLOQUEADO', skipped: 'JÁ CARREGADO',
+      estornado: 'ESTORNADO',
     };
     const cargaStatusOf = (cpf: string) => {
       const it = cargaStatusByCpf.get(cpf);
@@ -113,17 +126,8 @@ export async function GET(request: NextRequest) {
       return { label: STATUS_LABEL[it.status] ?? it.status, tx: it.tx ?? '' };
     };
 
-    // 3. Load extrato data (all transactions up to financial_cutoff + snapshots)
-    let extratoRows = await sql`
-      SELECT data, hora, codigo_transacao, numero_cartao, grupo, usuario, tipo,
-             descricao, valor::text, status, id_despesa, id_relatorio, tipo_despesa,
-             centro_custo, projeto, percentual_projeto, is_snapshot
-      FROM extrato_movimentacao
-      WHERE data <= ${dates.saldo_cartao_carga_date}
-      ORDER BY data ASC, hora ASC
-    `;
-
-    // 4. Load base prest (reports + expenses) — only Aprovado/Enviado for prestação calc
+    // 4. Load base prest (reports) — lista para a aba BASE PREST e para o
+    // cálculo da aba CARGA (quando não congelada).
     let reportRows = await sql`
       SELECT r.id, r.name, r.status, r.user_cpf, r.user_name, r.total_value::text,
              r.created_at, r.updated_at
@@ -133,23 +137,7 @@ export async function GET(request: NextRequest) {
       ORDER BY r.user_name ASC, r.id ASC
     `;
     if (scope) reportRows = (reportRows as any[]).filter(r => inScope(r.user_cpf)) as any;
-
-    // Get expenses for all reports
-    const reportIds = reportRows.map((r: any) => r.id);
-    let expenseRows: any[] = [];
-    if (reportIds.length > 0) {
-      // Batch in chunks of 1000 to avoid query param limits
-      for (let i = 0; i < reportIds.length; i += 1000) {
-        const chunk = reportIds.slice(i, i + 1000);
-        const rows = await sql`
-          SELECT e.id, e.report_id, e.value::text, e.date, e.description, e.status, e.raw_data
-          FROM prestacao_expenses e
-          WHERE e.report_id = ANY(${chunk})
-          ORDER BY e.report_id ASC, e.id ASC
-        `;
-        expenseRows = expenseRows.concat(rows as any[]);
-      }
-    }
+    const reportIds = (reportRows as any[]).map((r: any) => r.id);
 
     // 5. Build name→cpf map (prefer CPF with non-null situacao for duplicate names)
     const nomeToCpf = new Map<string, string>();
@@ -169,21 +157,15 @@ export async function GET(request: NextRequest) {
       }
     }
     const fuzzyCache = new Map<string, string>();
-
     // Escopo (gestor): EXTRATO/SALDO CARTAO mostram só as linhas que resolvem
     // para CPFs in-scope — mesma resolução usada no cálculo do CARGA.
-    if (scope) {
-      extratoRows = (extratoRows as any[]).filter(r => {
-        const cpf = resolveCpfByName(String(r.usuario || ''), nomeToCpf, fuzzyCache);
-        return cpf !== undefined && scope.cpfs.has(cpf);
-      }) as any;
-    }
+    const extratoInScope = (r: any) => {
+      if (!scope) return true;
+      const cpf = resolveCpfByName(String(r.usuario || ''), nomeToCpf, fuzzyCache);
+      return cpf !== undefined && scope.cpfs.has(cpf);
+    };
 
-    // ---- Build XLSX ----
-
-    const wb = XLSX.utils.book_new();
-
-    // Tab 1: CARGA (main summary)
+    // ---- Aba CARGA (montada em memória — ~mil linhas, barato) ----
     const cargaData: any[][] = [];
     cargaData.push([
       'CPF', 'Colaborador', 'Situação', 'Status Cartão', 'Regional', 'Centro de Custo',
@@ -239,7 +221,7 @@ export async function GET(request: NextRequest) {
         GROUP BY usuario_up
       `;
 
-      const validReportIds = reportRows
+      const validReportIds = (reportRows as any[])
         .filter((r: any) => !isFaturaOrCartao(r.name || ''))
         .map((r: any) => r.id);
 
@@ -339,7 +321,7 @@ export async function GET(request: NextRequest) {
         SELECT reembolso_multiplier::text FROM quinzena_config
         WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
       `;
-      const reembolsoMultiplier = configRows[0] ? parseFloat(configRows[0].reembolso_multiplier as string) : 0.5;
+      const reembolsoMultiplier = configRows[0] ? parseFloat(configRows[0].reembolso_multiplier as string) : 0;
 
       for (const snap of cadastroRows as any[]) {
         const manual = manualByCpf.get(snap.cpf);
@@ -377,110 +359,181 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const wsCarga = XLSX.utils.aoa_to_sheet(cargaData);
-    XLSX.utils.book_append_sheet(wb, wsCarga, 'CARGA');
+    // ---- Stream do workbook (ExcelJS WorkbookWriter → PassThrough → Response) ----
+    const pass = new PassThrough({ highWaterMark: 1024 * 1024 });
+    const wb = new ExcelJS.stream.xlsx.WorkbookWriter({ stream: pass });
+    const counters = { extrato: 0, despesas: 0 };
 
-    // Tab 2: EXTRATO (all transactions)
-    const extratoData: any[][] = [];
-    extratoData.push([
-      'Data', 'Hora', 'Código de Transação', 'Número do Cartão', 'Grupo', 'Usuário',
-      'Tipo', 'Descrição', 'Valor', 'Status', 'ID da Despesa', 'ID do Relatório',
-      'Tipo de Despesa', 'Centro de Custo', 'Projeto', 'Percentual de projeto', 'is_snapshot'
-    ]);
-    for (const r of extratoRows as any[]) {
-      extratoData.push([
-        r.data, r.hora, r.codigo_transacao, r.numero_cartao, r.grupo, r.usuario,
-        r.tipo, r.descricao, toNum(r.valor), r.status, r.id_despesa, r.id_relatorio,
-        r.tipo_despesa, r.centro_custo, r.projeto, r.percentual_projeto, r.is_snapshot,
-      ]);
-    }
-    const wsExtrato = XLSX.utils.aoa_to_sheet(extratoData);
-    XLSX.utils.book_append_sheet(wb, wsExtrato, 'EXTRATO');
+    const produce = async () => {
+      // Conexão dedicada + REPEATABLE READ + cursores: leitura em chunks com
+      // heap limitada E snapshot consistente (o sync-worker insere extrato
+      // concorrentemente — paginar fora de tx duplicaria/pularia linhas).
+      const client = await getPool()!.connect();
+      // Watchdog de consumidor morto: cliente desconectou mas o producer
+      // seguiria escrevendo num PassThrough sem leitor (ExcelJS ignora
+      // backpressure e request.signal nem sempre propaga o disconnect).
+      // Buffer > 8MB sem drenar = ninguém consumindo → aborta e libera o slot.
+      const DEAD_BYTES = 8 * 1024 * 1024;
+      const alive = () => {
+        if (pass.destroyed || request.signal.aborted) return false;
+        if (pass.writableLength > DEAD_BYTES) return false;
+        return true;
+      };
+      try {
+        await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
 
-    // Tab 3: BASE PREST (reports)
-    const prestData: any[][] = [];
-    prestData.push([
-      'Report ID', 'Nome', 'Status', 'User CPF', 'User Name', 'Total Value',
-      'Created At', 'Updated At',
-      'Is Fatura/Cartão',
-    ]);
-    for (const r of reportRows as any[]) {
-      prestData.push([
-        r.id, r.name, r.status, r.user_cpf, r.user_name, toNum(r.total_value),
-        r.created_at, r.updated_at,
-        isFaturaOrCartao(r.name || '') ? 'SIM' : 'NÃO',
-      ]);
-    }
-    const wsPrest = XLSX.utils.aoa_to_sheet(prestData);
-    XLSX.utils.book_append_sheet(wb, wsPrest, 'BASE PREST');
+        const wsCarga = wb.addWorksheet('CARGA');
+        for (const row of cargaData) wsCarga.addRow(row).commit();
+        wsCarga.commit();
 
-    // Tab 4: DESPESAS (expenses detail)
-    const expData: any[][] = [];
-    expData.push([
-      'Expense ID', 'Report ID', 'Value', 'Date', 'Description', 'Status',
-    ]);
-    for (const e of expenseRows) {
-      expData.push([
-        e.id, e.report_id, toNum(e.value),
-        e.date, e.description, e.status,
-      ]);
-    }
-    const wsExp = XLSX.utils.aoa_to_sheet(expData);
-    XLSX.utils.book_append_sheet(wb, wsExp, 'DESPESAS');
+        // EXTRATO — cursor, filtro de escopo por chunk
+        const wsExtrato = wb.addWorksheet('EXTRATO');
+        wsExtrato.addRow([
+          'Data', 'Hora', 'Código de Transação', 'Número do Cartão', 'Grupo', 'Usuário',
+          'Tipo', 'Descrição', 'Valor', 'Status', 'ID da Despesa', 'ID do Relatório',
+          'Tipo de Despesa', 'Centro de Custo', 'Projeto', 'Percentual de projeto', 'is_snapshot'
+        ]).commit();
+        await client.query(
+          `DECLARE cur_ext NO SCROLL CURSOR FOR
+            SELECT data, hora, codigo_transacao, numero_cartao, grupo, usuario, tipo,
+                   descricao, valor::text, status, id_despesa, id_relatorio, tipo_despesa,
+                   centro_custo, projeto, percentual_projeto, is_snapshot
+            FROM extrato_movimentacao
+            WHERE data <= $1
+            ORDER BY data ASC, hora ASC`,
+          [dates.saldo_cartao_carga_date],
+        );
+        for (;;) {
+          if (!alive()) throw new Error('export abortado: cliente desconectou');
+          const { rows } = await client.query(`FETCH ${CHUNK} FROM cur_ext`);
+          for (const r of rows as any[]) {
+            if (!extratoInScope(r)) continue;
+            wsExtrato.addRow([
+              r.data, r.hora, r.codigo_transacao, r.numero_cartao, r.grupo, r.usuario,
+              r.tipo, r.descricao, toNum(r.valor), r.status, r.id_despesa, r.id_relatorio,
+              r.tipo_despesa, r.centro_custo, r.projeto, r.percentual_projeto, r.is_snapshot,
+            ]).commit();
+            counters.extrato++;
+          }
+          if (rows.length < CHUNK) break;
+        }
+        wsExtrato.commit();
 
-    // Tab 5: SALDO CARTÃO (snapshots only)
-    const snapData: any[][] = [];
-    snapData.push(['Data', 'Usuário', 'Valor (Saldo)', 'Número do Cartão']);
-    for (const r of extratoRows as any[]) {
-      if (r.is_snapshot) {
-        snapData.push([r.data, r.usuario, toNum(r.valor), r.numero_cartao]);
+        // BASE PREST (reports)
+        const wsPrest = wb.addWorksheet('BASE PREST');
+        wsPrest.addRow([
+          'Report ID', 'Nome', 'Status', 'User CPF', 'User Name', 'Total Value',
+          'Created At', 'Updated At',
+          'Is Fatura/Cartão',
+        ]).commit();
+        for (const r of reportRows as any[]) {
+          wsPrest.addRow([
+            r.id, r.name, r.status, r.user_cpf, r.user_name, toNum(r.total_value),
+            r.created_at, r.updated_at,
+            isFaturaOrCartao(r.name || '') ? 'SIM' : 'NÃO',
+          ]).commit();
+        }
+        wsPrest.commit();
+
+        // DESPESAS — chunks de report_id (mesmo fatiamento de antes, sem reter tudo)
+        const wsExp = wb.addWorksheet('DESPESAS');
+        wsExp.addRow(['Expense ID', 'Report ID', 'Value', 'Date', 'Description', 'Status']).commit();
+        for (let i = 0; i < reportIds.length; i += 1000) {
+          const chunk = reportIds.slice(i, i + 1000);
+          const { rows } = await client.query(
+            `SELECT e.id, e.report_id, e.value::text, e.date, e.description, e.status
+             FROM prestacao_expenses e
+             WHERE e.report_id = ANY($1)
+             ORDER BY e.report_id ASC, e.id ASC`,
+            [chunk],
+          );
+          for (const e of rows as any[]) {
+            wsExp.addRow([e.id, e.report_id, toNum(e.value), e.date, e.description, e.status]).commit();
+            counters.despesas++;
+          }
+        }
+        wsExp.commit();
+
+        // SALDO CARTÃO — snapshots, cursor
+        const wsSnap = wb.addWorksheet('SALDO CARTAO');
+        wsSnap.addRow(['Data', 'Usuário', 'Valor (Saldo)', 'Número do Cartão']).commit();
+        await client.query(
+          `DECLARE cur_snap NO SCROLL CURSOR FOR
+            SELECT data, usuario, valor::text, numero_cartao
+            FROM extrato_movimentacao
+            WHERE is_snapshot = TRUE
+              AND data <= $1
+            ORDER BY data ASC`,
+          [dates.saldo_cartao_carga_date],
+        );
+        for (;;) {
+          if (!alive()) throw new Error('export abortado: cliente desconectou');
+          const { rows } = await client.query(`FETCH ${CHUNK} FROM cur_snap`);
+          for (const r of rows as any[]) {
+            if (!extratoInScope(r)) continue;
+            wsSnap.addRow([r.data, r.usuario, toNum(r.valor), r.numero_cartao]).commit();
+          }
+          if (rows.length < CHUNK) break;
+        }
+        wsSnap.commit();
+
+        // CADASTRO
+        const wsCad = wb.addWorksheet('CADASTRO');
+        wsCad.addRow(['CPF', 'Colaborador', 'Situação', 'Status Cartão', 'Regional', 'Centro de Custo', 'Gestor', 'Diretor']).commit();
+        for (const c of cadastroRows as any[]) {
+          wsCad.addRow([c.cpf, c.colaborador, c.situacao, c.status_cartao, c.regional, c.centro_custo, c.gestor, c.diretor]).commit();
+        }
+        wsCad.commit();
+
+        // INFO
+        const wsInfo = wb.addWorksheet('INFO');
+        const infoRows: any[][] = [
+          ['Quinzena Export'],
+          ['Year', year],
+          ['Month', month],
+          ['Quinzena', quinzena],
+          ['Periodo', `${dates.start_date} a ${dates.end_date}`],
+          ['Fechamento', dates.fechamento],
+          ['Cutoff Financeiro', dates.financial_cutoff],
+          ['Saldo Cartao Controle', dates.saldo_cartao_controle_date],
+          ['Saldo Cartao Carga', dates.saldo_cartao_carga_date],
+          ['Congelado', isFrozen ? 'SIM' : 'NAO'],
+        ];
+        if (isFrozen && (frozenRows[0] as any)?.frozen_at) {
+          infoRows.push(['Frozen At', (frozenRows[0] as any).frozen_at]);
+        }
+        infoRows.push(
+          ['Total Rows (Carga)', cargaData.length - 1],
+          ['Total Extrato Rows', counters.extrato],
+          ['Total Reports (Base Prest)', reportRows.length],
+          ['Total Expenses (Despesas)', counters.despesas],
+          [''],
+          ['Regras (rulebook.md)'],
+          ['Carga/Transf/Tarifa/Prestacao', `Dados ate ${dates.financial_cutoff} (ultimo dia do mes anterior)`],
+          ['Saldo Cartao (Controle)', `Ate ${dates.saldo_cartao_controle_date} (dia 1 mes atual)`],
+          ['Saldo Cartao (Carga)', `Ate ${dates.saldo_cartao_carga_date} (data de fechamento)`],
+          ['Prestacao de Contas', `Snapshot na data e ate a data, desde criacao do cartao`],
+        );
+        for (const row of infoRows) wsInfo.addRow(row).commit();
+        wsInfo.commit();
+
+        await client.query('COMMIT');
+        await wb.commit();
+      } catch (e) {
+        try { await client.query('ROLLBACK'); } catch {}
+        pass.destroy(e instanceof Error ? e : new Error(String(e)));
+      } finally {
+        client.release();
+        release();
       }
-    }
-    const wsSnap = XLSX.utils.aoa_to_sheet(snapData);
-    XLSX.utils.book_append_sheet(wb, wsSnap, 'SALDO CARTAO');
+    };
 
-    // Tab 6: CADASTRO (user metadata)
-    const cadData: any[][] = [];
-    cadData.push(['CPF', 'Colaborador', 'Situação', 'Status Cartão', 'Regional', 'Centro de Custo', 'Gestor', 'Diretor']);
-    for (const c of cadastroRows as any[]) {
-      cadData.push([c.cpf, c.colaborador, c.situacao, c.status_cartao, c.regional, c.centro_custo, c.gestor, c.diretor]);
-    }
-    const wsCad = XLSX.utils.aoa_to_sheet(cadData);
-    XLSX.utils.book_append_sheet(wb, wsCad, 'CADASTRO');
+    void produce();
 
-    // Tab 7: INFO (metadata)
-    const infoData: any[][] = [];
-    infoData.push(['Quinzena Export']);
-    infoData.push(['Year', year]);
-    infoData.push(['Month', month]);
-    infoData.push(['Quinzena', quinzena]);
-    infoData.push(['Periodo', `${dates.start_date} a ${dates.end_date}`]);
-    infoData.push(['Fechamento', dates.fechamento]);
-    infoData.push(['Cutoff Financeiro', dates.financial_cutoff]);
-    infoData.push(['Saldo Cartao Controle', dates.saldo_cartao_controle_date]);
-    infoData.push(['Saldo Cartao Carga', dates.saldo_cartao_carga_date]);
-    infoData.push(['Congelado', isFrozen ? 'SIM' : 'NAO']);
-    if (isFrozen && (frozenRows[0] as any)?.frozen_at) {
-      infoData.push(['Frozen At', (frozenRows[0] as any).frozen_at]);
-    }
-    infoData.push(['Total Rows (Carga)', cargaData.length - 1]);
-    infoData.push(['Total Extrato Rows', extratoData.length - 1]);
-    infoData.push(['Total Reports (Base Prest)', prestData.length - 1]);
-    infoData.push(['Total Expenses (Despesas)', expData.length - 1]);
-    infoData.push(['']);
-    infoData.push(['Regras (rulebook.md)']);
-    infoData.push(['Carga/Transf/Tarifa/Prestacao', `Dados ate ${dates.financial_cutoff} (ultimo dia do mes anterior)`]);
-    infoData.push(['Saldo Cartao (Controle)', `Ate ${dates.saldo_cartao_controle_date} (dia 1 mes atual)`]);
-    infoData.push(['Saldo Cartao (Carga)', `Ate ${dates.saldo_cartao_carga_date} (data de fechamento)`]);
-    infoData.push(['Prestacao de Contas', `Snapshot na data e ate a data, desde criacao do cartao`]);
-    const wsInfo = XLSX.utils.aoa_to_sheet(infoData);
-    XLSX.utils.book_append_sheet(wb, wsInfo, 'INFO');
-
-    // Generate buffer
-    const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+    request.signal.addEventListener('abort', () => pass.destroy(new Error('client aborted')));
 
     const filename = `controle_${year}_${String(month).padStart(2, '0')}_Q${quinzena}.xlsx`;
-    return new NextResponse(buf, {
+    return new Response(Readable.toWeb(pass) as ReadableStream, {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -488,10 +541,11 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
+    release();
     console.error('[quinzena-export] Erro:', error);
     return NextResponse.json(
-      { error: 'Erro ao gerar XLSX', detail: String(error) },
-      { status: 500 }
+      { error: 'Erro ao exportar', detail: String(error) },
+      { status: 500 },
     );
   }
 }

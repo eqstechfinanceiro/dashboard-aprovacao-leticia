@@ -6,6 +6,7 @@ import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 import { getQuinzenaDates, toNum, r2, calcFinancials } from '@/lib/quinzena/financials';
 import { ensureAutocargaSchema } from '@/lib/autocarga/tables';
 import { logAudit } from '@/lib/db/audit';
+import { computeLimiter, heavyBusy } from '@/lib/util/heavy';
 
 export const dynamic = 'force-dynamic';
 
@@ -169,6 +170,10 @@ export async function GET(request: NextRequest) {
   const scope = await getScopeForRequest(request);
   const inScope = (cpf: string | null | undefined) =>
     !scope || (!!cpf && scope.cpfs.has(normalizeCpf(cpf) ?? '__none__'));
+
+  // Cálculo pesado — serializa com outras rotas pesadas (ver lib/util/heavy).
+  const release = await computeLimiter.acquire();
+  if (!release) return heavyBusy();
 
   try {
     // 0. Read reembolso multiplier from config table.
@@ -676,6 +681,8 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao consultar dados', detail: String(error) },
       { status: 500 },
     );
+  } finally {
+    release();
   }
 }
 
