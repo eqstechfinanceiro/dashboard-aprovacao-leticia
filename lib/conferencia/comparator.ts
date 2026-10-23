@@ -158,10 +158,12 @@ export function compareNf(
 
   // valbrut só mascara qtd quando HÁ itens no TOTVS (fracionamento). Nota de
   // mercadoria com ZERO linhas SD1 é lançamento quebrado/incompleto — diverge
-  // mesmo com o total batendo.
+  // mesmo com o total batendo. Com SD1 vazia a falha mora em 'Itens no TOTVS'
+  // (abaixo): 'Qtd. Itens' vira informativo pra não contar a mesma causa 2x.
+  const semItensTotvs = totvsItems.length === 0 && xmlData.items.length > 0;
   const itemCountMatch = totvsItems.length === xmlData.items.length;
   chk('Qtd. Itens', String(totvsItems.length), String(xmlData.items.length),
-    valbrutMatch && totvsItems.length > 0 ? true : itemCountMatch);
+    semItensTotvs || (valbrutMatch && totvsItems.length > 0) ? true : itemCountMatch);
 
   // Quando a NF fraciona itens (1 XML → N SD1) o total da NF bate mas nenhum
   // item casa 1:1 — aí o valbrut "amortece" checks de item. Quando a qtd de
@@ -374,22 +376,63 @@ export function compareNf(
     itemChecks.push(list);
   }
 
-  // Itens do XML sem par no TOTVS — informativos quando NF total bate
+  // Itens do XML sem par no TOTVS — informativos quando NF total bate.
+  // SD1 completamente vazia = leitura durante o lançamento ou lançamento
+  // quebrado: a divergência é UMA ('Itens no TOTVS'), não N por campo. Os
+  // valores do XML ficam informativos e a TES que a regra Lince espera
+  // aparece pro revisor conferir o lançamento quando ele terminar.
+  if (semItensTotvs) {
+    itemChecks.push([{
+      field: 'Itens no TOTVS',
+      expected: `${xmlItems.length} item(ns) no XML`,
+      actual: '0 lançados — possível leitura durante o lançamento',
+      match: false,
+    }]);
+    hasMismatch = true;
+  }
   for (let xi = 0; xi < xmlItems.length; xi++) {
     if (xmlMatched[xi]) continue;
     const xi2 = xmlItems[xi];
-    const m2 = valbrutMask;
+    const m2 = semItensTotvs || valbrutMask;
     const pfx = `Item ${_normStr(xi2.c_prod) || xi + 1} · `;
     const list: Check[] = [
       { field: pfx + 'Produto', expected: '—', actual: _normStr(xi2.c_prod), match: m2 },
       { field: pfx + 'Quantidade', expected: '—', actual: xi2.q_com.toFixed(4), match: m2 },
       { field: pfx + 'Vlr. Unitário', expected: '—', actual: xi2.v_un_com.toFixed(4), match: m2 },
       { field: pfx + 'Vlr. Total Item', expected: '—', actual: xi2.v_prod.toFixed(2), match: m2 },
-      { field: pfx + 'TES', expected: '—', actual: '—', match: m2 },
       { field: pfx + 'ICMS Item', expected: '—', actual: xi2.v_icms.toFixed(2), match: m2 },
       { field: pfx + 'IPI Item', expected: '—', actual: xi2.v_ipi.toFixed(2), match: m2 },
       { field: pfx + 'CFOP', expected: '—', actual: _normStr(xi2.cfop), match: true },
     ];
+    if (!semItensTotvs) {
+      list.splice(4, 0, { field: pfx + 'TES', expected: '—', actual: '—', match: m2 });
+    } else {
+      const natureza = String(totvsHeader.f1_naturez || '').trim();
+      if (natureza) {
+        const r = definirTes({
+          natureza,
+          ctrl_imposto: deriveCtrlImposto(xi2),
+          empresa,
+          produto: _normStr(xi2.c_prod) || null,
+          cfop: _normStr(xi2.cfop) || null,
+          presenca_comp: xmlData.ind_pres || null,
+          cfop_xml: _normStr(xi2.cfop) || null,
+          icms_aliq_xml: xi2.p_icms || null,
+        });
+        let tesEsp = r.tes;
+        if (tesOverride && tesEsp) {
+          const ov = resolverTesOverride(tesOverride,
+            xmlData.emit_cnpj || totvsHeader.a2_cgc, [_normStr(xi2.c_prod)], tesEsp);
+          if (ov.tes) tesEsp = ov.tes;
+        }
+        list.push({
+          field: pfx + 'TES esperada (regra)',
+          expected: '—',
+          actual: tesEsp || r.meta?.regra_aplicada || 'não determinável',
+          match: true,
+        });
+      }
+    }
     if (!m2) hasMismatch = true;
     itemChecks.push(list);
   }
@@ -449,7 +492,9 @@ export function compareNf(
     status,
     header_checks: headerChecks,
     item_checks: itemChecks,
-    summary: cstOnly
+    summary: semItensTotvs
+      ? `0 itens lançados no TOTVS — possível leitura durante o lançamento`
+      : cstOnly
       ? `${mismatchCount} divergência(s) apenas de Origem CST (aviso)`
       : mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
     mismatch_count: mismatchCount,
