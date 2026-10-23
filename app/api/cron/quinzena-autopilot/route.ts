@@ -113,10 +113,11 @@ export async function GET(req: NextRequest) {
     }
 
     // ---------- Dia D: fechamento automático ----------------------------------
+    // ?autocarga=1 → também dispara a auto-carga logo após o freeze (P2).
     const fecharRes = await fetch(`${base}/api/quinzena-fechar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...fwd },
-      body: JSON.stringify({ year, month, quinzena }),
+      body: JSON.stringify({ year, month, quinzena, autocarga: sp.get('autocarga') === '1' }),
     });
     const fechar = await fecharRes.json().catch(() => ({}));
 

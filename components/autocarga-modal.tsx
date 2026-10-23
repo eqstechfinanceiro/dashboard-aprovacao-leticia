@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   X, Zap, Loader2, CheckCircle2, AlertTriangle, XCircle, RefreshCw,
-  CreditCard, Wallet, ShieldAlert, Ban,
+  CreditCard, Wallet, ShieldAlert, Ban, Undo2, GitCompareArrows,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -91,6 +91,13 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
   const [forcing, setForcing] = useState<Set<string>>(new Set());
   const [forcedOk, setForcedOk] = useState<Map<string, string>>(new Map());   // cpf → transaction_id
   const [forcedErr, setForcedErr] = useState<Map<string, string>>(new Map()); // cpf → mensagem
+  const [reversing, setReversing] = useState<Set<string>>(new Set());
+  const [estornados, setEstornados] = useState<Map<string, { tx: string | null; poolTx: string | null }>>(new Map());
+  const [revErr, setRevErr] = useState<Map<string, string>>(new Map());
+  const [reverseAll, setReverseAll] = useState(false);
+  const [reconOpen, setReconOpen] = useState(false);
+  const [recon, setRecon] = useState<{ summary: any; divergencias: any[] } | null>(null);
+  const [reconLoading, setReconLoading] = useState(false);
 
   const loadPlan = useCallback(async () => {
     setLoading(true);
@@ -116,11 +123,86 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
       setResult(null);
       setForcedOk(new Map());
       setForcedErr(new Map());
+      setEstornados(new Map());
+      setRevErr(new Map());
+      setRecon(null);
+      setReconOpen(false);
       loadPlan();
     }
   }, [open, loadPlan]);
 
   if (!open) return null;
+
+  // Cargas com dinheiro vivo: executadas ok/forced_ok desta sessão menos as
+  // já estornadas (estornado volta a ser carregável — some desta lista).
+  const activeLoaded = (plan?.already_loaded ?? []).filter((l) => !estornados.has(l.cpf));
+
+  const handleReverse = async (cpf: string, nome: string, amount: number) => {
+    if (!window.confirm(
+      `Estornar a carga de ${nome} (${brl(amount)})?\n\n` +
+      `O valor sai do cartão do funcionário de volta ao grupo e ao pool EQS. ` +
+      `O CPF volta a ser carregável numa próxima execução.`,
+    )) return;
+    setReversing((s) => new Set(s).add(cpf));
+    setRevErr((m) => { const n = new Map(m); n.delete(cpf); return n; });
+    try {
+      const r = await fetch('/api/quinzena-autocarga/reverse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, month, quinzena, cpf }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.estornado) throw new Error(j.error || `HTTP ${r.status}`);
+      setEstornados((m) => new Map(m).set(cpf, { tx: j.estorno_tx, poolTx: j.pool_tx }));
+      onChanged?.();
+    } catch (e: any) {
+      setRevErr((m) => new Map(m).set(cpf, e?.message || 'Falha ao estornar'));
+    } finally {
+      setReversing((s) => { const n = new Set(s); n.delete(cpf); return n; });
+    }
+  };
+
+  const handleReverseAll = async () => {
+    if (!window.confirm(
+      `Estornar TODAS as ${activeLoaded.length} carga(s) ativas desta quinzena?\n\n` +
+      `Todos os valores voltam dos cartões ao pool EQS.`,
+    )) return;
+    setReverseAll(true);
+    try {
+      const r = await fetch('/api/quinzena-autocarga/reverse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year, month, quinzena, all: true }),
+      });
+      const j = await r.json();
+      const m = new Map(estornados);
+      for (const it of j.results ?? []) {
+        if (it.estornado) m.set(it.cpf, { tx: it.estorno_tx, poolTx: it.pool_tx });
+        else setRevErr((em) => new Map(em).set(it.cpf, it.error ?? 'falhou'));
+      }
+      setEstornados(m);
+      onChanged?.();
+    } catch (e: any) {
+      setRevErr((m) => new Map(m).set('__all__', e?.message || 'Falha no estorno em lote'));
+    } finally {
+      setReverseAll(false);
+    }
+  };
+
+  const loadReconcile = async () => {
+    if (recon || reconLoading) return;
+    setReconLoading(true);
+    try {
+      const r = await fetch(
+        `/api/quinzena-autocarga/reconcile?year=${year}&month=${month}&quinzena=${quinzena}`,
+        { cache: 'no-store' },
+      );
+      const j = await r.json();
+      if (r.ok) setRecon(j);
+    } catch { /* bloco fica vazio */ } finally {
+      setReconLoading(false);
+    }
+  };
 
   const pendingBlocked = (plan?.blocked ?? []).filter((b) => !forcedOk.has(b.cpf));
   const totalEffective = (plan?.total_to_load ?? 0) + [...forcedOk.keys()].reduce((s, cpf) => {
@@ -247,6 +329,47 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
                     ))}
                   </ul>
                 </div>
+              )}
+              {okItems.length > 0 && (
+                <details className="rounded-lg border border-gray-200 px-4 py-2 text-xs">
+                  <summary className="cursor-pointer font-medium text-gray-700">
+                    Carregados nesta execução ({okItems.filter((i) => !estornados.has(i.cpf)).length})
+                    — clique para estornar se algo saiu errado
+                  </summary>
+                  <ul className="mt-2 max-h-44 space-y-1 overflow-y-auto">
+                    {okItems.map((i) => {
+                      const est = estornados.has(i.cpf);
+                      return (
+                        <li key={i.cpf} className="flex items-center justify-between gap-2 rounded border border-gray-100 px-3 py-1.5">
+                          <span className={`font-medium ${est ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                            {i.colaborador}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono font-semibold text-emerald-700">{brl(i.amount)}</span>
+                            {est ? (
+                              <span className="text-[11px] text-gray-400">ESTORNADO</span>
+                            ) : (
+                              <button
+                                onClick={() => handleReverse(i.cpf, i.colaborador, i.amount)}
+                                disabled={reversing.has(i.cpf) || reverseAll || executing}
+                                className="inline-flex items-center gap-1 rounded border border-red-200 bg-white px-2 py-0.5 text-[11px] font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                                title="Estorna: tira do cartão → devolve ao pool EQS"
+                              >
+                                {reversing.has(i.cpf) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Undo2 className="h-3 w-3" />}
+                                Estornar
+                              </button>
+                            )}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {revErr.size > 0 && (
+                    <p className="mt-1 text-[11px] text-red-600">
+                      {[...revErr.entries()].map(([c, e]) => `${c}: ${e}`).join(' · ')}
+                    </p>
+                  )}
+                </details>
               )}
               {result.blocked.length > 0 && (
                 <p className="text-xs text-gray-500">
@@ -407,22 +530,118 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
                 </div>
               )}
 
-              {/* Já carregados */}
-              {plan.already_loaded.length > 0 && (
-                <details className="rounded-lg border border-gray-200 px-4 py-2 text-xs">
-                  <summary className="cursor-pointer font-medium text-gray-700">
-                    Já carregados nesta quinzena ({plan.already_loaded.length}) — não serão repetidos
-                  </summary>
-                  <ul className="mt-2 space-y-1 text-gray-600">
-                    {plan.already_loaded.map((l) => (
-                      <li key={l.cpf} className="flex justify-between">
-                        <span>{l.colaborador}</span>
-                        <span className="font-mono">{brl(l.amount)} ✓</span>
+              {/* Cargas executadas (dinheiro vivo nos cartões) — estorno */}
+              {(activeLoaded.length > 0 || estornados.size > 0) && (
+                <div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <p className="text-xs font-semibold text-gray-700">
+                      Cargas ativas nesta quinzena ({activeLoaded.length})
+                    </p>
+                    {activeLoaded.length > 1 && (
+                      <button
+                        onClick={handleReverseAll}
+                        disabled={reverseAll || reversing.size > 0 || executing}
+                        className="inline-flex items-center gap-1 rounded border border-red-200 bg-white px-2 py-0.5 text-[11px] font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                        title="Devolve TODAS as cargas ativas dos cartões ao pool EQS"
+                      >
+                        {reverseAll ? <Loader2 className="h-3 w-3 animate-spin" /> : <Undo2 className="h-3 w-3" />}
+                        Estornar todos
+                      </button>
+                    )}
+                  </div>
+                  <ul className="max-h-40 space-y-1 overflow-y-auto">
+                    {activeLoaded.map((l) => (
+                      <li key={l.cpf} className="rounded border border-gray-100 px-3 py-1.5 text-xs">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium text-gray-800">{l.colaborador}</span>
+                          <span className="flex items-center gap-2">
+                            <span className="font-mono font-semibold text-emerald-700">{brl(l.amount)}</span>
+                            <button
+                              onClick={() => handleReverse(l.cpf, l.colaborador, l.amount)}
+                              disabled={reversing.has(l.cpf) || reverseAll || executing}
+                              className="inline-flex items-center gap-1 rounded border border-red-200 bg-white px-2 py-0.5 text-[11px] font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                              title="Estorna: tira do cartão → devolve ao pool EQS"
+                            >
+                              {reversing.has(l.cpf) ? <Loader2 className="h-3 w-3 animate-spin" /> : <Undo2 className="h-3 w-3" />}
+                              Estornar
+                            </button>
+                          </span>
+                        </div>
+                        {revErr.has(l.cpf) && (
+                          <p className="mt-0.5 text-[11px] text-red-600">Estorno falhou: {revErr.get(l.cpf)}</p>
+                        )}
                       </li>
                     ))}
+                    {[...estornados.entries()].map(([cpf, e]) => {
+                      const l = plan.already_loaded.find((x) => x.cpf === cpf);
+                      return (
+                        <li key={cpf} className="rounded border border-gray-200 bg-gray-50 px-3 py-1.5 text-xs text-gray-500">
+                          <div className="flex items-center justify-between">
+                            <span className="line-through">{l?.colaborador ?? cpf}</span>
+                            <span className="font-mono">
+                              {l ? brl(l.amount) : ''} — ESTORNADO{e.poolTx ? '' : ' (no grupo)'}
+                            </span>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
-                </details>
+                  {revErr.has('__all__') && (
+                    <p className="mt-1 text-[11px] text-red-600">Estorno em lote: {revErr.get('__all__')}</p>
+                  )}
+                </div>
               )}
+
+              {/* Relatório de divergência planilha × executado */}
+              <details
+                className="rounded-lg border border-gray-200 px-4 py-2 text-xs"
+                open={reconOpen}
+                onToggle={(e) => {
+                  const isOpen = (e.target as HTMLDetailsElement).open;
+                  setReconOpen(isOpen);
+                  if (isOpen) loadReconcile();
+                }}
+              >
+                <summary className="cursor-pointer font-medium text-gray-700">
+                  <GitCompareArrows className="mr-1 inline h-3.5 w-3.5" />
+                  Conferência planilha × executado
+                </summary>
+                <div className="mt-2">
+                  {reconLoading && (
+                    <p className="flex items-center gap-1 text-gray-500">
+                      <Loader2 className="h-3 w-3 animate-spin" /> reconciliando…
+                    </p>
+                  )}
+                  {recon && (
+                    <>
+                      <p className="text-gray-600">
+                        Planilha {brl(recon.summary.snapshot_total)} · executado {brl(recon.summary.loaded_total)} ·
+                        delta {brl(recon.summary.delta)} · {recon.summary.ok} ok · {recon.summary.estornado} estornado(s)
+                      </p>
+                      {recon.divergencias.length === 0 ? (
+                        <p className="mt-1 text-emerald-700">Sem divergências — tudo conferido.</p>
+                      ) : (
+                        <ul className="mt-2 max-h-44 space-y-1 overflow-y-auto">
+                          {recon.divergencias.map((d: any) => (
+                            <li key={d.cpf + d.tipo} className="rounded border border-amber-100 bg-amber-50/50 px-3 py-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="font-medium text-gray-800">{d.colaborador}</span>
+                                <span className="font-mono text-gray-600">
+                                  {brl(d.planilha)}{d.executado !== null ? ` → ${brl(d.executado)}` : ''}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-amber-800">
+                                <strong>{d.tipo}</strong> — {d.detalhe}
+                                {d.transaction_id ? ` · tx ${d.transaction_id}` : ''}
+                              </p>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  )}
+                </div>
+              </details>
             </div>
           ) : null}
         </div>

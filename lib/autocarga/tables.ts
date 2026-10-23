@@ -68,15 +68,27 @@ export async function ensureAutocargaSchema(): Promise<void> {
       transaction_id TEXT,
       vex_response JSONB,
       created_at TIMESTAMPTZ DEFAULT NOW(),
-      executed_at TIMESTAMPTZ
+      executed_at TIMESTAMPTZ,
+      estornado_at TIMESTAMPTZ,
+      estornado_by TEXT,
+      estorno_tx TEXT,
+      estorno_pool_tx TEXT
     )`;
   await sql`CREATE INDEX IF NOT EXISTS idx_carga_items_run ON quinzena_carga_items(run_id)`;
   await sql`CREATE INDEX IF NOT EXISTS idx_carga_items_period_cpf
     ON quinzena_carga_items(year, month, quinzena, cpf)`;
-  // Anti-dupla-carga: mesmo período+cpf carregado com sucesso no máximo 1×
+  // Anti-dupla-carga: mesmo período+cpf carregado com sucesso no máximo 1×.
+  // 'estornado' NÃO entra no índice — estornar libera o CPF pra nova carga.
   await sql`CREATE UNIQUE INDEX IF NOT EXISTS uq_carga_loaded
     ON quinzena_carga_items(year, month, quinzena, cpf)
     WHERE status IN ('ok', 'forced_ok')`;
+
+  // Colunas de estorno (P2) — aditivas em bases já criadas
+  await sql`ALTER TABLE quinzena_carga_items
+    ADD COLUMN IF NOT EXISTS estornado_at TIMESTAMPTZ,
+    ADD COLUMN IF NOT EXISTS estornado_by TEXT,
+    ADD COLUMN IF NOT EXISTS estorno_tx TEXT,
+    ADD COLUMN IF NOT EXISTS estorno_pool_tx TEXT`;
 
   schemaReady = true;
 }

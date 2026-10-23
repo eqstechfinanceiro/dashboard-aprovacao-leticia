@@ -536,6 +536,7 @@ export default function QuinzenaDinamicaPage() {
       const CARGA_STATUS_LABEL: Record<string, string> = {
         ok: 'CARREGADO', forced_ok: 'CARREGADO (FORÇADO)', failed: 'FALHOU',
         forced_failed: 'FALHOU (FORÇADO)', blocked: 'BLOQUEADO', skipped: 'JÁ CARREGADO',
+        estornado: 'ESTORNADO',
       };
 
       const numericKeys = new Set([
@@ -731,6 +732,7 @@ export default function QuinzenaDinamicaPage() {
   const [canAutocarga, setCanAutocarga] = useState(false);
   const [cargaItems, setCargaItems] = useState<Record<string, { status: string; amount: number; block_reason: string | null; transaction_id: string | null; forced: boolean }>>({});
   const [lastRun, setLastRun] = useState<{ status: string; items_ok: number; items_failed: number; total_loaded: number | null } | null>(null);
+  const [autoCargaOnFreeze, setAutoCargaOnFreeze] = useState(false);
 
   const loadCargaStatus = useCallback(async (y: number, m: number, q: number) => {
     try {
@@ -748,14 +750,16 @@ export default function QuinzenaDinamicaPage() {
   }, []);
 
   useEffect(() => {
-    if (year !== null && month !== null && quinzena !== null && isFrozen) {
+    if (year !== null && month !== null && quinzena !== null) {
+      // Sempre: can_autocarga decide a visibilidade do checkbox "auto-carga
+      // ao congelar" (pré-freeze) e do botão Auto-carga (pós-freeze).
       loadCargaStatus(year, month, quinzena);
     } else {
       setCanAutocarga(false);
       setCargaItems({});
       setLastRun(null);
     }
-  }, [year, month, quinzena, isFrozen, loadCargaStatus]);
+  }, [year, month, quinzena, loadCargaStatus]);
 
   const handleFreeze = async () => {
     if (year === null || month === null || quinzena === null) return;
@@ -764,7 +768,7 @@ export default function QuinzenaDinamicaPage() {
       const res = await fetch('/api/quinzena-fechar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, quinzena }),
+        body: JSON.stringify({ year, month, quinzena, autocarga: autoCargaOnFreeze }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Erro ao congelar');
@@ -895,10 +899,26 @@ export default function QuinzenaDinamicaPage() {
               Descongelar
             </Button>
           ) : (
-            <Button size="sm" variant="default" onClick={() => setPrecheckOpen(true)} disabled={freezing || loading || !data}>
-              <Snowflake className="h-4 w-4 mr-1" />
-              Congelar
-            </Button>
+            <>
+              {canAutocarga && (
+                <label
+                  className="flex cursor-pointer items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-800"
+                  title="Ao congelar, dispara a auto-carga em segundo plano (acompanhe pelo botão Auto-carga)"
+                >
+                  <input
+                    type="checkbox"
+                    checked={autoCargaOnFreeze}
+                    onChange={(e) => setAutoCargaOnFreeze(e.target.checked)}
+                  />
+                  <Zap className="h-3.5 w-3.5" />
+                  auto-carga ao congelar
+                </label>
+              )}
+              <Button size="sm" variant="default" onClick={() => setPrecheckOpen(true)} disabled={freezing || loading || !data}>
+                <Snowflake className="h-4 w-4 mr-1" />
+                Congelar
+              </Button>
+            </>
           ))}
           {isFrozen && canAutocarga && (
             <Button
@@ -909,9 +929,11 @@ export default function QuinzenaDinamicaPage() {
                 ? `Última carga: ${lastRun.status} — ${lastRun.items_ok} ok · ${lastRun.items_failed} falha(s)`
                 : 'Executa a carga automática dos cartões com os valores congelados'}
             >
-              <Zap className="h-4 w-4 mr-1" />
+              <Zap className={`h-4 w-4 mr-1 ${lastRun?.status === 'running' ? 'animate-pulse' : ''}`} />
               {lastRun
-                ? lastRun.status === 'done' ? 'Auto-carga ✓' : `Auto-carga (${lastRun.items_failed} falhas)`
+                ? lastRun.status === 'done' ? 'Auto-carga ✓'
+                  : lastRun.status === 'running' ? 'Auto-carga executando…'
+                  : `Auto-carga (${lastRun.items_failed} falhas)`
                 : 'Auto-carga'}
             </Button>
           )}
@@ -1422,6 +1444,7 @@ export default function QuinzenaDinamicaPage() {
                                   forced_failed: { cls: 'bg-red-500',     label: `Carga forçada falhou: ${ci.block_reason ?? ''}` },
                                   blocked:       { cls: 'bg-amber-500',   label: `Bloqueado: ${ci.block_reason ?? ''}` },
                                   skipped:       { cls: 'bg-gray-400',    label: 'Já carregado anteriormente' },
+                                  estornado:     { cls: 'bg-purple-500',  label: 'Estornado — valor devolvido ao pool' },
                                 };
                                 const m = meta[ci.status];
                                 if (!m) return null;

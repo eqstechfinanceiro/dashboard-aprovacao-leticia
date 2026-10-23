@@ -26,6 +26,15 @@ export async function GET(request: NextRequest) {
   const canAutocarga = isAutocargaAllowedEmail(email);
 
   try {
+    // Run 'running' há +20min é órfã (o processo morreu no meio — restart do
+    // PM2). Marca como failed pra não travar o período pra sempre.
+    await sql`
+      UPDATE quinzena_carga_runs SET status='failed', finished_at=NOW(),
+        error='execução interrompida (processo reiniciado)'
+      WHERE year=${year} AND month=${month} AND quinzena=${quinzena}
+        AND status='running' AND started_at < NOW() - INTERVAL '20 minutes'
+    `.catch(() => []);
+
     const runs = await sql`
       SELECT id, status, triggered_by_email, triggered_by_name,
              pool_before::text, pool_after::text,
@@ -42,7 +51,8 @@ export async function GET(request: NextRequest) {
     const itemRows = await sql`
       SELECT DISTINCT ON (cpf)
         cpf, colaborador, amount::text, status, block_reason,
-        transaction_id, forced, forced_by, executed_at
+        transaction_id, forced, forced_by, executed_at,
+        estornado_at, estornado_by
       FROM quinzena_carga_items
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
       ORDER BY cpf, id DESC
@@ -57,6 +67,8 @@ export async function GET(request: NextRequest) {
         forced: r.forced,
         forced_by: r.forced_by,
         executed_at: r.executed_at,
+        estornado_at: r.estornado_at,
+        estornado_by: r.estornado_by,
       };
     }
 
