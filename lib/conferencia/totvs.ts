@@ -809,3 +809,27 @@ export async function fetchNfByIdentidade(ref: NfIdentidade): Promise<NfSnapshot
   }
   return { encontrada: false, empresa: null, header: null, items: [], fingerprint: null };
 }
+
+/**
+ * Re-leitura dedicada da SD1 de UMA nota (sem janela de data). O batch do
+ * ciclo pode reportar 0 itens por corrida — Lince gravando os itens depois do
+ * fetch em lote, ou deriva de paginação com a tabela crescendo. Antes de
+ * acusar "0 itens no TOTVS", confirma com esta leitura pontual.
+ */
+export async function fetchSd1ItensNota(
+  tenantId: string,
+  ref: { doc: string; serie?: string; fornec: string; loja?: string },
+): Promise<any[]> {
+  const docIn = docVariants(ref.doc).map((d) => `'${d}'`).join(',');
+  const it = await genericQuery(tenantId, {
+    tables: 'SD1,SB1',
+    fields: SD1_SB1_FIELDS,
+    where: `SD1.D1_DOC IN (${docIn})` +
+      (ref.serie ? ` AND SD1.D1_SERIE='${ref.serie}'` : '') +
+      ` AND SD1.D1_FORNECE='${trim(ref.fornec)}'` +
+      (ref.loja ? ` AND SD1.D1_LOJA='${trim(ref.loja)}'` : '') +
+      ` AND SD1.D1_COD=SB1.B1_COD AND SD1.D_E_L_E_T_=' ' AND SB1.D_E_L_E_T_=' '`,
+    page: '1', pageSize: '500',
+  });
+  return it.items || [];
+}

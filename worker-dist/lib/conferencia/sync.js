@@ -23,6 +23,7 @@ const path_1 = __importDefault(require("path"));
 const neon_1 = require("../db/neon");
 const fiscal_db_1 = require("../fiscal/fiscal-db");
 const totvs_1 = require("./totvs");
+const totvs_2 = require("../impacto/totvs");
 const fontes_1 = require("./fontes");
 const comparator_1 = require("./comparator");
 const tes_override_1 = require("./tes-override");
@@ -125,8 +126,8 @@ async function upsertNota(runId, nota) {
                 await (0, neon_1.sql) `
           UPDATE fiscal_notas SET
             review_status = CASE
-              WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
-              WHEN ${stale.review_status ?? null} IN ('confirmado_ok', 'confirmado_erro') THEN ${stale.review_status ?? null}
+              WHEN review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN review_status
+              WHEN ${stale.review_status ?? null} IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN ${stale.review_status ?? null}
               ELSE review_status END,
             review_nota = COALESCE(review_nota, ${stale.review_nota ?? null}),
             reviewed_by = COALESCE(reviewed_by, ${stale.reviewed_by ?? null}),
@@ -147,9 +148,9 @@ async function upsertNota(runId, nota) {
           auto_status = ${nota.autoStatus},
           auto_resumo = COALESCE(${nul(nota.autoResumo)}, auto_resumo),
           checks = COALESCE(${nota.checks ? JSON.stringify(nota.checks) : null}::jsonb, checks),
-          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra),
+          extra = COALESCE(${nota.extra ? JSON.stringify(nota.extra) : null}::jsonb, extra) - 'reconf',
           review_status = CASE
-            WHEN review_status IN ('confirmado_ok', 'confirmado_erro') THEN review_status
+            WHEN review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida') THEN review_status
             ELSE ${reviewStatus}
           END,
           conferencia_tentativas = ${nota.tentativas},
@@ -182,9 +183,9 @@ async function upsertNota(runId, nota) {
       auto_status = EXCLUDED.auto_status,
       auto_resumo = EXCLUDED.auto_resumo,
       checks = COALESCE(EXCLUDED.checks, fiscal_notas.checks),
-      extra = COALESCE(EXCLUDED.extra, fiscal_notas.extra),
+      extra = COALESCE(EXCLUDED.extra, fiscal_notas.extra) - 'reconf',
       review_status = CASE
-        WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro')
+        WHEN fiscal_notas.review_status IN ('confirmado_ok', 'confirmado_erro', 'cancelado', 'corrigida')
           THEN fiscal_notas.review_status
         ELSE EXCLUDED.review_status
       END,
@@ -348,8 +349,8 @@ async function syncConferencia(opts = {}) {
       ), upd AS (
         UPDATE fiscal_notas k SET
           review_status = CASE
-            WHEN k.review_status IN ('confirmado_ok','confirmado_erro') THEN k.review_status
-            WHEN d.review_status IN ('confirmado_ok','confirmado_erro') THEN d.review_status
+            WHEN k.review_status IN ('confirmado_ok','confirmado_erro','cancelado','corrigida') THEN k.review_status
+            WHEN d.review_status IN ('confirmado_ok','confirmado_erro','cancelado','corrigida') THEN d.review_status
             WHEN k.review_status IN ('pendente','falha_tecnica') THEN d.review_status
             ELSE k.review_status END,
           review_nota = COALESCE(k.review_nota, d.review_nota),
@@ -414,6 +415,18 @@ async function syncConferencia(opts = {}) {
             }
         }
         await setState({ fase: 'conferindo', elegiveis: elegiveis.length }, `conferindo ${elegiveis.length} notas (${out.puladas} puladas por dedup/backoff)`);
+        // Parcelas SE2 das elegíveis (batch) — checks de duplicata no compareNf.
+        let parcelasMap = new Map();
+        try {
+            parcelasMap = await (0, totvs_1.fetchSe2Parcelas)(elegiveis.map((nf) => ({
+                doc: trim(nf.header.f1_doc), serie: trim(nf.header.f1_serie),
+                fornec: trim(nf.header.f1_fornece), loja: trim(nf.header.f1_loja),
+                empresa: nf.header._empresa,
+            })));
+        }
+        catch (e) {
+            console.warn('[conferencia] SE2 parcelas falhou (checks de duplicata pulados):', e?.message);
+        }
         let i = 0;
         for (const nf of elegiveis) {
             i++;
@@ -429,14 +442,29 @@ async function syncConferencia(opts = {}) {
                 fornecedor: trim(h.f1_fornece), cnpj: trim(h.a2_cgc),
                 valor: Number(h.f1_valbrut) || null, emissao, chave,
             };
+            // SD1 do batch pode vir vazia por corrida (Lince gravando itens após o
+            // fetch em lote) ou deriva de paginação — re-leitura dedicada confirma
+            // o "0 itens" antes de acusar divergência.
+            let items = nf.items;
+            if (!items.length) {
+                try {
+                    const reread = await (0, totvs_1.fetchSd1ItensNota)(totvs_2.EMPRESAS[h._empresa], {
+                        doc: base.doc, serie: base.serie,
+                        fornec: base.fornecedor, loja: trim(h.f1_loja),
+                    });
+                    if (reread.length)
+                        items = reread;
+                }
+                catch { }
+            }
             const extraBase = {
                 empresa: h._empresa, usuario: h.f1_userlgi || null,
-                f1_dtdigit: trim(h.f1_dtdigit), f1_loja: trim(h.f1_loja), itens_totvs: nf.items.length,
+                f1_dtdigit: trim(h.f1_dtdigit), f1_loja: trim(h.f1_loja), itens_totvs: items.length,
                 ...(vex ? { vexpenses: { expense_id: vex.expense_id, report_id: vex.report_id, report_name: vex.report_name } } : {}),
             };
             // Fingerprint do estado TOTVS na conferência — baseline pro monitor de
             // canceladas detectar edição/re-digitação depois.
-            const fingerprint = (0, totvs_1.nfFingerprint)(h, nf.items);
+            const fingerprint = (0, totvs_1.nfFingerprint)(h, items);
             let xmlRes = null;
             try {
                 xmlRes = await (0, fontes_1.obterXmlNfe)(chave, { sieg: opts.useSieg !== false });
@@ -463,7 +491,8 @@ async function syncConferencia(opts = {}) {
             let cmp;
             try {
                 const tesOvr = await (0, tes_override_1.carregarTesOverride)(h._empresa || 'EQS');
-                cmp = (0, comparator_1.compareNf)(h, nf.items, xmlRes.parsed, tesOvr);
+                const parc = parcelasMap.get((0, totvs_1.se2ParcelaKey)(h.f1_doc, h.f1_serie, h.f1_fornece, h.f1_loja));
+                cmp = (0, comparator_1.compareNf)(h, items, xmlRes.parsed, tesOvr, { se2Parcelas: parc });
             }
             catch (e) {
                 const nextRetry = new Date(now + RETRY_BASE_MIN * 60000);

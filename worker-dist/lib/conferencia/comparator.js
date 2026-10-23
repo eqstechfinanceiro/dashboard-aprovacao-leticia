@@ -40,11 +40,14 @@ const _cmpFloat = (a, b, tol = exports.TOLERANCE) => Math.abs(a - b) <= tol;
 const _cmpStr = (a, b) => _normStr(a) === _normStr(b);
 const _cmpCnpj = (a, b) => { const x = _normCnpj(a), y = _normCnpj(b); return !!x && !!y && x === y; };
 const _cmpDate = (a, b) => _normDate(a) === _normDate(b);
-/** Deriva ctrl_imposto dos impostos do item XML (mesma tabela do Python). */
+/** Deriva ctrl_imposto dos impostos do item XML (mesma tabela do Python).
+ * Paridade com documento_entrada_handler._determinar_tipo do Lince: imposto
+ * conta quando o VALOR **ou a BASE** é > 0 — CST 051/70 e afins têm base sem
+ * valor destacado e antes caíam em 'Nenhum imposto' (TES esperada errada). */
 function deriveCtrlImposto(xmlItem) {
-    const hasIcms = _toFloat(xmlItem.v_icms) > 0;
-    const hasSt = _toFloat(xmlItem.v_icms_st) > 0;
-    const hasIpi = _toFloat(xmlItem.v_ipi) > 0;
+    const hasIcms = _toFloat(xmlItem.v_icms) > 0 || _toFloat(xmlItem.v_bc_icms) > 0;
+    const hasSt = _toFloat(xmlItem.v_icms_st) > 0 || _toFloat(xmlItem.v_bc_icms_st) > 0;
+    const hasIpi = _toFloat(xmlItem.v_ipi) > 0 || _toFloat(xmlItem.v_bc_ipi) > 0;
     if (hasIcms && hasSt && hasIpi)
         return 'Todos os impostos';
     if (hasIcms && hasSt && !hasIpi)
@@ -61,7 +64,7 @@ function deriveCtrlImposto(xmlItem) {
         return 'Apenas o IPI';
     return 'Nenhum imposto';
 }
-function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
+function compareNf(totvsHeader, totvsItems, xmlData, tesOverride, extras) {
     const empresa = _normStr(totvsHeader._empresa) || 'EQS';
     const headerChecks = [];
     const itemChecks = [];
@@ -121,21 +124,29 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
     chk('Vlr. ICMS-ST', totvsIcmst.toFixed(2), xmlIcmst.toFixed(2), icmstMatch);
     info('Descontos', _toFloat(totvsHeader.f1_descont).toFixed(2), (xmlData.total?.vDesc ?? 0).toFixed(2));
     info('Vlr. Produtos', 'N/A', (xmlData.total?.vProd ?? 0).toFixed(2));
+    // valbrut só mascara qtd quando HÁ itens no TOTVS (fracionamento). Nota de
+    // mercadoria com ZERO linhas SD1 é lançamento quebrado/incompleto — diverge
+    // mesmo com o total batendo. Com SD1 vazia a falha mora em 'Itens no TOTVS'
+    // (abaixo): 'Qtd. Itens' vira informativo pra não contar a mesma causa 2x.
+    const semItensTotvs = totvsItems.length === 0 && xmlData.items.length > 0;
     const itemCountMatch = totvsItems.length === xmlData.items.length;
-    chk('Qtd. Itens', String(totvsItems.length), String(xmlData.items.length), valbrutMatch ? true : itemCountMatch);
-    // ── Itens (greedy match por total, pontuado por qtd+vunit) ───────────
+    chk('Qtd. Itens', String(totvsItems.length), String(xmlData.items.length), semItensTotvs || (valbrutMatch && totvsItems.length > 0) ? true : itemCountMatch);
+    // Quando a NF fraciona itens (1 XML → N SD1) o total da NF bate mas nenhum
+    // item casa 1:1 — aí o valbrut "amortece" checks de item. Quando a qtd de
+    // itens bate, divergência de item é real e NÃO pode ser mascarada.
+    const valbrutMask = valbrutMatch && !itemCountMatch && totvsItems.length > 0;
+    // ── Itens — fase 1: par 1:1 greedy por total (desempate qtd+vunit) ────
     const xmlItems = xmlData.items || [];
     const xmlMatched = new Array(xmlItems.length).fill(false);
+    const matchXi = new Array(totvsItems.length).fill(null);
     for (let ti = 0; ti < totvsItems.length; ti++) {
         const totvsItem = totvsItems[ti];
-        const list = [];
         let bestXi = null;
         let bestScore = -1;
         for (let xi = 0; xi < xmlItems.length; xi++) {
             if (xmlMatched[xi])
                 continue;
-            const xt = xmlItems[xi].v_prod;
-            if (!_cmpFloat(_toFloat(totvsItem.d1_total), xt))
+            if (!_cmpFloat(_toFloat(totvsItem.d1_total), xmlItems[xi].v_prod))
                 continue;
             let score = 0;
             if (_cmpFloat(_toFloat(totvsItem.d1_quant), xmlItems[xi].q_com))
@@ -147,15 +158,51 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
                 bestXi = xi;
             }
         }
-        let xmlItem;
         if (bestXi !== null) {
             xmlMatched[bestXi] = true;
-            xmlItem = xmlItems[bestXi];
+            matchXi[ti] = bestXi;
         }
-        else {
-            xmlItem = {};
+    }
+    // ── Fase 2: fracionamento — N linhas SD1 do mesmo produto cuja Σ fecha
+    // no v_prod de UM item XML sem par. Todas as linhas do grupo casam com
+    // esse item (checks somados); sem o grupo cada linha divergia sozinha.
+    const fracionado = new Map();
+    {
+        const porProd = new Map();
+        for (let i = 0; i < totvsItems.length; i++) {
+            if (matchXi[i] !== null)
+                continue;
+            const k = _normStr(totvsItems[i].d1_cod);
+            const g = porProd.get(k) || [];
+            g.push(i);
+            porProd.set(k, g);
         }
+        for (const idxs of porProd.values()) {
+            if (idxs.length < 2)
+                continue;
+            const soma = idxs.reduce((s, i) => s + _toFloat(totvsItems[i].d1_total), 0);
+            for (let xi = 0; xi < xmlItems.length; xi++) {
+                if (xmlMatched[xi])
+                    continue;
+                if (!_cmpFloat(soma, xmlItems[xi].v_prod))
+                    continue;
+                xmlMatched[xi] = true;
+                for (const i of idxs)
+                    fracionado.set(i, { xi, idxs });
+                break;
+            }
+        }
+    }
+    for (let ti = 0; ti < totvsItems.length; ti++) {
+        const totvsItem = totvsItems[ti];
+        const list = [];
+        const frac = fracionado.get(ti) || null;
+        const bestXi = matchXi[ti] !== null ? matchXi[ti] : (frac ? frac.xi : null);
+        const xmlItem = bestXi !== null ? xmlItems[bestXi] : {};
         const noXml = bestXi === null;
+        // Agregados do grupo fracionado (ou do item sozinho quando não é).
+        const grp = frac ? frac.idxs.map((i) => totvsItems[i]) : [totvsItem];
+        const sum = (k) => grp.reduce((s, t) => s + _toFloat(t[k]), 0);
         const pfx = `Item ${_normStr(totvsItem.d1_cod) || _normStr(xmlItem.c_prod) || ti + 1} · `;
         const itemChk = (field, expected, actual, match) => {
             list.push({ field: pfx + field, expected: String(expected ?? ''), actual: String(actual ?? ''), match, missing_xml: noXml });
@@ -166,21 +213,25 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
             list.push({ field: pfx + field, expected: String(expected ?? ''), actual: String(actual ?? ''), match: true, missing_xml: noXml });
         };
         itemInfo('Produto', _normStr(totvsItem.d1_cod), _normStr(xmlItem.c_prod));
-        const totvsTotal = _toFloat(totvsItem.d1_total);
+        if (frac) {
+            itemInfo('Fracionado', `${frac.idxs.length} linhas SD1`, `itens ${frac.idxs.map((i) => _normStr(totvsItems[i].d1_item) || i + 1).join('+')}`);
+        }
+        const totvsTotal = sum('d1_total');
         const totalMatch = bestXi !== null ? _cmpFloat(totvsTotal, xmlItem.v_prod) : false;
-        itemChk('Vlr. Total Item', totvsTotal.toFixed(2), bestXi !== null ? xmlItem.v_prod.toFixed(2) : '—', valbrutMatch ? true : totalMatch);
-        const totvsQtd = _toFloat(totvsItem.d1_quant);
+        itemChk('Vlr. Total Item', totvsTotal.toFixed(2), bestXi !== null ? xmlItem.v_prod.toFixed(2) : '—', valbrutMask ? true : totalMatch);
+        const totvsQtd = sum('d1_quant');
         const qtdMatch = bestXi !== null ? _cmpFloat(totvsQtd, xmlItem.q_com) : false;
-        itemChk('Quantidade', totvsQtd.toFixed(4), bestXi !== null ? xmlItem.q_com.toFixed(4) : '—', (totalMatch || valbrutMatch) ? true : qtdMatch);
-        const totvsVunit = _toFloat(totvsItem.d1_vunit);
+        itemChk('Quantidade', totvsQtd.toFixed(4), bestXi !== null ? xmlItem.q_com.toFixed(4) : '—', (totalMatch || valbrutMask) ? true : qtdMatch);
+        const totvsVunit = totvsQtd ? totvsTotal / totvsQtd : sum('d1_vunit');
         const vunitMatch = bestXi !== null ? _cmpFloat(totvsVunit, xmlItem.v_un_com) : false;
-        itemChk('Vlr. Unitário', totvsVunit.toFixed(4), bestXi !== null ? xmlItem.v_un_com.toFixed(4) : '—', (totalMatch || valbrutMatch) ? true : vunitMatch);
+        itemChk('Vlr. Unitário', totvsVunit.toFixed(4), bestXi !== null ? xmlItem.v_un_com.toFixed(4) : '—', (totalMatch || valbrutMask) ? true : vunitMatch);
         // TES via regras Lince — empresa vem do header (corrige bug EQS-fixo do legado)
         const totvsTes = String(totvsItem.d1_tes || '').trim();
         const natureza = String(totvsHeader.f1_naturez || '').trim();
         const ctrlImposto = bestXi !== null ? deriveCtrlImposto(xmlItem) : '';
         let expectedTes = '';
         let tesMatch = true;
+        let tesRegra = null;
         if (bestXi !== null && natureza) {
             const xi = xmlItem;
             const r = (0, tes_rules_1.definirTes)({
@@ -195,6 +246,7 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
                 icms_aliq_xml: xi.p_icms || null,
             });
             expectedTes = r.tes;
+            tesRegra = r.meta?.regra_aplicada || null;
             // Parametrização lince_tes_regras — o bot aplica esse override depois de
             // definir_tes (cred ICMS: fornecedor+produto+TES nas listas do banco).
             // Sem isso a conferência esperava a TES padrão e falhava nos dois
@@ -207,20 +259,52 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
             tesMatch = expectedTes ? expectedTes === totvsTes : true;
         }
         itemChk('TES', expectedTes || totvsTes, totvsTes, tesMatch);
-        // ICMS item — valida regra zerar
-        const totvsIcmsItem = _toFloat(totvsItem.d1_valicms);
+        // "Não verificável" ≠ match: a regra não consegue decidir a TES esperada
+        // (natureza cód.8, CC especial sem TES, tes_vazio_no_siga). Informativo —
+        // sai do silêncio sem criar fila sem dono.
+        if (bestXi !== null && natureza && !expectedTes) {
+            itemInfo('Não verificável', tesRegra || '—', totvsTes || '—');
+        }
+        const zerarIcms = !!totvsTes && (0, tes_rules_1.precisaZerarIcms)(totvsTes, ctrlImposto);
+        const zerarIpi = !!totvsTes && (0, tes_rules_1.precisaZerarIpi)(totvsTes, ctrlImposto);
+        const zerarSt = !!totvsTes && (0, tes_rules_1.precisaZerarIcmsSt)(totvsTes, ctrlImposto);
+        // ICMS item — D1_VALICMS nunca é gravada neste ambiente: a SF4 das TES
+        // zera o campo na gravação (0 linhas >0 em set–out/2026; a prova real do
+        // imposto são Base ICMS + Aliq ICMS abaixo). Aceita 0 ou o valor do XML
+        // (se alguma TES contabilizar); um terceiro valor é divergência real.
+        const totvsIcmsItem = sum('d1_valicms');
         const xmlIcmsItem = bestXi !== null ? xmlItem.v_icms : 0;
-        const icmsItemMatch = bestXi !== null && totvsTes && (0, tes_rules_1.precisaZerarIcms)(totvsTes, ctrlImposto)
-            ? totvsIcmsItem === 0
-            : bestXi !== null ? _cmpFloat(totvsIcmsItem, xmlIcmsItem) : false;
-        itemChk('ICMS Item', totvsIcmsItem.toFixed(2), bestXi !== null ? xmlIcmsItem.toFixed(2) : '—', valbrutMatch ? true : icmsItemMatch);
+        const icmsItemMatch = bestXi !== null &&
+            (totvsIcmsItem === 0 || _cmpFloat(totvsIcmsItem, xmlIcmsItem));
+        itemChk('ICMS Item', '0.00', totvsIcmsItem.toFixed(2), valbrutMask ? true : icmsItemMatch);
         // IPI item — valida regra zerar
-        const totvsIpiItem = _toFloat(totvsItem.d1_valipi);
+        const totvsIpiItem = sum('d1_valipi');
         const xmlIpiItem = bestXi !== null ? xmlItem.v_ipi : 0;
-        const ipiItemMatch = bestXi !== null && totvsTes && (0, tes_rules_1.precisaZerarIpi)(totvsTes, ctrlImposto)
-            ? totvsIpiItem === 0
+        const ipiItemMatch = bestXi !== null && zerarIpi
+            ? totvsIpiItem === 0 || _cmpFloat(totvsIpiItem, xmlIpiItem)
             : bestXi !== null ? _cmpFloat(totvsIpiItem, xmlIpiItem) : false;
-        itemChk('IPI Item', totvsIpiItem.toFixed(2), bestXi !== null ? xmlIpiItem.toFixed(2) : '—', valbrutMatch ? true : ipiItemMatch);
+        itemChk('IPI Item', (zerarIpi ? 0 : xmlIpiItem).toFixed(2), totvsIpiItem.toFixed(2), valbrutMask ? true : ipiItemMatch);
+        // ── Campos que o Lince escreve e ninguém conferia ────────────────────
+        // Alíquotas/bases/impostos-a-mais por item. Contexto "zerar": a SF4 às
+        // vezes conserva base/aliq residuais (TES 421 grava picm em ~12% das
+        // notas) — aceita 0 OU o valor do XML; um terceiro valor diverge.
+        if (bestXi !== null) {
+            const xi = xmlItem;
+            const campo = (field, xmlV, d1V, zerar) => {
+                const ok = zerar ? (d1V === 0 || _cmpFloat(d1V, xmlV)) : _cmpFloat(d1V, xmlV);
+                itemChk(field, (zerar ? 0 : xmlV).toFixed(2), d1V.toFixed(2), valbrutMask ? true : ok);
+            };
+            campo('Aliq ICMS', xi.p_icms, _toFloat(totvsItem.d1_picm), zerarIcms);
+            campo('Base ICMS', xi.v_bc_icms, sum('d1_baseicm'), zerarIcms);
+            campo('Aliq IPI', xi.p_ipi, _toFloat(totvsItem.d1_ipi), zerarIpi);
+            campo('Base IPI', xi.v_bc_ipi, sum('d1_baseipi'), zerarIpi);
+            campo('ST Item', xi.v_icms_st, sum('d1_icmsret'), zerarSt);
+            campo('Base ST', xi.v_bc_icms_st, sum('d1_bricms'), zerarSt);
+            campo('Desconto', xi.v_desc, sum('d1_valdesc'), false);
+            campo('Frete', xi.v_frete, sum('d1_valfre'), false);
+            campo('Seguro', xi.v_seg, sum('d1_seguro'), false);
+            campo('Despesa', xi.v_outro, sum('d1_despesa'), false);
+        }
         // CFOP — informativo
         itemInfo('CFOP', _normStr(totvsItem.d1_cf), bestXi !== null ? _normStr(xmlItem.cfop) : '—');
         // Origem CST — TOTVS D1_CLASFIS × XML orig+CST
@@ -242,26 +326,112 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
         }
         itemChecks.push(list);
     }
-    // Itens do XML sem par no TOTVS — informativos quando NF total bate
+    // Itens do XML sem par no TOTVS — informativos quando NF total bate.
+    // SD1 completamente vazia = leitura durante o lançamento ou lançamento
+    // quebrado: a divergência é UMA ('Itens no TOTVS'), não N por campo. Os
+    // valores do XML ficam informativos e a TES que a regra Lince espera
+    // aparece pro revisor conferir o lançamento quando ele terminar.
+    if (semItensTotvs) {
+        itemChecks.push([{
+                field: 'Itens no TOTVS',
+                expected: `${xmlItems.length} item(ns) no XML`,
+                actual: '0 lançados — possível leitura durante o lançamento',
+                match: false,
+            }]);
+        hasMismatch = true;
+    }
     for (let xi = 0; xi < xmlItems.length; xi++) {
         if (xmlMatched[xi])
             continue;
         const xi2 = xmlItems[xi];
-        const m2 = valbrutMatch;
+        const m2 = semItensTotvs || valbrutMask;
         const pfx = `Item ${_normStr(xi2.c_prod) || xi + 1} · `;
         const list = [
             { field: pfx + 'Produto', expected: '—', actual: _normStr(xi2.c_prod), match: m2 },
             { field: pfx + 'Quantidade', expected: '—', actual: xi2.q_com.toFixed(4), match: m2 },
             { field: pfx + 'Vlr. Unitário', expected: '—', actual: xi2.v_un_com.toFixed(4), match: m2 },
             { field: pfx + 'Vlr. Total Item', expected: '—', actual: xi2.v_prod.toFixed(2), match: m2 },
-            { field: pfx + 'TES', expected: '—', actual: '—', match: m2 },
             { field: pfx + 'ICMS Item', expected: '—', actual: xi2.v_icms.toFixed(2), match: m2 },
             { field: pfx + 'IPI Item', expected: '—', actual: xi2.v_ipi.toFixed(2), match: m2 },
             { field: pfx + 'CFOP', expected: '—', actual: _normStr(xi2.cfop), match: true },
         ];
+        if (!semItensTotvs) {
+            list.splice(4, 0, { field: pfx + 'TES', expected: '—', actual: '—', match: m2 });
+        }
+        else {
+            const natureza = String(totvsHeader.f1_naturez || '').trim();
+            if (natureza) {
+                const r = (0, tes_rules_1.definirTes)({
+                    natureza,
+                    ctrl_imposto: deriveCtrlImposto(xi2),
+                    empresa,
+                    produto: _normStr(xi2.c_prod) || null,
+                    cfop: _normStr(xi2.cfop) || null,
+                    presenca_comp: xmlData.ind_pres || null,
+                    cfop_xml: _normStr(xi2.cfop) || null,
+                    icms_aliq_xml: xi2.p_icms || null,
+                });
+                let tesEsp = r.tes;
+                if (tesOverride && tesEsp) {
+                    const ov = (0, tes_override_1.resolverTesOverride)(tesOverride, xmlData.emit_cnpj || totvsHeader.a2_cgc, [_normStr(xi2.c_prod)], tesEsp);
+                    if (ov.tes)
+                        tesEsp = ov.tes;
+                }
+                list.push({
+                    field: pfx + 'TES esperada (regra)',
+                    expected: '—',
+                    actual: tesEsp || r.meta?.regra_aplicada || 'não determinável',
+                    match: true,
+                });
+            }
+        }
         if (!m2)
             hasMismatch = true;
         itemChecks.push(list);
+    }
+    // ── Duplicatas (SE2 parcelas × XML cobr.dup) ─────────────────────────
+    // O Lince gera as parcelas no SE2 a partir do XML — qtd e valor têm que
+    // bater (hard); vencimento é informativo (cond. pagto pode mudar
+    // legitimamente) e natureza é conferida só em nível informativo.
+    const se2Parcelas = extras?.se2Parcelas || [];
+    const xmlDups = xmlData.dups || [];
+    if (se2Parcelas.length || xmlDups.length) {
+        const uniq = new Map();
+        for (const p of se2Parcelas) {
+            const k = `${p.parcela}|${p.valor.toFixed(2)}|${p.vencto || ''}`;
+            if (!uniq.has(k))
+                uniq.set(k, p);
+        }
+        const parcelas = [...uniq.values()].sort((a, b) => a.parcela.localeCompare(b.parcela, 'pt-BR', { numeric: true }) || String(a.vencto).localeCompare(String(b.vencto)));
+        const dups = [...xmlDups].sort((a, b) => String(a.d_venc).localeCompare(String(b.d_venc)));
+        if (dups.length) {
+            chk('Qtd. parcelas', String(dups.length), String(parcelas.length), dups.length === parcelas.length);
+            const n = Math.max(dups.length, parcelas.length);
+            for (let i = 0; i < n; i++) {
+                const xd = dups[i];
+                const sp = parcelas[i];
+                const label = `Parcela ${i + 1}`;
+                if (!sp) {
+                    chk(`${label} Vlr.`, xd.v_dup.toFixed(2), '—', false);
+                    continue;
+                }
+                if (!xd) {
+                    chk(`${label} Vlr.`, '—', sp.valor.toFixed(2), false);
+                    continue;
+                }
+                chk(`${label} Vlr.`, xd.v_dup.toFixed(2), sp.valor.toFixed(2), _cmpFloat(xd.v_dup, sp.valor, 0.02));
+                // Vencimento: warning-only — informativo mesmo quando diverge.
+                const dv = _normDate(xd.d_venc);
+                const sv = _normDate(sp.vencto || '');
+                headerChecks.push({ field: `${label} Vencimento`, expected: dv, actual: sv || '—', match: true });
+            }
+        }
+        else {
+            info('Qtd. parcelas', '— (XML sem cobr)', String(parcelas.length));
+        }
+        const natDom = parcelas.length ? parcelas[0].natureza : '';
+        if (natDom)
+            info('Natureza título', _normStr(totvsHeader.f1_naturez), _normStr(natDom));
     }
     const allChecks = [...headerChecks, ...itemChecks.flat()];
     const mismatchCount = allChecks.filter((c) => !c.match).length;
@@ -273,9 +443,11 @@ function compareNf(totvsHeader, totvsItems, xmlData, tesOverride) {
         status,
         header_checks: headerChecks,
         item_checks: itemChecks,
-        summary: cstOnly
-            ? `${mismatchCount} divergência(s) apenas de Origem CST (aviso)`
-            : mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
+        summary: semItensTotvs
+            ? `0 itens lançados no TOTVS — possível leitura durante o lançamento`
+            : cstOnly
+                ? `${mismatchCount} divergência(s) apenas de Origem CST (aviso)`
+                : mismatchCount === 0 ? 'Tudo conferiu' : `${mismatchCount} divergência(s)`,
         mismatch_count: mismatchCount,
         empresa,
         cst_only: cstOnly,

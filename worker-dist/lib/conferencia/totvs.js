@@ -5,6 +5,8 @@ exports.decodeUserlgi = decodeUserlgi;
 exports.fetchMercadoriaNfs = fetchMercadoriaNfs;
 exports.fetchZ01XmlByChave = fetchZ01XmlByChave;
 exports.fetchSdsXmlByChave = fetchSdsXmlByChave;
+exports.se2ParcelaKey = se2ParcelaKey;
+exports.fetchSe2Parcelas = fetchSe2Parcelas;
 exports.checkTituloBordero = checkTituloBordero;
 exports.fetchBorderoStatusBatch = fetchBorderoStatusBatch;
 exports.isFornecCodigo = isFornecCodigo;
@@ -13,6 +15,7 @@ exports.normFornecNome = normFornecNome;
 exports.sa2ByNome = sa2ByNome;
 exports.nfFingerprint = nfFingerprint;
 exports.fetchNfByIdentidade = fetchNfByIdentidade;
+exports.fetchSd1ItensNota = fetchSd1ItensNota;
 /**
  * Conferência de mercadoria — consulta TOTVS REST (SF1+SA2 cabeçalho,
  * SD1+SB1 itens) para NFs lançadas (bot OU humano), EQS + BRATEC.
@@ -34,6 +37,8 @@ exports.SD1_SB1_FIELDS = [
     'D1_FILIAL', 'D1_DOC', 'D1_SERIE', 'D1_FORNECE', 'D1_LOJA', 'D1_COD', 'D1_ITEM',
     'D1_QUANT', 'D1_VUNIT', 'D1_TOTAL', 'D1_VALICMS', 'D1_VALIPI', 'D1_TES', 'D1_CF', 'D1_ICMSRET',
     'D1_BASEICM', 'D1_BASEIPI', 'D1_VALDESC', 'D1_CLASFIS',
+    // Conferência Lince-parity: alíquotas, frete/seguro/despesa por item.
+    'D1_PICM', 'D1_IPI', 'D1_VALFRE', 'D1_SEGURO', 'D1_DESPESA', 'D1_BRICMS',
     'B1_DESC', 'B1_UM',
 ].join(',');
 /** F1_USERLGI codificado → usuário (prefixo até os 2 dígitos após '@='). */
@@ -208,6 +213,70 @@ async function fetchSdsXmlByChave(chave) {
         catch { }
     }
     return null;
+}
+const SE2_PARC_FIELDS = 'E2_NUM,E2_PREFIXO,E2_PARCELA,E2_TIPO,E2_NATUREZ,E2_VALOR,E2_VENCTO,E2_VENCREA,E2_FORNECE,E2_LOJA,E2_BAIXA';
+/** Chave canônica doc|serie|fornec|loja (doc pad-9) — mesma do mapa de retorno. */
+function se2ParcelaKey(doc, serie, fornec, loja) {
+    return `${trim(doc).padStart(9, '0')}|${trim(serie)}|${trim(fornec)}|${trim(loja)}`;
+}
+/** Parcelas SE2 por nota (doc+serie+fornec+loja), batch com IN(...) paginado.
+ * Chave de retorno: `se2ParcelaKey(doc, serie, fornec, loja)`. */
+async function fetchSe2Parcelas(refs) {
+    const out = new Map();
+    if (!refs.length)
+        return out;
+    const allEmps = Object.keys(totvs_1.EMPRESAS);
+    const porEmpresa = new Map();
+    for (const n of refs) {
+        const emps = n.empresa && totvs_1.EMPRESAS[n.empresa] ? [n.empresa] : allEmps;
+        for (const emp of emps) {
+            const g = porEmpresa.get(emp);
+            if (g)
+                g.push(n);
+            else
+                porEmpresa.set(emp, [n]);
+        }
+    }
+    const keyOf = se2ParcelaKey;
+    for (const [emp, grupo] of porEmpresa) {
+        const tenantId = totvs_1.EMPRESAS[emp];
+        const docNums = [...new Set(grupo.flatMap((n) => docVariants(n.doc)))];
+        for (let i = 0; i < docNums.length; i += BATCH_CHUNK) {
+            const inList = docNums.slice(i, i + BATCH_CHUNK).map((d) => `'${d}'`).join(',');
+            try {
+                const d = await queryAllPages(tenantId, {
+                    tables: 'SE2', fields: SE2_PARC_FIELDS,
+                    where: `SE2.D_E_L_E_T_=' ' AND E2_NUM IN (${inList})`,
+                    pageSize: '1000',
+                });
+                for (const it of d.items || []) {
+                    for (const n of grupo) {
+                        if (!docVariants(n.doc).includes(trim(it.e2_num)))
+                            continue;
+                        if (n.serie && trim(it.e2_prefixo) !== n.serie)
+                            continue;
+                        if (n.fornec && trim(it.e2_fornece) !== n.fornec)
+                            continue;
+                        if (n.loja && trim(it.e2_loja) !== n.loja)
+                            continue;
+                        const k = keyOf(n.doc, n.serie, n.fornec, n.loja);
+                        const arr = out.get(k) || [];
+                        const ven = trim(it.e2_vencrea || it.e2_vencto);
+                        arr.push({
+                            parcela: trim(it.e2_parcela),
+                            tipo: trim(it.e2_tipo),
+                            natureza: trim(it.e2_naturez),
+                            valor: Number(it.e2_valor) || 0,
+                            vencto: /^\d{4}-\d{2}-\d{2}/.test(ven) ? ven.slice(0, 10) : null,
+                        });
+                        out.set(k, arr);
+                    }
+                }
+            }
+            catch { }
+        }
+    }
+    return out;
 }
 /**
  * Verifica se o título da NF está em borderô de pagamento (SEA — "Títulos
@@ -709,4 +778,24 @@ async function fetchNfByIdentidade(ref) {
         catch { }
     }
     return { encontrada: false, empresa: null, header: null, items: [], fingerprint: null };
+}
+/**
+ * Re-leitura dedicada da SD1 de UMA nota (sem janela de data). O batch do
+ * ciclo pode reportar 0 itens por corrida — Lince gravando os itens depois do
+ * fetch em lote, ou deriva de paginação com a tabela crescendo. Antes de
+ * acusar "0 itens no TOTVS", confirma com esta leitura pontual.
+ */
+async function fetchSd1ItensNota(tenantId, ref) {
+    const docIn = docVariants(ref.doc).map((d) => `'${d}'`).join(',');
+    const it = await (0, totvs_1.genericQuery)(tenantId, {
+        tables: 'SD1,SB1',
+        fields: exports.SD1_SB1_FIELDS,
+        where: `SD1.D1_DOC IN (${docIn})` +
+            (ref.serie ? ` AND SD1.D1_SERIE='${ref.serie}'` : '') +
+            ` AND SD1.D1_FORNECE='${trim(ref.fornec)}'` +
+            (ref.loja ? ` AND SD1.D1_LOJA='${trim(ref.loja)}'` : '') +
+            ` AND SD1.D1_COD=SB1.B1_COD AND SD1.D_E_L_E_T_=' ' AND SB1.D_E_L_E_T_=' '`,
+        page: '1', pageSize: '500',
+    });
+    return it.items || [];
 }

@@ -254,10 +254,24 @@ async function downloadExtrato(onProgress, options) {
     // that are NOT in the new dataset. This prevents data loss if insert fails.
     console.log(`[Extrato] Todos os ${chunks.length} chunks baixados. Iniciando persistência no DB...`);
     for (const { start: chunkStart, end: chunkEnd, rows: batch } of chunkData) {
+        // ON CONFLICT falha se a chave (data,hora,codigo_transacao,is_snapshot)
+        // aparecer 2x no mesmo INSERT — dedup por chave de conflito (a última
+        // ocorrência vence, mesmo resultado que o DO UPDATE daria). Linhas com
+        // codigo_transacao NULL não entram no índice parcial e nunca conflitam.
+        const byKey = new Map();
+        const semCodigo = [];
+        for (const row of batch) {
+            if (row[2] == null) {
+                semCodigo.push(row);
+                continue;
+            }
+            byKey.set(`${row[0]}|${row[1]}|${row[2]}|${row[16]}`, row);
+        }
+        const deduped = [...byKey.values(), ...semCodigo];
         // Insert new rows FIRST (before deleting old ones)
         const SUB_BATCH = 100;
-        for (let j = 0; j < batch.length; j += SUB_BATCH) {
-            const sub = batch.slice(j, j + SUB_BATCH);
+        for (let j = 0; j < deduped.length; j += SUB_BATCH) {
+            const sub = deduped.slice(j, j + SUB_BATCH);
             const valueGroups = [];
             const params = [];
             let paramIdx = 1;

@@ -16,7 +16,8 @@ import { mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import { sql } from '../db/neon';
 import { ensureFiscalTables, computeReviewStatus } from '../fiscal/fiscal-db';
-import { fetchMercadoriaNfs, fetchSe2Parcelas, nfFingerprint, se2ParcelaKey } from './totvs';
+import { fetchMercadoriaNfs, fetchSe2Parcelas, fetchSd1ItensNota, nfFingerprint, se2ParcelaKey } from './totvs';
+import { EMPRESAS } from '../impacto/totvs';
 import { ensureDocCacheTable, cacheHasChaves, prepararSieg, obterXmlNfe } from './fontes';
 import { compareNf } from './comparator';
 import { carregarTesOverride } from './tes-override';
@@ -477,14 +478,27 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
         fornecedor: trim(h.f1_fornece), cnpj: trim(h.a2_cgc),
         valor: Number(h.f1_valbrut) || null, emissao, chave,
       };
+      // SD1 do batch pode vir vazia por corrida (Lince gravando itens após o
+      // fetch em lote) ou deriva de paginação — re-leitura dedicada confirma
+      // o "0 itens" antes de acusar divergência.
+      let items = nf.items;
+      if (!items.length) {
+        try {
+          const reread = await fetchSd1ItensNota(EMPRESAS[h._empresa], {
+            doc: base.doc, serie: base.serie,
+            fornec: base.fornecedor, loja: trim(h.f1_loja),
+          });
+          if (reread.length) items = reread;
+        } catch {}
+      }
       const extraBase = {
         empresa: h._empresa, usuario: h.f1_userlgi || null,
-        f1_dtdigit: trim(h.f1_dtdigit), f1_loja: trim(h.f1_loja), itens_totvs: nf.items.length,
+        f1_dtdigit: trim(h.f1_dtdigit), f1_loja: trim(h.f1_loja), itens_totvs: items.length,
         ...(vex ? { vexpenses: { expense_id: vex.expense_id, report_id: vex.report_id, report_name: vex.report_name } } : {}),
       };
       // Fingerprint do estado TOTVS na conferência — baseline pro monitor de
       // canceladas detectar edição/re-digitação depois.
-      const fingerprint = nfFingerprint(h, nf.items);
+      const fingerprint = nfFingerprint(h, items);
 
       let xmlRes = null;
       try {
@@ -518,7 +532,7 @@ export async function syncConferencia(opts: { janelaDias?: number; useSieg?: boo
         const parc = parcelasMap.get(
           se2ParcelaKey(h.f1_doc, h.f1_serie, h.f1_fornece, h.f1_loja)
         );
-        cmp = compareNf(h, nf.items, xmlRes.parsed, tesOvr, { se2Parcelas: parc });
+        cmp = compareNf(h, items, xmlRes.parsed, tesOvr, { se2Parcelas: parc });
       } catch (e: any) {
         const nextRetry = new Date(now + RETRY_BASE_MIN * 60_000);
         await upsertNota(runId, {

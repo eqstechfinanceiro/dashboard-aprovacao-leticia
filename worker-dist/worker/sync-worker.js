@@ -31,6 +31,7 @@ const totvs_1 = require("../lib/impacto/totvs");
 const totvs_2 = require("../lib/boletos/totvs");
 const sync_2 = require("../lib/conferencia/sync");
 const servico_docs_1 = require("../lib/fiscal/servico-docs");
+const servico_validar_1 = require("../lib/fiscal/servico-validar");
 const bordero_monitor_1 = require("../lib/fiscal/bordero-monitor");
 const cancelada_monitor_1 = require("../lib/fiscal/cancelada-monitor");
 const settings_1 = require("../lib/db/settings");
@@ -251,6 +252,17 @@ async function warmCycle() {
         }
         catch (e) {
             await logError(runId, 'warm', 'servico-docs', e?.message || String(e), true);
+        }
+        // Revalidação server-side de serviço — multi-doc pdfjs + fallback por
+        // metadados do processo (PDF-imagem sem OCR). Tira as falhas falsas.
+        try {
+            const rv = await (0, servico_validar_1.revalidarServicos)({ limit: 15 });
+            if (rv.processadas) {
+                meta.servico_revalidar = `proc:${rv.processadas} ok:${rv.promovidas_match} aviso:${rv.promovidas_aviso} div:${rv.divergentes} falha:${rv.seguem_falha} err:${rv.erros.length}`;
+            }
+        }
+        catch (e) {
+            await logError(runId, 'warm', 'servico-revalidar', e?.message || String(e), true);
         }
         // Monitor fiscal — cache batch de borderô (SEA×SE2 por tenant, erros
         // pendentes p/ contas a pagar) + monitor de re-lançamento de canceladas

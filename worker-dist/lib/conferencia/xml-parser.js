@@ -137,6 +137,20 @@ function parseNfeXml(xmlText) {
             p_ipi: ipi.p_ipi,
         });
     }
+    // Duplicatas <cobr><dup> — conferidas contra as parcelas SE2.
+    const dups = [];
+    const cobrBlk = tag(infNfe, 'cobr');
+    if (cobrBlk) {
+        const dupRe = /<dup>([\s\S]*?)<\/dup>/g;
+        let dm;
+        while ((dm = dupRe.exec(cobrBlk)) !== null) {
+            dups.push({
+                n_dup: tag(dm[1], 'nDup'),
+                d_venc: tag(dm[1], 'dVenc'),
+                v_dup: numTag(dm[1], 'vDup'),
+            });
+        }
+    }
     return {
         chave,
         numero: tag(ide, 'nNF'),
@@ -150,5 +164,6 @@ function parseNfeXml(xmlText) {
         filial: CNPJ_FILIAL_EQS[destCnpj] || '',
         total,
         items,
+        dups,
     };
 }
