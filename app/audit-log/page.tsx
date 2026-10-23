@@ -32,6 +32,9 @@ const fmtTime = (iso: string) => new Date(iso).toLocaleString('pt-BR');
 
 const ACTION_COLORS: Record<string, string> = {
   'quinzena.freeze': 'bg-blue-100 text-blue-700',
+  'quinzena.edit_override': 'bg-amber-100 text-amber-700',
+  'quinzena.autocarga': 'bg-emerald-100 text-emerald-700',
+  'quinzena.autocarga_force': 'bg-emerald-100 text-emerald-700',
   'quinzena.unfreeze': 'bg-amber-100 text-amber-700',
   'quinzena.import_qz': 'bg-indigo-100 text-indigo-700',
   'relatorio.approve': 'bg-green-100 text-green-700',

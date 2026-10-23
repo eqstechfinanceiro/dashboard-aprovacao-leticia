@@ -4,6 +4,8 @@ import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
 import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 import { getQuinzenaDates, toNum, r2, calcFinancials } from '@/lib/quinzena/financials';
+import { ensureAutocargaSchema } from '@/lib/autocarga/tables';
+import { logAudit } from '@/lib/db/audit';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +27,12 @@ interface ManualInput {
   adiantamento: string | null;
   obs: string | null;
   cpf: string | null;
+  reembolso_override: string | null;
+  carga_final_override: string | null;
+  reembolso_edited_by: string | null;
+  reembolso_edited_at: string | null;
+  carga_final_edited_by: string | null;
+  carga_final_edited_at: string | null;
 }
 
 interface FrozenSnapshot {
@@ -81,6 +89,14 @@ export interface QuinzenaRow {
   carga_parcial: number;
   reembolso: number;
   carga_final: number;
+  // Overrides manuais de resultado (auto-carga era): valor efetivo acima,
+  // calculado + metadados de edição abaixo
+  reembolso_override: number | null;
+  carga_final_override: number | null;
+  reembolso_calc: number;
+  carga_final_calc: number;
+  reembolso_edit: { by: string | null; at: string | null } | null;
+  carga_final_edit: { by: string | null; at: string | null } | null;
   data_sources: {
     col_qz: 'manual' | 'null';
     adiantamento: 'manual' | 'default';
@@ -147,12 +163,17 @@ export async function GET(request: NextRequest) {
 
   const { start_date, end_date, fechamento, financial_cutoff, saldo_cartao_controle_date, saldo_cartao_carga_date } = getQuinzenaDates(year, month, quinzena);
 
+  // Colunas de override (reembolso/carga_final) — criadas sob demanda
+  await ensureAutocargaSchema();
+
   const scope = await getScopeForRequest(request);
   const inScope = (cpf: string | null | undefined) =>
     !scope || (!!cpf && scope.cpfs.has(normalizeCpf(cpf) ?? '__none__'));
 
   try {
-    // 0. Read reembolso multiplier from config table
+    // 0. Read reembolso multiplier from config table.
+    //    Novo default (out/2026): período SEM linha de config → 0 (a regra de
+    //    reembolso de 50% foi descontinuada; config explícita ainda é honrada).
     const configRows = await sql`
       SELECT reembolso_multiplier::text
       FROM quinzena_config
@@ -160,7 +181,7 @@ export async function GET(request: NextRequest) {
     `;
     const reembolsoMultiplier = configRows[0]
       ? parseFloat(configRows[0].reembolso_multiplier as string)
-      : 0.5;
+      : 0;
 
     // 1. Check if this period is frozen (skip if forceCalc=true)
     const frozenRows = forceCalc ? [] : await sql`
@@ -193,6 +214,18 @@ export async function GET(request: NextRequest) {
       const sitByCpf = new Map<string, string>();
       for (const r of sitRows as any[]) if (r.situacao) sitByCpf.set(r.cpf, r.situacao);
 
+      // Metadados de override pré-freeze (a edição aconteceu antes do congelar;
+      // os valores do snapshot já são os efetivos)
+      const frozenManuals = await sql`
+        SELECT cpf, reembolso_override::text, carga_final_override::text,
+               reembolso_edited_by, reembolso_edited_at,
+               carga_final_edited_by, carga_final_edited_at
+        FROM quinzena_manual_inputs
+        WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+      `;
+      const frozenManualByCpf = new Map<string, any>();
+      for (const m of frozenManuals as any[]) if (m.cpf) frozenManualByCpf.set(m.cpf, m);
+
       // Return frozen data directly
       let rows: QuinzenaRow[] = frozenSnapshots.map((snap) => {
         const sf = toNum(snap.saldo_final);
@@ -204,6 +237,7 @@ export async function GET(request: NextRequest) {
         const carga_parcial = toNum(snap.carga_parcial);
         const reembolso = toNum(snap.reembolso);
         const carga_final = toNum(snap.carga_final);
+        const man = frozenManualByCpf.get(snap.cpf);
 
         return {
           cpf: snap.cpf,
@@ -231,6 +265,16 @@ export async function GET(request: NextRequest) {
           carga_parcial,
           reembolso,
           carga_final,
+          reembolso_override: man?.reembolso_override != null ? toNum(man.reembolso_override) : null,
+          carga_final_override: man?.carga_final_override != null ? toNum(man.carga_final_override) : null,
+          // No snapshot o valor gravado já é o efetivo — o "calculado" original
+          // não é recuperável quando houve override (histórico no audit_log)
+          reembolso_calc: reembolso,
+          carga_final_calc: carga_final,
+          reembolso_edit: man?.reembolso_edited_by
+            ? { by: man.reembolso_edited_by, at: man.reembolso_edited_at } : null,
+          carga_final_edit: man?.carga_final_edited_by
+            ? { by: man.carga_final_edited_by, at: man.carga_final_edited_at } : null,
           data_sources: {
             col_qz: col_qz !== null ? 'manual' as const : 'null' as const,
             adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
@@ -283,9 +327,12 @@ export async function GET(request: NextRequest) {
     `;
     const cadastroBase = cadastroRows as unknown as CadastroRow[];
 
-    // 2b. Load manual inputs
+    // 2b. Load manual inputs (incluindo overrides de resultado)
     const manualRows = await sql`
-      SELECT col_1qz::text, adiantamento::text, obs, cpf
+      SELECT col_1qz::text, adiantamento::text, obs, cpf,
+             reembolso_override::text, carga_final_override::text,
+             reembolso_edited_by, reembolso_edited_at,
+             carga_final_edited_by, carga_final_edited_at
       FROM quinzena_manual_inputs
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
     `;
@@ -487,7 +534,7 @@ export async function GET(request: NextRequest) {
 
       const col_qz_efetivo = col_qz_manual !== null ? col_qz_manual : 0;
 
-      const { carga_parcial, reembolso, carga_final } = calcFinancials(
+      const calc = calcFinancials(
         col_qz_efetivo,
         saldo_final_carga,
         saldo_cartao_carga,
@@ -497,6 +544,17 @@ export async function GET(request: NextRequest) {
         snap.status_cartao ?? '',
         reembolsoMultiplier,
       );
+
+      // Overrides manuais de resultado (editáveis pré-freeze; override explícito
+      // vence até a regra de "pendente = 0" — foi decisão humana auditada)
+      const reembolso_override = manual?.reembolso_override != null
+        ? toNum(manual.reembolso_override) : null;
+      const carga_final_override = manual?.carga_final_override != null
+        ? toNum(manual.carga_final_override) : null;
+      const reembolso_efetivo = reembolso_override ?? calc.reembolso;
+      const carga_parcial = calc.carga_parcial;
+      const reembolso = reembolso_efetivo;
+      const carga_final = carga_final_override ?? r2(Math.max(0, carga_parcial) + reembolso_efetivo);
 
       return {
         cpf: snap.cpf,
@@ -524,6 +582,14 @@ export async function GET(request: NextRequest) {
         carga_parcial,
         reembolso,
         carga_final,
+        reembolso_override,
+        carga_final_override,
+        reembolso_calc: calc.reembolso,
+        carga_final_calc: calc.carga_final,
+        reembolso_edit: manual?.reembolso_edited_by
+          ? { by: manual.reembolso_edited_by, at: manual.reembolso_edited_at } : null,
+        carga_final_edit: manual?.carga_final_edited_by
+          ? { by: manual.carga_final_edited_by, at: manual.carga_final_edited_at } : null,
         data_sources: {
           col_qz: col_qz_manual !== null ? 'manual' as const : 'null' as const,
           adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
@@ -615,13 +681,18 @@ export async function GET(request: NextRequest) {
 
 // ---- POST: salvar campo manual ----------------------------------------------
 
-const ALLOWED_FIELDS = ['col_1qz', 'adiantamento', 'obs'] as const;
+const ALLOWED_FIELDS = ['col_1qz', 'adiantamento', 'obs', 'reembolso', 'carga_final'] as const;
 type AllowedField = typeof ALLOWED_FIELDS[number];
+
+// Campos que alteram o valor que vira dinheiro na auto-carga — restritos a
+// não-gestores (D8) e proibidos após congelar (o snapshot já é a verdade).
+const OVERRIDE_FIELDS: AllowedField[] = ['reembolso', 'carga_final'];
 
 export async function POST(request: NextRequest) {
   if (!sql) {
     return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
   }
+  await ensureAutocargaSchema();
 
   let body: {
     cpf: string;
@@ -662,12 +733,40 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (field === 'col_1qz' || field === 'adiantamento') {
+  if (field === 'col_1qz' || field === 'adiantamento' || OVERRIDE_FIELDS.includes(field)) {
     const n = parseFloat(String(value));
     if (value !== null && isNaN(n)) {
       return NextResponse.json(
         { error: `${field} deve ser numerico ou null` },
         { status: 400 },
+      );
+    }
+    if (OVERRIDE_FIELDS.includes(field) && value !== null && n < 0) {
+      return NextResponse.json(
+        { error: `${field} não pode ser negativo` },
+        { status: 400 },
+      );
+    }
+  }
+
+  // Overrides: gestor não edita resultado (mexe no valor que vira dinheiro)
+  if (OVERRIDE_FIELDS.includes(field) && postScope) {
+    return NextResponse.json(
+      { error: 'Gestores não podem editar reembolso/carga final' },
+      { status: 403 },
+    );
+  }
+
+  // Overrides só valem pré-freeze — depois do congelar a verdade é o snapshot
+  if (OVERRIDE_FIELDS.includes(field)) {
+    const frozenCnt = await sql`
+      SELECT COUNT(*) AS cnt FROM quinzena_frozen_snapshots
+      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+    `;
+    if (Number(frozenCnt[0].cnt) > 0) {
+      return NextResponse.json(
+        { error: 'Quinzena congelada — descongele para editar valores' },
+        { status: 409 },
       );
     }
   }
@@ -689,7 +788,7 @@ export async function POST(request: NextRequest) {
         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
         DO UPDATE SET adiantamento = EXCLUDED.adiantamento, updated_at = NOW()
       `;
-    } else {
+    } else if (field === 'obs') {
       const strVal = value === null ? null : String(value);
       await sql`
         INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, obs)
@@ -697,6 +796,46 @@ export async function POST(request: NextRequest) {
         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
         DO UPDATE SET obs = EXCLUDED.obs, updated_at = NOW()
       `;
+    } else {
+      // Override de resultado — coluna *_override + quem/quando editou + audit
+      const col = field === 'reembolso' ? 'reembolso' : 'carga_final';
+      const numVal = value === null ? null : parseFloat(String(value));
+      const userEmail = request.headers.get('x-user-email') || 'unknown';
+
+      const prevRes = await sql.query(
+        `SELECT ${col}_override FROM quinzena_manual_inputs
+         WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+        [cpf, year, month, quinzena],
+      );
+      const oldValue = prevRes.rows?.[0]?.[`${col}_override`] ?? null;
+
+      await sql.query(
+        `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, ${col}_override, ${col}_edited_by, ${col}_edited_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+         DO UPDATE SET ${col}_override = EXCLUDED.${col}_override,
+                       ${col}_edited_by = EXCLUDED.${col}_edited_by,
+                       ${col}_edited_at = NOW(),
+                       updated_at = NOW()`,
+        [cpf, year, month, quinzena, numVal, userEmail],
+      );
+
+      // Nome do colaborador pro audit ficar legível
+      const cad = await sql`
+        SELECT colaborador FROM quinzena_cadastro WHERE cpf = ${cpf} LIMIT 1
+      `;
+      await logAudit(request, {
+        action: 'quinzena.edit_override',
+        entity_type: 'quinzena',
+        entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}:${cpf}`,
+        details: {
+          field, cpf,
+          colaborador: (cad[0] as any)?.colaborador ?? null,
+          old_value: oldValue != null ? Number(oldValue) : null,
+          new_value: numVal,
+          cleared: numVal === null && oldValue != null,
+        },
+      });
     }
 
     return NextResponse.json({ ok: true });

@@ -3,6 +3,7 @@ import { ImportQzModal } from '@/components/ImportQzModal';
 import { FreezePrecheckModal } from '@/components/freeze-precheck-modal';
 import { FreezeDiffModal } from '@/components/freeze-diff-modal';
 import { ReconcileModal } from '@/components/reconcile-modal';
+import { AutoCargaModal } from '@/components/autocarga-modal';
 import { useAuth } from '@/lib/auth/auth-context';
 
 import { useState, useEffect, useCallback, useRef, ReactNode } from 'react';
@@ -23,6 +24,7 @@ import {
   X,
   Snowflake,
   Unlock,
+  Zap,
 } from 'lucide-react';
 
 // ---- Types ------------------------------------------------------------------
@@ -70,6 +72,13 @@ interface QuinzenaRow {
   carga_parcial: number;
   reembolso: number;
   carga_final: number;
+  // Overrides de resultado (editáveis pré-freeze; valores efetivos acima)
+  reembolso_override: number | null;
+  carga_final_override: number | null;
+  reembolso_calc: number;
+  carga_final_calc: number;
+  reembolso_edit: { by: string | null; at: string | null } | null;
+  carga_final_edit: { by: string | null; at: string | null } | null;
   _data_source: 'frozen' | 'calculado';
   _is_frozen: boolean;
   data_sources: {
@@ -371,7 +380,7 @@ export default function QuinzenaDinamicaPage() {
   // 3. Save manual field — optimistic local update, no refetch
   const saveField = async (cpf: string, field: string, rawValue: string | null) => {
     if (year === null || month === null || quinzena === null) return;
-    const value = (field === 'col_1qz' || field === 'adiantamento') && rawValue !== null
+    const value = ['col_1qz', 'adiantamento', 'reembolso', 'carga_final'].includes(field) && rawValue !== null
       ? parseFloat(rawValue)
       : rawValue;
 
@@ -393,6 +402,7 @@ export default function QuinzenaDinamicaPage() {
         data: prev.data.map(row => {
           if (row.cpf !== cpf) return row;
           const updated = { ...row };
+          const nowIso = new Date().toISOString();
           if (field === 'col_1qz') {
             updated.col_qz_manual = rawValue === null ? null : parseFloat(rawValue);
             updated.data_sources = {
@@ -408,8 +418,16 @@ export default function QuinzenaDinamicaPage() {
             };
           }
           if (field === 'obs') updated.obs = rawValue;
+          if (field === 'reembolso') {
+            updated.reembolso_override = value === null ? null : parseFloat(rawValue!);
+            updated.reembolso_edit = { by: user?.email ?? 'você', at: nowIso };
+          }
+          if (field === 'carga_final') {
+            updated.carga_final_override = value === null ? null : parseFloat(rawValue!);
+            updated.carga_final_edit = { by: user?.email ?? 'você', at: nowIso };
+          }
 
-          // Recalculate (regras confirmadas: reembolso 0 na 2QZ, cadastro pendente = 0)
+          // Recalculate fórmula (reembolso 0 na 2QZ, cadastro pendente = 0)
           const qz = prev.period.quinzena;
           const col_qz_efetivo = updated.col_qz_manual !== null
             ? updated.col_qz_manual
@@ -418,17 +436,25 @@ export default function QuinzenaDinamicaPage() {
 
           if (isPendente) {
             updated.carga_parcial = 0;
-            updated.reembolso = 0;
-            updated.carga_final = 0;
+            updated.reembolso_calc = 0;
+            updated.carga_final_calc = 0;
           } else {
             updated.carga_parcial = Math.round(
               (col_qz_efetivo - updated.saldo_final_carga - updated.saldo_cartao_carga - updated.adiantamento) * 100,
             ) / 100;
-            updated.reembolso = qz === 1
-              ? Math.round(Math.max(0, updated.saldo_reembolsar) * (prev.reembolso_multiplier ?? 0.5) * 100) / 100
+            updated.reembolso_calc = qz === 1
+              ? Math.round(Math.max(0, updated.saldo_reembolsar) * (prev.reembolso_multiplier ?? 0) * 100) / 100
               : 0;
-            updated.carga_final = Math.round((Math.max(0, updated.carga_parcial) + updated.reembolso) * 100) / 100;
+            updated.carga_final_calc = Math.round(
+              (Math.max(0, updated.carga_parcial) + updated.reembolso_calc) * 100,
+            ) / 100;
           }
+
+          // Valores efetivos: override vence a fórmula (inclusive a regra pendente)
+          updated.reembolso = updated.reembolso_override ?? updated.reembolso_calc;
+          updated.carga_final = updated.carga_final_override ?? Math.round(
+            (Math.max(0, updated.carga_parcial) + updated.reembolso) * 100,
+          ) / 100;
           return updated;
         }),
       };
@@ -690,6 +716,37 @@ export default function QuinzenaDinamicaPage() {
   const [diffOpen, setDiffOpen] = useState(false);
   const [reconcileOpen, setReconcileOpen] = useState(false);
 
+  // Auto-carga: só depois do freeze e só pra allowlist (o endpoint diz quem pode)
+  const [autocargaOpen, setAutocargaOpen] = useState(false);
+  const [canAutocarga, setCanAutocarga] = useState(false);
+  const [cargaItems, setCargaItems] = useState<Record<string, { status: string; amount: number; block_reason: string | null; transaction_id: string | null; forced: boolean }>>({});
+  const [lastRun, setLastRun] = useState<{ status: string; items_ok: number; items_failed: number; total_loaded: number | null } | null>(null);
+
+  const loadCargaStatus = useCallback(async (y: number, m: number, q: number) => {
+    try {
+      const r = await fetch(`/api/quinzena-autocarga/status?year=${y}&month=${m}&quinzena=${q}`, { cache: 'no-store' });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error);
+      setCanAutocarga(!!j.can_autocarga);
+      setCargaItems(j.items ?? {});
+      setLastRun(j.run ? { status: j.run.status, items_ok: j.run.items_ok ?? 0, items_failed: j.run.items_failed ?? 0, total_loaded: j.run.total_loaded } : null);
+    } catch {
+      setCanAutocarga(false);
+      setCargaItems({});
+      setLastRun(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (year !== null && month !== null && quinzena !== null && isFrozen) {
+      loadCargaStatus(year, month, quinzena);
+    } else {
+      setCanAutocarga(false);
+      setCargaItems({});
+      setLastRun(null);
+    }
+  }, [year, month, quinzena, isFrozen, loadCargaStatus]);
+
   const handleFreeze = async () => {
     if (year === null || month === null || quinzena === null) return;
     setFreezing(true);
@@ -821,6 +878,21 @@ export default function QuinzenaDinamicaPage() {
               Congelar
             </Button>
           ))}
+          {isFrozen && canAutocarga && (
+            <Button
+              size="sm"
+              onClick={() => setAutocargaOpen(true)}
+              className="bg-emerald-600 hover:bg-emerald-700"
+              title={lastRun
+                ? `Última carga: ${lastRun.status} — ${lastRun.items_ok} ok · ${lastRun.items_failed} falha(s)`
+                : 'Executa a carga automática dos cartões com os valores congelados'}
+            >
+              <Zap className="h-4 w-4 mr-1" />
+              {lastRun
+                ? lastRun.status === 'done' ? 'Auto-carga ✓' : `Auto-carga (${lastRun.items_failed} falhas)`
+                : 'Auto-carga'}
+            </Button>
+          )}
           {!isGestor && (
             <Button size="sm" variant="outline"
               onClick={() => setImportModalOpen(true)}
@@ -1164,6 +1236,9 @@ export default function QuinzenaDinamicaPage() {
                   <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded">Neon</span>
                   <span className="bg-amber-100 text-amber-700 px-2 py-0.5 rounded">Manual</span>
                   <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Calculado</span>
+                  <span className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300" title="Valor editado manualmente — passe o mouse sobre a célula para ver quem e quando">
+                    ● override
+                  </span>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -1195,8 +1270,8 @@ export default function QuinzenaDinamicaPage() {
                       <SortTh k="adiantamento" className="text-right px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Adiant. *</SortTh>
                       {/* Calculated */}
                       <SortTh k="carga_parcial" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Carga Parcial</SortTh>
-                      <SortTh k="reembolso" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Reembolso</SortTh>
-                      <SortTh k="carga_final" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap font-bold">Carga Final</SortTh>
+                      <SortTh k="reembolso" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap">Reembolso *</SortTh>
+                      <SortTh k="carga_final" className="text-right px-2 py-2 font-semibold bg-blue-50 whitespace-nowrap font-bold">Carga Final *</SortTh>
                       {/* Status / obs */}
                       <SortTh k="status_cartao" className="text-left px-2 py-2 font-semibold whitespace-nowrap">Status Cartao</SortTh>
                       <th className="text-left px-2 py-2 font-semibold bg-amber-50 whitespace-nowrap">Obs *</th>
@@ -1279,11 +1354,73 @@ export default function QuinzenaDinamicaPage() {
                           <td className="px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap">
                             {num(row.carga_parcial)}
                           </td>
-                          <td className="px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap">
-                            {num(row.reembolso)}
+                          {/* Reembolso — editável pré-freeze; âmbar quando override manual */}
+                          <td
+                            className={`px-2 py-1.5 font-mono whitespace-nowrap ${
+                              row.reembolso_override !== null
+                                ? 'bg-amber-100/70 text-amber-900 font-semibold'
+                                : 'bg-blue-50/40'
+                            }`}
+                            title={row.reembolso_edit
+                              ? `Editado manualmente por ${row.reembolso_edit.by} em ${new Date(row.reembolso_edit.at!).toLocaleString('pt-BR')} — valor calculado: ${num(row.reembolso_calc)}`
+                              : undefined}
+                          >
+                            <span className="flex items-center justify-end gap-1">
+                              {row.reembolso_override !== null && (
+                                <span className="text-amber-500 text-[9px]" title="Override manual">●</span>
+                              )}
+                              <EditCell
+                                value={row.reembolso}
+                                numeric
+                                onSave={v => saveField(row.cpf, 'reembolso', v)}
+                                empty="0,00"
+                                readOnly={isGestor || isFrozen}
+                              />
+                            </span>
                           </td>
-                          <td className={`px-2 py-1.5 text-right font-mono bg-blue-50/40 whitespace-nowrap font-bold ${row.carga_final > 0 ? 'text-blue-700' : 'text-gray-400'}`}>
-                            {num(row.carga_final)}
+                          {/* Carga Final — editável pré-freeze; badge de status da auto-carga */}
+                          <td
+                            className={`px-2 py-1.5 font-mono whitespace-nowrap font-bold ${
+                              row.carga_final_override !== null
+                                ? 'bg-amber-100/70 text-amber-900'
+                                : `bg-blue-50/40 ${row.carga_final > 0 ? 'text-blue-700' : 'text-gray-400'}`
+                            }`}
+                            title={row.carga_final_edit
+                              ? `Editado manualmente por ${row.carga_final_edit.by} em ${new Date(row.carga_final_edit.at!).toLocaleString('pt-BR')} — valor calculado: ${num(row.carga_final_calc)}`
+                              : undefined}
+                          >
+                            <span className="flex items-center justify-end gap-1">
+                              {(() => {
+                                const ci = isFrozen ? cargaItems[row.cpf] : undefined;
+                                if (!ci) return null;
+                                const meta: Record<string, { cls: string; label: string }> = {
+                                  ok:            { cls: 'bg-emerald-500', label: 'Carga executada' },
+                                  forced_ok:     { cls: 'bg-emerald-500', label: `Carga forçada por ${ci.forced ? 'operador' : ''}` },
+                                  failed:        { cls: 'bg-red-500',     label: `Carga falhou: ${ci.block_reason ?? ''}` },
+                                  forced_failed: { cls: 'bg-red-500',     label: `Carga forçada falhou: ${ci.block_reason ?? ''}` },
+                                  blocked:       { cls: 'bg-amber-500',   label: `Bloqueado: ${ci.block_reason ?? ''}` },
+                                  skipped:       { cls: 'bg-gray-400',    label: 'Já carregado anteriormente' },
+                                };
+                                const m = meta[ci.status];
+                                if (!m) return null;
+                                return (
+                                  <span
+                                    className={`inline-block h-2 w-2 rounded-full ${m.cls}`}
+                                    title={`${m.label}${ci.transaction_id ? ` — tx ${ci.transaction_id}` : ''}`}
+                                  />
+                                );
+                              })()}
+                              {row.carga_final_override !== null && (
+                                <span className="text-amber-500 text-[9px]" title="Override manual">●</span>
+                              )}
+                              <EditCell
+                                value={row.carga_final}
+                                numeric
+                                onSave={v => saveField(row.cpf, 'carga_final', v)}
+                                empty="0,00"
+                                readOnly={isGestor || isFrozen}
+                              />
+                            </span>
                           </td>
 
                           {/* Status + obs */}
@@ -1402,6 +1539,16 @@ export default function QuinzenaDinamicaPage() {
             year={year}
             month={month}
             quinzena={quinzena}
+          />
+          <AutoCargaModal
+            open={autocargaOpen}
+            onClose={() => setAutocargaOpen(false)}
+            year={year}
+            month={month}
+            quinzena={quinzena}
+            onChanged={() => {
+              loadCargaStatus(year, month, quinzena);
+            }}
           />
         </>
       )}
