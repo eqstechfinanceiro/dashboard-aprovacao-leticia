@@ -41,13 +41,19 @@ extensão Aery. Verificar `expires_at` — o worker precisa de token fresco.
 
 | Uso | Chamada | Resposta |
 |---|---|---|
-| Saldo do pool EQS | `GET /v3/pay/company/balance` | `{amount: 2977.35}` |
-| Listar grupos | `GET /v3/pay/v2/app/card-groups?page=1&limit=10&ordenation_type=ASC` | `{objects:[{id,name,balance_id,account_aggregation_id}], total:24}` |
+| Saldo do pool EQS | `GET /v3/pay/company/balance` | `{success:true, data:{amount: 2977.35}}` |
+| Listar grupos | `GET /v3/pay/v2/app/card-groups?page=1&limit=10&ordenation_type=ASC` | `{success:true, data:{objects:[{id,name,balance_id,account_aggregation_id}]}, total:24, current_page,…}` |
 | Detalhe do grupo | `GET /v3/pay/v2/app/card-groups/{uuid}` | `{id,name,balance_id}` |
-| Cartões do grupo | `GET /v3/pay/v2/app/accounts?card_group_id={uuid}&page=1&limit=10&sort_order=ASC` | `{objects:[{individual:{user_id,user_name,account:{id,card_number,card_status,balances:[{id}]}}}]}` |
-| Saldo de uma conta | `GET /v3/pay/accounts/balances/{balance_id}/amount` | `{amount}` |
+| Cartões do grupo | `GET /v3/pay/v2/app/accounts?card_group_id={uuid}&page=1&limit=10&sort_order=ASC` | `{data:{objects:[{individual:{user_id,user_name,account:{id,status,card_number,card_status,balances:[{id,description}]}}}],…}` |
+| Saldo de uma conta | `GET /v3/pay/accounts/balances/{balance_id}/amount` | `{data:{amount}}` |
 | Soma nos cartões do grupo | `GET /v3/pay/v2/app/company/allocated-balance?card_group_id={uuid}&refresh=1` | `{amount}` (distributed on cards) |
 | Saldo livre de vários grupos | `POST /v3/pay/v2/app/company/balance/multiple` body `{card_group_ids:[...]}` | `[{card_group_id,amount}]` |
+
+> **Envelope (corrigido em produção, out/2026)**: as listas usam envelope
+> paginado Laravel — `data.objects[]` (não `data[]`), com `total`/`current_page`
+> no topo. Saldo simples vem em `data.amount`. O grupo identifica-se por `id`
+> (não `uuid`) e o cartão traz `individual.account.status` + `card_status`
+> ("ACTIVE"). Ler o envelope errado devolve lista vazia silenciosamente.
 
 ## Endpoints — escrita (todas provadas, "Approved")
 
@@ -92,7 +98,15 @@ POST /v3/pay/company/transfers
   de intervalo → HTTP 200 com `{"success":false,"errors":[{"code":147002002,
   "message":"Excesso de tentativas, tente novamente mais tarde"}]}`.
   Retry após ~30–60s aprova. **A automação precisa de backoff/retry por item
-  e idealmente de janela entre movimentações no mesmo cartão.**
+  e idealmente de janela entre movimentações no mesmo cartão.** Nota: em lote,
+  **um** item rate-limited derruba a chamada `transfers` inteira
+  (`success:false` no envelope, não na fatia `failure[]`).
+- **Rate-limit global por burst (descoberto no E2E)**: ~30+ leituras em
+  sequência (refresh do card_map) → a API passa a responder **HTTP 403**
+  pra qualquer chamada por ~30–60s e depois volta sozinha. Tratar como
+  transitório (retry com backoff), não como token morto — e espaçar os
+  lotes (concorrência ≤4, ~300ms entre lotes).
+- `152002002` no withdrawal = saldo insuficiente na conta do grupo.
 - **Saldos são cacheados por alguns segundos** em leituras
   (`/company/balance` demorou ~8s pra refletir o último withdrawal).
 - `description` (deposit/withdrawal) é texto livre — usar pra trilha
