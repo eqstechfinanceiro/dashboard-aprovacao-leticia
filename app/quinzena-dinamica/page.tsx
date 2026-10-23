@@ -529,7 +529,14 @@ export default function QuinzenaDinamicaPage() {
         { h: 'CARGA PARCIAL',     key: 'carga_parcial',      group: 'calc',   w: 14 },
         { h: 'REEMBOLSO',         key: 'reembolso',          group: 'calc',   w: 14 },
         { h: 'CARGA FINAL',       key: 'carga_final',        group: 'calc',   w: 14 },
+        { h: 'STATUS CARGA',      key: '__carga_status',     group: 'calc',   w: 18 },
+        { h: 'TRANSACTION ID',    key: '__carga_tx',         group: 'calc',   w: 34 },
       ];
+
+      const CARGA_STATUS_LABEL: Record<string, string> = {
+        ok: 'CARREGADO', forced_ok: 'CARREGADO (FORÇADO)', failed: 'FALHOU',
+        forced_failed: 'FALHOU (FORÇADO)', blocked: 'BLOQUEADO', skipped: 'JÁ CARREGADO',
+      };
 
       const numericKeys = new Set([
         'carga','transferencia','tarifa','prestacao','saldo_prestacao',
@@ -561,7 +568,10 @@ export default function QuinzenaDinamicaPage() {
 
       // Rows 4+ — data
       for (const r of filteredRows) {
+        const ci = cargaItems[r.cpf];
         wsData.push(COLS.map(c => {
+          if (c.key === '__carga_status') return ci ? (CARGA_STATUS_LABEL[ci.status] ?? ci.status) : '';
+          if (c.key === '__carga_tx') return ci?.transaction_id ?? '';
           const v = (r as unknown as Record<string, unknown>)[c.key];
           if (v === null || v === undefined) return '';
           return v;
@@ -776,7 +786,19 @@ export default function QuinzenaDinamicaPage() {
     if (year === null || month === null || quinzena === null) return;
     setFreezing(true);
     try {
-      const res = await fetch(`/api/quinzena-freeze?year=${year}&month=${month}&quinzena=${quinzena}`, { method: 'DELETE' });
+      let url = `/api/quinzena-freeze?year=${year}&month=${month}&quinzena=${quinzena}`;
+      let res = await fetch(url, { method: 'DELETE' });
+      if (res.status === 409) {
+        const err = await res.json().catch(() => ({}));
+        if (err.run_exists) {
+          const ok = window.confirm(
+            `ATENÇÃO: ${err.items_ok} carga(s) já foram executadas nesta quinzena (R$ ${Number(err.total_loaded).toFixed(2)} movidos).\n\n` +
+            `Descongelar apaga a planilha congelada, mas NÃO desfaz o dinheiro já transferido aos cartões.\n\nDescongelar mesmo assim?`
+          );
+          if (!ok) { setFreezing(false); return; }
+          res = await fetch(`${url}&confirm_run=1`, { method: 'DELETE' });
+        }
+      }
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Erro ao descongelar');

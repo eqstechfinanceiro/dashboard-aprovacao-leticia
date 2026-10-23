@@ -78,7 +78,8 @@ export interface CargaPlan {
 
 function isActiveCard(c: CardMapRow): boolean {
   const st = `${c.card_status ?? ''} ${c.account_status ?? ''}`;
-  if (/inativ|bloquead|cancel|suspend|encerrad/i.test(st)) return false;
+  // A API devolve status em inglês (BLOCKED/CANCELED) e pt-BR — cobrir os dois
+  if (/inativ|bloquead|blocked|cancel|suspend|encerrad|closed|expired|disabled/i.test(st)) return false;
   return /activ|ativ/i.test(st) || c.card_status === '' || c.card_status === null;
 }
 

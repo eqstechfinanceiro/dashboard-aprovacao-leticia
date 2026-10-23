@@ -168,6 +168,32 @@ export async function DELETE(request: NextRequest) {
   }
 
   try {
+    // Guard: descongelar apaga a planilha auditável da auto-carga — se já
+    // existe carga executada (dinheiro real movido), exige confirm_run=1.
+    // Descongelar NÃO desfaz dinheiro já transferido.
+    const confirmRun = searchParams.get('confirm_run') === '1';
+    if (!confirmRun) {
+      const loaded = await sql`
+        SELECT COUNT(*)::int AS n, COALESCE(SUM(amount), 0)::text AS total
+        FROM quinzena_carga_items
+        WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+          AND status IN ('ok', 'forced_ok')
+      `.catch(() => [{ n: 0, total: '0' }]);
+      const n = Number((loaded as any[])[0]?.n ?? 0);
+      if (n > 0) {
+        return NextResponse.json(
+          {
+            error: 'run_exists',
+            run_exists: true,
+            items_ok: n,
+            total_loaded: Number((loaded as any[])[0]?.total ?? 0),
+            detail: `${n} carga(s) já executada(s) nesta quinzena — descongelar não desfaz dinheiro transferido.`,
+          },
+          { status: 409 },
+        );
+      }
+    }
+
     const result = await sql`
       DELETE FROM quinzena_frozen_snapshots
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}

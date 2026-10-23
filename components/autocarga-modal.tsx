@@ -162,6 +162,7 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
       setResult(j);
       onChanged?.();
     } catch (e: any) {
+      setResult(null); // volta pra tela do plano — onde o erro é exibido
       setError(e?.message || 'Erro ao executar carga');
       await loadPlan();
     } finally {
@@ -432,6 +433,22 @@ export function AutoCargaModal({ open, year, month, quinzena, onClose, onChanged
             <Button variant="outline" size="sm" onClick={onClose} disabled={executing}>
               {result ? 'Fechar' : 'Cancelar'}
             </Button>
+            {result && failItems.length > 0 && (
+              <Button
+                size="sm"
+                disabled={executing}
+                onClick={handleExecute}
+                className="bg-amber-600 hover:bg-amber-700"
+                title="Refaz a carga apenas dos que falharam — itens já carregados são ignorados pelo servidor"
+              >
+                {executing ? (
+                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="mr-1 h-4 w-4" />
+                )}
+                {executing ? 'Reexecutando…' : `Reexecutar falhas (${failItems.length})`}
+              </Button>
+            )}
             {!result && plan && plan.loads.length > 0 && (
               <Button
                 size="sm"

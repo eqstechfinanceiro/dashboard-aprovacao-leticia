@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sql } from '@/lib/neon';
+import { sql } from '@/lib/db/neon';
+import { isFaturaOrCartao } from '@/lib/rules/report-filters';
+import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
+import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 import * as XLSX from 'xlsx';
 
 export const dynamic = 'force-dynamic';
@@ -13,83 +16,6 @@ function toNum(v: string | null | undefined): number {
 
 function r2(v: number): number {
   return Math.round(v * 100) / 100;
-}
-
-/** Normalize name for matching */
-function normalizeName(s: string | null | undefined): string {
-  if (!s) return '';
-  return s.toUpperCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function fuzzyMatchRatio(a: string, b: string): number {
-  if (a === b) return 1;
-  if (!a.length || !b.length) return 0;
-  const bigrams = (s: string): Set<string> => {
-    const set = new Set<string>();
-    for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
-    return set;
-  };
-  const ba = bigrams(a), bb = bigrams(b);
-  let intersection = 0;
-  for (const bg of ba) if (bb.has(bg)) intersection++;
-  return (2 * intersection) / (ba.size + bb.size);
-}
-
-function resolveCpfByName(
-  extratoName: string,
-  nomeToCpf: Map<string, string>,
-  fuzzyCache: Map<string, string>
-): string | undefined {
-  const normalized = normalizeName(extratoName);
-  const exact = nomeToCpf.get(normalized);
-  if (exact) return exact;
-  const cached = fuzzyCache.get(normalized);
-  if (cached) return cached;
-  let bestCpf: string | undefined;
-  let bestRatio = 0;
-  for (const [cadName, cpf] of nomeToCpf) {
-    const ratio = fuzzyMatchRatio(normalized, cadName);
-    if (ratio > bestRatio) {
-      bestRatio = ratio;
-      bestCpf = cpf;
-    }
-  }
-  if (bestRatio >= 0.88 && bestCpf) {
-    fuzzyCache.set(normalized, bestCpf);
-    return bestCpf;
-  }
-  if (normalized.length >= 10) {
-    const prefix15 = normalized.slice(0, 15);
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 15) === prefix15) return cpf;
-    }
-    const prefix10 = normalized.slice(0, 10);
-    for (const [cadName, cpf] of nomeToCpf) {
-      if (cadName.slice(0, 10) === prefix10) return cpf;
-    }
-  }
-  return undefined;
-}
-
-function isFaturaOrCartao(name: string): boolean {
-  const n = name.trim().toUpperCase();
-  if (n.includes('CAIXA ITAU') || n.includes('CAIXA ITAÚ')) return true;
-  if (n.startsWith('CAIXA')) return false;
-  if (/^(FATURA|CARTAO|CARTÃO|FATUAR|FARTUR|FATUT|FARUR|FATUTR)/.test(n)) return true;
-  if (n.includes('CARTÃO DE CRÉDITO') || n.includes('CARTAO DE CREDITO') || n.includes('CARTÃO DE CREDITO')) return true;
-  if (n.includes('CARTÃO CORPORATIVO')) return true;
-  if ((n.includes('ITAU') || n.includes('ITAÚ')) && !n.includes('CAIXA')) return true;
-  if (n.includes('DOLAR') || n.includes('DÓLAR')) return true;
-  if (n.startsWith('DESPESA') && n.includes('FATURA')) return true;
-  if (n.startsWith('COMPLEMENTAR') && n.includes('FATURA')) return true;
-  if (n.includes('CARTÃO') && n.includes('CRÉDITO')) return true;
-  if (n.includes('CARTAO') && n.includes('CREDITO')) return true;
-  if (n.startsWith('CARTÃO VEXPENSES')) return true;
-  return false;
 }
 
 function getQuinzenaDates(year: number, month: number, quinzena: number) {
@@ -138,16 +64,20 @@ export async function GET(request: NextRequest) {
 
   const dates = getQuinzenaDates(year, month, quinzena);
 
+  const scope = await getScopeForRequest(request);
+  const inScope = (cpf: unknown) => scope!.cpfs.has(normalizeCpf(cpf) ?? '__none__');
+
   try {
     // 1. Load cadastro
-    const cadastroRows = await sql`
+    let cadastroRows = await sql`
       SELECT cpf, colaborador, situacao, status_cartao, regional, centro_custo, gestor, diretor
       FROM quinzena_cadastro
       ORDER BY colaborador ASC NULLS LAST
     `;
+    if (scope) cadastroRows = (cadastroRows as any[]).filter(c => inScope(c.cpf)) as any;
 
     // 2. Load frozen data (or calculate)
-    const frozenRows = await sql`
+    let frozenRows = await sql`
       SELECT cpf, colaborador, situacao, status_cartao, regional, centro_custo, gestor, diretor,
              carga::text, transferencia::text, tarifa::text, prestacao::text,
              saldo_prestacao::text, saldo_cartao::text, saldo_final::text,
@@ -158,11 +88,33 @@ export async function GET(request: NextRequest) {
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
       ORDER BY colaborador ASC NULLS LAST
     `;
+    if (scope) frozenRows = (frozenRows as any[]).filter(r => inScope(r.cpf)) as any;
 
     const isFrozen = frozenRows.length > 0;
 
+    // Status da auto-carga por CPF (último item de cada CPF no período)
+    const cargaItemRows = await sql`
+      SELECT DISTINCT ON (cpf) cpf, status, transaction_id, block_reason
+      FROM quinzena_carga_items
+      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+      ORDER BY cpf, id DESC
+    `.catch(() => [] as any[]); // tabela pode não existir em bases antigas
+    const cargaStatusByCpf = new Map<string, { status: string; tx: string | null; reason: string | null }>();
+    for (const it of cargaItemRows as any[]) {
+      cargaStatusByCpf.set(it.cpf, { status: it.status, tx: it.transaction_id, reason: it.block_reason });
+    }
+    const STATUS_LABEL: Record<string, string> = {
+      ok: 'CARREGADO', forced_ok: 'CARREGADO (FORÇADO)', failed: 'FALHOU',
+      forced_failed: 'FALHOU (FORÇADO)', blocked: 'BLOQUEADO', skipped: 'JÁ CARREGADO',
+    };
+    const cargaStatusOf = (cpf: string) => {
+      const it = cargaStatusByCpf.get(cpf);
+      if (!it) return { label: '', tx: '' };
+      return { label: STATUS_LABEL[it.status] ?? it.status, tx: it.tx ?? '' };
+    };
+
     // 3. Load extrato data (all transactions up to financial_cutoff + snapshots)
-    const extratoRows = await sql`
+    let extratoRows = await sql`
       SELECT data, hora, codigo_transacao, numero_cartao, grupo, usuario, tipo,
              descricao, valor::text, status, id_despesa, id_relatorio, tipo_despesa,
              centro_custo, projeto, percentual_projeto, is_snapshot
@@ -171,14 +123,16 @@ export async function GET(request: NextRequest) {
       ORDER BY data ASC, hora ASC
     `;
 
-    // 4. Load base prest (reports + expenses)
-    const reportRows = await sql`
+    // 4. Load base prest (reports + expenses) — only Aprovado/Enviado for prestação calc
+    let reportRows = await sql`
       SELECT r.id, r.name, r.status, r.user_cpf, r.user_name, r.total_value::text,
              r.created_at, r.updated_at
       FROM prestacao_reports r
       WHERE r.user_cpf IS NOT NULL
+        AND (r.status ILIKE 'Aprovado' OR r.status ILIKE 'Enviado')
       ORDER BY r.user_name ASC, r.id ASC
     `;
+    if (scope) reportRows = (reportRows as any[]).filter(r => inScope(r.user_cpf)) as any;
 
     // Get expenses for all reports
     const reportIds = reportRows.map((r: any) => r.id);
@@ -216,6 +170,15 @@ export async function GET(request: NextRequest) {
     }
     const fuzzyCache = new Map<string, string>();
 
+    // Escopo (gestor): EXTRATO/SALDO CARTAO mostram só as linhas que resolvem
+    // para CPFs in-scope — mesma resolução usada no cálculo do CARGA.
+    if (scope) {
+      extratoRows = (extratoRows as any[]).filter(r => {
+        const cpf = resolveCpfByName(String(r.usuario || ''), nomeToCpf, fuzzyCache);
+        return cpf !== undefined && scope.cpfs.has(cpf);
+      }) as any;
+    }
+
     // ---- Build XLSX ----
 
     const wb = XLSX.utils.book_new();
@@ -228,18 +191,25 @@ export async function GET(request: NextRequest) {
       'CARGA', 'TRANSFERÊNCIA', '(-)TARIFA', '(-)PRESTAÇÃO DE CONTAS',
       'SALDO PRESTAÇÃO', '(-)SALDO CARTÃO', 'SALDO FINAL', 'SALDO REEMBOLSAR',
       '1ª QZ', 'ADIANTAMENTO', 'OBS',
-      'CARGA PARCIAL', 'REEMBOLSO', 'CARGA FINAL',
+      '(-)SALDO CARTÃO CARGA', 'CARGA PARCIAL', 'REEMBOLSO', 'CARGA FINAL',
+      'STATUS CARGA', 'TRANSACTION ID',
     ]);
 
     if (isFrozen) {
+      // Situacao é cadastral: o valor atual do cadastro (com merge do RH)
+      // sobrepõe o congelado — demissões recentes aparecem no export.
+      const sitByCpf = new Map<string, string>();
+      for (const c of cadastroRows as any[]) if (c.situacao) sitByCpf.set(c.cpf, c.situacao);
       for (const row of frozenRows as any[]) {
+        const st = cargaStatusOf(row.cpf);
         cargaData.push([
-          row.cpf, row.colaborador, row.situacao, row.status_cartao,
+          row.cpf, row.colaborador, sitByCpf.get(row.cpf) ?? row.situacao, row.status_cartao,
           row.regional, row.centro_custo, row.gestor, row.diretor,
           toNum(row.carga), toNum(row.transferencia), toNum(row.tarifa), toNum(row.prestacao),
           toNum(row.saldo_prestacao), toNum(row.saldo_cartao), toNum(row.saldo_final), toNum(row.saldo_reembolsar),
           row.col_qz ? toNum(row.col_qz) : null, toNum(row.adiantamento), row.obs,
-          toNum(row.carga_parcial), toNum(row.reembolso), toNum(row.carga_final),
+          toNum(row.saldo_cartao_carga), toNum(row.carga_parcial), toNum(row.reembolso), toNum(row.carga_final),
+          st.label, st.tx,
         ]);
       }
     } else {
@@ -251,7 +221,7 @@ export async function GET(request: NextRequest) {
             COALESCE(NULLIF(codigo_transacao, ''), hora::text)
           )
             UPPER(usuario) AS usuario_up,
-            data, tipo, valor, codigo_transacao
+            data, tipo, valor, codigo_transacao, descricao
           FROM extrato_movimentacao
           WHERE is_snapshot = FALSE
             AND data <= ${dates.financial_cutoff}
@@ -260,9 +230,11 @@ export async function GET(request: NextRequest) {
         )
         SELECT
           usuario_up,
-          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0), 0) AS carga_raw,
+          COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor > 0
+            AND NOT (descricao ~* 'estorno.*taxa|taxa.*estorno|^CHARGEBACK_')), 0) AS carga_raw,
           COALESCE(SUM(valor) FILTER(WHERE tipo = 'Transferência' AND valor < 0), 0) AS transf_raw,
-          COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa', 'Pendência de taxa')), 0) AS tarifa_raw
+          COALESCE(SUM(valor) FILTER(WHERE tipo IN ('Taxa', 'Estorno de taxa')
+            OR (tipo = 'Transferência' AND descricao ~* 'estorno.*taxa|taxa.*estorno|^CHARGEBACK_')), 0) AS tarifa_raw
         FROM deduped
         GROUP BY usuario_up
       `;
@@ -287,80 +259,34 @@ export async function GET(request: NextRequest) {
         if (r.user_cpf) somaseByCpf.set(r.user_cpf, toNum(r.total));
       }
 
+      // Saldo cartão = latest fixed snapshot (NULL = 0, ex: cartão cancelado/inativo)
+      // NÃO somar transações pós-snapshot — o saldo é um snapshot fixo do extrato
       const saldoControleRows = await sql`
-        WITH deduped AS (
-          SELECT DISTINCT ON (UPPER(usuario), data, tipo, valor, codigo_transacao)
-            UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
-          FROM extrato_movimentacao
-          WHERE is_snapshot = FALSE AND data <= ${dates.saldo_cartao_controle_date}
-          ORDER BY UPPER(usuario), data, tipo, valor, codigo_transacao
-        ),
-        latest_snap AS (
-          SELECT DISTINCT ON (UPPER(usuario))
-            UPPER(usuario) AS usuario_up, valor AS saldo, data AS snapshot_date
-          FROM extrato_movimentacao
-          WHERE is_snapshot = TRUE AND valor IS NOT NULL
-            AND data <= ${dates.saldo_cartao_controle_date}
-          ORDER BY UPPER(usuario), data DESC
-        ),
-        post_snap_txns AS (
-          SELECT d.usuario_up, SUM(d.valor) AS adjustment
-          FROM deduped d JOIN latest_snap s ON d.usuario_up = s.usuario_up
-          WHERE d.data > s.snapshot_date GROUP BY d.usuario_up
-        ),
-        computed_balance AS (
-          SELECT usuario_up, COALESCE(SUM(valor), 0) AS saldo FROM deduped GROUP BY usuario_up
-        )
-        SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
-               COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
-               COALESCE(c.saldo, 0) AS computed_saldo,
-               (s.usuario_up IS NOT NULL) AS has_snapshot
-        FROM latest_snap s
-        FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
-        FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+        SELECT DISTINCT ON (UPPER(TRIM(usuario)))
+          UPPER(TRIM(usuario)) AS usuario_up,
+          COALESCE(valor, 0) AS saldo
+        FROM extrato_movimentacao
+        WHERE is_snapshot = TRUE
+          AND data <= ${dates.saldo_cartao_controle_date}
+        ORDER BY UPPER(TRIM(usuario)), data DESC
       `;
 
       const saldoCargaRows = await sql`
-        WITH deduped AS (
-          SELECT DISTINCT ON (UPPER(usuario), data, tipo, valor, codigo_transacao)
-            UPPER(usuario) AS usuario_up, data, tipo, valor, codigo_transacao
-          FROM extrato_movimentacao
-          WHERE is_snapshot = FALSE AND data <= ${dates.saldo_cartao_carga_date}
-          ORDER BY UPPER(usuario), data, tipo, valor, codigo_transacao
-        ),
-        latest_snap AS (
-          SELECT DISTINCT ON (UPPER(usuario))
-            UPPER(usuario) AS usuario_up, valor AS saldo, data AS snapshot_date
-          FROM extrato_movimentacao
-          WHERE is_snapshot = TRUE AND valor IS NOT NULL
-            AND data <= ${dates.saldo_cartao_carga_date}
-          ORDER BY UPPER(usuario), data DESC
-        ),
-        post_snap_txns AS (
-          SELECT d.usuario_up, SUM(d.valor) AS adjustment
-          FROM deduped d JOIN latest_snap s ON d.usuario_up = s.usuario_up
-          WHERE d.data > s.snapshot_date GROUP BY d.usuario_up
-        ),
-        computed_balance AS (
-          SELECT usuario_up, COALESCE(SUM(valor), 0) AS saldo FROM deduped GROUP BY usuario_up
-        )
-        SELECT COALESCE(s.usuario_up, c.usuario_up) AS usuario_up,
-               COALESCE(s.saldo, 0) + COALESCE(p.adjustment, 0) AS snap_saldo,
-               COALESCE(c.saldo, 0) AS computed_saldo,
-               (s.usuario_up IS NOT NULL) AS has_snapshot
-        FROM latest_snap s
-        FULL OUTER JOIN post_snap_txns p ON p.usuario_up = s.usuario_up
-        FULL OUTER JOIN computed_balance c ON c.usuario_up = COALESCE(s.usuario_up, p.usuario_up)
+        SELECT DISTINCT ON (UPPER(TRIM(usuario)))
+          UPPER(TRIM(usuario)) AS usuario_up,
+          COALESCE(valor, 0) AS saldo
+        FROM extrato_movimentacao
+        WHERE is_snapshot = TRUE
+          AND data <= ${dates.saldo_cartao_carga_date}
+        ORDER BY UPPER(TRIM(usuario)), data DESC
       `;
 
       const saldoControleByCpf = new Map<string, number>();
       for (const r of saldoControleRows as any[]) {
         const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
         if (cpf) {
-          const hasSnap = r.has_snapshot;
-          const snapSaldo = toNum(r.snap_saldo);
-          const computedSaldo = toNum(r.computed_saldo);
-          saldoControleByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+          const saldo = toNum(r.saldo);
+          saldoControleByCpf.set(cpf, r2((saldoControleByCpf.get(cpf) ?? 0) + saldo));
         }
       }
 
@@ -368,10 +294,8 @@ export async function GET(request: NextRequest) {
       for (const r of saldoCargaRows as any[]) {
         const cpf = resolveCpfByName(String(r.usuario_up), nomeToCpf, fuzzyCache);
         if (cpf) {
-          const hasSnap = r.has_snapshot;
-          const snapSaldo = toNum(r.snap_saldo);
-          const computedSaldo = toNum(r.computed_saldo);
-          saldoCargaByCpf.set(cpf, r2(hasSnap ? snapSaldo : computedSaldo));
+          const saldo = toNum(r.saldo);
+          saldoCargaByCpf.set(cpf, r2((saldoCargaByCpf.get(cpf) ?? 0) + saldo));
         }
       }
 
@@ -386,13 +310,17 @@ export async function GET(request: NextRequest) {
           const carga = Number(r.carga_raw || 0);
           const transf = Math.abs(Number(r.transf_raw || 0));
           const tarifa = Math.abs(Number(r.tarifa_raw || 0));
-          const somase = somaseByCpf.get(cpf) ?? 0;
-          const sp = r2(carga - transf - tarifa - somase);
-          saldoPrestByCpf.set(cpf, sp);
-          cargaByCpf.set(cpf, carga);
-          transfByCpf.set(cpf, transf);
-          tarifaByCpf.set(cpf, tarifa);
+          // Accumulate: multiple extrato names may resolve to same CPF
+          cargaByCpf.set(cpf, (cargaByCpf.get(cpf) ?? 0) + carga);
+          transfByCpf.set(cpf, (transfByCpf.get(cpf) ?? 0) + transf);
+          tarifaByCpf.set(cpf, (tarifaByCpf.get(cpf) ?? 0) + tarifa);
         }
+      }
+      // Calculate saldo_prestacao after accumulating all extrato for each CPF
+      for (const cpf of cargaByCpf.keys()) {
+        const somase = somaseByCpf.get(cpf) ?? 0;
+        const sp = r2(cargaByCpf.get(cpf)! - transfByCpf.get(cpf)! - tarifaByCpf.get(cpf)! - somase);
+        saldoPrestByCpf.set(cpf, sp);
       }
 
       // Load manual inputs
@@ -436,13 +364,15 @@ export async function GET(request: NextRequest) {
           carga_final = r2(Math.max(0, carga_parcial) + reembolso);
         }
 
+        const st = cargaStatusOf(snap.cpf);
         cargaData.push([
           snap.cpf, snap.colaborador, snap.situacao, snap.status_cartao,
           snap.regional, snap.centro_custo, snap.gestor, snap.diretor,
           carga, transf, tarifa, prestacao,
           sp, sc_controle, sf, sr,
           col_qz_manual, adiantamento, manual?.obs ?? null,
-          carga_parcial, reembolso, carga_final,
+          sc_carga, carga_parcial, reembolso, carga_final,
+          st.label, st.tx,
         ]);
       }
     }
