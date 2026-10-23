@@ -9,7 +9,12 @@ import {
   listCardGroups, listGroupAccounts, getPayUser, CardGroup,
 } from '@/lib/vexpay/client';
 
-const USER_FETCH_CONCURRENCY = 8;
+const USER_FETCH_CONCURRENCY = 4;
+// A VExpenses derruba o token (HTTP 403 por ~30-60s) quando leituras saem em
+// burst — espaça os lotes pra ficar abaixo do limiar.
+const BATCH_DELAY_MS = 300;
+const GROUP_DELAY_MS = 150;
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 // Salvaguarda: só remove linhas "não vistas" se o discovery trouxe uma
 // quantidade plausível de cartões (protege contra API paginando vazio).
 const MIN_SEEN_FOR_PRUNE = 50;
@@ -38,6 +43,7 @@ export interface CardMapRefreshResult {
 async function fetchUserCpfs(uuids: string[]): Promise<Map<string, { cpf: string | null; name: string }>> {
   const out = new Map<string, { cpf: string | null; name: string }>();
   for (let i = 0; i < uuids.length; i += USER_FETCH_CONCURRENCY) {
+    if (i > 0) await sleep(BATCH_DELAY_MS);
     const batch = uuids.slice(i, i + USER_FETCH_CONCURRENCY);
     const results = await Promise.allSettled(batch.map((u) => getPayUser(u)));
     results.forEach((r, j) => {
@@ -62,6 +68,7 @@ export async function refreshCardMap(): Promise<CardMapRefreshResult> {
   let upserted = 0;
 
   for (const g of groups) {
+    if (seen.size > 0) await sleep(GROUP_DELAY_MS);
     const cards = await listGroupAccounts(g.id);
     for (const c of cards) {
       if (!c.user_uuid || !c.balance_account_id) continue;

@@ -37,7 +37,7 @@ export interface VexEnvelope<T = any> {
   message?: string;
 }
 
-async function vexFetch<T = any>(path: string, init: RequestInit = {}): Promise<T> {
+async function vexFetch<T = any>(path: string, init: RequestInit = {}, _retried = false): Promise<T> {
   const cookie = await getLaravelCookieString();
   if (!cookie) {
     throw new VexpayAuthError(
@@ -61,7 +61,18 @@ async function vexFetch<T = any>(path: string, init: RequestInit = {}): Promise<
     throw new VexpayError(0, null, `Falha de rede em ${path}: ${e?.message ?? e}`);
   }
   if (res.status === 401 || res.status === 403) {
+    // 403 transitório: a API derruba a sessão por alguns segundos em bursts de
+    // leitura (refresh do card_map). Um retry com backoff resolve a janela;
+    // um token realmente morto falha de novo e vira VexpayAuthError.
+    if (res.status === 403 && !_retried) {
+      await new Promise((r) => setTimeout(r, 2000));
+      return vexFetch<T>(path, init, true);
+    }
     throw new VexpayAuthError(`laravel_token expirado/inválido (HTTP ${res.status})`);
+  }
+  if (res.status === 429 && !_retried) {
+    await new Promise((r) => setTimeout(r, 3000));
+    return vexFetch<T>(path, init, true);
   }
   const body = await res.json().catch(() => null);
   if (!res.ok) {
@@ -73,8 +84,8 @@ async function vexFetch<T = any>(path: string, init: RequestInit = {}): Promise<
 // ---- Leituras ---------------------------------------------------------------
 
 export async function getPoolBalance(): Promise<number> {
-  const j = await vexFetch<{ amount?: number }>('/v3/pay/company/balance');
-  return Number(j?.amount ?? 0);
+  const j = await vexFetch<any>('/v3/pay/company/balance');
+  return Number(j?.data?.amount ?? j?.amount ?? 0);
 }
 
 export interface CardGroup {
@@ -86,16 +97,18 @@ export interface CardGroup {
 export async function listCardGroups(): Promise<CardGroup[]> {
   const out: CardGroup[] = [];
   for (let page = 1; page <= 20; page++) {
-    const j = await vexFetch<{ objects?: any[]; total?: number }>(
+    const j = await vexFetch<any>(
       `/v3/pay/v2/app/card-groups?page=${page}&limit=100&ordenation_type=ASC`,
     );
-    const objs = j?.objects ?? [];
+    // Envelope paginado Laravel: {data: {objects: [...]}, total, current_page…}
+    const objs: any[] = j?.data?.objects ?? j?.objects ?? [];
     for (const g of objs) {
       if (g?.id && g?.balance_id) {
         out.push({ id: g.id, name: g.name ?? '', balance_id: g.balance_id });
       }
     }
-    if (objs.length === 0 || out.length >= Number(j?.total ?? 0)) break;
+    const total = Number(j?.total ?? j?.data?.total ?? 0);
+    if (objs.length === 0 || (total > 0 && out.length >= total)) break;
   }
   return out;
 }
@@ -114,10 +127,10 @@ export interface PayCard {
 export async function listGroupAccounts(cardGroupId: string): Promise<PayCard[]> {
   const out: PayCard[] = [];
   for (let page = 1; page <= 30; page++) {
-    const j = await vexFetch<{ objects?: any[]; total?: number }>(
+    const j = await vexFetch<any>(
       `/v3/pay/v2/app/accounts?card_group_id=${cardGroupId}&page=${page}&limit=100&sort_order=ASC`,
     );
-    const objs = j?.objects ?? [];
+    const objs: any[] = j?.data?.objects ?? j?.objects ?? [];
     for (const o of objs) {
       const ind = o?.individual ?? {};
       const acc = ind.account ?? o?.account ?? {};
@@ -127,12 +140,13 @@ export async function listGroupAccounts(cardGroupId: string): Promise<PayCard[]>
         account_id: acc.id ?? null,
         card_number: String(acc.card_number ?? ''),
         card_status: String(acc.card_status ?? ''),
-        account_status: String(o?.status ?? ind.status ?? ''),
+        account_status: String(acc.status ?? o?.status ?? ind.status ?? ''),
         balance_account_id: acc.balances?.[0]?.id ?? null,
         card_group_id: cardGroupId,
       });
     }
-    if (objs.length === 0 || out.length >= Number(j?.total ?? 0)) break;
+    const total = Number(j?.total ?? j?.data?.total ?? 0);
+    if (objs.length === 0 || (total > 0 && out.length >= total)) break;
   }
   return out;
 }
@@ -161,13 +175,14 @@ export async function getPayUser(userUuid: string): Promise<PayUserDetail | null
 export async function getGroupBalances(cardGroupIds: string[]): Promise<Map<string, number>> {
   const map = new Map<string, number>();
   if (cardGroupIds.length === 0) return map;
-  const j = await vexFetch<any[]>(
+  const j = await vexFetch<any>(
     '/v3/pay/v2/app/company/balance/multiple',
     { method: 'POST', body: JSON.stringify({ card_group_ids: cardGroupIds }) },
   );
-  const arr = Array.isArray(j) ? j : (j as any)?.data ?? [];
+  const arr: any[] = Array.isArray(j?.data) ? j.data : (j?.data?.objects ?? j?.objects ?? []);
   for (const r of arr) {
-    if (r?.card_group_id) map.set(r.card_group_id, Number(r.amount ?? 0));
+    const gid = r?.card_group_id ?? r?.cardGroupId ?? r?.id;
+    if (gid) map.set(gid, Number(r.amount ?? r.balance ?? 0));
   }
   return map;
 }
