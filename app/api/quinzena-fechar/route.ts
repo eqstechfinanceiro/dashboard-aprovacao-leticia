@@ -8,8 +8,6 @@ import { getScopeForRequest } from '@/lib/auth/scope';
 import { sql } from '@/lib/db/neon';
 import { logAudit } from '@/lib/db/audit';
 import { notifyAdmins } from '@/lib/sync/notifications';
-import { isAutocargaAllowedEmail } from '@/lib/autocarga/allowlist';
-import { executeAutoCarga } from '@/lib/autocarga/execute';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -174,39 +172,19 @@ export async function POST(req: NextRequest) {
         frozen_now: frozenNow, rows_frozen: rowsFrozen,
         file: filename, bytes, notified,
         precheck_warnings: precheck.summary?.warnings ?? 0,
-        autocarga_scheduled: body.autocarga === true,
       },
     });
 
-    // ---- 5. Auto-carga agendada (opcional) ------------------------------------
-    // Executa em background — a run aparece como 'running' no /status e a UI
-    // acompanha o progresso. Se o processo reiniciar, o guard do /status
-    // marca a run órfã como failed.
-    let autocargaScheduled = false;
-    if (body.autocarga === true && frozenNow) {
-      const opEmail = req.headers.get('x-user-email');
-      const isCron = !!cronHdr;
-      if (isAutocargaAllowedEmail(opEmail) || isCron) {
-        const actor = {
-          email: opEmail || 'autopilot@eqsengenharia.com.br',
-          name: req.headers.get('x-user-name') || 'autopilot',
-        };
-        autocargaScheduled = true;
-        steps.push('autocarga:scheduled');
-        void executeAutoCarga(year, month, quinzena, actor).catch((e) =>
-          console.error('[autocarga scheduled]', e),
-        );
-      } else {
-        steps.push('autocarga:not_allowed');
-      }
-    }
+    // Auto-carga NUNCA dispara por aqui — regra de negócio: a movimentação de
+    // dinheiro só acontece pelo botão "Auto-carga" (preflight + execute manual)
+    // depois da conferência humana. O parâmetro `autocarga` no body é ignorado.
 
     return NextResponse.json({
       ok: true, period: { year, month, quinzena, label: periodo },
       frozen_now: frozenNow, rows_frozen: rowsFrozen,
       download_url: downloadUrl, filename,
       checks_summary: precheck.summary, notified, steps,
-      autocarga_scheduled: autocargaScheduled,
+      autocarga_scheduled: false,
     });
   } catch (error) {
     console.error('[quinzena-fechar] Erro:', error);

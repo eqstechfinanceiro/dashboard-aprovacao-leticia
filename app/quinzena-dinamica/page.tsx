@@ -744,7 +744,8 @@ export default function QuinzenaDinamicaPage() {
   const [canAutocarga, setCanAutocarga] = useState(false);
   const [cargaItems, setCargaItems] = useState<Record<string, { status: string; amount: number; block_reason: string | null; transaction_id: string | null; forced: boolean }>>({});
   const [lastRun, setLastRun] = useState<{ status: string; items_ok: number; items_failed: number; total_loaded: number | null } | null>(null);
-  const [autoCargaOnFreeze, setAutoCargaOnFreeze] = useState(false);
+  // Auto-carga NUNCA dispara automaticamente — só pelo botão "Auto-carga"
+  // (preflight + execute manual, pós-conferência humana).
 
   const loadCargaStatus = useCallback(async (y: number, m: number, q: number) => {
     try {
@@ -780,7 +781,7 @@ export default function QuinzenaDinamicaPage() {
       const res = await fetch('/api/quinzena-fechar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year, month, quinzena, autocarga: autoCargaOnFreeze }),
+        body: JSON.stringify({ year, month, quinzena }),
       });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error || 'Erro ao congelar');
@@ -911,26 +912,10 @@ export default function QuinzenaDinamicaPage() {
               Descongelar
             </Button>
           ) : (
-            <>
-              {canAutocarga && (
-                <label
-                  className="flex cursor-pointer items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs text-emerald-800"
-                  title="Ao congelar, dispara a auto-carga em segundo plano (acompanhe pelo botão Auto-carga)"
-                >
-                  <input
-                    type="checkbox"
-                    checked={autoCargaOnFreeze}
-                    onChange={(e) => setAutoCargaOnFreeze(e.target.checked)}
-                  />
-                  <Zap className="h-3.5 w-3.5" />
-                  auto-carga ao congelar
-                </label>
-              )}
-              <Button size="sm" variant="default" onClick={() => setPrecheckOpen(true)} disabled={freezing || loading || !data}>
-                <Snowflake className="h-4 w-4 mr-1" />
-                Congelar
-              </Button>
-            </>
+            <Button size="sm" variant="default" onClick={() => setPrecheckOpen(true)} disabled={freezing || loading || !data}>
+              <Snowflake className="h-4 w-4 mr-1" />
+              Congelar
+            </Button>
           ))}
           {isFrozen && canAutocarga && (
             <Button

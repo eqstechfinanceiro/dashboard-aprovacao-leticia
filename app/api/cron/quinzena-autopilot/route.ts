@@ -113,11 +113,12 @@ export async function GET(req: NextRequest) {
     }
 
     // ---------- Dia D: fechamento automático ----------------------------------
-    // ?autocarga=1 → também dispara a auto-carga logo após o freeze (P2).
+    // Só congela + exporta. Auto-carga nunca dispara por autopilot nem pelo
+    // fechar — movimentação de dinheiro é sempre manual (botão Auto-carga).
     const fecharRes = await fetch(`${base}/api/quinzena-fechar`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...fwd },
-      body: JSON.stringify({ year, month, quinzena, autocarga: sp.get('autocarga') === '1' }),
+      body: JSON.stringify({ year, month, quinzena }),
     });
     const fechar = await fecharRes.json().catch(() => ({}));
 
