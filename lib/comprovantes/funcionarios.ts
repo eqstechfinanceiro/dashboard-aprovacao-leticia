@@ -127,6 +127,20 @@ export async function getSituacaoMap(cpfs: string[]): Promise<Map<string, string
   return map;
 }
 
+/** Mapa cpf → {cc, filial} do RH — usado pelo cadastro-sync para preencher
+ *  centro_custo/regional vazios em membros que entraram via team-members API
+ *  (a API não traz centro de custo; o RH é a fonte oficial). */
+export async function getRhInfoMap(cpfs: string[]): Promise<Map<string, { cc: string; filial: string }>> {
+  if (!cpfs.length) return new Map();
+  const rows = await getPool().query(
+    'SELECT cpf, cc, filial FROM funcionarios WHERE cpf = ANY($1)',
+    [cpfs]
+  );
+  const map = new Map<string, { cc: string; filial: string }>();
+  for (const r of rows.rows) map.set(String(r.cpf), { cc: String(r.cc ?? ''), filial: String(r.filial ?? '') });
+  return map;
+}
+
 /** Export completo (sem paginação) para o botão de Excel — respeita a busca. */
 export async function listFuncionariosForExport(q: string): Promise<any[]> {
   const p = getPool();

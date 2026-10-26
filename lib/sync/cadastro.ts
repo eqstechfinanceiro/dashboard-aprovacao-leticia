@@ -2,7 +2,7 @@
 import { sql } from '../db/neon';
 import { API_URL, API_KEY, v2Headers } from './client';
 import { getCurrentQuinzenaId } from '../pipeline/quinzena-dates';
-import { getSituacaoMap } from '../comprovantes/funcionarios';
+import { getSituacaoMap, getRhInfoMap } from '../comprovantes/funcionarios';
 
 /** Refresh cadastro data — merge API team-members with last snapshot */
 export async function refreshCadastro(): Promise<Record<string, unknown>> {
@@ -132,6 +132,61 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
     }
   } catch (e) {
     console.warn('[cadastro] merge de situacao RH falhou (segue com dados VExpenses):', e);
+  }
+
+  // Preenche centro_custo/regional vazios — membros sincronizados pela API
+  // chegam sem nada (a API não traz CC). Fonte: RH eqs_funcionarios (cc) e,
+  // para regional, o grupo do extrato (mesmo naming "REGIONAL XX" da planilha)
+  // com fallback no sufixo da filial RH. Nunca sobrescreve valor existente
+  // (planilha importada vence).
+  let ccFilled = 0;
+  try {
+    const blankRows: { cpf: string; colaborador: string | null }[] = await db`
+      SELECT cpf, colaborador FROM quinzena_cadastro
+      WHERE cpf IS NOT NULL AND (
+        centro_custo IS NULL OR centro_custo = '' OR
+        regional IS NULL OR regional = ''
+      )
+    `;
+    if (blankRows.length) {
+      const rhInfo = await getRhInfoMap(blankRows.map((r) => r.cpf));
+      const norm = (s: string | null | undefined) => (s || '')
+        .toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+      const grpRows: { usuario: string; grupo: string }[] = await db`
+        SELECT DISTINCT ON (usuario) usuario, grupo
+        FROM extrato_movimentacao
+        WHERE grupo IS NOT NULL AND grupo <> ''
+        ORDER BY usuario, data DESC
+      `;
+      const grpByName = new Map(grpRows.map((g) => [norm(g.usuario), g.grupo]));
+      const FILIAL2REG: Record<string, string> = {
+        RS: 'REGIONAL RS', SC: 'REGIONAL SC', SP: 'REGIONAL SP', MG: 'REGIONAL MG',
+        PR: 'REGIONAL SC', BA: 'REGIONAL NE', AL: 'REGIONAL NE', PE: 'REGIONAL NE',
+        CE: 'REGIONAL NE', RN: 'REGIONAL NE', GO: 'REGIONAL CLARO INFRA SUL',
+        MS: 'REGIONAL CLARO INFRA SUL', MT: 'REGIONAL CLARO INFRA SUL',
+      };
+      for (const row of blankRows) {
+        const info = rhInfo.get(row.cpf);
+        const cc = info?.cc && info.cc !== 'Sem Centro de custo' ? info.cc : null;
+        let reg = grpByName.get(norm(row.colaborador)) || null;
+        if (!reg && info?.filial) {
+          const m = info.filial.match(/-\s*([A-Z]{2})\s*$/);
+          if (m) reg = FILIAL2REG[m[1]] || null;
+        }
+        if (!cc && !reg) continue;
+        await db`
+          UPDATE quinzena_cadastro SET
+            centro_custo = CASE WHEN centro_custo IS NULL OR centro_custo = '' THEN ${cc} ELSE centro_custo END,
+            regional = CASE WHEN regional IS NULL OR regional = '' THEN ${reg} ELSE regional END,
+            updated_at = NOW()
+          WHERE cpf = ${row.cpf}
+        `;
+        ccFilled++;
+      }
+      if (ccFilled) console.log(`[cadastro] centro_custo/regional preenchidos em ${ccFilled} cadastros`);
+    }
+  } catch (e) {
+    console.warn('[cadastro] fill de centro_custo/regional falhou:', e);
   }
 
   // Base do snapshot por período: o cadastro canônico (quinzena_cadastro).

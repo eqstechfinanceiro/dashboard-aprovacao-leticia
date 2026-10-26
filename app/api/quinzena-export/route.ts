@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PassThrough, Readable } from 'stream';
+import { createReadStream, createWriteStream, existsSync, statSync, renameSync, unlinkSync } from 'fs';
 import ExcelJS from 'exceljs';
 import { sql, getPool } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
@@ -74,6 +75,27 @@ export async function GET(request: NextRequest) {
 
   const scope = await getScopeForRequest(request);
   const inScope = (cpf: unknown) => scope!.cpfs.has(normalizeCpf(cpf) ?? '__none__');
+
+  // Cache de arquivo em disco (só export full, sem escopo de gestor): o XLSX
+  // demora minutos pra gerar na CPU contida e todo mundo baixa o mesmo
+  // conteúdo no dia de carga. Serve o arquivo por TTL; depois disso regenera.
+  const filename = `controle_${year}_${String(month).padStart(2, '0')}_Q${quinzena}.xlsx`;
+  const cacheFile = !scope ? `/tmp/qz_export_${year}_${month}_${quinzena}.xlsx` : null;
+  const CACHE_TTL_MS = 5 * 60 * 1000;
+  const bypass = searchParams.get('nocache') === '1';
+  if (cacheFile && !bypass && existsSync(cacheFile)
+    && Date.now() - statSync(cacheFile).mtimeMs < CACHE_TTL_MS) {
+    const s = statSync(cacheFile);
+    return new Response(Readable.toWeb(createReadStream(cacheFile)) as ReadableStream, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Length': String(s.size),
+        'X-Cache': 'hit',
+      },
+    });
+  }
 
   // Limite de concorrência — segurado até o stream terminar (produtor libera).
   const release = await exportLimiter.acquire();
@@ -366,7 +388,12 @@ export async function GET(request: NextRequest) {
 
     // ---- Stream do workbook (ExcelJS WorkbookWriter → PassThrough → Response) ----
     const pass = new PassThrough({ highWaterMark: 1024 * 1024 });
-    const wb = new ExcelJS.stream.xlsx.WorkbookWriter({ stream: pass });
+    // zlib level 1: deflate rápido — o gargalo do export é CPU de zip na VPS,
+    // não I/O. Arquivo sai ~2x maior mas em fração do tempo.
+    const wb = new ExcelJS.stream.xlsx.WorkbookWriter({
+      stream: pass,
+      zip: { zlib: { level: 1 } },
+    });
     const counters = { extrato: 0, despesas: 0 };
 
     const produce = async () => {
@@ -386,13 +413,22 @@ export async function GET(request: NextRequest) {
         if (pass.writableLength > DEAD_BYTES) return false;
         return true;
       };
+      // Tee pro cache em disco — o mesmo stream que alimenta a resposta
+      // grava o arquivo; só vira cache se o workbook fechar completo.
+      const tmpFile = cacheFile ? `${cacheFile}.tmp` : null;
+      const fileSink = tmpFile ? createWriteStream(tmpFile) : null;
+      if (fileSink) pass.pipe(fileSink);
+
+      const tSheet = () => { const t = Date.now(); return () => Date.now() - t; };
       try {
         client = await getPool()!.connect();
         await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
 
+        let t = tSheet();
         const wsCarga = wb.addWorksheet('CARGA');
         for (const row of cargaData) wsCarga.addRow(row).commit();
         wsCarga.commit();
+        console.log(`[export] CARGA ${cargaData.length - 1} rows em ${t()}ms`);
 
         // EXTRATO — cursor, filtro de escopo por chunk
         const wsExtrato = wb.addWorksheet('EXTRATO');
@@ -426,8 +462,10 @@ export async function GET(request: NextRequest) {
           if (rows.length < CHUNK) break;
         }
         wsExtrato.commit();
+        console.log(`[export] EXTRATO ${counters.extrato} rows em ${t()}ms`);
 
         // BASE PREST (reports)
+        t = tSheet();
         const wsPrest = wb.addWorksheet('BASE PREST');
         wsPrest.addRow([
           'Report ID', 'Nome', 'Status', 'User CPF', 'User Name', 'Total Value',
@@ -442,8 +480,10 @@ export async function GET(request: NextRequest) {
           ]).commit();
         }
         wsPrest.commit();
+        console.log(`[export] BASE PREST ${reportRows.length} rows em ${t()}ms`);
 
         // DESPESAS — chunks de report_id (mesmo fatiamento de antes, sem reter tudo)
+        t = tSheet();
         const wsExp = wb.addWorksheet('DESPESAS');
         wsExp.addRow(['Expense ID', 'Report ID', 'Value', 'Date', 'Description', 'Status']).commit();
         for (let i = 0; i < reportIds.length; i += 1000) {
@@ -461,8 +501,10 @@ export async function GET(request: NextRequest) {
           }
         }
         wsExp.commit();
+        console.log(`[export] DESPESAS ${counters.despesas} rows em ${t()}ms`);
 
         // SALDO CARTÃO — snapshots, cursor
+        t = tSheet();
         const wsSnap = wb.addWorksheet('SALDO CARTAO');
         wsSnap.addRow(['Data', 'Usuário', 'Valor (Saldo)', 'Número do Cartão']).commit();
         await client.query(
@@ -527,9 +569,16 @@ export async function GET(request: NextRequest) {
 
         await client.query('COMMIT');
         await wb.commit();
+        console.log(`[export] workbook commit — total ${t()}ms desde EXTRATO`);
+        // Workbook completo: promove o .tmp pra cache (rename atômico)
+        if (fileSink && tmpFile && cacheFile) {
+          await new Promise<void>((res) => { fileSink.end(res); });
+          try { renameSync(tmpFile, cacheFile); } catch {}
+        }
       } catch (e) {
         try { await client?.query('ROLLBACK'); } catch {}
         pass.destroy(e instanceof Error ? e : new Error(String(e)));
+        if (tmpFile) try { unlinkSync(tmpFile); } catch {}
       } finally {
         client?.release();
         release();
@@ -540,7 +589,6 @@ export async function GET(request: NextRequest) {
 
     request.signal.addEventListener('abort', () => pass.destroy(new Error('client aborted')));
 
-    const filename = `controle_${year}_${String(month).padStart(2, '0')}_Q${quinzena}.xlsx`;
     return new Response(Readable.toWeb(pass) as ReadableStream, {
       status: 200,
       headers: {
