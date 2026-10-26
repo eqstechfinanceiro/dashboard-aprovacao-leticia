@@ -144,8 +144,8 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
     const blankRows: { cpf: string; colaborador: string | null }[] = await db`
       SELECT cpf, colaborador FROM quinzena_cadastro
       WHERE cpf IS NOT NULL AND (
-        centro_custo IS NULL OR centro_custo = '' OR
-        regional IS NULL OR regional = ''
+        centro_custo IS NULL OR btrim(centro_custo) IN ('','-','—','N/A') OR
+        regional IS NULL OR btrim(regional) IN ('','-','—','N/A')
       )
     `;
     if (blankRows.length) {
@@ -155,7 +155,7 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
       const grpRows: { usuario: string; grupo: string }[] = await db`
         SELECT DISTINCT ON (usuario) usuario, grupo
         FROM extrato_movimentacao
-        WHERE grupo IS NOT NULL AND grupo <> ''
+        WHERE grupo IS NOT NULL AND btrim(grupo) NOT IN ('','-','—','N/A')
         ORDER BY usuario, data DESC
       `;
       const grpByName = new Map(grpRows.map((g) => [norm(g.usuario), g.grupo]));
@@ -176,8 +176,8 @@ export async function refreshCadastro(): Promise<Record<string, unknown>> {
         if (!cc && !reg) continue;
         await db`
           UPDATE quinzena_cadastro SET
-            centro_custo = CASE WHEN centro_custo IS NULL OR centro_custo = '' THEN ${cc} ELSE centro_custo END,
-            regional = CASE WHEN regional IS NULL OR regional = '' THEN ${reg} ELSE regional END,
+            centro_custo = CASE WHEN btrim(COALESCE(centro_custo,'')) IN ('','-','—','N/A') THEN ${cc} ELSE centro_custo END,
+            regional = CASE WHEN btrim(COALESCE(regional,'')) IN ('','-','—','N/A') THEN ${reg} ELSE regional END,
             updated_at = NOW()
           WHERE cpf = ${row.cpf}
         `;
