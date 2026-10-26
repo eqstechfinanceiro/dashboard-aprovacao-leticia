@@ -32,12 +32,24 @@ async function refreshCadastro() {
             break;
         page++;
     }
-    // Build CPF → active map from API
-    const apiCpfActive = new Map();
+    // Dedup por CPF: o VExpenses mantém registros duplicados de team-member
+    // (mesmo CPF, um active e outro inactive — re-cadastro sem baixar o antigo).
+    // O registro ATIVO é o vínculo operacional (cartões/prestações) e vence;
+    // o desligamento real continua chegando pelo merge do RH abaixo.
+    const memberByCpf = new Map();
     for (const m of allMembers) {
-        if (m.cpf)
-            apiCpfActive.set(m.cpf, m.active !== false);
+        const cpf = String(m.cpf || '').replace(/\D/g, '');
+        if (!cpf)
+            continue;
+        const active = m.active !== false;
+        const cur = memberByCpf.get(cpf);
+        if (!cur || (active && !cur.active)) {
+            memberByCpf.set(cpf, { name: String(m.name || ''), active });
+        }
     }
+    const apiCpfActive = new Map();
+    for (const [cpf, m] of memberByCpf)
+        apiCpfActive.set(cpf, m.active);
     // Guarantee every VExpenses member with a CPF exists in quinzena_cadastro.
     // Without a cadastro row, resolveCpfByName cannot map their card
     // transactions and the balance silently vanishes (or worse, leaks to a
@@ -53,19 +65,25 @@ async function refreshCadastro() {
             noCpf.push(m.name ? String(m.name) : `(sem nome) cpf=${cpf || '-'}`);
             continue;
         }
+    }
+    for (const [cpf, m] of memberByCpf) {
+        if (!m.name.trim())
+            continue;
         const targetSituacao = m.active === false ? 'INATIVO' : 'ATIVO';
+        const memberActive = m.active;
+        const memberName = m.name;
         const rows = await db `
       INSERT INTO quinzena_cadastro (cpf, colaborador, situacao, updated_at)
-      VALUES (${cpf}, ${String(m.name || '').toUpperCase()}, ${targetSituacao}, NOW())
+      VALUES (${cpf}, ${memberName.toUpperCase()}, ${targetSituacao}, NOW())
       ON CONFLICT (cpf) DO UPDATE SET
         situacao = CASE
-          WHEN ${m.active === false} THEN 'INATIVO'
+          WHEN ${memberActive === false} THEN 'INATIVO'
           WHEN quinzena_cadastro.situacao IS NULL OR quinzena_cadastro.situacao = '' THEN 'ATIVO'
           ELSE quinzena_cadastro.situacao
         END,
         updated_at = NOW()
       WHERE quinzena_cadastro.situacao IS DISTINCT FROM CASE
-          WHEN ${m.active === false} THEN 'INATIVO'
+          WHEN ${memberActive === false} THEN 'INATIVO'
           WHEN quinzena_cadastro.situacao IS NULL OR quinzena_cadastro.situacao = '' THEN 'ATIVO'
           ELSE quinzena_cadastro.situacao
         END
