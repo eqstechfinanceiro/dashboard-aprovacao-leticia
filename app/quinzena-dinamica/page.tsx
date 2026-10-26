@@ -391,8 +391,11 @@ export default function QuinzenaDinamicaPage() {
     });
     if (!res.ok) {
       const j = await res.json();
-      throw new Error(j.error ?? 'Erro ao salvar');
+      const msg = j.error ?? 'Erro ao salvar';
+      setError(msg);
+      throw new Error(msg);
     }
+    setError(null);
 
     // Optimistic update
     setData(prev => {
@@ -425,6 +428,15 @@ export default function QuinzenaDinamicaPage() {
           if (field === 'carga_final') {
             updated.carga_final_override = value === null ? null : parseFloat(rawValue!);
             updated.carga_final_edit = { by: user?.email ?? 'você', at: nowIso };
+          }
+
+          // Pós-freeze o valor editado É o snapshot — não há fórmula pra
+          // recalcular (a auto-carga lê direto o valor gravado)
+          if (prev.is_frozen) {
+            if (field === 'col_1qz') { updated.col_qz = updated.col_qz_manual; }
+            if (field === 'reembolso') updated.reembolso = updated.reembolso_override ?? 0;
+            if (field === 'carga_final') updated.carga_final = updated.carga_final_override ?? 0;
+            return updated;
           }
 
           // Recalculate fórmula (reembolso 0 na 2QZ, cadastro pendente = 0)
@@ -1379,7 +1391,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric
                               onSave={v => saveField(row.cpf, 'col_1qz', v)}
                               empty="override..."
-                              readOnly={isGestor || isFrozen}
+                              readOnly={isGestor}
                             />
                           </td>
 
@@ -1390,7 +1402,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric
                               onSave={v => saveField(row.cpf, 'adiantamento', v)}
                               empty="0,00"
-                              readOnly={isGestor || isFrozen}
+                              readOnly={isGestor}
                             />
                           </td>
 
@@ -1418,7 +1430,7 @@ export default function QuinzenaDinamicaPage() {
                                 numeric
                                 onSave={v => saveField(row.cpf, 'reembolso', v)}
                                 empty="0,00"
-                                readOnly={isGestor || isFrozen}
+                                readOnly={isGestor}
                               />
                             </span>
                           </td>
@@ -1463,7 +1475,7 @@ export default function QuinzenaDinamicaPage() {
                                 numeric
                                 onSave={v => saveField(row.cpf, 'carga_final', v)}
                                 empty="0,00"
-                                readOnly={isGestor || isFrozen}
+                                readOnly={isGestor}
                               />
                             </span>
                           </td>
@@ -1485,7 +1497,7 @@ export default function QuinzenaDinamicaPage() {
                               numeric={false}
                               onSave={v => saveField(row.cpf, 'obs', v)}
                               empty="obs..."
-                              readOnly={isGestor || isFrozen}
+                              readOnly={isGestor}
                             />
                           </td>
                         </tr>

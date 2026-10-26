@@ -764,18 +764,87 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Overrides só valem pré-freeze — depois do congelar a verdade é o snapshot
-  if (OVERRIDE_FIELDS.includes(field)) {
-    const frozenCnt = await sql`
-      SELECT COUNT(*) AS cnt FROM quinzena_frozen_snapshots
-      WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
-    `;
-    if (Number(frozenCnt[0].cnt) > 0) {
+  // Quinzena congelada: a escrita vai direto pro snapshot — é a fonte da
+  // auto-carga (plan lê carga_final do snapshot) e da planilha exportada.
+  // Audit registra old→new; os metadados *_edited_by alimentam o badge.
+  const frozenRes = await sql`
+    SELECT COUNT(*)::int AS cnt FROM quinzena_frozen_snapshots
+    WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+  `;
+  const isFrozenPeriod = Number(frozenRes[0].cnt) > 0;
+
+  if (isFrozenPeriod) {
+    const snapCol = field === 'col_1qz' ? 'col_qz' : field;
+    const newVal = field === 'obs'
+      ? (value === null || value === undefined ? null : String(value))
+      : (value === null || value === undefined ? null : parseFloat(String(value)));
+
+    // Carga já executada: o dinheiro saiu do pool — não dá pra mudar o valor
+    // retroativamente. Estorne primeiro se precisar ajustar.
+    if (field === 'reembolso' || field === 'carga_final') {
+      const loadedRes = await sql`
+        SELECT COUNT(*)::int AS n FROM quinzena_carga_items
+        WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+          AND cpf = ${cpf} AND status IN ('ok', 'forced_ok')
+      `.catch(() => [{ n: 0 }]);
+      if (Number((loadedRes as any[])[0]?.n ?? 0) > 0) {
+        return NextResponse.json(
+          { error: 'Carga já executada para este colaborador — estorne antes de alterar o valor' },
+          { status: 409 },
+        );
+      }
+    }
+
+    const prevRows = await sql.query(
+      `SELECT ${snapCol} FROM quinzena_frozen_snapshots
+       WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+      [cpf, year, month, quinzena],
+    );
+    if (!prevRows.rows?.length) {
       return NextResponse.json(
-        { error: 'Quinzena congelada — descongele para editar valores' },
-        { status: 409 },
+        { error: 'Colaborador não está no snapshot congelado desta quinzena' },
+        { status: 404 },
       );
     }
+    const oldValue = prevRows.rows[0][snapCol];
+
+    await sql.query(
+      `UPDATE quinzena_frozen_snapshots SET ${snapCol} = $5
+       WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+      [cpf, year, month, quinzena, newVal],
+    );
+
+    const userEmail = request.headers.get('x-user-email') || 'unknown';
+    if (field === 'reembolso' || field === 'carga_final') {
+      await sql.query(
+        `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, ${snapCol}_override, ${snapCol}_edited_by, ${snapCol}_edited_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+         DO UPDATE SET ${snapCol}_override = EXCLUDED.${snapCol}_override,
+                       ${snapCol}_edited_by = EXCLUDED.${snapCol}_edited_by,
+                       ${snapCol}_edited_at = NOW(),
+                       updated_at = NOW()`,
+        [cpf, year, month, quinzena, newVal, userEmail],
+      );
+    }
+
+    const cad = await sql`
+      SELECT colaborador FROM quinzena_cadastro WHERE cpf = ${cpf} LIMIT 1
+    `;
+    await logAudit(request, {
+      action: 'quinzena.edit_frozen',
+      entity_type: 'quinzena',
+      entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}:${cpf}`,
+      details: {
+        field, cpf,
+        colaborador: (cad[0] as any)?.colaborador ?? null,
+        old_value: oldValue !== null && oldValue !== undefined && snapCol !== 'obs'
+          ? Number(oldValue) : oldValue,
+        new_value: newVal,
+      },
+    });
+
+    return NextResponse.json({ ok: true, frozen_edit: true });
   }
 
   try {
