@@ -3,6 +3,11 @@ import { sql } from '@/lib/db/neon';
 import { isFaturaOrCartao } from '@/lib/rules/report-filters';
 import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
 import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
+import { getQuinzenaDates, toNum, r2, calcFinancials } from '@/lib/quinzena/financials';
+import { ensureAutocargaSchema } from '@/lib/autocarga/tables';
+import { recomputeFrozenDerived } from '@/lib/quinzena/recalc-frozen';
+import { logAudit } from '@/lib/db/audit';
+import { computeLimiter, heavyBusy } from '@/lib/util/heavy';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +29,15 @@ interface ManualInput {
   adiantamento: string | null;
   obs: string | null;
   cpf: string | null;
+  reembolso_override: string | null;
+  carga_final_override: string | null;
+  reembolso_edited_by: string | null;
+  reembolso_edited_at: string | null;
+  carga_final_edited_by: string | null;
+  carga_final_edited_at: string | null;
+  imported_fields: string[] | null;
+  imported_by: string | null;
+  imported_at: string | null;
 }
 
 interface FrozenSnapshot {
@@ -41,6 +55,7 @@ interface FrozenSnapshot {
   prestacao: string | null;
   saldo_prestacao: string | null;
   saldo_cartao: string | null;
+  saldo_cartao_carga: string | null;
   saldo_final: string | null;
   saldo_reembolsar: string | null;
   col_qz: string | null;
@@ -80,6 +95,18 @@ export interface QuinzenaRow {
   carga_parcial: number;
   reembolso: number;
   carga_final: number;
+  // Overrides manuais de resultado (auto-carga era): valor efetivo acima,
+  // calculado + metadados de edição abaixo
+  reembolso_override: number | null;
+  carga_final_override: number | null;
+  reembolso_calc: number;
+  carga_final_calc: number;
+  reembolso_edit: { by: string | null; at: string | null } | null;
+  carga_final_edit: { by: string | null; at: string | null } | null;
+  // Proveniência: campos escritos pela última importação de planilha + quem/quando
+  imported: { fields: string[]; by: string | null; at: string | null } | null;
+  // Tem valor de carga mas não receberá (motivo derivado do cadastro — ver helper)
+  carga_block: string | null;
   data_sources: {
     col_qz: 'manual' | 'null';
     adiantamento: 'manual' | 'default';
@@ -105,6 +132,7 @@ export interface QuinzenaResponse {
     total_rows: number;
     ativos: number;
     com_carga: number;
+    sem_carga: number;
     total_carga_final: number;
     total_saldo_final: number;
     total_col_qz: number;
@@ -119,100 +147,29 @@ const MONTH_NAMES = [
   'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro',
 ];
 
-/**
- * Regra quinzenal (validada em jul/2026):
- *   1ª QZ: período 26 do mês anterior → 10 do mês atual  (fechamento dia 11)
- *   2ª QZ: período 11 → 25 do mês atual                  (fechamento dia 25)
- *
- * Cutoff financeiro (carga/transf/tarifa/prestação): dia 30 do mês anterior
- * Saldo cartão CONTROLE: último snapshot até dia 1 do mês atual
- * Saldo cartão CARGA: último snapshot até a data de fechamento (11 ou 25)
- */
-function getQuinzenaDates(year: number, month: number, quinzena: number) {
-  const mm = String(month).padStart(2, '0');
-  const prevMonth = month === 1 ? 12 : month - 1;
-  const prevYear  = month === 1 ? year - 1 : year;
-  const pmm = String(prevMonth).padStart(2, '0');
-
-  // Financial data cutoff: last day of previous month (same for both quinzenas)
-  const prevMonthLastDay = new Date(prevYear, prevMonth, 0).getDate();
-  const financial_cutoff = `${prevYear}-${pmm}-${String(prevMonthLastDay).padStart(2, '0')}`;
-
-  // Saldo cartão CONTROLE: last snapshot up to day 1 of current month
-  const saldo_cartao_controle_date = `${year}-${mm}-01`;
-
-  if (quinzena === 1) {
-    return {
-      start_date:    `${prevYear}-${pmm}-26`,
-      end_date:      `${year}-${mm}-10`,
-      fechamento:    `${year}-${mm}-11`,
-      financial_cutoff,
-      saldo_cartao_controle_date,
-      saldo_cartao_carga_date: `${year}-${mm}-11`,
-    };
-  }
-  return {
-    start_date:  `${year}-${mm}-11`,
-    end_date:    `${year}-${mm}-25`,
-    fechamento:  `${year}-${mm}-25`,
-    financial_cutoff,
-    saldo_cartao_controle_date,
-    saldo_cartao_carga_date: `${year}-${mm}-25`,
-  };
-}
-
-function toNum(v: string | null | undefined): number {
-  if (v === null || v === undefined) return 0;
-  const n = parseFloat(String(v));
-  return isNaN(n) ? 0 : n;
-}
-
-function r2(v: number): number {
-  return Math.round(v * 100) / 100;
-}
-
+// Regra de datas e fórmulas financeiras centralizadas em
+// @/lib/quinzena/financials (testadas em lib/quinzena/financials.test.ts).
 // Resolucao nome->CPF centralizada em @/lib/quinzena/name-resolve (aliases
 // manuais + fallback de prefixo nao-ambiguo). Nao manter copia local aqui.
 
-/**
- * Fórmulas confirmadas por inspeção direta nas planilhas de Carga (validado 100% em mai/2026):
- *
- *   col_qz_efetivo  = col_qz_manual ?? col_qz_planilha ?? 0
- *
- *   CARGA_PARCIAL = col_qz_efetivo - saldo_final_carga - saldo_cartao_carga - adiantamento
- *     (saldo_final_carga = max(0, saldo_final); se negativo → 0, exceto cadastro pendente que força 0)
- *
- *   REEMBOLSO = max(0, saldo_reembolsar) * 0.5   ← SOMENTE na 1ª QZ
- *               0                                 ← sempre na 2ª QZ
- *
- *   CARGA_FINAL = max(0, CARGA_PARCIAL) + REEMBOLSO
- *
- * Regras de negócio:
- *   - status_cartao contém "pendente" → carga_parcial=0, carga_final=0
- *   - Reembolso é mensal único: pago na 1ª QZ, 0 na 2ª QZ
- */
-function calcFinancials(
-  col_qz_efetivo: number,
-  saldo_final: number,
-  saldo_cartao: number,
-  saldo_reembolsar: number,
-  adiantamento: number,
-  quinzena: number,
-  status_cartao: string,
-  reembolso_multiplier: number = 0.5,
-): { carga_parcial: number; reembolso: number; carga_final: number } {
-  const isPendente = status_cartao.toLowerCase().includes('pendente');
-
-  if (isPendente) {
-    return { carga_parcial: 0, reembolso: 0, carga_final: 0 };
-  }
-
-  const carga_parcial = r2(col_qz_efetivo - saldo_final - saldo_cartao - adiantamento);
-  const reembolso     = quinzena === 1 ? r2(Math.max(0, saldo_reembolsar) * reembolso_multiplier) : 0;
-  const carga_final   = r2(Math.max(0, carga_parcial) + reembolso);
-
-  return { carga_parcial, reembolso, carga_final };
+// Indica que o colaborador TEM valor de carga mas não a receberá — espelha os
+// bloqueios cadastrais do buildCargaPlan (situacao != ATIVO, cartão pendente/
+// inativo). Os motivos que dependem do card map VExpenses (sem_cartao,
+// nome_ambiguo, cpf_nao_encontrado) só aparecem no preflight da auto-carga.
+function cargaBlockReason(situacao: string, statusCartao: string, cargaFinal: number): string | null {
+  if (!(cargaFinal > 0)) return null;
+  const sit = (situacao || '').trim().toUpperCase();
+  if (sit && sit !== 'ATIVO') return `Sem carga — ${situacao.trim()}`;
+  const sc = (statusCartao || '').trim();
+  if (/pendente|n[aã]o vinculad/i.test(sc)) return `Sem carga — ${sc}`;
+  if (/inativ|bloquead|cancel/i.test(sc)) return `Sem carga — cartão ${sc}`;
+  return null;
 }
+
+const importedMeta = (m?: { imported_fields?: string[] | null; imported_by?: string | null; imported_at?: string | null } | null) =>
+  m?.imported_fields?.length
+    ? { fields: m.imported_fields, by: m.imported_by ?? null, at: m.imported_at ?? null }
+    : null;
 
 // ---- GET --------------------------------------------------------------------
 
@@ -236,12 +193,21 @@ export async function GET(request: NextRequest) {
 
   const { start_date, end_date, fechamento, financial_cutoff, saldo_cartao_controle_date, saldo_cartao_carga_date } = getQuinzenaDates(year, month, quinzena);
 
+  // Colunas de override (reembolso/carga_final) — criadas sob demanda
+  await ensureAutocargaSchema();
+
   const scope = await getScopeForRequest(request);
   const inScope = (cpf: string | null | undefined) =>
     !scope || (!!cpf && scope.cpfs.has(normalizeCpf(cpf) ?? '__none__'));
 
+  // Cálculo pesado — serializa com outras rotas pesadas (ver lib/util/heavy).
+  const release = await computeLimiter.acquire();
+  if (!release) return heavyBusy();
+
   try {
-    // 0. Read reembolso multiplier from config table
+    // 0. Read reembolso multiplier from config table.
+    //    Novo default (out/2026): período SEM linha de config → 0 (a regra de
+    //    reembolso de 50% foi descontinuada; config explícita ainda é honrada).
     const configRows = await sql`
       SELECT reembolso_multiplier::text
       FROM quinzena_config
@@ -249,7 +215,7 @@ export async function GET(request: NextRequest) {
     `;
     const reembolsoMultiplier = configRows[0]
       ? parseFloat(configRows[0].reembolso_multiplier as string)
-      : 0.5;
+      : 0;
 
     // 1. Check if this period is frozen (skip if forceCalc=true)
     const frozenRows = forceCalc ? [] : await sql`
@@ -257,7 +223,7 @@ export async function GET(request: NextRequest) {
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
         carga::text, transferencia::text, tarifa::text, prestacao::text,
-        saldo_prestacao::text, saldo_cartao::text, saldo_final::text,
+        saldo_prestacao::text, saldo_cartao::text, saldo_cartao_carga::text, saldo_final::text,
         saldo_reembolsar::text, col_qz::text, adiantamento::text, obs,
         carga_parcial::text, reembolso::text, carga_final::text,
         reembolso_multiplier::text,
@@ -282,6 +248,19 @@ export async function GET(request: NextRequest) {
       const sitByCpf = new Map<string, string>();
       for (const r of sitRows as any[]) if (r.situacao) sitByCpf.set(r.cpf, r.situacao);
 
+      // Metadados de override pré-freeze (a edição aconteceu antes do congelar;
+      // os valores do snapshot já são os efetivos)
+      const frozenManuals = await sql`
+        SELECT cpf, reembolso_override::text, carga_final_override::text,
+               reembolso_edited_by, reembolso_edited_at,
+               carga_final_edited_by, carga_final_edited_at,
+               imported_fields, imported_by, imported_at
+        FROM quinzena_manual_inputs
+        WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+      `;
+      const frozenManualByCpf = new Map<string, any>();
+      for (const m of frozenManuals as any[]) if (m.cpf) frozenManualByCpf.set(m.cpf, m);
+
       // Return frozen data directly
       let rows: QuinzenaRow[] = frozenSnapshots.map((snap) => {
         const sf = toNum(snap.saldo_final);
@@ -293,11 +272,13 @@ export async function GET(request: NextRequest) {
         const carga_parcial = toNum(snap.carga_parcial);
         const reembolso = toNum(snap.reembolso);
         const carga_final = toNum(snap.carga_final);
+        const man = frozenManualByCpf.get(snap.cpf);
+        const situacao = sitByCpf.get(snap.cpf) ?? snap.situacao ?? '';
 
         return {
           cpf: snap.cpf,
           colaborador: snap.colaborador ?? '',
-          situacao: sitByCpf.get(snap.cpf) ?? snap.situacao ?? '',
+          situacao,
           status_cartao: snap.status_cartao ?? '',
           regional: snap.regional ?? '',
           centro_custo: snap.centro_custo ?? '',
@@ -313,13 +294,25 @@ export async function GET(request: NextRequest) {
           saldo_reembolsar: sr,
           col_qz,
           saldo_final_carga: Math.max(sf, 0),
-          saldo_cartao_carga: sc,
+          saldo_cartao_carga: snap.saldo_cartao_carga != null ? toNum(snap.saldo_cartao_carga) : sc,
           col_qz_manual: col_qz,
           adiantamento,
           obs: snap.obs ?? null,
           carga_parcial,
           reembolso,
           carga_final,
+          reembolso_override: man?.reembolso_override != null ? toNum(man.reembolso_override) : null,
+          carga_final_override: man?.carga_final_override != null ? toNum(man.carga_final_override) : null,
+          // No snapshot o valor gravado já é o efetivo — o "calculado" original
+          // não é recuperável quando houve override (histórico no audit_log)
+          reembolso_calc: reembolso,
+          carga_final_calc: carga_final,
+          reembolso_edit: man?.reembolso_edited_by
+            ? { by: man.reembolso_edited_by, at: man.reembolso_edited_at } : null,
+          carga_final_edit: man?.carga_final_edited_by
+            ? { by: man.carga_final_edited_by, at: man.carga_final_edited_at } : null,
+          imported: importedMeta(man),
+          carga_block: cargaBlockReason(situacao, snap.status_cartao ?? '', carga_final),
           data_sources: {
             col_qz: col_qz !== null ? 'manual' as const : 'null' as const,
             adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
@@ -333,6 +326,7 @@ export async function GET(request: NextRequest) {
 
       const ativos = rows.filter(r => r.situacao?.toUpperCase() === 'ATIVO').length;
       const com_carga = rows.filter(r => r.carga_final > 0).length;
+      const sem_carga = rows.filter(r => r.carga_block).length;
       const total_carga_final = rows.reduce((s, r) => s + r.carga_final, 0);
       const total_saldo_final = rows.reduce((s, r) => s + r.saldo_final, 0);
       const total_col_qz = rows.reduce((s, r) => s + (r.col_qz_manual ?? r.col_qz ?? 0), 0);
@@ -351,6 +345,7 @@ export async function GET(request: NextRequest) {
           total_rows: rows.length,
           ativos,
           com_carga,
+          sem_carga,
           total_carga_final,
           total_saldo_final,
           total_col_qz,
@@ -372,9 +367,13 @@ export async function GET(request: NextRequest) {
     `;
     const cadastroBase = cadastroRows as unknown as CadastroRow[];
 
-    // 2b. Load manual inputs
+    // 2b. Load manual inputs (incluindo overrides de resultado)
     const manualRows = await sql`
-      SELECT col_1qz::text, adiantamento::text, obs, cpf
+      SELECT col_1qz::text, adiantamento::text, obs, cpf,
+             reembolso_override::text, carga_final_override::text,
+             reembolso_edited_by, reembolso_edited_at,
+             carga_final_edited_by, carga_final_edited_at,
+             imported_fields, imported_by, imported_at
       FROM quinzena_manual_inputs
       WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
     `;
@@ -576,7 +575,7 @@ export async function GET(request: NextRequest) {
 
       const col_qz_efetivo = col_qz_manual !== null ? col_qz_manual : 0;
 
-      const { carga_parcial, reembolso, carga_final } = calcFinancials(
+      const calc = calcFinancials(
         col_qz_efetivo,
         saldo_final_carga,
         saldo_cartao_carga,
@@ -586,6 +585,17 @@ export async function GET(request: NextRequest) {
         snap.status_cartao ?? '',
         reembolsoMultiplier,
       );
+
+      // Overrides manuais de resultado (editáveis pré-freeze; override explícito
+      // vence até a regra de "pendente = 0" — foi decisão humana auditada)
+      const reembolso_override = manual?.reembolso_override != null
+        ? toNum(manual.reembolso_override) : null;
+      const carga_final_override = manual?.carga_final_override != null
+        ? toNum(manual.carga_final_override) : null;
+      const reembolso_efetivo = reembolso_override ?? calc.reembolso;
+      const carga_parcial = calc.carga_parcial;
+      const reembolso = reembolso_efetivo;
+      const carga_final = carga_final_override ?? r2(Math.max(0, carga_parcial) + reembolso_efetivo);
 
       return {
         cpf: snap.cpf,
@@ -613,6 +623,16 @@ export async function GET(request: NextRequest) {
         carga_parcial,
         reembolso,
         carga_final,
+        reembolso_override,
+        carga_final_override,
+        reembolso_calc: calc.reembolso,
+        carga_final_calc: calc.carga_final,
+        reembolso_edit: manual?.reembolso_edited_by
+          ? { by: manual.reembolso_edited_by, at: manual.reembolso_edited_at } : null,
+        carga_final_edit: manual?.carga_final_edited_by
+          ? { by: manual.carga_final_edited_by, at: manual.carga_final_edited_at } : null,
+        imported: importedMeta(manual),
+        carga_block: cargaBlockReason(snap.situacao ?? '', snap.status_cartao ?? '', carga_final),
         data_sources: {
           col_qz: col_qz_manual !== null ? 'manual' as const : 'null' as const,
           adiantamento: adiantamento > 0 ? 'manual' as const : 'default' as const,
@@ -627,6 +647,7 @@ export async function GET(request: NextRequest) {
     // 4. Estatisticas
     const ativos            = rows.filter(r => r.situacao?.toUpperCase() === 'ATIVO').length;
     const com_carga         = rows.filter(r => r.carga_final > 0).length;
+    const sem_carga         = rows.filter(r => r.carga_block).length;
     const total_carga_final = rows.reduce((s, r) => s + r.carga_final, 0);
     const total_saldo_final = rows.reduce((s, r) => s + r.saldo_final, 0);
     const total_col_qz      = rows.reduce((s, r) => s + (r.col_qz_manual ?? r.col_qz ?? 0), 0);
@@ -645,6 +666,7 @@ export async function GET(request: NextRequest) {
         total_rows: rows.length,
         ativos,
         com_carga,
+        sem_carga,
         total_carga_final,
         total_saldo_final,
         total_col_qz,
@@ -675,6 +697,11 @@ export async function GET(request: NextRequest) {
     // Add freshness info to response
     const responseWithFreshness = {
       ...response,
+      // Nomes do extrato que não resolveram para um CPF do cadastro — valores
+      // ficam FORA do cálculo (surfaced aqui pro pre-freeze checklist)
+      unresolved_extrato: [...unresolvedExtrato.entries()]
+        .map(([nome, net]) => ({ nome, net: r2(net) }))
+        .sort((a, b) => Math.abs(b.net) - Math.abs(a.net)),
       data_freshness: {
         last_sync_at: lastSync,
         reports_with_non_final_status: staleCount,
@@ -694,18 +721,25 @@ export async function GET(request: NextRequest) {
       { error: 'Erro ao consultar dados', detail: String(error) },
       { status: 500 },
     );
+  } finally {
+    release();
   }
 }
 
 // ---- POST: salvar campo manual ----------------------------------------------
 
-const ALLOWED_FIELDS = ['col_1qz', 'adiantamento', 'obs'] as const;
+const ALLOWED_FIELDS = ['col_1qz', 'adiantamento', 'obs', 'reembolso', 'carga_final'] as const;
 type AllowedField = typeof ALLOWED_FIELDS[number];
+
+// Campos que alteram o valor que vira dinheiro na auto-carga — restritos a
+// não-gestores (D8) e proibidos após congelar (o snapshot já é a verdade).
+const OVERRIDE_FIELDS: AllowedField[] = ['reembolso', 'carga_final'];
 
 export async function POST(request: NextRequest) {
   if (!sql) {
     return NextResponse.json({ error: 'Banco de dados nao configurado' }, { status: 503 });
   }
+  await ensureAutocargaSchema();
 
   let body: {
     cpf: string;
@@ -746,7 +780,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (field === 'col_1qz' || field === 'adiantamento') {
+  if (field === 'col_1qz' || field === 'adiantamento' || OVERRIDE_FIELDS.includes(field)) {
     const n = parseFloat(String(value));
     if (value !== null && isNaN(n)) {
       return NextResponse.json(
@@ -754,6 +788,131 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+    if (OVERRIDE_FIELDS.includes(field) && value !== null && n < 0) {
+      return NextResponse.json(
+        { error: `${field} não pode ser negativo` },
+        { status: 400 },
+      );
+    }
+  }
+
+  // Overrides: gestor não edita resultado (mexe no valor que vira dinheiro)
+  if (OVERRIDE_FIELDS.includes(field) && postScope) {
+    return NextResponse.json(
+      { error: 'Gestores não podem editar reembolso/carga final' },
+      { status: 403 },
+    );
+  }
+
+  // Quinzena congelada: a escrita vai direto pro snapshot — é a fonte da
+  // auto-carga (plan lê carga_final do snapshot) e da planilha exportada.
+  // Audit registra old→new; os metadados *_edited_by alimentam o badge.
+  const frozenRes = await sql`
+    SELECT COUNT(*)::int AS cnt FROM quinzena_frozen_snapshots
+    WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+  `;
+  const isFrozenPeriod = Number(frozenRes[0].cnt) > 0;
+
+  if (isFrozenPeriod) {
+    const snapCol = field === 'col_1qz' ? 'col_qz' : field;
+    const newVal = field === 'obs'
+      ? (value === null || value === undefined ? null : String(value))
+      : (value === null || value === undefined ? null : parseFloat(String(value)));
+
+    // Carga já executada: todo campo que alimenta carga_final está selado — o
+    // dinheiro saiu do pool e o valor gravado não pode divergir do transferido.
+    // Estorne primeiro se precisar ajustar. (obs é livre — não move dinheiro.)
+    if (field !== 'obs') {
+      const loadedRes = await sql`
+        SELECT COUNT(*)::int AS n FROM quinzena_carga_items
+        WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
+          AND cpf = ${cpf} AND status IN ('ok', 'forced_ok')
+      `.catch(() => [{ n: 0 }]);
+      if (Number((loadedRes as any[])[0]?.n ?? 0) > 0) {
+        return NextResponse.json(
+          { error: 'Carga já executada para este colaborador — estorne antes de alterar o valor' },
+          { status: 409 },
+        );
+      }
+    }
+
+    const prevRows = await sql.query(
+      `SELECT ${snapCol} FROM quinzena_frozen_snapshots
+       WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+      [cpf, year, month, quinzena],
+    );
+    if (!prevRows.rows?.length) {
+      return NextResponse.json(
+        { error: 'Colaborador não está no snapshot congelado desta quinzena' },
+        { status: 404 },
+      );
+    }
+    const oldValue = prevRows.rows[0][snapCol];
+
+    const userEmail = request.headers.get('x-user-email') || 'unknown';
+
+    // Entradas da fórmula (planilha/adiantamento/obs) gravam direto no snapshot.
+    // Overrides de resultado vão pro manual_inputs — a fonte do badge "editado
+    // por" — e o snapshot é atualizado pelo recálculo logo abaixo.
+    if (field === 'reembolso' || field === 'carga_final') {
+      // Edição manual apaga a marca de "importado" — o valor atual não é mais
+      // o que veio da planilha (a proveniência da importação fica no audit).
+      await sql.query(
+        `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, ${snapCol}_override, ${snapCol}_edited_by, ${snapCol}_edited_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+         DO UPDATE SET ${snapCol}_override = EXCLUDED.${snapCol}_override,
+                       ${snapCol}_edited_by = EXCLUDED.${snapCol}_edited_by,
+                       ${snapCol}_edited_at = NOW(),
+                       imported_fields = array_remove(COALESCE(quinzena_manual_inputs.imported_fields, '{}'), '${snapCol}'),
+                       updated_at = NOW()`,
+        [cpf, year, month, quinzena, newVal, userEmail],
+      );
+    } else {
+      await sql.query(
+        `UPDATE quinzena_frozen_snapshots SET ${snapCol} = $5
+         WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+        [cpf, year, month, quinzena, newVal],
+      );
+      if (field === 'col_1qz' || field === 'adiantamento') {
+        await sql.query(
+          `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, updated_at)
+           VALUES ($1, $2, $3, $4, NOW())
+           ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+           DO UPDATE SET imported_fields = array_remove(COALESCE(quinzena_manual_inputs.imported_fields, '{}'), $5),
+                         updated_at = NOW()`,
+          [cpf, year, month, quinzena, field],
+        );
+      }
+    }
+
+    // Recalcula os derivados congelados — editar planilha/adiantamento/
+    // reembolso/carga_final propaga pra carga_parcial, reembolso e carga_final
+    // na mesma hora (override manual continua vencendo a fórmula).
+    const recalc = field === 'obs'
+      ? null
+      : (await recomputeFrozenDerived([cpf], year, month, quinzena)).get(cpf) ?? null;
+
+    const cad = await sql`
+      SELECT colaborador FROM quinzena_cadastro WHERE cpf = ${cpf} LIMIT 1
+    `;
+    await logAudit(request, {
+      action: 'quinzena.edit_frozen',
+      entity_type: 'quinzena',
+      entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}:${cpf}`,
+      details: {
+        field, cpf,
+        colaborador: (cad[0] as any)?.colaborador ?? null,
+        old_value: oldValue !== null && oldValue !== undefined && snapCol !== 'obs'
+          ? Number(oldValue) : oldValue,
+        new_value: newVal,
+        recalculated: recalc
+          ? { carga_parcial: recalc.carga_parcial, reembolso: recalc.reembolso, carga_final: recalc.carga_final }
+          : undefined,
+      },
+    });
+
+    return NextResponse.json({ ok: true, frozen_edit: true, recalc });
   }
 
   try {
@@ -763,7 +922,9 @@ export async function POST(request: NextRequest) {
         INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, col_1qz)
         VALUES (${cpf}, ${year}, ${month}, ${quinzena}, ${numVal})
         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
-        DO UPDATE SET col_1qz = EXCLUDED.col_1qz, updated_at = NOW()
+        DO UPDATE SET col_1qz = EXCLUDED.col_1qz,
+                      imported_fields = array_remove(COALESCE(quinzena_manual_inputs.imported_fields, '{}'), 'col_1qz'),
+                      updated_at = NOW()
       `;
     } else if (field === 'adiantamento') {
       const numVal = value === null ? null : parseFloat(String(value));
@@ -771,9 +932,11 @@ export async function POST(request: NextRequest) {
         INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, adiantamento)
         VALUES (${cpf}, ${year}, ${month}, ${quinzena}, ${numVal})
         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
-        DO UPDATE SET adiantamento = EXCLUDED.adiantamento, updated_at = NOW()
+        DO UPDATE SET adiantamento = EXCLUDED.adiantamento,
+                      imported_fields = array_remove(COALESCE(quinzena_manual_inputs.imported_fields, '{}'), 'adiantamento'),
+                      updated_at = NOW()
       `;
-    } else {
+    } else if (field === 'obs') {
       const strVal = value === null ? null : String(value);
       await sql`
         INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, obs)
@@ -781,6 +944,47 @@ export async function POST(request: NextRequest) {
         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
         DO UPDATE SET obs = EXCLUDED.obs, updated_at = NOW()
       `;
+    } else {
+      // Override de resultado — coluna *_override + quem/quando editou + audit
+      const col = field === 'reembolso' ? 'reembolso' : 'carga_final';
+      const numVal = value === null ? null : parseFloat(String(value));
+      const userEmail = request.headers.get('x-user-email') || 'unknown';
+
+      const prevRes = await sql.query(
+        `SELECT ${col}_override FROM quinzena_manual_inputs
+         WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+        [cpf, year, month, quinzena],
+      );
+      const oldValue = prevRes.rows?.[0]?.[`${col}_override`] ?? null;
+
+      await sql.query(
+        `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, ${col}_override, ${col}_edited_by, ${col}_edited_at)
+         VALUES ($1, $2, $3, $4, $5, $6, NOW())
+         ON CONFLICT (cpf, year, month, quinzena) WHERE cpf IS NOT NULL
+         DO UPDATE SET ${col}_override = EXCLUDED.${col}_override,
+                       ${col}_edited_by = EXCLUDED.${col}_edited_by,
+                       ${col}_edited_at = NOW(),
+                       imported_fields = array_remove(COALESCE(quinzena_manual_inputs.imported_fields, '{}'), '${col}'),
+                       updated_at = NOW()`,
+        [cpf, year, month, quinzena, numVal, userEmail],
+      );
+
+      // Nome do colaborador pro audit ficar legível
+      const cad = await sql`
+        SELECT colaborador FROM quinzena_cadastro WHERE cpf = ${cpf} LIMIT 1
+      `;
+      await logAudit(request, {
+        action: 'quinzena.edit_override',
+        entity_type: 'quinzena',
+        entity_id: `${year}-${String(month).padStart(2, '0')}-Q${quinzena}:${cpf}`,
+        details: {
+          field, cpf,
+          colaborador: (cad[0] as any)?.colaborador ?? null,
+          old_value: oldValue != null ? Number(oldValue) : null,
+          new_value: numVal,
+          cleared: numVal === null && oldValue != null,
+        },
+      });
     }
 
     return NextResponse.json({ ok: true });
