@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
     let frozenRows = await sql`
       SELECT cpf, colaborador, situacao, status_cartao, regional, centro_custo, gestor, diretor,
              carga::text, transferencia::text, tarifa::text, prestacao::text,
-             saldo_prestacao::text, saldo_cartao::text, saldo_final::text,
+             saldo_prestacao::text, saldo_cartao::text, saldo_cartao_carga::text, saldo_final::text,
              saldo_reembolsar::text, col_qz::text, adiantamento::text, obs,
              carga_parcial::text, reembolso::text, carga_final::text,
              reembolso_multiplier::text, frozen_at
@@ -166,14 +166,19 @@ export async function GET(request: NextRequest) {
     };
 
     // ---- Aba CARGA (montada em memória — ~mil linhas, barato) ----
+    const ddmm = (iso: string) => {
+      const [, m, d] = iso.split('-');
+      return `${d}/${m}`;
+    };
     const cargaData: any[][] = [];
     cargaData.push([
       'CPF', 'Colaborador', 'Situação', 'Status Cartão', 'Regional', 'Centro de Custo',
       'Gestor', 'Diretor',
       'CARGA', 'TRANSFERÊNCIA', '(-)TARIFA', '(-)PRESTAÇÃO DE CONTAS',
-      'SALDO PRESTAÇÃO', '(-)SALDO CARTÃO', 'SALDO FINAL', 'SALDO REEMBOLSAR',
-      '1ª QZ', 'ADIANTAMENTO', 'OBS',
-      '(-)SALDO CARTÃO CARGA', 'CARGA PARCIAL', 'REEMBOLSO', 'CARGA FINAL',
+      'SALDO PRESTAÇÃO', `(-)SALDO CARTÃO ATÉ ${ddmm(dates.saldo_cartao_controle_date)}`,
+      'SALDO FINAL', 'SALDO REEMBOLSAR',
+      'CARGA PLANILHA', 'ADIANTAMENTO', 'OBS',
+      `(-)SALDO CARTÃO ATÉ ${ddmm(dates.saldo_cartao_carga_date)}`, 'CARGA PARCIAL', 'REEMBOLSO', 'CARGA FINAL',
       'STATUS CARGA', 'TRANSACTION ID',
     ]);
 
@@ -368,7 +373,9 @@ export async function GET(request: NextRequest) {
       // Conexão dedicada + REPEATABLE READ + cursores: leitura em chunks com
       // heap limitada E snapshot consistente (o sync-worker insere extrato
       // concorrentemente — paginar fora de tx duplicaria/pularia linhas).
-      const client = await getPool()!.connect();
+      // client fica fora do try: se connect() falhar, o finally ainda libera
+      // o slot do limiter (antes ficava preso → 503 permanente até restart).
+      let client: import('pg').PoolClient | null = null;
       // Watchdog de consumidor morto: cliente desconectou mas o producer
       // seguiria escrevendo num PassThrough sem leitor (ExcelJS ignora
       // backpressure e request.signal nem sempre propaga o disconnect).
@@ -380,6 +387,7 @@ export async function GET(request: NextRequest) {
         return true;
       };
       try {
+        client = await getPool()!.connect();
         await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
 
         const wsCarga = wb.addWorksheet('CARGA');
@@ -520,10 +528,10 @@ export async function GET(request: NextRequest) {
         await client.query('COMMIT');
         await wb.commit();
       } catch (e) {
-        try { await client.query('ROLLBACK'); } catch {}
+        try { await client?.query('ROLLBACK'); } catch {}
         pass.destroy(e instanceof Error ? e : new Error(String(e)));
       } finally {
-        client.release();
+        client?.release();
         release();
       }
     };

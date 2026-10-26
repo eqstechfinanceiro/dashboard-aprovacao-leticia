@@ -533,7 +533,7 @@ export default function QuinzenaDinamicaPage() {
         // CARGA columns (using carga variants: max(0,sf) and carga-date saldo_cartao)
         { h: 'SALDO FINAL',       key: 'saldo_final_carga',  group: 'carga',  w: 14 },
         { h: 'SALDO REEMBOLSAR',  key: 'saldo_reembolsar',   group: 'carga',  w: 16 },
-        { h: 'SALDO CARTAO',      key: 'saldo_cartao_carga', group: 'carga',  w: 14 },
+        { h: `SALDO CARTAO ATÉ ${period.end_date.slice(8, 10)}/${period.end_date.slice(5, 7)}`, key: 'saldo_cartao_carga', group: 'carga', w: 18 },
         { h: `${period.quinzena}a QZ (planilha)`, key: 'col_qz',    group: 'carga',  w: 16 },
         { h: `${period.quinzena}a QZ (manual)`,   key: 'col_qz_manual', group: 'manual', w: 16 },
         { h: 'ADIANTAMENTO',      key: 'adiantamento',       group: 'manual', w: 14 },
@@ -1297,7 +1297,8 @@ export default function QuinzenaDinamicaPage() {
                       <SortTh k="gestor" className="text-left px-2 py-2 font-semibold">Gestor</SortTh>
                       {/* Neon */}
                       <SortTh k="saldo_final" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Final</SortTh>
-                      <SortTh k="saldo_cartao" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Cartao</SortTh>
+                      <SortTh k="saldo_cartao" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">{`Saldo Cartão 01/${String(data.period.month).padStart(2, '0')}`}</SortTh>
+                      <SortTh k="saldo_cartao_carga" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">{`Saldo Cartão ${data.period.end_date.slice(8, 10)}/${String(data.period.month).padStart(2, '0')}`}</SortTh>
                       <SortTh k="saldo_prestacao" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Prest.</SortTh>
                       <SortTh k="saldo_reembolsar" className="text-right px-2 py-2 font-semibold bg-green-50 whitespace-nowrap">Saldo Reemb.</SortTh>
                       {/* From carga spreadsheet */}
@@ -1321,7 +1322,7 @@ export default function QuinzenaDinamicaPage() {
                   <tbody>
                     {filteredRows.length === 0 ? (
                       <tr>
-                        <td colSpan={18} className="text-center py-10 text-gray-400">
+                        <td colSpan={19} className="text-center py-10 text-gray-400">
                           {search ? 'Nenhum resultado para a busca.' : 'Sem dados.'}
                         </td>
                       </tr>
@@ -1356,6 +1357,9 @@ export default function QuinzenaDinamicaPage() {
                           </td>
                           <td className="px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap">
                             {num(row.saldo_cartao)}
+                          </td>
+                          <td className="px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap">
+                            {num(row.saldo_cartao_carga)}
                           </td>
                           <td className={`px-2 py-1.5 text-right font-mono bg-green-50/40 whitespace-nowrap ${row.saldo_prestacao < 0 ? 'text-orange-500' : ''}`}>
                             {num(row.saldo_prestacao)}
@@ -1502,6 +1506,9 @@ export default function QuinzenaDinamicaPage() {
                         </td>
                         <td className="px-2 py-2 text-right font-mono bg-green-100/50">
                           {num(filteredRows.reduce((s,r) => s + r.saldo_cartao, 0))}
+                        </td>
+                        <td className="px-2 py-2 text-right font-mono bg-green-100/50">
+                          {num(filteredRows.reduce((s,r) => s + r.saldo_cartao_carga, 0))}
                         </td>
                         <td className="px-2 py-2 text-right font-mono bg-green-100/50">
                           {num(filteredRows.reduce((s,r) => s + r.saldo_prestacao, 0))}

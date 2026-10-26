@@ -51,6 +51,7 @@ interface FrozenSnapshot {
   prestacao: string | null;
   saldo_prestacao: string | null;
   saldo_cartao: string | null;
+  saldo_cartao_carga: string | null;
   saldo_final: string | null;
   saldo_reembolsar: string | null;
   col_qz: string | null;
@@ -194,7 +195,7 @@ export async function GET(request: NextRequest) {
         cpf, colaborador, situacao, status_cartao,
         regional, centro_custo, gestor, diretor,
         carga::text, transferencia::text, tarifa::text, prestacao::text,
-        saldo_prestacao::text, saldo_cartao::text, saldo_final::text,
+        saldo_prestacao::text, saldo_cartao::text, saldo_cartao_carga::text, saldo_final::text,
         saldo_reembolsar::text, col_qz::text, adiantamento::text, obs,
         carga_parcial::text, reembolso::text, carga_final::text,
         reembolso_multiplier::text,
@@ -263,7 +264,7 @@ export async function GET(request: NextRequest) {
           saldo_reembolsar: sr,
           col_qz,
           saldo_final_carga: Math.max(sf, 0),
-          saldo_cartao_carga: sc,
+          saldo_cartao_carga: snap.saldo_cartao_carga != null ? toNum(snap.saldo_cartao_carga) : sc,
           col_qz_manual: col_qz,
           adiantamento,
           obs: snap.obs ?? null,

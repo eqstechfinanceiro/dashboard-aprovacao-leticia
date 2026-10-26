@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
           colaborador, situacao, status_cartao,
           regional, centro_custo, gestor, diretor,
           carga, transferencia, tarifa, prestacao,
-          saldo_prestacao, saldo_cartao, saldo_final,
+          saldo_prestacao, saldo_cartao, saldo_cartao_carga, saldo_final,
           saldo_reembolsar, col_qz, adiantamento, obs,
           carga_parcial, reembolso, carga_final,
           reembolso_multiplier, frozen_by
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
           ${row.colaborador}, ${row.situacao}, ${row.status_cartao},
           ${row.regional}, ${row.centro_custo}, ${row.gestor}, ${row.diretor},
           ${row.carga}, ${row.transferencia}, ${row.tarifa}, ${row.prestacao},
-          ${row.saldo_prestacao}, ${row.saldo_cartao}, ${row.saldo_final},
+          ${row.saldo_prestacao}, ${row.saldo_cartao}, ${row.saldo_cartao_carga}, ${row.saldo_final},
           ${row.saldo_reembolsar},
           ${row.col_qz_manual ?? null},
           ${row.adiantamento},
