@@ -389,13 +389,17 @@ export default function QuinzenaDinamicaPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ cpf, year, month, quinzena, field, value }),
     });
+    const j = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const j = await res.json();
       const msg = j.error ?? 'Erro ao salvar';
       setError(msg);
       throw new Error(msg);
     }
     setError(null);
+    // Pós-freeze o backend recalcula os derivados no snapshot e devolve aqui
+    const recalc = j.recalc as
+      | { carga_parcial: number; reembolso: number; carga_final: number }
+      | undefined;
 
     // Optimistic update
     setData(prev => {
@@ -430,12 +434,21 @@ export default function QuinzenaDinamicaPage() {
             updated.carga_final_edit = { by: user?.email ?? 'você', at: nowIso };
           }
 
-          // Pós-freeze o valor editado É o snapshot — não há fórmula pra
-          // recalcular (a auto-carga lê direto o valor gravado)
+          // Pós-freeze o snapshot já foi recalculado no backend — aplica os
+          // derivados devolvidos (planilha/adiantamento/reembolso propagam pra
+          // carga_parcial, reembolso e carga_final na hora)
           if (prev.is_frozen) {
             if (field === 'col_1qz') { updated.col_qz = updated.col_qz_manual; }
-            if (field === 'reembolso') updated.reembolso = updated.reembolso_override ?? 0;
-            if (field === 'carga_final') updated.carga_final = updated.carga_final_override ?? 0;
+            if (recalc) {
+              updated.carga_parcial = recalc.carga_parcial;
+              updated.reembolso = recalc.reembolso;
+              updated.carga_final = recalc.carga_final;
+              updated.reembolso_calc = recalc.reembolso;
+              updated.carga_final_calc = recalc.carga_final;
+            } else {
+              if (field === 'reembolso') updated.reembolso = updated.reembolso_override ?? 0;
+              if (field === 'carga_final') updated.carga_final = updated.carga_final_override ?? 0;
+            }
             return updated;
           }
 
@@ -937,11 +950,13 @@ export default function QuinzenaDinamicaPage() {
           {!isGestor && (
             <Button size="sm" variant="outline"
               onClick={() => setImportModalOpen(true)}
-              disabled={year === null || month === null || quinzena === null || isFrozen}
-              title={isFrozen ? 'Quinzena congelada — descongele para importar (o snapshot exibido não refletiria a importação)' : undefined}
+              disabled={year === null || month === null || quinzena === null}
+              title={isFrozen
+                ? 'Quinzena congelada — a importação grava no snapshot e recalcula as cargas'
+                : 'Importa valores de planilha (carga QZ, reembolso, adiantamento, carga final)'}
             >
               <Upload className="h-4 w-4 mr-1" />
-              Importar QZ
+              Importar
             </Button>
           )}
           <Button size="sm" variant="default" onClick={exportServerXLSX} disabled={exporting || year === null || month === null || quinzena === null}>
@@ -1553,6 +1568,7 @@ export default function QuinzenaDinamicaPage() {
           year={year}
           month={month}
           quinzena={quinzena}
+          frozen={isFrozen}
           onImported={() => {
             setImportModalOpen(false);
             loadData(year, month, quinzena);

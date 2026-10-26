@@ -5,6 +5,7 @@ import { getScopeForRequest, normalizeCpf } from '@/lib/auth/scope';
 import { normalizeName, resolveCpfByName } from '@/lib/quinzena/name-resolve';
 import { getQuinzenaDates, toNum, r2, calcFinancials } from '@/lib/quinzena/financials';
 import { ensureAutocargaSchema } from '@/lib/autocarga/tables';
+import { recomputeFrozenDerived } from '@/lib/quinzena/recalc-frozen';
 import { logAudit } from '@/lib/db/audit';
 import { computeLimiter, heavyBusy } from '@/lib/util/heavy';
 
@@ -780,9 +781,10 @@ export async function POST(request: NextRequest) {
       ? (value === null || value === undefined ? null : String(value))
       : (value === null || value === undefined ? null : parseFloat(String(value)));
 
-    // Carga já executada: o dinheiro saiu do pool — não dá pra mudar o valor
-    // retroativamente. Estorne primeiro se precisar ajustar.
-    if (field === 'reembolso' || field === 'carga_final') {
+    // Carga já executada: todo campo que alimenta carga_final está selado — o
+    // dinheiro saiu do pool e o valor gravado não pode divergir do transferido.
+    // Estorne primeiro se precisar ajustar. (obs é livre — não move dinheiro.)
+    if (field !== 'obs') {
       const loadedRes = await sql`
         SELECT COUNT(*)::int AS n FROM quinzena_carga_items
         WHERE year = ${year} AND month = ${month} AND quinzena = ${quinzena}
@@ -809,13 +811,11 @@ export async function POST(request: NextRequest) {
     }
     const oldValue = prevRows.rows[0][snapCol];
 
-    await sql.query(
-      `UPDATE quinzena_frozen_snapshots SET ${snapCol} = $5
-       WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
-      [cpf, year, month, quinzena, newVal],
-    );
-
     const userEmail = request.headers.get('x-user-email') || 'unknown';
+
+    // Entradas da fórmula (planilha/adiantamento/obs) gravam direto no snapshot.
+    // Overrides de resultado vão pro manual_inputs — a fonte do badge "editado
+    // por" — e o snapshot é atualizado pelo recálculo logo abaixo.
     if (field === 'reembolso' || field === 'carga_final') {
       await sql.query(
         `INSERT INTO quinzena_manual_inputs (cpf, year, month, quinzena, ${snapCol}_override, ${snapCol}_edited_by, ${snapCol}_edited_at)
@@ -827,7 +827,20 @@ export async function POST(request: NextRequest) {
                        updated_at = NOW()`,
         [cpf, year, month, quinzena, newVal, userEmail],
       );
+    } else {
+      await sql.query(
+        `UPDATE quinzena_frozen_snapshots SET ${snapCol} = $5
+         WHERE cpf = $1 AND year = $2 AND month = $3 AND quinzena = $4`,
+        [cpf, year, month, quinzena, newVal],
+      );
     }
+
+    // Recalcula os derivados congelados — editar planilha/adiantamento/
+    // reembolso/carga_final propaga pra carga_parcial, reembolso e carga_final
+    // na mesma hora (override manual continua vencendo a fórmula).
+    const recalc = field === 'obs'
+      ? null
+      : (await recomputeFrozenDerived([cpf], year, month, quinzena)).get(cpf) ?? null;
 
     const cad = await sql`
       SELECT colaborador FROM quinzena_cadastro WHERE cpf = ${cpf} LIMIT 1
@@ -842,10 +855,13 @@ export async function POST(request: NextRequest) {
         old_value: oldValue !== null && oldValue !== undefined && snapCol !== 'obs'
           ? Number(oldValue) : oldValue,
         new_value: newVal,
+        recalculated: recalc
+          ? { carga_parcial: recalc.carga_parcial, reembolso: recalc.reembolso, carga_final: recalc.carga_final }
+          : undefined,
       },
     });
 
-    return NextResponse.json({ ok: true, frozen_edit: true });
+    return NextResponse.json({ ok: true, frozen_edit: true, recalc });
   }
 
   try {

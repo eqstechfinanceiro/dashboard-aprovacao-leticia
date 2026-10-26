@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { parseQzFile, type QzEntry } from '@/lib/parse-qz-file';
+import { parseQzFile, type QzEntry } from '@/lib/parsing/parse-qz-file';
 import {
   Upload,
   FileSpreadsheet,
@@ -21,11 +21,42 @@ interface ImportQzModalProps {
   year: number;
   month: number;
   quinzena: number;
+  /** Quinzena congelada — a importação grava no snapshot e recalcula */
+  frozen?: boolean;
   /** Called after a successful import so the page can refetch */
   onImported: (count: number) => void;
 }
 
 type Step = 'drop' | 'preview' | 'importing' | 'done' | 'error';
+
+type ImportField = 'col_1qz' | 'adiantamento' | 'reembolso' | 'carga_final';
+
+const FIELD_OPTIONS: { value: ImportField; label: string; colLabel: string; hint: string }[] = [
+  {
+    value: 'col_1qz',
+    label: 'Carga da quinzena (planilha)',
+    colLabel: 'Valor QZ',
+    hint: 'valor da planilha de carga — quem não estiver no arquivo fica sem valor de QZ',
+  },
+  {
+    value: 'reembolso',
+    label: 'Reembolso',
+    colLabel: 'Reembolso',
+    hint: 'vira override de REEMBOLSO — soma na CARGA FINAL (mesma regra da edição inline)',
+  },
+  {
+    value: 'adiantamento',
+    label: 'Adiantamento',
+    colLabel: 'Adiantamento',
+    hint: 'vira valor de ADIANTAMENTO — abate da CARGA PARCIAL',
+  },
+  {
+    value: 'carga_final',
+    label: 'Carga final',
+    colLabel: 'Carga final',
+    hint: 'vira override de CARGA FINAL — valor exato que será carregado no cartão',
+  },
+];
 
 // ---- helpers ----------------------------------------------------------------
 
@@ -43,6 +74,7 @@ const MONTH_FULL = [
 export function ImportQzModal({
   open, onClose,
   year, month, quinzena,
+  frozen = false,
   onImported,
 }: ImportQzModalProps) {
   const [step, setStep]         = useState<Step>('drop');
@@ -55,12 +87,14 @@ export function ImportQzModal({
   const [parseError, setParseError] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<{
     imported: number; failed: number; errors?: string[];
+    skipped_loaded?: string[]; skipped_not_in_snapshot?: string[];
   } | null>(null);
 
   // Local override for target quinzena (defaults to page selection)
   const [targetYear, setTargetYear] = useState(year);
   const [targetMonth, setTargetMonth] = useState(month);
   const [targetQuinzena, setTargetQuinzena] = useState(quinzena);
+  const [targetField, setTargetField] = useState<ImportField>('col_1qz');
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -78,6 +112,7 @@ export function ImportQzModal({
       setTargetYear(year);
       setTargetMonth(month);
       setTargetQuinzena(quinzena);
+      setTargetField('col_1qz');
     }
   }, [open, year, month, quinzena]);
 
@@ -134,7 +169,10 @@ export function ImportQzModal({
       const res = await fetch('/api/quinzena/import-qz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ year: targetYear, month: targetMonth, quinzena: targetQuinzena, entries }),
+        body: JSON.stringify({
+          year: targetYear, month: targetMonth, quinzena: targetQuinzena,
+          field: targetField, entries,
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Erro desconhecido');
@@ -152,6 +190,7 @@ export function ImportQzModal({
   const periodLabel = `${MONTH_FULL[targetMonth]} ${targetYear} — ${targetQuinzena}ª Quinzena`;
   const totalValue  = entries.reduce((s, e) => s + e.valor, 0);
   const isTargetDifferent = targetYear !== year || targetMonth !== month || targetQuinzena !== quinzena;
+  const fieldOpt = FIELD_OPTIONS.find(o => o.value === targetField) ?? FIELD_OPTIONS[0];
 
   return (
     // Backdrop
@@ -179,7 +218,7 @@ export function ImportQzModal({
         </div>
 
         {/* Quinzena selector */}
-        <div className="px-6 py-3 border-b bg-gray-50/50">
+        <div className="px-6 py-3 border-b bg-gray-50/50 space-y-2">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-xs font-medium text-gray-600">Importar para:</span>
             <select
@@ -214,6 +253,23 @@ export function ImportQzModal({
               </span>
             )}
           </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-medium text-gray-600">Coluna destino:</span>
+            <select
+              value={targetField}
+              onChange={e => setTargetField(e.target.value as ImportField)}
+              className="text-sm border rounded-md px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+            >
+              {FIELD_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+            {frozen && (
+              <span className="text-xs text-indigo-700 font-medium bg-indigo-50 border border-indigo-200 rounded px-2 py-0.5">
+                Congelada — grava no snapshot e recalcula as cargas
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Body */}
@@ -228,7 +284,10 @@ export function ImportQzModal({
                 <div>
                   <p className="font-medium mb-0.5">Formato esperado</p>
                   <p>Qualquer arquivo <strong>xlsx, xls ou csv</strong> com colunas de <strong>Nome</strong>, <strong>CPF</strong> e <strong>Valor</strong> — pode estar em qualquer ordem e as linhas de cabeçalho são detectadas automaticamente.</p>
-                  <p className="mt-1 text-blue-600">Quem não estiver no arquivo terá o valor de QZ zerado.</p>
+                  <p className="mt-1 text-blue-600">
+                    O valor vai para <strong>{fieldOpt.label}</strong>: {fieldOpt.hint}.
+                    {targetField !== 'col_1qz' && ' Quem não estiver no arquivo não é alterado.'}
+                  </p>
                 </div>
               </div>
 
@@ -290,7 +349,7 @@ export function ImportQzModal({
                 </div>
                 <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-center">
                   <div className="text-sm font-bold text-blue-700 leading-tight">{brl(totalValue)}</div>
-                  <div className="text-xs text-blue-600">total de carga</div>
+                  <div className="text-xs text-blue-600">total — {fieldOpt.label.toLowerCase()}</div>
                 </div>
                 <div className="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center">
                   <div className="text-xl font-bold text-gray-500">{skipped}</div>
@@ -326,7 +385,7 @@ export function ImportQzModal({
                       <tr>
                         <th className="text-left px-3 py-2 font-semibold text-gray-600">CPF</th>
                         <th className="text-left px-3 py-2 font-semibold text-gray-600">Nome</th>
-                        <th className="text-right px-3 py-2 font-semibold text-gray-600">Valor QZ</th>
+                        <th className="text-right px-3 py-2 font-semibold text-gray-600">{fieldOpt.colLabel}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -342,14 +401,25 @@ export function ImportQzModal({
                 </div>
               </div>
 
-              {/* Warning about zeroing */}
-              <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
-                <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
-                <span>
-                  Colaboradores <strong>não presentes</strong> neste arquivo terão o valor de{' '}
-                  <strong>{targetQuinzena}ª QZ zerado</strong> para {MONTH_FULL[targetMonth]} {targetYear}.
-                </span>
-              </div>
+              {/* Warning about zeroing — só a planilha de QZ zera ausentes */}
+              {targetField === 'col_1qz' ? (
+                <div className="flex gap-2 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>
+                    Colaboradores <strong>não presentes</strong> neste arquivo terão o valor de{' '}
+                    <strong>{targetQuinzena}ª QZ zerado</strong> para {MONTH_FULL[targetMonth]} {targetYear}.
+                  </span>
+                </div>
+              ) : (
+                <div className="flex gap-2 bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-800">
+                  <Info className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>
+                    Somente os {entries.length} colaboradores do arquivo terão{' '}
+                    <strong>{fieldOpt.label}</strong> alterado — os demais ficam como estão.
+                    {frozen && ' CPFs com carga já executada são ignorados (estorne antes de alterar).'}
+                  </span>
+                </div>
+              )}
 
               {/* Re-upload link */}
               <button
@@ -381,9 +451,19 @@ export function ImportQzModal({
                 <p className="text-base font-semibold text-gray-800">
                   {importResult.imported} valores importados com sucesso!
                 </p>
-                <p className="text-sm text-gray-500 mt-1">{periodLabel}</p>
+                <p className="text-sm text-gray-500 mt-1">{periodLabel} — {fieldOpt.label}</p>
                 {importResult.failed > 0 && (
                   <p className="text-xs text-red-500 mt-1">{importResult.failed} falhas</p>
+                )}
+                {!!importResult.skipped_loaded?.length && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    {importResult.skipped_loaded.length} ignorado(s) — carga já executada
+                  </p>
+                )}
+                {!!importResult.skipped_not_in_snapshot?.length && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    {importResult.skipped_not_in_snapshot.length} ignorado(s) — fora do snapshot congelado
+                  </p>
                 )}
               </div>
             </div>
